@@ -268,7 +268,7 @@ void CFollowingMonster::OnDying()
 int CFollowingMonster::ObjectCaps()
 {
 	int caps = CSquadMonster::ObjectCaps();
-	if (m_afCapability & bits_CAP_USABLE)
+	if ((m_afCapability & bits_CAP_USABLE) && IsFullyAlive())
 	{
 		caps |= FCAP_IMPULSE_USE | FCAP_ONLYVISIBLE_USE;
 	}
