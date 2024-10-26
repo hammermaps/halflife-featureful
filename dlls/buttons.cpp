@@ -651,6 +651,33 @@ bool CCalcState::DoOperation(bool leftOp, bool rightOp, int operationId)
 	}
 }
 
+//
+// MultiSouce
+//
+
+#define MS_MAX_TARGETS		32
+
+class CMultiSource : public CPointEntity
+{
+public:
+	void Spawn();
+	void KeyValue( KeyValueData *pkvd );
+	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
+	int ObjectCaps( void ) { return ( CPointEntity::ObjectCaps() | FCAP_MASTER ); }
+	bool IsTriggered( CBaseEntity *pActivator );
+	void EXPORT Register( void );
+
+	virtual int Save( CSave &save );
+	virtual int Restore( CRestore &restore );
+	static TYPEDESCRIPTION m_SaveData[];
+
+	EHANDLE m_rgEntities[MS_MAX_TARGETS];
+	int m_rgTriggered[MS_MAX_TARGETS];
+
+	int m_iTotal;
+	string_t m_globalstate;
+};
+
 TYPEDESCRIPTION CMultiSource::m_SaveData[] =
 {
 	//!!!BUGBUG FIX
@@ -785,6 +812,85 @@ void CMultiSource::Register( void )
 	}
 	pev->spawnflags &= ~SF_MULTI_INIT;
 }
+
+enum
+{
+	BUTTON_USE_OFF = -1,
+	BUTTON_USE_TOGGLE = 0,
+	BUTTON_USE_ON = 1,
+	BUTTON_USE_ON_OFF = 2,
+	BUTTON_USE_OFF_ON = 3,
+};
+
+//
+// Generic Button
+//
+class CBaseButton : public CBaseToggle
+{
+public:
+	void Spawn( void );
+	virtual void Precache( void );
+	void RotSpawn( void );
+	virtual void KeyValue( KeyValueData* pkvd);
+
+	void ButtonActivate();
+	void SparkSoundCache( void );
+
+	void EXPORT ButtonShot( void );
+	void EXPORT ButtonTouch( CBaseEntity *pOther );
+	void EXPORT ButtonSpark( void );
+	void EXPORT TriggerAndWait( void );
+	void EXPORT ButtonReturn( void );
+	void EXPORT ButtonBackHome( void );
+	void EXPORT ButtonUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
+	void EXPORT ButtonUse_IgnorePlayer( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
+	virtual int TakeDamage( entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType );
+	virtual int Save( CSave &save );
+	virtual int Restore( CRestore &restore );
+
+	enum BUTTON_CODE { BUTTON_NOTHING, BUTTON_ACTIVATE, BUTTON_RETURN };
+	BUTTON_CODE ButtonResponseToTouch( void );
+	void OnLocked();
+	bool PrepareActivation(bool doActivationCheck);
+	bool IsSparkingButton();
+	USE_TYPE UseType(bool returning);
+
+	static	TYPEDESCRIPTION m_SaveData[];
+	// Buttons that don't take damage can be IMPULSE used
+	virtual int ObjectCaps( void );
+
+	BOOL IsAllowedToSpeak( void ) { return TRUE; }
+
+	BOOL m_fStayPushed;	// button stays pushed in until touched again?
+	BOOL m_fRotating;		// a rotating button?  default is a sliding button.
+
+	string_t m_strChangeTarget;	// if this field is not null, this is an index into the engine string array.
+							// when this button is touched, it's target entity's TARGET field will be set
+							// to the button's ChangeTarget. This allows you to make a func_train switch paths, etc.
+
+	locksound_t m_ls;			// door lock sounds
+
+	BYTE m_bLockedSound;		// ordinals from entity selection
+	BYTE m_bLockedSentence;
+	BYTE m_bUnlockedSound;
+	BYTE m_bUnlockedSentence;
+	int m_sounds;
+	string_t m_targetOnLocked;
+	float m_targetOnLockedTime;
+	string_t m_lockedSoundOverride;
+	string_t m_unlockedSoundOverride;
+	string_t m_lockedSentenceOverride;
+	string_t m_unlockedSentenceOverride;
+
+	string_t m_triggerOnReturn;
+	string_t m_triggerBeforeMove;
+
+	float m_waitBeforeToggleAgain;
+	float m_toggleAgainTime;
+
+	short m_iDirectUse;
+	BOOL m_fNonMoving;
+};
 
 static constexpr const char* sparkSoundScript = "DoSpark";
 

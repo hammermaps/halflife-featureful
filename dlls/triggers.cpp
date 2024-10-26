@@ -357,6 +357,8 @@ static void ParseMMDelay(const char* value, float& delay, short& mmUseType)
 	}
 }
 
+#define MAX_MULTI_TARGETS	16 // maximum number of targets a single multi_manager entity may be assigned.
+
 class CMultiManager : public CBaseToggle
 {
 public:
