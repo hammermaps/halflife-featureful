@@ -3,6 +3,7 @@
 #include "util.h"
 #include "visuals.h"
 #include "customentity.h"
+#include "error_collector.h"
 
 #include "json_utils.h"
 
@@ -126,18 +127,8 @@ static bool ParseRenderFx(const char* str, int& renderfx)
 
 bool VisualSystem::ReadFromFile(const char *fileName)
 {
-	int fileSize;
-	char *pMemFile = (char*)g_engfuncs.pfnLoadFileForMe( fileName, &fileSize );
-	if (!pMemFile)
-		return false;
-
-	ALERT(at_console, "Parsing %s\n", fileName);
-
 	Document document;
-	bool success = ReadJsonDocumentWithSchema(document, pMemFile, fileSize, visualsSchema, fileName);
-	g_engfuncs.pfnFreeFile(pMemFile);
-
-	if (!success)
+	if (!ReadJsonDocumentWithSchemaFromFile(document, fileName, visualsSchema))
 		return false;
 
 	for (auto scriptIt = document.MemberBegin(); scriptIt != document.MemberEnd(); ++scriptIt)
@@ -148,7 +139,7 @@ bool VisualSystem::ReadFromFile(const char *fileName)
 		if (value.IsObject())
 			AddVisualFromJsonValue(name, value);
 		else
-			ALERT(at_warning, "Visual '%s' is not an object!\n");
+			g_errorCollector.AddFormattedError("%s: visual '%s' is not an object!\n", fileName, name);
 	}
 
 	return true;

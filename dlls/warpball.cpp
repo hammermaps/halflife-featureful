@@ -5,12 +5,7 @@
 #include <algorithm>
 #include <utility>
 
-#include "rapidjson/stringbuffer.h"
-#include "rapidjson/writer.h"
-#include "rapidjson/document.h"
-#include "rapidjson/schema.h"
-#include "rapidjson/error/en.h"
-
+#include "error_collector.h"
 #include "parsetext.h"
 #include "extdll.h"
 #include "util.h"
@@ -53,7 +48,8 @@ const char warpballCatalogSchema[] = R"(
         "color": {
           "$ref": "#/definitions/color"
         }
-      }
+      },
+      "additionalProperties": false
     },
     "sound": {
       "type": ["object", "null"],
@@ -74,7 +70,8 @@ const char warpballCatalogSchema[] = R"(
           "type": "number",
           "minimum": 0
         }
-      }
+      },
+      "additionalProperties": false
     }
   },
   "properties": {
@@ -130,7 +127,8 @@ const char warpballCatalogSchema[] = R"(
               "life": {
                 "$ref": "definitions.json#/range"
               }
-            }
+            },
+            "additionalProperties": false
           },
           "beam_radius": {
             "type": "integer",
@@ -152,7 +150,8 @@ const char warpballCatalogSchema[] = R"(
                 "type": "number",
                 "minimum": 0
               }
-            }
+            },
+            "additionalProperties": false
           },
           "shake": {
             "type": ["object", "null"],
@@ -175,7 +174,8 @@ const char warpballCatalogSchema[] = R"(
                 "minimum": 0,
                 "maximum": 16
               }
-            }
+            },
+            "additionalProperties": false
           },
           "ai_sound": {
             "type": ["object", "null"],
@@ -192,7 +192,8 @@ const char warpballCatalogSchema[] = R"(
                 "type": "integer",
                 "minimum": 0
               }
-            }
+            },
+            "additionalProperties": false
           },
           "spawn_delay": {
             "type": "number",
@@ -201,15 +202,18 @@ const char warpballCatalogSchema[] = R"(
           "position": {
             "type": ["object", "null"],
             "properties": {
-                "vertical_shift": {
-                    "type": "number"
-                }
-            }
+              "vertical_shift": {
+                "type": "number"
+              }
+            },
+            "additionalProperties": false
           }
-        }
+        },
+        "additionalProperties": false
       }
     }
   },
+  "additionalProperties": false,
   "required": ["templates"]
 }
 )";
@@ -432,16 +436,19 @@ static void AssignWarpballPosition(WarpballPosition& pos, Value& posJson)
 	}
 }
 
-static bool AddWarpballTemplate(WarpballTemplateCatalog& catalog, Value& allTemplatesJsonValue, const char* templateName, Value& templateJsonValue, std::vector<std::string> inheritanceChain = std::vector<std::string>())
+static bool AddWarpballTemplate(const char* fileName, WarpballTemplateCatalog& catalog, Value& allTemplatesJsonValue, const char* templateName, Value& templateJsonValue, std::vector<std::string> inheritanceChain = std::vector<std::string>())
 {
 	if (std::find(inheritanceChain.begin(), inheritanceChain.end(), templateName) != inheritanceChain.end())
 	{
-		ALERT(at_error, "Cycle in warpball inheritance detected: ");
+		std::string chainString;
 		for (auto it = inheritanceChain.begin(); it != inheritanceChain.end(); it++)
 		{
-			ALERT(at_error, "'%s'; ", it->c_str());
+			chainString += "'" + *it + "' -> ";
 		}
-		ALERT(at_error, "'%s'\n", templateName);
+		chainString += "'";
+		chainString += templateName;
+		chainString += "'";
+		g_errorCollector.AddFormattedError("%s: cycle in warpball inheritance detected: %s", fileName, chainString.c_str());
 		return false;
 	}
 
@@ -470,7 +477,7 @@ static bool AddWarpballTemplate(WarpballTemplateCatalog& catalog, Value& allTemp
 			if (parentIt != allTemplatesJsonValue.MemberEnd())
 			{
 				inheritanceChain.push_back(templateName);
-				if (AddWarpballTemplate(catalog, allTemplatesJsonValue, parentName, parentIt->value, inheritanceChain))
+				if (AddWarpballTemplate(fileName, catalog, allTemplatesJsonValue, parentName, parentIt->value, inheritanceChain))
 				{
 					existingTemplateIt = catalog.templates.find(parentName);
 					if (existingTemplateIt != catalog.templates.end())
@@ -484,7 +491,7 @@ static bool AddWarpballTemplate(WarpballTemplateCatalog& catalog, Value& allTemp
 			}
 			else
 			{
-				ALERT(at_console, "Couldn't find a parent template '%s' for '%s'\n", parentName, templateName);
+				g_errorCollector.AddFormattedError("%s: couldn't find a parent template '%s' for '%s'", fileName, parentName, templateName);
 				return false;
 			}
 		}
@@ -548,18 +555,8 @@ WarpballTemplateCatalog g_WarpballCatalog;
 void LoadWarpballTemplates()
 {
 	const char* fileName = "templates/warpball.json";
-	int fileSize;
-	char *pMemFile = (char*)g_engfuncs.pfnLoadFileForMe( fileName, &fileSize );
-	if (!pMemFile)
-		return;
-
-	ALERT(at_console, "Parsing %s\n", fileName);
-
 	Document document;
-	bool success = ReadJsonDocumentWithSchema(document, pMemFile, fileSize, warpballCatalogSchema, fileName);
-	g_engfuncs.pfnFreeFile(pMemFile);
-
-	if (!success)
+	if (!ReadJsonDocumentWithSchemaFromFile(document, fileName, warpballCatalogSchema))
 		return;
 
 	auto templatesIt = document.FindMember("templates");
@@ -568,7 +565,7 @@ void LoadWarpballTemplates()
 		auto& templates = templatesIt->value;
 		for (auto templateIt = templates.MemberBegin(); templateIt != templates.MemberEnd(); ++templateIt)
 		{
-			AddWarpballTemplate(g_WarpballCatalog, templates, templateIt->name.GetString(), templateIt->value);
+			AddWarpballTemplate(fileName, g_WarpballCatalog, templates, templateIt->name.GetString(), templateIt->value);
 		}
 	}
 
@@ -587,13 +584,13 @@ void LoadWarpballTemplates()
 				auto warpballName = pairIt->value.GetString();
 				if (g_WarpballCatalog.templates.find(warpballName) == g_WarpballCatalog.templates.end())
 				{
-					ALERT(at_error, "Entity mapping '%s' refers to nonexistent template '%s'\n", mappingName, warpballName);
+					g_errorCollector.AddFormattedError("%s: entity mapping '%s' refers to nonexistent template '%s'", fileName, mappingName, warpballName);
 				}
 				mapping[entityName] = warpballName;
 			}
 			if (mapping.find("default") == mapping.end())
 			{
-				ALERT(at_error, "Entity mapping '%s' doesn't define 'default' template\n", mappingName);
+				g_errorCollector.AddFormattedError("%s: entity mapping '%s' doesn't define 'default' template", fileName, mappingName);
 			}
 			else
 			{

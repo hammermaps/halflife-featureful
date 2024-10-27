@@ -31,7 +31,8 @@ const char* entTemplatesSchema = R"(
             "mins": "definitions.json#/vector",
             "maxs": "definitions.json#/vector"
           },
-          "required": ["min", "max"]
+          "additionalProperties": false,
+          "required": ["mins", "maxs"]
         },
         "classify": {
           "type": "string"
@@ -67,7 +68,8 @@ const char* entTemplatesSchema = R"(
           "type": "string",
           "minLength": 1
         }
-      }
+      },
+      "additionalProperties": false
     }
   },
   "type": "object",
@@ -141,18 +143,8 @@ static std::string GenerateResourceName(const std::string& templateName, const c
 
 bool EntTemplateSystem::ReadFromFile(const char *fileName)
 {
-	int fileSize;
-	char *pMemFile = (char*)g_engfuncs.pfnLoadFileForMe( fileName, &fileSize );
-	if (!pMemFile)
-		return false;
-
-	ALERT(at_console, "Parsing %s\n", fileName);
-
 	Document document;
-	bool success = ReadJsonDocumentWithSchema(document, pMemFile, fileSize, entTemplatesSchema, fileName);
-	g_engfuncs.pfnFreeFile(pMemFile);
-
-	if (!success)
+	if (!ReadJsonDocumentWithSchemaFromFile(document, fileName, entTemplatesSchema))
 		return false;
 
 	for (auto templateIt = document.MemberBegin(); templateIt != document.MemberEnd(); ++templateIt)

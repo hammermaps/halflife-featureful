@@ -3,7 +3,6 @@
 #define HUD_INVENTORY_H
 
 #include "cl_dll.h"
-#include "cdll_int.h"
 
 #include <string>
 #include <vector>

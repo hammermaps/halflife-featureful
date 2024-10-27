@@ -3,6 +3,7 @@
 #include "soundscripts.h"
 #include "util.h"
 #include "icase_compare.h"
+#include "error_collector.h"
 
 #include <map>
 #include <set>
@@ -211,18 +212,8 @@ static bool ParseAttenuation(const char* str, float& attenuation)
 
 bool SoundScriptSystem::ReadFromFile(const char *fileName)
 {
-	int fileSize;
-	char *pMemFile = (char*)g_engfuncs.pfnLoadFileForMe( fileName, &fileSize );
-	if (!pMemFile)
-		return false;
-
-	ALERT(at_console, "Parsing %s\n", fileName);
-
 	Document document;
-	bool success = ReadJsonDocumentWithSchema(document, pMemFile, fileSize, soundScriptsSchema, fileName);
-	g_engfuncs.pfnFreeFile(pMemFile);
-
-	if (!success)
+	if (!ReadJsonDocumentWithSchemaFromFile(document, fileName, soundScriptsSchema))
 		return false;
 
 	for (auto scriptIt = document.MemberBegin(); scriptIt != document.MemberEnd(); ++scriptIt)
@@ -233,7 +224,7 @@ bool SoundScriptSystem::ReadFromFile(const char *fileName)
 		if (value.IsObject())
 			AddSoundScriptFromJsonValue(name, value);
 		else
-			ALERT(at_warning, "Soundscript '%s' is not an object!\n");
+			g_errorCollector.AddFormattedError("%s: soundscript '%s' is not an object!\n", fileName, name);
 	}
 
 	return true;
@@ -394,11 +385,9 @@ const SoundScript* SoundScriptSystem::ProvideDefaultSoundScript(const char *deri
 	}
 	else
 	{
-		//ALERT(at_console, "Derivative %s hasn't been registerd yet. Searching for %s as a base\n", derivative, base);
 		const SoundScript* baseScript = ProvideDefaultSoundScript(base, soundScript);
 		if (baseScript)
 		{
-			//ALERT(at_console, "Found a script for base %s\n", base);
 			if (paramOverride.HasOverrides())
 			{
 				SoundScript overrideSoundScript = *baseScript;

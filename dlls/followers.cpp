@@ -10,7 +10,7 @@ using namespace rapidjson;
 const char followersSchema[] = R"(
 {
   "type": "object",
-  "definitions": {
+  "properties": {
     "fast_recruit_monsters": {
       "type": "array",
       "items": {
@@ -23,24 +23,15 @@ const char followersSchema[] = R"(
       "type": "number",
       "exclusiveMinimum": 0
     }
-  }
+  },
+  "additionalProperties": false
 }
 )";
 
 bool FollowersDescription::ReadFromFile(const char *fileName)
 {
-	int fileSize;
-	char *pMemFile = (char*)g_engfuncs.pfnLoadFileForMe( fileName, &fileSize );
-	if (!pMemFile)
-		return false;
-
-	ALERT(at_console, "Parsing %s\n", fileName);
-
 	Document document;
-	bool success = ReadJsonDocumentWithSchema(document, pMemFile, fileSize, followersSchema, fileName);
-	g_engfuncs.pfnFreeFile(pMemFile);
-
-	if (!success)
+	if (!ReadJsonDocumentWithSchemaFromFile(document, fileName, followersSchema))
 		return false;
 
 	auto monstersIt = document.FindMember("fast_recruit_monsters");
@@ -61,9 +52,3 @@ bool FollowersDescription::ReadFromFile(const char *fileName)
 }
 
 FollowersDescription g_FollowersDescription;
-
-void ReadFollowersDescription()
-{
-	g_FollowersDescription.ReadFromFile("features/followers.json");
-}
-

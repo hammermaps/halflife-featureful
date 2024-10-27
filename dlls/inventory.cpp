@@ -22,7 +22,8 @@ const char inventorySpecSchema[] = R"(
             "type": "integer",
             "minimum": 0
           }
-        }
+        },
+        "additionalProperties": false
       }
     }
   }
@@ -42,18 +43,8 @@ private:
 
 bool InventorySpec::ReadFromFile(const char *fileName)
 {
-	int fileSize;
-	char *pMemFile = (char*)g_engfuncs.pfnLoadFileForMe( fileName, &fileSize );
-	if (!pMemFile)
-		return false;
-
-	ALERT(at_console, "Parsing %s\n", fileName);
-
 	Document document;
-	bool success = ReadJsonDocumentWithSchema(document, pMemFile, fileSize, inventorySpecSchema, fileName);
-	g_engfuncs.pfnFreeFile(pMemFile);
-
-	if (!success)
+	if (!ReadJsonDocumentWithSchemaFromFile(document, fileName, inventorySpecSchema))
 		return false;
 
 	auto itemsIt = document.FindMember("items");

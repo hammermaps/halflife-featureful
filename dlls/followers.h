@@ -26,6 +26,4 @@ private:
 
 extern FollowersDescription g_FollowersDescription;
 
-void ReadFollowersDescription();
-
 #endif

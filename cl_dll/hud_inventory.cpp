@@ -36,7 +36,8 @@ const char hudInventorySchema[] = R"(
           "show_in_history": {
             "type": "boolean"
           }
-        }
+        },
+        "additionalProperties": false
       }
     }
   }
@@ -54,18 +55,8 @@ bool InventoryHudSpec::ReadFromFile(const char *fileName)
 {
 	inventory.clear();
 
-	int fileSize;
-	char *pMemFile = (char*)gEngfuncs.COM_LoadFile( fileName, 5, &fileSize );
-	if (!pMemFile)
-		return false;
-
-	gEngfuncs.Con_DPrintf("Parsing %s\n", fileName);
-
 	Document document;
-	bool success = ReadJsonDocumentWithSchema(document, pMemFile, fileSize, hudInventorySchema, fileName);
-	gEngfuncs.COM_FreeFile(pMemFile);
-
-	if (!success)
+	if (!ReadJsonDocumentWithSchemaFromFile(document, fileName, hudInventorySchema))
 		return false;
 
 	auto itemsIt = document.FindMember("items");

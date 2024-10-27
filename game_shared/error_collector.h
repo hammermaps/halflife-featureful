@@ -9,6 +9,7 @@ class ErrorCollector
 {
 public:
 	void AddError(const char* str);
+	void AddFormattedError(const char* format, ...);
 	bool HasErrors() const;
 	std::string GetFullString() const;
 	void Clear();

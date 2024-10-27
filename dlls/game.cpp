@@ -1412,7 +1412,7 @@ void GameDLLInit( void )
 	g_SoundScriptSystem.ReadFromFile("sound/soundscripts.json");
 	g_VisualSystem.ReadFromFile("templates/visuals.json");
 	ReadEntTemplates();
-	ReadFollowersDescription();
+	g_FollowersDescription.ReadFromFile("features/followers.json");
 	ReadSaveTitles();
 
 	// Register cvars here:

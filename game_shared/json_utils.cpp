@@ -1,3 +1,10 @@
+#if CLIENT_DLL
+#include "cl_dll.h"
+#else
+#include "extdll.h"
+#include "enginecallback.h"
+#endif
+
 #include "json_utils.h"
 
 #include "color_utils.h"
@@ -40,6 +47,7 @@ constexpr const char definitions[] = R"(
         "type": "number"
       }
     },
+    "additionalProperties": false,
     "items": {
       "type": "number"
     },
@@ -57,6 +65,7 @@ constexpr const char definitions[] = R"(
         "type": "integer"
       }
     },
+    "additionalProperties": false,
     "items": {
       "type": "integer"
     },
@@ -83,7 +92,20 @@ constexpr const char definitions[] = R"(
       },
       "channel": {
         "type": "string",
-        "enum": ["Auto","auto","Weapon","weapon","Voice","voice","Item","item","Body","body","Static","static"]
+        "enum": [
+          "Auto",
+          "auto",
+          "Weapon",
+          "weapon",
+          "Voice",
+          "voice",
+          "Item",
+          "item",
+          "Body",
+          "body",
+          "Static",
+          "static"
+        ]
       },
       "volume": {
         "$ref": "#/range"
@@ -91,12 +113,22 @@ constexpr const char definitions[] = R"(
       "attenuation": {
         "type": ["number", "string"],
         "minimum": 0,
-        "enum": ["Norm","norm","Idle","idle","Static","static","None","none"]
+        "enum": [
+          "Norm",
+          "norm",
+          "Idle",
+          "idle",
+          "Static",
+          "static",
+          "None",
+          "none"
+        ]
       },
       "pitch": {
         "$ref": "#/range_int"
       }
-    }
+    },
+    "additionalProperties": false
   },
   "visual": {
     "type": ["object", "string"],
@@ -109,7 +141,20 @@ constexpr const char definitions[] = R"(
       },
       "rendermode": {
         "type": "string",
-        "pattern": ["Normal","normal","Color","color","Texture","texture","Glow","glow","Solid","solid","Additive","additive"]
+        "pattern": [
+          "Normal",
+          "normal",
+          "Color",
+          "color",
+          "Texture",
+          "texture",
+          "Glow",
+          "glow",
+          "Solid",
+          "solid",
+          "Additive",
+          "additive"
+        ]
       },
       "color": {
         "$ref": "definitions.json#/color"
@@ -119,7 +164,20 @@ constexpr const char definitions[] = R"(
       },
       "renderfx": {
         "type": ["integer", "string"],
-        "enum": ["Normal","normal","Constant Glow","constant glow","Constant glow","Distort","distort","Hologram","hologram","Glow Shell","glow shell","Glow shell"],
+        "enum": [
+          "Normal",
+          "normal",
+          "Constant Glow",
+          "constant glow",
+          "Constant glow",
+          "Distort",
+          "distort",
+          "Hologram",
+          "hologram",
+          "Glow Shell",
+          "glow shell",
+          "Glow shell"
+        ],
         "minimum": 0,
         "maximum": 20
       },
@@ -151,10 +209,20 @@ constexpr const char definitions[] = R"(
         "type": "array",
         "items": {
           "type": "string",
-          "enum": ["Sine", "sine", "Solid", "solid", "Shadein", "shadein", "Shadeout", "shadeout"]
+          "enum": [
+            "Sine",
+            "sine",
+            "Solid",
+            "solid",
+            "Shadein",
+            "shadein",
+            "Shadeout",
+            "shadeout"
+          ]
         }
       }
-    }
+    },
+    "additionalProperties": false
   }
 }
 )";
@@ -188,10 +256,7 @@ static void ReportParseErrors(const char* fileName, ParseResult& parseResult, co
 {
 	size_t errorLine, errorColumn;
 	CalculateLineAndColumnFromOffset(pMemFile, parseResult.Offset(), errorLine, errorColumn);
-
-	char buf[1024];
-	_snprintf(buf, sizeof(buf), "%s: JSON parse error: %s (Line %zu, column %zu)", fileName, GetParseError_En(parseResult.Code()), errorLine, errorColumn);
-	g_errorCollector.AddError(buf);
+	g_errorCollector.AddFormattedError("%s: JSON parse error: %s (Line %zu, column %zu)", fileName, GetParseError_En(parseResult.Code()), errorLine, errorColumn);
 }
 
 class DefinitionsProvider : public IRemoteSchemaDocumentProvider
@@ -278,6 +343,33 @@ bool ReadJsonDocumentWithSchema(Document &document, const char *pMemFile, int fi
 		return false;
 	}
 	return true;
+}
+
+bool ReadJsonDocumentWithSchemaFromFile(Document &document, const char *fileName, const char *schemaText)
+{
+	int fileSize;
+	char *pMemFile = nullptr;
+#if CLIENT_DLL
+	pMemFile = (char*)gEngfuncs.COM_LoadFile( fileName, 5, &fileSize );
+#else
+	pMemFile = (char*)g_engfuncs.pfnLoadFileForMe( fileName, &fileSize );
+#endif
+	if (!pMemFile)
+		return false;
+
+#if CLIENT_DLL
+	gEngfuncs.Con_DPrintf("Parsing %s\n", fileName);
+#else
+	ALERT(at_console, "Parsing %s\n", fileName);
+#endif
+
+	const bool success = ReadJsonDocumentWithSchema(document, pMemFile, fileSize, schemaText, fileName);
+#if CLIENT_DLL
+	gEngfuncs.COM_FreeFile(pMemFile);
+#else
+	g_engfuncs.pfnFreeFile(pMemFile);
+#endif
+	return success;
 }
 
 bool UpdatePropertyFromJson(std::string& str, Value& jsonValue, const char* key)
