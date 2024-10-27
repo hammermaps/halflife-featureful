@@ -438,6 +438,7 @@ TYPEDESCRIPTION	CBasePlayerWeapon::m_SaveData[] =
 	DEFINE_FIELD( CBasePlayerWeapon, m_iSecondaryAmmoType, FIELD_INTEGER ),
 	DEFINE_FIELD( CBasePlayerWeapon, m_iClip, FIELD_INTEGER ),
 	DEFINE_FIELD( CBasePlayerWeapon, m_iDefaultAmmo, FIELD_INTEGER ),
+	DEFINE_FIELD( CBasePlayerWeapon, m_sMaster, FIELD_STRING ),
 	//DEFINE_FIELD( CBasePlayerWeapon, m_iClientClip, FIELD_INTEGER ), reset to zero on load so hud gets updated correctly
 	//DEFINE_FIELD( CBasePlayerWeapon, m_iClientWeaponState, FIELD_INTEGER ), reset to zero on load so hud gets updated correctly
 };
@@ -455,6 +456,11 @@ void CBasePlayerWeapon::KeyValue(KeyValueData *pkvd)
 	if( FStrEq( pkvd->szKeyName, "initammo" ) )
 	{
 		m_iDefaultAmmo = atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "master"))
+	{
+		m_sMaster = ALLOC_STRING(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else
@@ -661,6 +667,9 @@ void CBasePlayerWeapon::TouchOrUse(CBaseEntity *pOther )
 		}
 		return;
 	}
+
+	if (!UTIL_IsMasterTriggered(m_sMaster, pOther))
+		return;
 
 	if( pOther->AddPlayerItem( this ) == GOT_NEW_ITEM )
 	{

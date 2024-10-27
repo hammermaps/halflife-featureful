@@ -27,6 +27,7 @@
 class CPickup : public CBaseDelay
 {
 public:
+	void KeyValue( KeyValueData* pkvd );
 	int ObjectCaps();
 	void SetObjectCollisionBox();
 
@@ -41,6 +42,13 @@ public:
 	CBaseEntity *Respawn( void );
 	void EXPORT Materialize( void );
 	virtual void OnMaterialize() = 0;
+
+	int Save(CSave &save);
+	int Restore(CRestore &restore);
+
+	static  TYPEDESCRIPTION m_SaveData[];
+
+	string_t m_sMaster;
 };
 
 class CItem : public CPickup

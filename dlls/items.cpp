@@ -316,6 +316,17 @@ void CInfoItemRandom::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYP
 
 //=========
 
+void CPickup::KeyValue(KeyValueData *pkvd)
+{
+	if (FStrEq(pkvd->szKeyName, "master"))
+	{
+		m_sMaster = ALLOC_STRING(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else
+		CBaseDelay::KeyValue(pkvd);
+}
+
 int CPickup::ObjectCaps()
 {
 	if (IsPickableByUse() && !(pev->effects & EF_NODRAW)) {
@@ -385,6 +396,12 @@ void CPickup::Materialize( void )
 
 	OnMaterialize();
 }
+
+TYPEDESCRIPTION CPickup::m_SaveData[] =
+{
+	DEFINE_FIELD(CPickup, m_sMaster, FIELD_STRING),
+};
+IMPLEMENT_SAVERESTORE(CPickup, CBaseDelay)
 
 extern int gEvilImpulse101;
 
@@ -468,6 +485,9 @@ void CItem::TouchOrUse(CBaseEntity *pOther)
 		// no? Ignore the touch.
 		return;
 	}
+
+	if (!UTIL_IsMasterTriggered(m_sMaster, pOther))
+		return;
 
 	if( MyTouch( pPlayer ) )
 	{

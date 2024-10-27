@@ -105,6 +105,9 @@ void CBasePlayerAmmo::TouchOrUse( CBaseEntity *pOther )
 		return;
 	}
 
+	if (!UTIL_IsMasterTriggered(m_sMaster, pOther))
+		return;
+
 	if( AddAmmo( pOther ) )
 	{
 		SUB_UseTargets( pOther );

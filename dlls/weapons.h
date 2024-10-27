@@ -327,6 +327,8 @@ public:
 	void	InitDefaultAmmo(int defaultGive);
 	int		m_iDefaultAmmo;// how much ammo you get when you pick up this weapon as placed by a level designer.
 
+	string_t m_sMaster;
+
 	// hle time creep vars
 	float	m_flPrevPrimaryAttack;
 	float	m_flLastFireTime;
