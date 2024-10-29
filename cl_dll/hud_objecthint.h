@@ -5,7 +5,6 @@
 #include "cl_dll.h"
 #include "com_model.h"
 #include "r_efx.h"
-#include "template_property_types.h"
 
 #include <map>
 #include <string>
