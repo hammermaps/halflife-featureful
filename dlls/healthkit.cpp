@@ -491,6 +491,7 @@ public:
 	void UpdateOnRemove();
 	void UpdateJar();
 	int ChargerCapacity() { return (int)(pev->health > 0 ? pev->health : gSkillData.healthchargerCapacity); }
+	bool IsUsefulToDisplayHint(CBaseEntity* pPlayer);
 
 	virtual int Save( CSave &save );
 	virtual int Restore( CRestore &restore );
@@ -948,4 +949,9 @@ void CWallHealthDecay::UpdateJar()
 	{
 		m_jar->Update(m_iState == Healing || m_iState == GiveShot, m_iJuice / (float)ChargerCapacity());
 	}
+}
+
+bool CWallHealthDecay::IsUsefulToDisplayHint(CBaseEntity* pPlayer)
+{
+	return m_iJuice > 0;
 }

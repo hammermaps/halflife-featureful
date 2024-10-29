@@ -375,6 +375,11 @@ int __MsgFunc_PlayMP3( const char *pszName, int iSize, void *pbuf )
 	return 1;
 }
 
+int __MsgFunc_ObjectHint( const char *pszName, int iSize, void *pbuf )
+{
+	return gHUD.MsgFunc_ObjectHint( pszName, iSize, pbuf );
+}
+
 // TFFree Command Menu
 void __CmdFunc_OpenCommandMenu( void )
 {
@@ -617,6 +622,7 @@ void CHud::Init( void )
 	HOOK_MESSAGE( VGUIMenu );
 
 	HOOK_MESSAGE( PlayMP3 );
+	HOOK_MESSAGE( ObjectHint );
 
 	CVAR_CREATE( "hud_classautokill", "1", FCVAR_ARCHIVE | FCVAR_USERINFO );		// controls whether or not to suicide immediately on TF class switch
 	CVAR_CREATE( "hud_takesshots", "0", FCVAR_ARCHIVE );		// controls whether or not to automatically take screenshots at the end of a round
@@ -692,6 +698,8 @@ void CHud::Init( void )
 	}
 
 	CreateBooleanCvarConditionally(m_pCvarCrosshairColorable, "crosshair_colorable", clientFeatures.crosshair_colorable);
+
+	m_pCvarObjectHint = CVAR_CREATE("cl_objecthint", "1", FCVAR_ARCHIVE);
 
 	m_pCvarMOTDVGUI = CVAR_CREATE("cl_motd_vgui", "1", FCVAR_ARCHIVE);
 	m_pCvarScoreboardVGUI = CVAR_CREATE("cl_scoreboard_vgui", "1", FCVAR_ARCHIVE);
@@ -1238,6 +1246,8 @@ void CHud::VidInit( void )
 	LoadWallPuffSprites();
 
 	m_iFontHeight = m_rgrcRects[m_HUD_number_0].bottom - m_rgrcRects[m_HUD_number_0].top;
+
+	objectHintManager.Clear();
 
 	m_Ammo.VidInit();
 	m_Health.VidInit();

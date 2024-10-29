@@ -19,10 +19,13 @@
 #include "pm_materials.h"
 #include "mod_features.h"
 #include "basemonster.h"
+#include "objecthint_spec.h"
 #if FEATURE_ROPE
 class CRope;
 #endif
 #include "com_model.h"
+
+#include <vector>
 
 #define PLAYER_FATAL_FALL_SPEED		1024// approx 60 feet
 #define PLAYER_MAX_SAFE_FALL_SPEED	580// approx 20 feet
@@ -322,6 +325,7 @@ public:
 
 	// JOHN:  sends custom messages if player HUD data has changed  (eg health, ammo)
 	virtual void UpdateClientData( void );
+	void GatherAndSendObjectHints();
 	
 	static	TYPEDESCRIPTION m_playerSaveData[];
 
@@ -387,6 +391,7 @@ public:
 
 	void WaterMove( void );
 	void EXPORT PlayerDeathThink( void );
+	std::pair<CBaseEntity*, const ObjectHintSpec*> GetInteractiveEntity(std::vector<std::pair<CBaseEntity*, const ObjectHintSpec*>>* hintedEntities = nullptr);
 	void PlayerUse( void );
 
 	void CheckSuitUpdate();
@@ -515,6 +520,8 @@ public:
 
 	string_t m_inventoryItems[MAX_INVENTORY_ITEMS];
 	short m_inventoryItemCounts[MAX_INVENTORY_ITEMS];
+	int FindSlotForItem(string_t item, bool allowOverflow = false, int* result = nullptr);
+	bool CanHaveIntenvoryItem(string_t item, bool allowOverflow = false);
 	int GiveInventoryItem(string_t item, int count, bool allowOverflow = false);
 	int SetInventoryItem(string_t item, int count, bool allowOverflow = false);
 	bool RemoveInventoryItem(string_t item, int count);
@@ -524,6 +531,8 @@ public:
 
 	EHANDLE m_camera;
 	int m_cameraFlags;
+
+	float m_spriteHintTimeCheck;
 };
 
 #define AUTOAIM_2DEGREES  0.0348994967025

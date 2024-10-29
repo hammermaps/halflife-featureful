@@ -251,8 +251,9 @@ public:
 
 	string_t m_entTemplate;
 	string_t m_ownerEntTemplate;
-
 	string_t m_soundList; // sound replacement list file name
+	string_t m_objectHint; // the name of the spritehint template
+
 	int PRECACHE_SOUND(const char* soundName);
 
 	bool EmitSoundDyn( int channel, const char *sample, float volume, float attenuation, int flags, int pitch );
@@ -423,6 +424,9 @@ public:
 
 	void ApplyDamageToHealth(float flDamage);
 	float m_healthMinThreshold;
+
+	virtual bool IsUsefulToDisplayHint(CBaseEntity* pPlayer) { return true; }
+	virtual bool IsLockedByMaster() { return false; }
 };
 
 // Ugly technique to override base member functions
@@ -581,7 +585,7 @@ public:
 	void EXPORT LinearMoveDone( void );
 	void AngularMove( Vector vecDestAngle, float flSpeed );
 	void EXPORT AngularMoveDone( void );
-	BOOL IsLockedByMaster( void );
+	bool IsLockedByMaster();
 
 	static float		AxisValue( int flags, const Vector &angles );
 	static void			AxisDir( entvars_t *pev );

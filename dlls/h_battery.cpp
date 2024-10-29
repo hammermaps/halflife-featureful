@@ -102,6 +102,9 @@ public:
 	}
 
 	int ChargerCapacity() { return (int)(pev->health > 0 ? pev->health : gSkillData.suitchargerCapacity); }
+
+	bool IsUsefulToDisplayHint(CBaseEntity* pPlayer);
+
 	virtual int Save( CSave &save );
 	virtual int Restore( CRestore &restore );
 
@@ -553,4 +556,9 @@ void CRechargeDecay::UpdateOnRemove()
 	m_beam = NULL;
 	m_glass = NULL;
 	CBaseAnimating::UpdateOnRemove();
+}
+
+bool CRechargeDecay::IsUsefulToDisplayHint(CBaseEntity* pPlayer)
+{
+	return m_iJuice > 0;
 }

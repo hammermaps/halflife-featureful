@@ -28,6 +28,7 @@
 #include "ent_templates.h"
 #include "followers.h"
 #include "savetitles.h"
+#include "objecthint_spec.h"
 #include "vcs_info.h"
 
 ModFeatures g_modFeatures;
@@ -1415,6 +1416,7 @@ void GameDLLInit( void )
 	ReadEntTemplates();
 	g_FollowersDescription.ReadFromFile("features/followers.json");
 	ReadSaveTitles();
+	g_objectHintCatalog.ReadFromFile("templates/objecthint.json");
 
 	// Register cvars here:
 

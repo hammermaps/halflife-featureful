@@ -46,5 +46,6 @@ public:
 	int OffStateFrame();
 
 	bool CalcRatio( CBaseEntity *pLocus, float* outResult );
+	bool IsUsefulToDisplayHint(CBaseEntity* pPlayer) { return m_iJuice > 0; }
 };
 #endif

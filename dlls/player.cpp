@@ -43,6 +43,7 @@
 #include "followers.h"
 #include "common_soundscripts.h"
 #include "error_collector.h"
+#include "spritehint_flags.h"
 
 #if FEATURE_ROPE
 #include "ropes.h"
@@ -242,6 +243,7 @@ int gmsgUseSound = 0;
 int gmsgCaption = 0;
 
 int gmsgInventory = 0;
+int gmsgObjectHint = 0;
 
 int gmsgRain = 0;
 int gmsgSnow = 0;
@@ -341,6 +343,7 @@ void LinkUserMessages( void )
 	gmsgCaption = REG_USER_MSG("Caption", -1);
 
 	gmsgInventory = REG_USER_MSG("Inventory", -1);
+	gmsgObjectHint = REG_USER_MSG("ObjectHint", -1);
 
 	gmsgRain = REG_USER_MSG("Rain", -1);
 	gmsgSnow = REG_USER_MSG("Snow", -1);
@@ -1827,7 +1830,153 @@ void CBasePlayer::StartObserver( Vector vecPosition, Vector vecViewAngle )
 //
 // PlayerUse - handles USE keypress
 //
-#define	PLAYER_SEARCH_RADIUS	(float)64
+#define	PLAYER_SEARCH_RADIUS	64.0f
+
+static bool ObjectInRadius(CBaseEntity* pEntity, const Vector& origin, float radius)
+{
+	radius *= radius;
+	float distSquared = 0.0f;
+
+	entvars_t* pev = pEntity->pev;
+	for( int i = 0; i < 3 && distSquared <= radius; i++ )
+	{
+		float axisDist = 0.0f;
+		if( origin[i] < pev->absmin[i] )
+			axisDist = origin[i] - pev->absmin[i];
+		else if( origin[i] > pev->absmax[i] )
+			axisDist = origin[i] - pev->absmax[i];
+
+		distSquared += axisDist * axisDist;
+	}
+
+	return distSquared < radius;
+}
+
+static const ObjectHintSpec* GetHintSpecForEntity(CBaseEntity* pEntity)
+{
+	if (!g_objectHintCatalog.HasAnyTemplates())
+		return nullptr;
+	const ObjectHintSpec* spec;
+	if (!FStringNull(pEntity->m_objectHint))
+	{
+		spec = g_objectHintCatalog.GetSpec(STRING(pEntity->m_objectHint));
+		if (spec)
+			return spec;
+	}
+	if (FClassnameIs(pEntity->pev, "item_pickup"))
+	{
+		if (!FStringNull(pEntity->pev->netname))
+		{
+			spec = g_objectHintCatalog.GetSpecByPickupName(STRING(pEntity->pev->netname)); // NOTE: the inventory item name is stored in netname
+			if (spec)
+				return spec;
+		}
+	}
+	return g_objectHintCatalog.GetSpecByEntityName(STRING(pEntity->pev->classname));
+}
+
+std::pair<CBaseEntity*, const ObjectHintSpec*> CBasePlayer::GetInteractiveEntity(std::vector<std::pair<CBaseEntity*, const ObjectHintSpec*>>* hintedEntities)
+{
+	const bool gatherHints = hintedEntities != nullptr;
+	CBaseEntity *pObject = nullptr;
+	Vector vecLOS;
+	float flMaxDot = VIEW_FIELD_NARROW;
+	float flDot;
+	TraceResult tr;
+
+	const Vector eyePosition = EyePosition();
+
+	UTIL_MakeVectors( pev->v_angle );// so we know which way we are facing
+
+	UTIL_TraceLine( eyePosition,
+						eyePosition + (gpGlobals->v_forward * PLAYER_SEARCH_RADIUS),
+						dont_ignore_monsters, ENT(pev), &tr );
+	if (tr.pHit)
+	{
+		pObject = CBaseEntity::Instance(tr.pHit);
+		if (!pObject || !(pObject->ObjectCaps() & (FCAP_IMPULSE_USE | FCAP_CONTINUOUS_USE | FCAP_ONOFF_USE)))
+		{
+			pObject = nullptr;
+		}
+	}
+
+	CBaseEntity* pInteractiveObject = pObject;
+	pObject = nullptr;
+
+	if (!pInteractiveObject || gatherHints)
+	{
+		CBaseEntity *pClosest = nullptr;
+
+		const float searchRadius = gatherHints ? Q_max(g_objectHintCatalog.GetMaxDistance(), PLAYER_SEARCH_RADIUS) : PLAYER_SEARCH_RADIUS;
+
+		while( ( pObject = UTIL_FindEntityInSphere( pObject, pev->origin, searchRadius ) ) != NULL )
+		{
+			const ObjectHintSpec* hintSpec = gatherHints ? GetHintSpecForEntity(pObject) : nullptr;
+			if (hintSpec && hintSpec->scanVisualSet.HasAnySpriteDefined())
+			{
+				CBasePlayerWeapon* pWeapon = pObject->MyWeaponPointer();
+				if (!pWeapon || !pWeapon->m_pPlayer)
+				{
+					const float radius = hintSpec->distance > 0 ? hintSpec->distance : PLAYER_SEARCH_RADIUS;
+					if (ObjectInRadius(pObject, eyePosition, radius))
+					{
+						vecLOS = (VecBModelOrigin( pObject->pev ) - eyePosition);
+						vecLOS = UTIL_ClampVectorToBox(vecLOS, pObject->pev->size * 0.5f);
+						flDot = DotProduct( vecLOS , gpGlobals->v_forward );
+						if (flDot > 0.5f)
+							hintedEntities->push_back(std::make_pair(pObject, hintSpec));
+					}
+				}
+			}
+
+			if (pInteractiveObject)
+				continue;
+
+			const bool inUseRadius = gatherHints ? ObjectInRadius(pObject, pev->origin, PLAYER_SEARCH_RADIUS) : true;
+			if (!inUseRadius)
+				continue;
+
+			int caps = pObject->ObjectCaps();
+			if( caps & ( FCAP_IMPULSE_USE | FCAP_CONTINUOUS_USE | FCAP_ONOFF_USE ) &&
+					!(caps & FCAP_ONLYDIRECT_USE) )
+			{
+				// !!!PERFORMANCE- should this check be done on a per case basis AFTER we've determined that
+				// this object is actually usable? This dot is being done for every object within PLAYER_SEARCH_RADIUS
+				// when player hits the use key. How many objects can be in that area, anyway? (sjb)
+				vecLOS = ( VecBModelOrigin( pObject->pev ) - eyePosition );
+
+				// This essentially moves the origin of the target to the corner nearest the player to test to see
+				// if it's "hull" is in the view cone
+				vecLOS = UTIL_ClampVectorToBox( vecLOS, pObject->pev->size * 0.5 );
+
+				if (!AllowUseThroughWalls() || (caps & FCAP_ONLYVISIBLE_USE) )
+				{
+					UTIL_TraceLine(eyePosition, pObject->Center(), dont_ignore_monsters, edict(), &tr);
+					if (tr.flFraction < 1.0f && tr.pHit != pObject->edict())
+					{
+						continue;
+					}
+				}
+
+				flDot = DotProduct( vecLOS , gpGlobals->v_forward );
+				if( flDot > flMaxDot )
+				{
+					// only if the item is in front of the user
+					pClosest = pObject;
+					flMaxDot = flDot;
+					//ALERT( at_console, "%s : %f\n", STRING( pObject->pev->classname ), flDot );
+				}
+				//ALERT( at_console, "%s : %f\n", STRING( pObject->pev->classname ), flDot );
+			}
+		}
+
+		if (!pInteractiveObject)
+			pInteractiveObject = pClosest;
+	}
+
+	const ObjectHintSpec* interactiveHintSpec = (pInteractiveObject && gatherHints) ? GetHintSpecForEntity(pInteractiveObject) : nullptr;
+	return std::make_pair(pInteractiveObject, interactiveHintSpec);
+}
 
 void CBasePlayer::PlayerUse( void )
 {
@@ -1894,73 +2043,12 @@ void CBasePlayer::PlayerUse( void )
 		}
 	}
 
-	CBaseEntity *pObject = NULL;
-	CBaseEntity *pClosest = NULL;
-	Vector vecLOS;
-	float flMaxDot = VIEW_FIELD_NARROW;
-	float flDot;
-	TraceResult tr;
-	int caps;
-
-	UTIL_MakeVectors( pev->v_angle );// so we know which way we are facing
-
-	UTIL_TraceLine( pev->origin + pev->view_ofs,
-						pev->origin + pev->view_ofs + (gpGlobals->v_forward * PLAYER_SEARCH_RADIUS),
-						dont_ignore_monsters, ENT(pev), &tr );
-	if (tr.pHit)
-	{
-		pObject = CBaseEntity::Instance(tr.pHit);
-		if (!pObject || !(pObject->ObjectCaps() & (FCAP_IMPULSE_USE | FCAP_CONTINUOUS_USE | FCAP_ONOFF_USE)))
-		{
-			pObject = NULL;
-		}
-	}
-
-	if (!pObject)
-	{
-		while( ( pObject = UTIL_FindEntityInSphere( pObject, pev->origin, PLAYER_SEARCH_RADIUS ) ) != NULL )
-		{
-			caps = pObject->ObjectCaps();
-			if( caps & ( FCAP_IMPULSE_USE | FCAP_CONTINUOUS_USE | FCAP_ONOFF_USE ) &&
-					!(caps & FCAP_ONLYDIRECT_USE) )
-			{
-				// !!!PERFORMANCE- should this check be done on a per case basis AFTER we've determined that
-				// this object is actually usable? This dot is being done for every object within PLAYER_SEARCH_RADIUS
-				// when player hits the use key. How many objects can be in that area, anyway? (sjb)
-				vecLOS = ( VecBModelOrigin( pObject->pev ) - ( pev->origin + pev->view_ofs ) );
-
-				// This essentially moves the origin of the target to the corner nearest the player to test to see
-				// if it's "hull" is in the view cone
-				vecLOS = UTIL_ClampVectorToBox( vecLOS, pObject->pev->size * 0.5 );
-
-				if (!AllowUseThroughWalls() || (caps & FCAP_ONLYVISIBLE_USE) )
-				{
-					UTIL_TraceLine(pev->origin + pev->view_ofs, pObject->Center(), dont_ignore_monsters, edict(), &tr);
-					if (tr.flFraction < 1.0f && tr.pHit != pObject->edict())
-					{
-						continue;
-					}
-				}
-
-				flDot = DotProduct( vecLOS , gpGlobals->v_forward );
-				if( flDot > flMaxDot )
-				{
-					// only if the item is in front of the user
-					pClosest = pObject;
-					flMaxDot = flDot;
-					//ALERT( at_console, "%s : %f\n", STRING( pObject->pev->classname ), flDot );
-				}
-				//ALERT( at_console, "%s : %f\n", STRING( pObject->pev->classname ), flDot );
-			}
-		}
-
-		pObject = pClosest;
-	}
+	CBaseEntity *pObject = GetInteractiveEntity().first;
 
 	// Found an object
 	if( pObject )
 	{
-		caps = pObject->ObjectCaps();
+		int caps = pObject->ObjectCaps();
 
 		if( m_afButtonPressed & IN_USE )
 		{
@@ -5338,6 +5426,114 @@ void CBasePlayer::UpdateClientData( void )
 			}
 		}
 	}
+
+	if (m_spriteHintTimeCheck <= gpGlobals->time)
+	{
+		GatherAndSendObjectHints();
+		m_spriteHintTimeCheck = gpGlobals->time + 0.1f;
+	}
+}
+
+static Vector CalcHintOrigin(CBaseEntity* pEntity, CBaseEntity* pLooker)
+{
+	if (pEntity->pev->model && *STRING(pEntity->pev->model) == '*')
+	{
+		Vector center = pEntity->Center();
+
+		TraceResult tr;
+		UTIL_TraceLine(pLooker->EyePosition(), center, ignore_monsters, pLooker->edict(), &tr);
+
+		float maxDist = 0.0f;
+		int axis = 0;
+		for (int i=0; i<3; ++i)
+		{
+			float dist = (center[i] - tr.vecEndPos[i]);
+			if (fabs(dist) > fabs(maxDist))
+			{
+				maxDist = dist;
+				axis = i;
+			}
+		}
+		center[axis] = tr.vecEndPos[axis];
+		return center;
+	}
+	else
+	{
+		return pEntity->Center();
+	}
+}
+
+void CBasePlayer::GatherAndSendObjectHints()
+{
+	if (!g_objectHintCatalog.HasAnyTemplates())
+		return;
+
+	auto chooseHintVisual = [this](CBaseEntity* pEntity, const ObjectHintVisualSet& visualSet)
+	{
+		// no point in choosing if these are the same
+		if (visualSet.defaultVisual != visualSet.unusableVisual)
+		{
+			if (!pEntity->IsUsefulToDisplayHint(this))
+				return visualSet.unusableVisual;
+		}
+		if (visualSet.defaultVisual != visualSet.lockedVisual)
+		{
+			if (pEntity->IsLockedByMaster())
+				return visualSet.lockedVisual;
+		}
+		return visualSet.defaultVisual;
+	};
+
+	auto sendObjectHint = [this](const ObjectHintSpec* spec, const ObjectHintVisual* hintVisual, CBaseEntity* pEntity, int flags)
+	{
+		MESSAGE_BEGIN(MSG_ONE, gmsgObjectHint, nullptr, pev);
+			WRITE_BYTE(flags);
+			WRITE_SHORT(pEntity->entindex());
+			WRITE_COLOR(hintVisual->color);
+			WRITE_COORD(hintVisual->scale);
+			WRITE_VECTOR(CalcHintOrigin(pEntity, this) + Vector(0,0,spec->verticalOffset));
+			WRITE_VECTOR(pEntity->pev->size);
+			WRITE_STRING(hintVisual->sprite.c_str());
+		MESSAGE_END();
+	};
+
+	std::vector<std::pair<CBaseEntity*, const ObjectHintSpec*>> hintedEntities;
+	auto interaction = GetInteractiveEntity(&hintedEntities);
+	CBaseEntity* pClosest = interaction.first;
+	const ObjectHintSpec* closestHintSpec = interaction.second;
+	const ObjectHintVisual* closestHintVisual = nullptr;
+	bool shownInteraction = false;
+	if (closestHintSpec)
+	{
+		closestHintVisual = chooseHintVisual(pClosest, closestHintSpec->interactionVisualSet);
+	}
+
+	if (pClosest && closestHintVisual)
+	{
+		sendObjectHint(closestHintSpec, closestHintVisual, pClosest, OBJECTHINT_FLAG_CLOSEST);
+		shownInteraction = true;
+	}
+	else
+	{
+		MESSAGE_BEGIN(MSG_ONE, gmsgObjectHint, nullptr, pev);
+			WRITE_BYTE(OBJECTHINT_FLAG_CLOSEST);
+			WRITE_SHORT(0);
+		MESSAGE_END();
+	}
+
+	for (auto p : hintedEntities)
+	{
+		CBaseEntity* pEntity = p.first;
+		const ObjectHintSpec* spec = p.second;
+		if (shownInteraction && pEntity == pClosest)
+			continue; // already handled
+
+		const ObjectHintVisual* hintVisual = chooseHintVisual(pEntity, spec->scanVisualSet);
+		if (hintVisual)
+		{
+			sendObjectHint(spec, hintVisual, pEntity, 0);
+		}
+	}
 }
 
 //=========================================================
@@ -6035,7 +6231,7 @@ void CBasePlayer::SetLoopedMp3(string_t loopedMp3)
 	m_loopedMp3 = loopedMp3;
 }
 
-int CBasePlayer::GiveInventoryItem(string_t item, int count, bool allowOverflow)
+int CBasePlayer::FindSlotForItem(string_t item, bool allowOverflow, int* result)
 {
 	int freeSlot = -1;
 	int i;
@@ -6059,9 +6255,36 @@ int CBasePlayer::GiveInventoryItem(string_t item, int count, bool allowOverflow)
 		}
 		else
 		{
-			return INVENTORY_ITEM_NONE_GIVEN_MAXITEMS;
+			if (result)
+				*result = INVENTORY_ITEM_NONE_GIVEN_MAXITEMS;
+			return -1;
 		}
 	}
+
+	const InventoryItemSpec* spec = GetInventoryItemSpec(STRING(item));
+	if (!allowOverflow && spec && spec->maxCount > 0)
+	{
+		if (m_inventoryItemCounts[i] >= spec->maxCount)
+		{
+			if (result)
+				*result = INVENTORY_ITEM_NONE_GIVEN_MAXCOUNT;
+			return -1;
+		}
+	}
+	return i;
+}
+
+bool CBasePlayer::CanHaveIntenvoryItem(string_t item, bool allowOverflow)
+{
+	return FindSlotForItem(item, allowOverflow) >= 0;
+}
+
+int CBasePlayer::GiveInventoryItem(string_t item, int count, bool allowOverflow)
+{
+	int ret = 0;
+	int i = FindSlotForItem(item, allowOverflow, &ret);
+	if (i < 0)
+		return ret;
 
 	const InventoryItemSpec* spec = GetInventoryItemSpec(STRING(item));
 	if (!allowOverflow && spec && spec->maxCount > 0)

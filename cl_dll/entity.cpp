@@ -678,6 +678,8 @@ void DLLEXPORT HUD_CreateEntities( void )
 	Game_AddObjects();
 	CL_UpdateLaserSpot();
 
+	gHUD.objectHintManager.Update();
+
 #if USE_VGUI
 	GetClientVoiceMgr()->CreateEntities();
 #endif

@@ -377,8 +377,18 @@ bool UpdatePropertyFromJson(std::string& str, Value& jsonValue, const char* key)
 	auto it = jsonValue.FindMember(key);
 	if (it != jsonValue.MemberEnd())
 	{
-		str = it->value.GetString();
-		return true;
+		if (it->value.IsNull())
+		{
+			str.clear();
+			return true;
+		}
+		else if (it->value.IsString())
+		{
+			str = it->value.GetString();
+			return true;
+		}
+		else
+			return false;
 	}
 	return false;
 }

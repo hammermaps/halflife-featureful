@@ -131,7 +131,7 @@ public:
 	virtual int	 ObjectCaps( void ) { return (CBaseDelay::ObjectCaps() & ~FCAP_ACROSS_TRANSITION); }
 	virtual void Activate( void );
 	virtual void UpdateOnRemove();
-	BOOL IsLockedByMaster() {
+	bool IsLockedByMaster() {
 		if( m_sMaster && !UTIL_IsMasterTriggered( m_sMaster, m_hActivator ) )
 			return TRUE;
 		else

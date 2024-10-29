@@ -45,6 +45,7 @@
 
 #include "hud_renderer.h"
 #include "hud_inventory.h"
+#include "hud_objecthint.h"
 
 #include <vector>
 #include <string>
@@ -906,6 +907,8 @@ public:
 	cvar_t	*m_pCvarHudBlue;
 	cvar_t	*m_pCvarArmorNearHealth;
 
+	cvar_t	*m_pCvarObjectHint;
+
 	cvar_t	*m_pCvarMOTDVGUI;
 	cvar_t	*m_pCvarScoreboardVGUI;
 
@@ -1057,6 +1060,7 @@ public:
 	int _cdecl MsgFunc_Items(const char* pszName, int iSize, void* pbuf);
 	int _cdecl MsgFunc_SetFog( const char *pszName, int iSize, void *pbuf );
 	int _cdecl MsgFunc_KeyedDLight( const char *pszName, int iSize, void *pbuf );
+	int _cdecl MsgFunc_ObjectHint( const char *pszName, int iSize, void *pbuf );
 
 	// Screen information
 	SCREENINFO	m_scrinfo;
@@ -1085,6 +1089,7 @@ public:
 	bool m_bFlashlight;
 
 	InventoryHudSpec inventorySpec;
+	ObjectHintManager objectHintManager;
 
 	HudSpriteRenderer hudRenderer;
 	bool hasHudScaleInEngine;

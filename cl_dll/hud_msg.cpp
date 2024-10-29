@@ -21,6 +21,8 @@
 #include "parsemsg.h"
 #include "r_efx.h"
 #include "arraysize.h"
+#include "string_utils.h"
+#include "spritehint_flags.h"
 
 #include "environment.h"
 
@@ -179,5 +181,42 @@ int CHud::MsgFunc_Concuss( const char *pszName, int iSize, void *pbuf )
 	}
 	else
 		this->m_StatusIcons.DisableIcon( "dmg_concuss" );
+	return 1;
+}
+
+int CHud::MsgFunc_ObjectHint(const char *pszName, int iSize, void *pbuf)
+{
+	BEGIN_READ(pbuf, iSize);
+
+	ObjectHint objectHint;
+
+	int flags = READ_BYTE();
+	if (flags & OBJECTHINT_FLAG_CLOSEST)
+		objectHint.interactable = true;
+	else
+		objectHint.interactable = false;
+	objectHint.entindex = READ_SHORT();
+
+	if (objectHint.entindex > 0)
+	{
+		objectHint.color = READ_COLOR();
+		objectHint.scaleFactor = READ_COORD();
+		objectHint.center = READ_VECTOR();
+		objectHint.size = READ_VECTOR();
+		const char* spriteName = READ_STRING();
+		strncpyEnsureTermination(objectHint.sprite, spriteName);
+
+		if (m_pCvarObjectHint->value)
+		{
+			const bool shouldSet = m_pCvarObjectHint->value == 2 ? objectHint.interactable : true;
+			if (shouldSet)
+				objectHintManager.SetHint(objectHint);
+		}
+	}
+	else if (objectHint.interactable)
+	{
+		objectHintManager.RemoveInteractable();
+	}
+
 	return 1;
 }

@@ -677,6 +677,7 @@ TYPEDESCRIPTION	CBaseEntity::m_SaveData[] =
 	DEFINE_FIELD( CBaseEntity, m_entTemplate, FIELD_STRING ),
 	DEFINE_FIELD( CBaseEntity, m_ownerEntTemplate, FIELD_STRING ),
 	DEFINE_FIELD( CBaseEntity, m_soundList, FIELD_STRING ),
+	DEFINE_FIELD( CBaseEntity, m_objectHint, FIELD_STRING ),
 };
 
 void CBaseEntity::KeyValue(KeyValueData* pkvd)
@@ -686,6 +687,9 @@ void CBaseEntity::KeyValue(KeyValueData* pkvd)
 		pkvd->fHandled = TRUE;
 	} else if (FStrEq(pkvd->szKeyName, "ent_template")) {
 		m_entTemplate = ALLOC_STRING(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	} else if (FStrEq(pkvd->szKeyName, "objecthint")) {
+		m_objectHint = ALLOC_STRING(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	} else {
 		pkvd->fHandled = FALSE;

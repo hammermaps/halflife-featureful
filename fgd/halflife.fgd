@@ -141,13 +141,18 @@
 	globalname(string) : "Global Entity Name"
 ]
 
+@BaseClass = CustomObjectHint
+[
+	objecthint(string): "Object Hint Template" : : "A template name from templates/objecthint.json"
+]
+
 @BaseClass = TargetOnPickup
 [
 	target(target_destination) : "Target on pickup" : : "When the item is picked up, trigger the entity with the specified name."
 	killtarget(target_destination) : "KillTarget on pickup" : : "When the item is picked up, remove the entity specified by this property from the game."
 ]
 
-@BaseClass size(-16 -16 0, 16 16 32) color(0 0 200) base(Targetname, TargetOnPickup, Delay, Appearflags, Angles, Global, Scalable) = Pickup
+@BaseClass size(-16 -16 0, 16 16 32) color(0 0 200) base(Targetname, TargetOnPickup, Delay, Appearflags, Angles, Global, Scalable, CustomObjectHint) = Pickup
 [
 	spawnflags(Flags) =
 	[
@@ -520,7 +525,7 @@
 	RefusalSentence(string) : "Refusal Sentence" : : "The sentence group to play when monster declines the player's request (e.g. if monster is set to Pre-Disaster). Special case: 'null' means no sentence"
 ]
 
-@BaseClass base(FollowingMonsterProps) = FollowingMonster
+@BaseClass base(FollowingMonsterProps, CustomObjectHint) = FollowingMonster
 [
 	master(string) : "Master" : : "Decline following if locked by master (for player ally monsters)"
 	spawnflags(Flags) =
@@ -830,7 +835,7 @@
 	]
 ]
 
-@BaseClass base(Appearflags, Targetname, RenderFields, Global, Angles, SoundRadius, BaseLockable, OpenClosable) = Door
+@BaseClass base(Appearflags, Targetname, RenderFields, Global, Angles, SoundRadius, BaseLockable, OpenClosable, CustomObjectHint) = Door
 [
 	killtarget(target_destination) : "KillTarget"
 	speed(integer) : "Speed" : 100
@@ -2680,8 +2685,9 @@
 [
 	wait_toggle(string) : "Delay before toggling again"
 ]
+@BaseClass base(BaseLockable, ButtonUseType, EntityUsePolicy, ButtonTrigger, ButtonWaitToggle, CustomObjectHint) = ButtonBase []
 
-@SolidClass base(Global, Targetname, Targetx, RenderFields, Angles, ZHLT, BaseLockable, ButtonUseType, EntityUsePolicy, ButtonTrigger, ButtonWaitToggle) = func_button : "Button"
+@SolidClass base(Global, Targetname, Targetx, RenderFields, Angles, ZHLT, ButtonBase) = func_button : "Button"
 [
 	speed(integer) : "Speed" : 5
 	health(integer) : "Health (shootable if > 0)"
@@ -2758,7 +2764,7 @@
 	_minlight(string) : "Minimum light level"
 ]
 
-@SolidClass base(Global, Recharger, RenderFields, ZHLT) = func_healthcharger: "Wall health recharger"
+@SolidClass base(Global, Recharger, RenderFields, ZHLT, CustomObjectHint) = func_healthcharger: "Wall health recharger"
 [
 	// dmdelay(integer) : "Deathmatch recharge delay" : 0
 	_minlight(string) : "Minimum light level"
@@ -2874,13 +2880,13 @@
 	_minlight(string) : "Minimum light level"
 ]
 
-@SolidClass base(Global, Recharger, RenderFields, ZHLT) = func_recharge: "Battery recharger"
+@SolidClass base(Global, Recharger, RenderFields, ZHLT, CustomObjectHint) = func_recharge: "Battery recharger"
 [
 	// dmdelay(integer) : "Deathmatch recharge delay" : 0
 	_minlight(string) : "Minimum light level"
 ]
 
-@SolidClass base(Targetname, Global, RenderFields, Angles, ZHLT, BaseLockable, ButtonUseType, EntityUsePolicy, ButtonTrigger, ButtonWaitToggle) = func_rot_button : "RotatingButton"
+@SolidClass base(Targetname, Global, RenderFields, Angles, ZHLT, ButtonBase) = func_rot_button : "RotatingButton"
 [
 	target(target_destination) : "Targetted object"
 	// changetarget will change the button's target's TARGET field to the button's changetarget.
@@ -3719,10 +3725,10 @@
 	CustomJuice(integer) : "Custom Juice Amount"
 ]
 
-@PointClass size(-12 -16 0, 12 16 36) base(ItemRecharger, Global) studio("models/health_charger_body.mdl") = item_healthcharger : "Wall Health Kit" []
-@PointClass size(-12 -16 0, 12 16 36) base(ItemRecharger, Global) studio("models/hev.mdl") = item_recharge : "Wall Recharger" []
+@PointClass size(-12 -16 0, 12 16 36) base(ItemRecharger, CustomObjectHint, Global) studio("models/health_charger_body.mdl") = item_healthcharger : "Wall Health Kit" []
+@PointClass size(-12 -16 0, 12 16 36) base(ItemRecharger, CustomObjectHint, Global) studio("models/hev.mdl") = item_recharge : "Wall Recharger" []
 
-@PointClass base(Targetname, Global, Angles) size(-16 -16 0, 16 16 48 ) studio("models/eye_scanner.mdl") = item_eyescanner : "Retinal Scanner"
+@PointClass base(Targetname, Global, Angles, CustomObjectHint) size(-16 -16 0, 16 16 48 ) studio("models/eye_scanner.mdl") = item_eyescanner : "Retinal Scanner"
 [
 	unlocked_target(target_destination) : "Unlocked target"
 	locked_target(target_destination) : "Locked target"
@@ -3857,7 +3863,7 @@
 	]
 ]
 
-@SolidClass base(Targetname, Target, Angles, RenderFields, ZHLT) = momentary_rot_button : "Direct wheel control"
+@SolidClass base(Targetname, Target, Angles, RenderFields, ZHLT, CustomObjectHint) = momentary_rot_button : "Direct wheel control"
 [
 	speed(integer) : "Speed" : 50
 	master(string) : "Master"

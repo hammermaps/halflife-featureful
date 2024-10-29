@@ -231,7 +231,7 @@ public:
 	void	Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 	int		ObjectCaps() { return CPointEntity::ObjectCaps() | FCAP_MASTER; }
 
-	BOOL	IsLockedByMaster( void ) { return !UTIL_IsMasterTriggered(m_sMaster, NULL); }
+	bool	IsLockedByMaster() { return !UTIL_IsMasterTriggered(m_sMaster, NULL); }
 
 	virtual int		Save( CSave &save );
 	virtual int		Restore( CRestore &restore );
@@ -860,6 +860,9 @@ public:
 	virtual int ObjectCaps( void );
 
 	BOOL IsAllowedToSpeak( void ) { return TRUE; }
+	bool IsUsefulToDisplayHint(CBaseEntity *pPlayer) {
+		return !FBitSet(pev->spawnflags, SF_BUTTON_PLAYER_CANT_USE);
+	}
 
 	BOOL m_fStayPushed;	// button stays pushed in until touched again?
 	BOOL m_fRotating;		// a rotating button?  default is a sliding button.

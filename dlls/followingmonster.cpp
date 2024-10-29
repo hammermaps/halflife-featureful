@@ -829,3 +829,16 @@ bool CFollowingMonster::CanRoamAfterCombat()
 		return false;
 	return CSquadMonster::CanRoamAfterCombat();
 }
+
+bool CFollowingMonster::IsUsefulToDisplayHint(CBaseEntity* pPlayer)
+{
+	if (!(m_afCapability & bits_CAP_USABLE))
+		return false;
+	if (ShouldDiscardFollowing(pPlayer))
+		return false;
+	if (ShouldDeclineFollowing())
+		return false;
+	if (m_followagePolicy == FOLLOWAGE_SCRIPTED_ONLY || m_followagePolicy == FOLLOWAGE_SCRIPTED_ONLY_DECLINE_USE)
+		return false;
+	return true;
+}

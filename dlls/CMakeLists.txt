@@ -134,6 +134,7 @@ set (SVDLL_SOURCES
 	nihilanth.cpp
 	nodes.cpp
 	nuclearbomb.cpp
+	objecthint_spec.cpp
 	observer.cpp
 	op4mortar.cpp
 	osprey.cpp

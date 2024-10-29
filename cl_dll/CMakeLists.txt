@@ -111,6 +111,7 @@ set (CLDLL_SOURCES
 	hud_error_collection.cpp
 	hud_inventory.cpp
 	hud_msg.cpp
+	hud_objecthint.cpp
 	hud_redraw.cpp
 	hud_spectator.cpp
 	hud_renderer.cpp

@@ -812,6 +812,16 @@ class CItemPickup : public CItem
 
 		return TRUE;
 	}
+
+	bool IsUsefulToDisplayHint(CBaseEntity* pPlayer)
+	{
+		if (pPlayer->IsPlayer())
+		{
+			CBasePlayer* p = (CBasePlayer*)pPlayer;
+			return p->CanHaveIntenvoryItem(pev->netname);
+		}
+		return false;
+	}
 };
 
 LINK_ENTITY_TO_CLASS( item_pickup, CItemPickup )
@@ -1129,6 +1139,8 @@ public:
 		return pev->noise2 ? STRING(pev->noise2) : "buttons/blip1.wav";
 	}
 
+	bool IsUsefulToDisplayHint(CBaseEntity* pPlayer);
+
 	string_t m_unlockedTarget;
 	string_t m_lockedTarget;
 	string_t m_unlockerName;
@@ -1354,6 +1366,15 @@ void CEyeScanner::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE us
 		SetActivity( ACT_STAND );
 		pev->nextthink = gpGlobals->time + 0.1;
 	}
+}
+
+bool CEyeScanner::IsUsefulToDisplayHint(CBaseEntity* pPlayer)
+{
+	if (!FStringNull(m_unlockerName))
+	{
+		return FClassnameIs(pPlayer->pev, STRING(m_unlockerName));
+	}
+	return false;
 }
 
 int CEyeScanner::TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType)

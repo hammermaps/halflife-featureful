@@ -122,6 +122,7 @@ public:
 	void HandleBlocker(CBaseEntity* pBlocker, bool duringMovement);
 
 	virtual bool CanRoamAfterCombat();
+	virtual bool IsUsefulToDisplayHint(CBaseEntity* pPlayer);
 
 	virtual int		Save( CSave &save );
 	virtual int		Restore( CRestore &restore );

@@ -140,6 +140,7 @@ BOOL CBaseMonster::FCanActiveIdle( void ) { return FALSE; }
 bool CBaseToggle::PlaySentence( const char *pszSentence, float duration, float volume, float attenuation, bool subtitle ) { return true; }
 void CBaseToggle::PlayScriptedSentence( const char *pszSentence, float duration, float volume, float attenuation, BOOL bConcurrent, CBaseEntity *pListener ) { }
 void CBaseToggle::SentenceStop( void ) { }
+bool CBaseToggle::IsLockedByMaster() { return false; }
 void CBaseMonster::MonsterInitDead( void ) { }
 float CBaseMonster::HeadHitGroupDamageMultiplier() { return 3.0f; }
 void CBaseMonster::TraceAttack( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType) { }
