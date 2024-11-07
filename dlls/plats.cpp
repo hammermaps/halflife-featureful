@@ -418,7 +418,7 @@ void CPlatTrigger::Touch( CBaseEntity *pOther )
 	if( !pOther->IsPlayer() )
 		return;
 
-	CFuncPlat *pPlatform = (CFuncPlat*)(CBaseEntity*)m_hPlatform;
+	CFuncPlat *pPlatform = m_hPlatform.Entity<CFuncPlat>();
 
 	if( !pPlatform )
 	{

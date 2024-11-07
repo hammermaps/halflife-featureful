@@ -261,7 +261,7 @@ void CGonome::UnlockPlayer()
 		{
 			CBasePlayer* player = 0;
 			if (m_lockedPlayer != 0 && m_lockedPlayer->IsPlayer())
-				player = (CBasePlayer*)((CBaseEntity*)m_lockedPlayer);
+				player = m_lockedPlayer.Entity<CBasePlayer>();
 			else // if ehandle is empty for some reason just unlock the first player
 				player = (CBasePlayer*)UTIL_FindEntityByClassname(0, "player");
 

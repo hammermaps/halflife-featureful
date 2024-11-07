@@ -158,7 +158,7 @@ void CRpgRocket::Explode( TraceResult *pTrace, int bitsDamageType )
 
 CRpg *CRpgRocket::GetLauncher( void )
 {
-	return (CRpg*)( (CBaseEntity*)m_hLauncher );
+	return m_hLauncher.Entity<CRpg>();
 }
 
 //=========================================================

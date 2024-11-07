@@ -1040,7 +1040,7 @@ BOOL CNihilanth::AbsorbSphere( void )
 	{
 		if( m_hSphere[i] != 0 )
 		{
-			CNihilanthHVR *pSphere = (CNihilanthHVR *)( (CBaseEntity *)m_hSphere[i] );
+			CNihilanthHVR *pSphere = m_hSphere[i].Entity<CNihilanthHVR>();
 			pSphere->AbsorbInit();
 			m_hSphere[i] = NULL;
 			m_iActiveSpheres--;

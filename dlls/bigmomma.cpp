@@ -224,7 +224,7 @@ public:
 
 	int GetNodePresequence( void )
 	{
-		CInfoBM *pTarget = (CInfoBM *)(CBaseEntity *)m_hTargetEnt;
+		CInfoBM *pTarget = m_hTargetEnt.Entity<CInfoBM>();
 		if( pTarget )
 		{
 			return pTarget->m_preSequence;
