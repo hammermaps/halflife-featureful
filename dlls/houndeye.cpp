@@ -19,6 +19,7 @@
 #include	"extdll.h"
 #include	"util.h"
 #include	"cbase.h"
+#include	"combat.h"
 #include	"monsters.h"
 #include	"schedule.h"
 #include	"animation.h"
@@ -563,9 +564,6 @@ const Visual* CHoundeye::GetWaveVisual()
 //=========================================================
 void CHoundeye::SonicAttack( void )
 {
-	float flAdjustedDamage;
-	float flDist;
-
 	EmitSoundScript(blastSoundScript);
 
 	const Visual* visual = GetWaveVisual();
@@ -584,59 +582,21 @@ void CHoundeye::SonicAttack( void )
 		WriteBeamVisual(visual);
 	MESSAGE_END();
 
-	CBaseEntity *pEntity = NULL;
-	// iterate on all entities in the vicinity.
-	while( ( pEntity = UTIL_FindEntityInSphere( pEntity, pev->origin, HOUNDEYE_MAX_ATTACK_RADIUS ) ) != NULL )
+	const int squadCount = SquadCount();
+
+	float flDamage = gSkillData.houndeyeDmgBlast;
+	if( squadCount > 1 )
 	{
-		if( pEntity->pev->takedamage != DAMAGE_NO )
-		{
-			if( !(FClassnameIs( pEntity->pev, "monster_houndeye" ) && IRelationship(pEntity) < R_DL ) )
-			{
-				// houndeyes don't hurt other houndeyes with their attack
-				// houndeyes do FULL damage if the ent in question is visible. Half damage otherwise.
-				// This means that you must get out of the houndeye's attack range entirely to avoid damage.
-				// Calculate full damage first
-
-				if( SquadCount() > 1 )
-				{
-					// squad gets attack bonus.
-					flAdjustedDamage = gSkillData.houndeyeDmgBlast + gSkillData.houndeyeDmgBlast * ( HOUNDEYE_SQUAD_BONUS * ( SquadCount() - 1 ) );
-				}
-				else
-				{
-					// solo
-					flAdjustedDamage = gSkillData.houndeyeDmgBlast;
-				}
-
-				flDist = ( pEntity->Center() - pev->origin ).Length();
-
-				flAdjustedDamage -= ( flDist / HOUNDEYE_MAX_ATTACK_RADIUS ) * flAdjustedDamage;
-
-				if( !FVisible( pEntity ) )
-				{
-					if( pEntity->IsPlayer() )
-					{
-						// if this entity is a client, and is not in full view, inflict half damage. We do this so that players still 
-						// take the residual damage if they don't totally leave the houndeye's effective radius. We restrict it to clients
-						// so that monsters in other parts of the level don't take the damage and get pissed.
-						flAdjustedDamage *= 0.5f;
-					}
-					else if( !FClassnameIs( pEntity->pev, "func_breakable" ) && !FClassnameIs( pEntity->pev, "func_pushable" ) ) 
-					{
-						// do not hurt nonclients through walls, but allow damage to be done to breakables
-						flAdjustedDamage = 0;
-					}
-				}
-
-				//ALERT ( at_aiconsole, "Damage: %f\n", flAdjustedDamage );
-
-				if( flAdjustedDamage > 0 )
-				{
-					pEntity->TakeDamage( pev, pev, flAdjustedDamage, DMG_SONIC | DMG_ALWAYSGIB );
-				}
-			}
-		}
+		// squad gets attack bonus.
+		flDamage = gSkillData.houndeyeDmgBlast + gSkillData.houndeyeDmgBlast * ( HOUNDEYE_SQUAD_BONUS * ( squadCount - 1 ) );
 	}
+
+	::RadiusDamage(this, pev->origin, pev, pev, flDamage,
+				   HOUNDEYE_MAX_ATTACK_RADIUS, DMG_SONIC | DMG_ALWAYSGIB,
+				   RADIUSDAMAGE_SPOT_IS_TARGET_CENTER|RADIUSDAMAGE_APPLY_FALLOFF,
+				   [this](CBaseEntity* pEntity) {
+		return !FClassnameIs( pEntity->pev, "monster_houndeye" ) || IRelationship(pEntity) >= R_DL;
+	});
 }
 
 //=========================================================

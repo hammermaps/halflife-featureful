@@ -1073,41 +1073,22 @@ void CISlave::HandleAnimEvent( MonsterEvent_t *pEvent )
 
 				UTIL_ScreenShake( pev->origin, 3.0, 40.0, 1.0, ISLAVE_COIL_ATTACK_RADIUS );
 
-				CBaseEntity *pEntity = NULL;
-				while( ( pEntity = UTIL_FindEntityInSphere( pEntity, pev->origin, ISLAVE_COIL_ATTACK_RADIUS ) ) != NULL )
-				{
-					float flAdjustedDamage = gSkillData.slaveDmgZap*2.5;
-					if( pEntity != this && pEntity->pev->takedamage != DAMAGE_NO ) {
-						const int rel = IRelationship(pEntity);
-						if (rel == R_AL)
-						{
-							if (FClassnameIs(pEntity->pev, STRING(pev->classname))) {
-								if (AbleToHeal() && HealOther(pEntity)) {
-									ALERT(at_aiconsole, "Vort healed friend with coil attack\n");
-								}
+				::RadiusDamage(this, pev->origin, pev, pev, gSkillData.slaveDmgZap*2.5f,
+							   ISLAVE_COIL_ATTACK_RADIUS, DMG_SHOCK,
+							   RADIUSDAMAGE_SPOT_IS_TARGET_CENTER,
+							   [this](CBaseEntity* pEntity) {
+					const int rel = IRelationship(pEntity);
+					if (rel == R_AL)
+					{
+						if (FClassnameIs(pEntity->pev, STRING(pev->classname))) {
+							if (AbleToHeal() && HealOther(pEntity)) {
+								ALERT(at_aiconsole, "Vort healed friend with coil attack\n");
 							}
 						}
-						else
-						{
-							if ( !FVisible( pEntity ) )
-							{
-								if (pEntity->IsPlayer())
-								{
-									// Restrict it to clients so that monsters in other parts of the level don't take the damage and get pissed.
-									flAdjustedDamage *= 0.5f;
-								}
-								else
-								{
-									flAdjustedDamage = 0;
-								}
-							}
-
-							if( flAdjustedDamage > 0 ) {
-								pEntity->TakeDamage( pev, pev, flAdjustedDamage, DMG_SHOCK );
-							}
-						}
+						return false;
 					}
-				}
+					return true;
+				});
 				EmitSoundScriptAmbient(pev->origin, electroSoundScript);
 
 				m_flNextAttack = gpGlobals->time + RANDOM_FLOAT( 1.0, 4.0 );

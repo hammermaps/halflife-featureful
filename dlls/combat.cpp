@@ -1267,76 +1267,10 @@ float CBaseMonster::DamageForce( float damage )
 // only damage ents that can clearly be seen by the explosion!
 void RadiusDamage( Vector vecSrc, entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, float flRadius, int iClassIgnore, int bitsDamageType )
 {
-	CBaseEntity *pEntity = NULL;
-	TraceResult	tr;
-	float		flAdjustedDamage, falloff;
-	Vector		vecSpot;
-
-	if( flRadius )
-		falloff = flDamage / flRadius;
-	else
-		falloff = 1.0f;
-
-	int bInWater = ( UTIL_PointContents( vecSrc ) == CONTENTS_WATER );
-
-	vecSrc.z += 1.0f;// in case grenade is lying on the ground
-
-	if( !pevAttacker )
-		pevAttacker = pevInflictor;
-
-	// iterate on all entities in the vicinity.
-	while( ( pEntity = UTIL_FindEntityInSphere( pEntity, vecSrc, flRadius ) ) != NULL )
-	{
-		if( pEntity->pev->takedamage != DAMAGE_NO )
-		{
-			// UNDONE: this should check a damage mask, not an ignore
-			if( iClassIgnore != CLASS_NONE && pEntity->Classify() == iClassIgnore )
-			{
-				// houndeyes don't hurt other houndeyes with their attack
-				continue;
-			}
-
-			// blast's don't tavel into or out of water
-			if( bInWater && pEntity->pev->waterlevel == 0 )
-				continue;
-			if( !bInWater && pEntity->pev->waterlevel == 3 )
-				continue;
-
-			vecSpot = pEntity->BodyTarget( vecSrc );
-
-			UTIL_TraceLine( vecSrc, vecSpot, dont_ignore_monsters, ENT( pevInflictor ), &tr );
-
-			if( tr.flFraction == 1.0f || tr.pHit == pEntity->edict() )
-			{
-				// the explosion can 'see' this entity, so hurt them!
-				if( tr.fStartSolid )
-				{
-					// if we're stuck inside them, fixup the position and distance
-					tr.vecEndPos = vecSrc;
-					tr.flFraction = 0.0f;
-				}
-
-				// decrease damage for an ent that's farther from the bomb.
-				flAdjustedDamage = ( vecSrc - tr.vecEndPos ).Length() * falloff;
-				flAdjustedDamage = flDamage - flAdjustedDamage;
-
-				if( flAdjustedDamage < 0.0f )
-				{
-					flAdjustedDamage = 0.0f;
-				}
-
-				// ALERT( at_console, "hit %s\n", STRING( pEntity->pev->classname ) );
-				if( tr.flFraction != 1.0f )
-				{
-					pEntity->ApplyTraceAttack( pevInflictor, pevAttacker, flAdjustedDamage, ( tr.vecEndPos - vecSrc ).Normalize(), &tr, bitsDamageType );
-				}
-				else
-				{
-					pEntity->TakeDamage ( pevInflictor, pevAttacker, flAdjustedDamage, bitsDamageType );
-				}
-			}
-		}
-	}
+	RadiusDamage(nullptr, vecSrc, pevInflictor, pevAttacker, flDamage, flRadius, bitsDamageType,
+				 RADIUSDAMAGE_FIX_GRENADE_POS | RADIUSDAMAGE_DONT_TRAVEL_THROUGH_WATER | RADIUSDAMAGE_APPLY_FALLOFF, [iClassIgnore](CBaseEntity* pEntity) {
+		return iClassIgnore == CLASS_NONE || pEntity->Classify() != iClassIgnore;
+	});
 }
 
 void CBaseMonster::RadiusDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int iClassIgnore, int bitsDamageType )
