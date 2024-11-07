@@ -244,7 +244,7 @@ int CPipeWrench::Swing(int fFirst)
 
 			ApplyMultiDamage(m_pPlayer->pev, m_pPlayer->pev);
 
-			if ( pEntity->DefaultClassify() != CLASS_NONE && !pEntity->IsMachine() )
+			if ( pEntity->HasFlesh() )
 			{
 				// play thwack or smack sound
 				switch( RANDOM_LONG(0,2) )
@@ -381,7 +381,7 @@ void CPipeWrench::BigSwing(void)
 
 		if (pEntity)
 		{
-			if (pEntity->DefaultClassify() != CLASS_NONE && !pEntity->IsMachine())
+			if (pEntity->HasFlesh())
 			{
 				// play thwack or smack sound
 				switch( RANDOM_LONG(0,1) )

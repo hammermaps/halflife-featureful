@@ -1472,8 +1472,7 @@ int AddToFullPack( struct entity_state_s *state, int e, edict_t *ent, edict_t *h
 	}
 
 	if( ( Entity = CBaseEntity::Instance( ent ))
-		&& Entity->DefaultClassify() != CLASS_NONE
-		&& Entity->DefaultClassify() != CLASS_MACHINE )
+		&& Entity->HasFlesh() )
 	{
 		SetBits( state->eflags, EFLAG_FLESH_SOUND );
 	}

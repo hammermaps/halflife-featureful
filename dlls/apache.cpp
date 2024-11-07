@@ -43,7 +43,7 @@ public:
 	void Precache( void );
 	void KeyValue(KeyValueData* pkvd);
 	int DefaultClassify( void ) { return CLASS_HUMAN_MILITARY; }
-	bool IsMachine() { return true; }
+	bool HasFlesh() { return false; }
 	const char* DefaultDisplayName() { return "Apache"; }
 	const char* ReverseRelationshipModel() { return "models/apachef.mdl"; }
 	int BloodColor( void ) { return DONT_BLEED; }
