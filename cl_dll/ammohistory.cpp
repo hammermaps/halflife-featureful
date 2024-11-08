@@ -29,16 +29,6 @@ HistoryResource gHR;
 #define AMMO_PICKUP_PICK_HEIGHT		( 32 + ( gHR.iHistoryGap * 2 ) )
 #define AMMO_PICKUP_HEIGHT_MAX		( ScreenHeight - 100 )
 
-#define MAX_ITEM_NAME	32
-
-// keep a list of items
-struct ITEM_INFO
-{
-	char szName[MAX_ITEM_NAME];
-	HSPRITE spr;
-	wrect_t rect;
-};
-
 void HistoryResource::AddToHistory( int iType, int iId, int iCount )
 {
 	if( iType == HISTSLOT_AMMO && !iCount )
