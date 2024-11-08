@@ -219,7 +219,7 @@ int WeaponsResource::CountAmmo( int iId )
 int WeaponsResource::HasAmmo( WEAPON *p )
 {
 	if( !p )
-		return FALSE;
+		return 0;
 
 	// weapons with no max ammo can always be selected
 	return ( p->iAmmoType == -1 ) || p->iClip > 0 || CountAmmo( p->iAmmoType ) 
@@ -581,7 +581,7 @@ HSPRITE* WeaponsResource::GetAmmoPicFromWeapon( int iAmmoId, wrect_t& rect )
 // Menu Selection Code
 void WeaponsResource::SelectSlot( int iSlot, int fAdvance, int iDirection )
 {
-	if( gHUD.m_Menu.m_fMenuDisplayed && ( fAdvance  == FALSE ) && ( iDirection == 1 ) )	
+	if( gHUD.m_Menu.m_fMenuDisplayed && ( fAdvance == 0 ) && ( iDirection == 1 ) )
 	{
 		// menu is overriding slot use commands
 		gHUD.m_Menu.SelectMenuItem( iSlot + 1 );  // slots are one off the key numbers
@@ -734,7 +734,7 @@ int CHudAmmo::MsgFunc_HideWeapon( const char *pszName, int iSize, void *pbuf )
 int CHudAmmo::MsgFunc_CurWeapon( const char *pszName, int iSize, void *pbuf )
 {
 	wrect_t nullrc = {0,};
-	int fOnTarget = FALSE;
+	bool fOnTarget = false;
 
 	BEGIN_READ( pbuf, iSize );
 
@@ -745,7 +745,7 @@ int CHudAmmo::MsgFunc_CurWeapon( const char *pszName, int iSize, void *pbuf )
 	// detect if we're also on target
 	if( iState > 1 )
 	{
-		fOnTarget = TRUE;
+		fOnTarget = true;
 	}
 
 	if( iId < 1 )
@@ -761,11 +761,11 @@ int CHudAmmo::MsgFunc_CurWeapon( const char *pszName, int iSize, void *pbuf )
 		// Is player dead???
 		if( ( iId == -1 ) && ( iClip == -1 ) )
 		{
-			gHUD.m_fPlayerDead = TRUE;
+			gHUD.m_fPlayerDead = true;
 			gpActiveSel = NULL;
 			return 1;
 		}
-		gHUD.m_fPlayerDead = FALSE;
+		gHUD.m_fPlayerDead = false;
 	}
 
 	WEAPON *pWeapon = gWR.GetWeapon( iId );
@@ -875,7 +875,7 @@ void CHudAmmo::SlotInput( int iSlot )
 	if( gViewPort && gViewPort->SlotInput( iSlot ) )
 		return;
 #endif
-	gWR.SelectSlot(iSlot, FALSE, 1);
+	gWR.SelectSlot(iSlot, 0, 1);
 }
 
 void CHudAmmo::UserCmd_Slot1( void )

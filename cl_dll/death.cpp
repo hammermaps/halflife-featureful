@@ -30,9 +30,9 @@ struct DeathNoticeItem {
 	char szKiller[MAX_PLAYER_NAME_LENGTH * 2];
 	char szVictim[MAX_PLAYER_NAME_LENGTH * 2];
 	int iId;	// the index number of the associated sprite
-	int iSuicide;
-	int iTeamKill;
-	int iNonPlayerKill;
+	bool iSuicide;
+	bool iTeamKill;
+	bool iNonPlayerKill;
 	float flDisplayTime;
 	float *KillerColor;
 	float *VictimColor;
@@ -155,7 +155,7 @@ int CHudDeathNotice::Draw( float flTime )
 			x += ( gHUD.GetSpriteRect(id).right - gHUD.GetSpriteRect(id).left );
 
 			// Draw victims name (if it was a player that was killed)
-			if( rgDeathNoticeList[i].iNonPlayerKill == FALSE )
+			if( !rgDeathNoticeList[i].iNonPlayerKill )
 			{
 				if( rgDeathNoticeList[i].VictimColor )
 					DrawSetTextColor( rgDeathNoticeList[i].VictimColor[0], rgDeathNoticeList[i].VictimColor[1], rgDeathNoticeList[i].VictimColor[2] );
@@ -236,7 +236,7 @@ int CHudDeathNotice::MsgFunc_DeathMsg( const char *pszName, int iSize, void *pbu
 	// Is it a non-player object kill?
 	if( ( (signed char)victim ) == -1 )
 	{
-		rgDeathNoticeList[i].iNonPlayerKill = TRUE;
+		rgDeathNoticeList[i].iNonPlayerKill = true;
 
 		// Store the object's name in the Victim slot (skip the d_ bit)
 		strcpy( rgDeathNoticeList[i].szVictim, killedwith + 2 );
@@ -244,10 +244,10 @@ int CHudDeathNotice::MsgFunc_DeathMsg( const char *pszName, int iSize, void *pbu
 	else
 	{
 		if( killer == victim || killer == 0 )
-			rgDeathNoticeList[i].iSuicide = TRUE;
+			rgDeathNoticeList[i].iSuicide = true;
 
 		if( !strcmp( killedwith, "d_teammate" ) )
-			rgDeathNoticeList[i].iTeamKill = TRUE;
+			rgDeathNoticeList[i].iTeamKill = true;
 	}
 
 	// Find the sprite in the list

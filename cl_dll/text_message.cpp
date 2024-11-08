@@ -181,7 +181,7 @@ int CHudTextMessage::MsgFunc_TextMsg( const char *pszName, int iSize, void *pbuf
 	char *psz = szBuf[5];
 
 #if USE_VGUI
-	if( gViewPort && gViewPort->AllowedToPrintText() == FALSE )
+	if( gViewPort && !gViewPort->AllowedToPrintText() )
 		return 1;
 #endif
 

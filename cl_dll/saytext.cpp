@@ -97,7 +97,7 @@ int CHudSayText::Draw( float flTime )
 	int y = Y_START;
 
 #if USE_VGUI
-	if( ( gViewPort && gViewPort->AllowedToPrintText() == FALSE ) )
+	if( ( gViewPort && !gViewPort->AllowedToPrintText() ) )
 		return 1;
 #endif
 	if ( !m_HUD_saytext->value )
@@ -165,7 +165,7 @@ int CHudSayText::MsgFunc_SayText( const char *pszName, int iSize, void *pbuf )
 void CHudSayText::SayTextPrint( const char *pszBuf, int iBufSize, int clientIndex )
 {
 #if USE_VGUI
-	if( gViewPort && gViewPort->AllowedToPrintText() == FALSE )
+	if( gViewPort && !gViewPort->AllowedToPrintText() )
 	{
 		// Print it straight to the console
 		ConsolePrint( pszBuf );

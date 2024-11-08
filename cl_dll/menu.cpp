@@ -55,7 +55,7 @@ void CHudMenu::InitHUDData( void )
 void CHudMenu::Reset( void )
 {
 	g_szPrelocalisedMenuString[0] = 0;
-	m_fWaitingForMore = FALSE;
+	m_fWaitingForMore = false;
 }
 
 int CHudMenu::VidInit( void )
@@ -195,7 +195,7 @@ int CHudMenu::MsgFunc_ShowMenu( const char *pszName, int iSize, void *pbuf )
 		m_iFlags &= ~HUD_ACTIVE;
 	}
 
-	m_fWaitingForMore = NeedMore;
+	m_fWaitingForMore = NeedMore != 0;
 
 	return 1;
 }

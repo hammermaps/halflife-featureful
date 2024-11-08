@@ -22,11 +22,6 @@
 #include "cvardef.h"
 #include "color_utils.h"
 
-#if !defined(TRUE)
-#define TRUE 1
-#define FALSE 0
-#endif
-
 // Macros to hook function calls into the HUD object
 
 #define HOOK_MESSAGE(x) gEngfuncs.pfnHookUserMsg( #x, __MsgFunc_##x );

@@ -238,7 +238,7 @@ int CHudScoreboard::Draw( float fTime )
 			CHud::UtfText::DrawString( xpos, ypos, xpos+50, buf, r, g, b );
 		}
 
-		team_info->already_drawn = TRUE;  // set the already_drawn to be TRUE, so this team won't get drawn again
+		team_info->already_drawn = true;  // set the already_drawn to be TRUE, so this team won't get drawn again
 		list_slot++;
 
 		// draw all the players that belong to this team, indented slightly
@@ -465,7 +465,7 @@ int CHudScoreboard::MsgFunc_TeamScore( const char *pszName, int iSize, void *pbu
 		return 1;
 
 	// use this new score data instead of combined player scores
-	g_TeamInfo[i].scores_overriden = TRUE;
+	g_TeamInfo[i].scores_overriden = true;
 	g_TeamInfo[i].frags = READ_SHORT();
 	g_TeamInfo[i].deaths = READ_SHORT();
 
@@ -487,12 +487,12 @@ void CHudScoreboard::DeathMsg( int killer, int victim )
 
 void CHudScoreboard::UserCmd_ShowScores( void )
 {
-	m_iShowscoresHeld = TRUE;
+	m_iShowscoresHeld = true;
 }
 
 void CHudScoreboard::UserCmd_HideScores( void )
 {
-	m_iShowscoresHeld = FALSE;
+	m_iShowscoresHeld = false;
 }
 
 //-----------------------------------------------------------------------------
@@ -594,9 +594,9 @@ void CHudScoreboard::UpdateTeams()
 		g_TeamInfo[j].packetloss += g_PlayerInfoList[i].packetloss;
 
 		if( g_PlayerInfoList[i].thisplayer )
-			g_TeamInfo[j].ownteam = TRUE;
+			g_TeamInfo[j].ownteam = true;
 		else
-			g_TeamInfo[j].ownteam = FALSE;
+			g_TeamInfo[j].ownteam = false;
 
 		// Set the team's number (used for team colors)
 		g_TeamInfo[j].teamnumber = g_PlayerExtraInfo[i].teamnumber;
@@ -605,7 +605,7 @@ void CHudScoreboard::UpdateTeams()
 	// find team ping/packetloss averages
 	for( i = 1; i <= m_iNumTeams; i++ )
 	{
-		g_TeamInfo[i].already_drawn = FALSE;
+		g_TeamInfo[i].already_drawn = false;
 
 		if( g_TeamInfo[i].players > 0 )
 		{

@@ -367,7 +367,7 @@ public:
 	int m_iLastKilledBy;
 	int m_fLastKillTime;
 	int m_iPlayerNum;
-	int m_iShowscoresHeld;
+	bool m_iShowscoresHeld;
 };
 
 //
@@ -419,10 +419,10 @@ struct team_info_t
 	short deaths;
 	short ping;
 	short packetloss;
-	short ownteam;
+	bool ownteam;
 	short players;
-	int already_drawn;
-	int scores_overriden;
+	bool already_drawn;
+	bool scores_overriden;
 	int teamnumber;
 };
 
@@ -1067,7 +1067,7 @@ public:
 
 	int	m_iWeaponBits;
 	int m_iItemBits;
-	int	m_fPlayerDead;
+	bool m_fPlayerDead;
 	int m_iIntermission;
 
 	// sprite indexes

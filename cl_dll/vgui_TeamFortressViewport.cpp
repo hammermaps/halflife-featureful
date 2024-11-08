@@ -1584,10 +1584,10 @@ bool TeamFortressViewport::AllowedToPrintText( void )
 	{
 		int iId = m_pCurrentMenu->GetMenuID();
 		if( iId == MENU_TEAM || iId == MENU_CLASS || iId == MENU_INTRO || iId == MENU_CLASSHELP )
-			return FALSE;
+			return false;
 	}
 
-	return TRUE;
+	return true;
 }
 
 //======================================================================================
@@ -1801,7 +1801,7 @@ bool TeamFortressViewport::SlotInput( int iSlot )
 	if( m_pCurrentMenu )
 		return m_pCurrentMenu->SlotInput( iSlot );
 
-	return FALSE;
+	return false;
 }
 
 // Direct Key Input
