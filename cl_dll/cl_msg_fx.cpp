@@ -1,4 +1,3 @@
-#include "hud.h"
 #include "cl_util.h"
 #include "parsemsg.h"
 
@@ -18,6 +17,7 @@
 #include "particleman.h"
 
 extern engine_studio_api_t IEngineStudio;
+extern cvar_t* cl_muzzlelight_monsters;
 
 void GibHitCallback( TEMPENTITY* ent, pmtrace_t* pmtrace )
 {

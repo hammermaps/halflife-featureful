@@ -5,7 +5,6 @@
 // $NoKeywords: $
 //=============================================================================
 
-#include "hud.h"
 #include "cl_util.h"
 #include "com_model.h"
 #include "studio_util.h"

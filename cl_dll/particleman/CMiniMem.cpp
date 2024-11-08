@@ -15,7 +15,6 @@
 
 #include <algorithm>
 
-#include "hud.h"
 #include "cl_util.h"
 #include "particleman.h"
 #include "particleman_internal.h"

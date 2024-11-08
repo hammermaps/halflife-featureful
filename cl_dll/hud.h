@@ -69,8 +69,6 @@ enum
 
 typedef struct cvar_s cvar_t;
 
-extern cvar_t* cl_muzzlelight_monsters;
-
 #define HUD_ACTIVE	1
 #define HUD_INTERMISSION 2
 

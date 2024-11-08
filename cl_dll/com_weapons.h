@@ -11,7 +11,7 @@
 #if !defined( COM_WEAPONSH )
 #define COM_WEAPONSH
 
-#include "hud_iface.h"
+#include "cl_dll.h"
 #include "util_shared.h"
 
 extern "C"

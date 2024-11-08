@@ -6,7 +6,6 @@
 //=============================================================================
 
 #include <cassert>
-#include "hud.h"
 #include "cl_util.h"
 #include "com_model.h"
 #include "studio.h"

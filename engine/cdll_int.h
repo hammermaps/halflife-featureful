@@ -22,11 +22,8 @@
 #if !defined(CDLL_INT_H)
 #define CDLL_INT_H
 
-#if __cplusplus
-extern "C" {
-#endif
-
-#include "const.h"
+#include "cl_entity.h"
+#include "wrect.h"
 
 #define MAX_ALIAS_NAME	32
 
@@ -42,8 +39,6 @@ typedef struct cmdalias_s
 
 typedef int HSPRITE;	// handle to a graphic
 typedef int (*pfnUserMsgHook)( const char *pszName, int iSize, void *pbuf );
-
-#include "wrect.h"
 
 #define SCRINFO_SCREENFLASH	1
 #define SCRINFO_STRETCHED	2
@@ -309,9 +304,5 @@ typedef struct cl_enginefuncs_s
 } cl_enginefunc_t;
 
 #define CLDLL_INTERFACE_VERSION	7
-
-#if __cplusplus
-}
-#endif
 
 #endif//CDLL_INT_H

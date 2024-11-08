@@ -17,7 +17,6 @@
 #include "windows_lean.h"
 #include <GL/gl.h>
 
-#include "hud.h"
 #include "cl_util.h"
 #include "triangleapi.h"
 #include "CFrustum.h"
