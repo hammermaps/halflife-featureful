@@ -10,8 +10,6 @@
 #include "hud.h"
 #include "cl_util.h"
 #include "cvardef.h"
-#include "usercmd.h"
-#include "const.h"
 
 #include "entity_state.h"
 #include "cl_entity.h"

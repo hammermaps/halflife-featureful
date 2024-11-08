@@ -3,7 +3,6 @@
 #define WARPBALL_H
 
 #include <string>
-#include "extdll.h"
 #include "template_property_types.h"
 
 #define WARPBALL_RED_DEFAULT 77

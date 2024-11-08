@@ -1,5 +1,5 @@
-#include "extdll.h"
 #include <cstring>
+#include "arraysize.h"
 #include "classify.h"
 
 struct ClassifyAndName

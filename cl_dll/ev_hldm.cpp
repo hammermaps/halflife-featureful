@@ -15,11 +15,9 @@
 
 #include "hud.h"
 #include "cl_util.h"
-#include "const.h"
 #include "entity_state.h"
 #include "cl_entity.h"
 #include "entity_types.h"
-#include "usercmd.h"
 #include "pm_defs.h"
 #include "pm_materials.h"
 

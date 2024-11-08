@@ -1,4 +1,4 @@
-#include "extdll.h"
+#include "const_sound.h"
 #include "common_soundscripts.h"
 
 const NamedSoundScript sparkBaseSoundScript = {

@@ -16,6 +16,8 @@
 #if !defined(PARTICLEDEF_H)
 #define PARTICLEDEF_H
 
+#include "vector.h"
+
 typedef enum
 {
 	pt_static, 

@@ -2,10 +2,11 @@
 #ifndef SOUNDSCRIPTS_H
 #define SOUNDSCRIPTS_H
 
+#include "const_sound.h"
+
 #include <cstddef>
 #include <initializer_list>
 #include <array>
-#include "const.h"
 #include "rapidjson/document.h"
 #include "template_property_types.h"
 

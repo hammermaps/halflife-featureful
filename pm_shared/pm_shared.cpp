@@ -13,19 +13,16 @@
 *
 ****/
 
-#include <assert.h>
-//#include <stdio.h>  // NULL
-#include <math.h>   // sqrt
-#include <string.h> // strcpy
-#include <stdlib.h> // atoi
-#include <ctype.h>  // isspace
+#include <cassert>
+#include <cmath>   // sqrt
+#include <cstring> // strcpy
+#include <cstdlib> // atoi
+#include <cctype>  // isspace
 #include "mathlib.h"
 #if HAVE_TGMATH_H
 #include <tgmath.h>
 #endif
 
-#include "const.h"
-#include "usercmd.h"
 #include "pm_defs.h"
 #include "pm_shared.h"
 #include "pm_movevars.h"

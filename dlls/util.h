@@ -21,13 +21,8 @@
 //
 // Misc utility code
 //
-#if !defined(ACTIVITY_H)
 #include "activity.h"
-#endif
-
-#if !defined(ENGINECALLBACK_H)
 #include "enginecallback.h"
-#endif
 
 #include "fx_types.h"
 #include "template_property_types.h"

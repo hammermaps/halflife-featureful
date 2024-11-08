@@ -2,9 +2,9 @@
 #ifndef CL_FX_H
 #define CL_FX_H
 
-#include "cl_dll.h"
 #include "com_model.h"
 #include "fx_types.h"
+#include "vector.h"
 
 void LoadDefaultSprites();
 

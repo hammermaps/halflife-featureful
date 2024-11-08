@@ -2,8 +2,6 @@
 #ifndef VISUALS_UTILS_H
 #define VISUALS_UTILS_H
 
-#include "extdll.h"
-#include "util.h"
 #include "effects.h"
 #include "visuals.h"
 

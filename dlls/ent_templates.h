@@ -2,6 +2,7 @@
 #ifndef ENT_TEMPLATES_H
 #define ENT_TEMPLATES_H
 
+#include "vector.h"
 #include "visuals.h"
 #include "soundscripts.h"
 

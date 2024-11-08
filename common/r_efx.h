@@ -16,25 +16,11 @@
 #if !defined(R_EFX_H)
 #define R_EFX_H
 
-// particle_t
-#if !defined( PARTICLEDEFH )  
 #include "particledef.h"
-#endif
-
-// BEAM
-#if !defined( BEAMDEFH )
 #include "beamdef.h"
-#endif
-
-// dlight_t
-#if !defined ( DLIGHTH )
 #include "dlight.h"
-#endif
-
-// cl_entity_t
-#if !defined( CL_ENTITYH )
 #include "cl_entity.h"
-#endif
+#include "com_model.h"
 
 /*
 // FOR REFERENCE, These are the built-in tracer colors.  Note, color 4 is the one

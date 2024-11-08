@@ -1,5 +1,3 @@
-#include "extdll.h"
-#include "enginecallback.h"
 #include "util.h"
 #include "visuals.h"
 #include "customentity.h"

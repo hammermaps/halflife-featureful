@@ -17,6 +17,9 @@
 #define CONST_H
 
 #include "common_types.h"
+#include "vector.h"
+#include "const_render.h"
+#include "const_sound.h"
 
 //
 // Constants shared by the engine and dlls
@@ -623,42 +626,6 @@
 #define CONTENT_LAVA		-5
 #define CONTENT_SKY			-6
 
-// channels
-#define CHAN_AUTO			0
-#define CHAN_WEAPON			1
-#define CHAN_VOICE			2
-#define CHAN_ITEM			3
-#define CHAN_BODY			4
-#define CHAN_STREAM			5	// allocate stream channel from the static or dynamic area
-#define CHAN_STATIC			6	// allocate channel from the static area 
-#define CHAN_NETWORKVOICE_BASE		7	// voice data coming across the network
-#define CHAN_NETWORKVOICE_END		500	// network voice data reserves slots (CHAN_NETWORKVOICE_BASE through CHAN_NETWORKVOICE_END).
-#define CHAN_BOT			501	// channel used for bot chatter.
-
-// attenuation values
-#define ATTN_NONE			0
-#define ATTN_NORM			0.8f
-#define ATTN_IDLE			2.0f
-#define ATTN_STATIC			1.25f
-
-// pitch values
-#define PITCH_NORM			100	// non-pitch shifted
-#define PITCH_LOW			95	// other values are possible - 0-255, where 255 is very high
-#define PITCH_HIGH			120
-
-// volume values
-#define VOL_NORM			1.0f
-
-// plats
-#define PLAT_LOW_TRIGGER		1
-
-// Trains
-#define SF_TRAIN_WAIT_RETRIGGER	1
-#define SF_TRAIN_SETORIGIN	2
-#define SF_TRAIN_START_ON		4	// Train is initially moving
-#define SF_TRAIN_PASSABLE		8	// Train is not solid -- used SF_TRAIN_SETORIGINefine SF_TRAIN_RESPECT_ORIGIN		32
-#define SF_TRAIN_NO_DAMAGE		64
-
 // buttons
 #define IN_ATTACK			(1<<0)
 #define IN_JUMP			(1<<1)
@@ -703,60 +670,8 @@
 #define TE_BOUNCE_SHELL		1
 #define TE_BOUNCE_SHOTSHELL		2
 
-// Rendering constants
-enum 
-{	
-	kRenderNormal,		// src
-	kRenderTransColor,		// c*a+dest*(1-a)
-	kRenderTransTexture,	// src*a+dest*(1-a)
-	kRenderGlow,		// src*a+dest -- No Z buffer checks
-	kRenderTransAlpha,		// src*srca+dest*(1-srca)
-	kRenderTransAdd,		// src*a+dest
-	kRenderWorldGlow		// Same as kRenderGlow but not fixed size in screen space
-};
-
-enum 
-{	
-	kRenderFxNone = 0, 
-	kRenderFxPulseSlow, 
-	kRenderFxPulseFast, 
-	kRenderFxPulseSlowWide, 
-	kRenderFxPulseFastWide, 
-	kRenderFxFadeSlow, 
-	kRenderFxFadeFast, 
-	kRenderFxSolidSlow, 
-	kRenderFxSolidFast, 	   
-	kRenderFxStrobeSlow, 
-	kRenderFxStrobeFast, 
-	kRenderFxStrobeFaster, 
-	kRenderFxFlickerSlow, 
-	kRenderFxFlickerFast,
-	kRenderFxNoDissipation,
-	kRenderFxDistort,			// Distort/scale/translate flicker
-	kRenderFxHologram,			// kRenderFxDistort + distance fade
-	kRenderFxDeadPlayer,		// kRenderAmt is the player index
-	kRenderFxExplode,			// Scale up really big!
-	kRenderFxGlowShell,			// Glowing Shell
-	kRenderFxClampMinScale,		// Keep this sprite from getting very small (SPRITES only!)
-	kRenderFxLightMultiplier	//CTM !!!CZERO added to tell the studiorender that the value in iuser2 is a lightmultiplier
-};
-
 typedef unsigned int		func_t;
 typedef int		string_t;
-
-#undef true
-#undef false
-
-#if !__cplusplus
-typedef enum { false, true }	qboolean;
-#else 
-typedef int qboolean;
-#endif
-
-typedef struct
-{
-	unsigned	r, g, b, a;
-} colorVec;
 
 typedef struct link_s
 {

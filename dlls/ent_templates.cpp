@@ -1,5 +1,3 @@
-#include "extdll.h"
-#include "enginecallback.h"
 #include "ent_templates.h"
 #include "util.h"
 #include "grapple_target.h"

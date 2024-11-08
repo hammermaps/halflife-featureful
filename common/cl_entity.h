@@ -16,6 +16,15 @@
 #if !defined(CL_ENTITY_H)
 #define CL_ENTITY_H
 
+#include "com_model.h"
+#include "common_types.h"
+#include "vector.h"
+
+typedef struct
+{
+	unsigned	r, g, b, a;
+} colorVec;
+
 typedef struct efrag_s
 {
 	struct mleaf_s	*leaf;

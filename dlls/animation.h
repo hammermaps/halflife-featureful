@@ -16,13 +16,9 @@
 #if !defined(ANIMATION_H)
 #define ANIMATION_H
 
-#include "extdll.h"
+#include "monsterevent.h"
 
 #define ACTIVITY_NOT_AVAILABLE		-1
-
-#if !defined(MONSTEREVENT_H)
-#include "monsterevent.h"
-#endif
 
 extern int IsSoundEvent( int eventNumber );
 

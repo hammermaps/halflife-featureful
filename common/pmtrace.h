@@ -16,6 +16,9 @@
 #if !defined(PM_TRACE_H)
 #define PM_TRACE_H
 
+#include "common_types.h"
+#include "vector.h"
+
 typedef struct
 {
 	Vector	normal;

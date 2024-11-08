@@ -16,6 +16,10 @@
 #if !defined(R_STUDIOINT_H)
 #define R_STUDIOINT_H
 
+#include "cl_entity.h"
+#include "com_model.h"
+#include "cvardef.h"
+
 #define STUDIO_INTERFACE_VERSION 1
 
 typedef struct engine_studio_api_s

@@ -2,7 +2,7 @@
 #ifndef VISUALS_H
 #define VISUALS_H
 
-#include "extdll.h"
+#include "const_render.h"
 #include "template_property_types.h"
 #include "rapidjson/document.h"
 

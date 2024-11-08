@@ -16,6 +16,9 @@
 #if !defined(DLIGHT_H)
 #define DLIGHT_H
 
+#include "common_types.h"
+#include "vector.h"
+
 typedef struct dlight_s
 {
 	Vector		origin;

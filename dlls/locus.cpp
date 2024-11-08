@@ -6,7 +6,6 @@
 // Spirit of Half-Life's particle system uses "locus triggers" to tell
 // entities where to perform their actions.
 
-#include "extdll.h"
 #include "util.h"
 #include "cbase.h"
 #include "locus.h"

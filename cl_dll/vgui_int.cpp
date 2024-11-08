@@ -17,8 +17,6 @@
 #include "camera.h"
 #include "kbutton.h"
 #include "cvardef.h"
-#include "usercmd.h"
-#include "const.h"
 #include "camera.h"
 #include "in_defs.h"
 #include "vgui_TeamFortressViewport.h"

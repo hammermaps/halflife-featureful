@@ -1,7 +1,5 @@
 #include "objecthint_spec.h"
 
-#include "extdll.h"
-#include "util.h"
 #include "json_utils.h"
 #include "error_collector.h"
 

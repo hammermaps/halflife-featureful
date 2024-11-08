@@ -16,6 +16,9 @@
 #if !defined(USERCMD_H)
 #define USERCMD_H
 
+#include "common_types.h"
+#include "vector.h"
+
 typedef struct usercmd_s
 {
 	short		lerp_msec;	// Interpolation time on client

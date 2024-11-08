@@ -4,7 +4,7 @@
 
 #include <string>
 
-#include "extdll.h"
+#include "vector.h"
 #include "rapidjson/document.h"
 #include "template_property_types.h"
 

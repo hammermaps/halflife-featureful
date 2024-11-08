@@ -2,6 +2,8 @@
 #ifndef COMMON_TYPES_H
 #define COMMON_TYPES_H
 
+typedef int qboolean;
+
 typedef unsigned char	byte;
 
 typedef struct

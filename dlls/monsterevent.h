@@ -20,7 +20,7 @@ typedef struct
 {
 	int event;
 	char *options;
-}MonsterEvent_t;
+} MonsterEvent_t;
 
 #define EVENT_SPECIFIC			0
 #define EVENT_SCRIPTED			1000

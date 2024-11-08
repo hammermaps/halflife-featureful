@@ -1,4 +1,3 @@
-#include "extdll.h"
 #include "util.h"
 #include "string_utils.h"
 #include "json_utils.h"

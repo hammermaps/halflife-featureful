@@ -654,6 +654,12 @@ void CFuncPlatRot::RotMove( Vector &destAngle, float time )
 //
 //====================== TRAIN code ==================================================
 //
+#define SF_TRAIN_WAIT_RETRIGGER	1
+#define SF_TRAIN_SETORIGIN	2
+#define SF_TRAIN_START_ON		4	// Train is initially moving
+#define SF_TRAIN_PASSABLE		8	// Train is not solid -- used SF_TRAIN_SETORIGINefine SF_TRAIN_RESPECT_ORIGIN		32
+#define SF_TRAIN_NO_DAMAGE		64
+
 class CFuncTrain : public CBasePlatTrain
 {
 public:

@@ -1,5 +1,3 @@
-#include "extdll.h"
-#include "enginecallback.h"
 #include "soundscripts.h"
 #include "util.h"
 #include "icase_compare.h"

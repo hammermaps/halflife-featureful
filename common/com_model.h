@@ -9,6 +9,9 @@
 #if !defined( COM_MODEL_H )
 #define COM_MODEL_H
 
+#include "common_types.h"
+#include "vector.h"
+
 #define STUDIO_RENDER 1
 #define STUDIO_EVENTS 2
 

@@ -18,7 +18,6 @@
 #include <tgmath.h>
 #endif
 
-#include "const.h"
 #include "usercmd.h"
 #include "pm_defs.h"
 #include "pm_shared.h"
