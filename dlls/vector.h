@@ -50,7 +50,7 @@ public:
 		}
 	}
 
-	vec_t	x, y;
+	float	x, y;
 };
 
 inline float DotProduct( const Vector2D& a, const Vector2D& b ) { return( a.x * b.x + a.y * b.y ); }
@@ -99,7 +99,7 @@ public:
 	inline float Length2D( void ) const		{ return sqrt( x * x + y * y ); }
 
 	// Members
-	vec_t x = 0, y = 0, z = 0;
+	float x = 0, y = 0, z = 0;
 };
 constexpr Vector operator*( float fl, const Vector& v ) { return v * fl; }
 constexpr float DotProduct( const Vector& a, const Vector& b ) { return( a.x * b.x + a.y * b.y + a.z * b.z); }

@@ -563,8 +563,8 @@ void CFuncRotating::HurtTouch( CBaseEntity *pOther )
 void CFuncRotating::RampPitchVol( int fUp )
 {
 	Vector vecAVel = pev->avelocity;
-	vec_t vecCur;
-	vec_t vecFinal;
+	float vecCur;
+	float vecFinal;
 	float fpct;
 	float fvol;
 	float fpitch;
@@ -632,7 +632,7 @@ void CFuncRotating::SpinUp( void )
 void CFuncRotating::SpinDown( void )
 {
 	Vector vecAVel;//rotational velocity
-	vec_t vecdir;
+	float vecdir;
 
 	pev->nextthink = pev->ltime + 0.1f;
 

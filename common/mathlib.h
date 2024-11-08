@@ -17,8 +17,6 @@
 #if !defined(MATHLIB_H)
 #define MATHLIB_H
 
-typedef float vec_t;
-
 #include "vector.h"
 #include "pi_constant.h"
 
