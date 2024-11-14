@@ -39,7 +39,14 @@ public:
 
 	EHANDLE m_hDisplacedTarget;
 
-	int m_iTrail;
+	static const NamedVisual spriteVisual;
+	static const NamedVisual armBeamVisual;
+	static const NamedVisual hitBeamVisual;
+	static const NamedVisual ringVisual;
+	static const NamedVisual lightVisual;
+
+	static const NamedSoundScript impactSoundScript;
+	static const NamedSoundScript explodeSoundScript;
 };
 #endif
 #endif

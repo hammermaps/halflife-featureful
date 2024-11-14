@@ -9,6 +9,7 @@
 #include "shake.h"
 #include "displacerball.h"
 #include "scripted.h"
+#include "visuals_utils.h"
 
 #if FEATURE_DISPLACER
 extern edict_t *EntSelectSpawnPoint( CBaseEntity *pPlayer );
@@ -24,23 +25,66 @@ TYPEDESCRIPTION	CDisplacerBall::m_SaveData[] =
 
 IMPLEMENT_SAVERESTORE(CDisplacerBall, CBaseEntity);
 
+const NamedVisual CDisplacerBall::spriteVisual = BuildVisual("DisplacerBall.Sprite")
+		.Model("sprites/exit1.spr")
+		.Alpha(255)
+		.RenderMode(kRenderTransAdd)
+		.Scale(0.75f);
+
+const NamedVisual CDisplacerBall::armBeamVisual = BuildVisual("DisplacerBall.ArmBeam")
+		.Model("sprites/lgtning.spr")
+		.BeamParams(30, 80)
+		.RenderColor(96, 128, 16)
+		.Alpha(255);
+
+const NamedVisual CDisplacerBall::hitBeamVisual = BuildVisual("DisplacerBall.HitBeam")
+		.Model("sprites/lgtning.spr")
+		.BeamParams(30, 10)
+		.RenderColor(255, 255, 255)
+		.Alpha(255);
+
+const NamedVisual CDisplacerBall::ringVisual = BuildVisual("DisplacerBall.Ring")
+		.Model("sprites/disp_ring.spr")
+		.Life(0.3f)
+		.BeamParams(36, 0)
+		.RenderColor(255, 255, 255)
+		.Alpha(255);
+
+const NamedVisual CDisplacerBall::lightVisual = BuildVisual("DisplacerBall.Light")
+		.Radius(160)
+		.RenderColor(255, 180, 96)
+		.Life(1.0f);
+
+const NamedSoundScript CDisplacerBall::impactSoundScript = {
+	CHAN_WEAPON,
+	{"weapons/displacer_impact.wav"},
+	FloatRange(0.8f, 0.9f),
+	ATTN_NORM,
+	"DisplacerBall.Impact"
+};
+
+const NamedSoundScript CDisplacerBall::explodeSoundScript = {
+	CHAN_WEAPON,
+	{"weapons/displacer_teleport.wav"},
+	FloatRange(0.8f, 0.9f),
+	ATTN_NORM,
+	"DisplacerBall.Explode"
+};
+
 void CDisplacerBall::Spawn(void)
 {
 	Precache();
 	pev->classname = MAKE_STRING("displacer_ball");
 
 	pev->movetype = MOVETYPE_FLY;
-
 	pev->solid = SOLID_BBOX;
-	pev->rendermode = kRenderTransAdd;
-	pev->renderamt = 255;
 
-	SET_MODEL(ENT(pev), "sprites/exit1.spr");
+	ApplyVisual(GetVisual(spriteVisual));
+
 	UTIL_SetOrigin(pev, pev->origin);
 	UTIL_SetSize(pev, g_vecZero, g_vecZero);
 
 	pev->frame = 0;
-	pev->scale = 0.75f;
 
 	SetTouch(&CDisplacerBall::BallTouch);
 	SetThink(&CDisplacerBall::FlyThink);
@@ -51,12 +95,16 @@ void CDisplacerBall::Spawn(void)
 
 void CDisplacerBall::Precache()
 {
-	PRECACHE_MODEL("sprites/exit1.spr");
-	PRECACHE_MODEL("sprites/lgtning.spr");
-	m_iTrail = PRECACHE_MODEL("sprites/disp_ring.spr");
+	RegisterVisual(spriteVisual);
+	RegisterVisual(armBeamVisual);
+	RegisterVisual(hitBeamVisual);
+	RegisterVisual(ringVisual);
+	RegisterVisual(lightVisual);
 
-	PRECACHE_SOUND("weapons/displacer_impact.wav");
-	PRECACHE_SOUND("weapons/displacer_teleport.wav");
+	RegisterAndPrecacheSoundScript(impactSoundScript);
+	RegisterAndPrecacheSoundScript(explodeSoundScript);
+
+	PRECACHE_SOUND("weapons/displacer_self.wav");
 }
 
 void CDisplacerBall::FlyThink()
@@ -69,7 +117,7 @@ void CDisplacerBall::FlyThink()
 void CDisplacerBall::ArmBeam( int iSide )
 {
 	//This method is identical to the Alien Slave's ArmBeam, except it treats m_pBeam as a circular buffer.
-	if( m_iBeams > 7 )
+	if( m_iBeams >= ARRAYSIZE(m_pBeam) )
 		m_iBeams = 0;
 
 	TraceResult tr;
@@ -88,37 +136,27 @@ void CDisplacerBall::ArmBeam( int iSide )
 	if( flDist == 1.0 )
 		return;
 
-	// The beam might already exist if we've created all beams before.
-	if( !m_pBeam[ m_iBeams ] )
-		m_pBeam[ m_iBeams ] = CBeam::BeamCreate( "sprites/lgtning.spr", 30 );
+	CBaseEntity* pHit = Instance( tr.pHit );
+	const bool hitSomething = pHit && pHit->pev->takedamage != DAMAGE_NO;
 
-	if( !m_pBeam[ m_iBeams ] )
+	// The beam might already exist if we've created all beams before.
+	if( !m_pBeam[m_iBeams] )
+	{
+		m_pBeam[m_iBeams] = CreateBeamFromVisual(hitSomething ? GetVisual(hitBeamVisual) : GetVisual(armBeamVisual));
+	}
+
+	if( !m_pBeam[m_iBeams] )
 		return;
 
-	CBaseEntity* pHit = Instance( tr.pHit );
-
-	entvars_t *pevOwner;
-	if ( pev->owner )
-		pevOwner = VARS( pev->owner );
-	else
-		pevOwner = NULL;
-
-	if( pHit && pHit->pev->takedamage != DAMAGE_NO )
+	if( hitSomething )
 	{
 		//Beam hit something, deal radius damage to it
-		m_pBeam[ m_iBeams ]->EntsInit( pHit->entindex(), entindex() );
-		m_pBeam[ m_iBeams ]->SetColor( 255, 255, 255 );
-		m_pBeam[ m_iBeams ]->SetBrightness( 255 );
-		m_pBeam[ m_iBeams ]->SetNoise( 10 );
-
-		RadiusDamage( tr.vecEndPos, pev, pevOwner, 25, 15, CLASS_NONE, DMG_ENERGYBEAM );
+		m_pBeam[m_iBeams]->EntsInit( pHit->entindex(), entindex() );
+		RadiusDamage( tr.vecEndPos, pev, VARS(pev->owner), 25, 15, CLASS_NONE, DMG_ENERGYBEAM );
 	}
 	else
 	{
-		m_pBeam[ m_iBeams ]->PointEntInit( tr.vecEndPos, entindex() );
-		m_pBeam[ m_iBeams ]->SetColor( 96, 128, 16 );
-		m_pBeam[ m_iBeams ]->SetBrightness( 255 );
-		m_pBeam[ m_iBeams ]->SetNoise( 80 );
+		m_pBeam[m_iBeams]->PointEntInit( tr.vecEndPos, entindex() );
 	}
 	m_iBeams++;
 }
@@ -151,12 +189,9 @@ void CDisplacerBall::BallTouch(CBaseEntity *pOther)
 {
 	pev->velocity = g_vecZero;
 
-	TraceResult tr;
-	Vector vecSpot;
-	Vector vecSrc;
 	CBaseEntity *pTarget = NULL;
 
-	EMIT_SOUND(ENT(pev), CHAN_WEAPON, "weapons/displacer_impact.wav", 0.9f, ATTN_NORM);
+	EmitSoundScript(impactSoundScript);
 
 	if( ( g_pGameRules->IsMultiplayer() && !g_pGameRules->IsCoOp() ) && pOther->IsPlayer() )
 	{
@@ -227,23 +262,18 @@ void CDisplacerBall::BallTouch(CBaseEntity *pOther)
 
 void CDisplacerBall::Circle( void )
 {
-	// portal circle
-	MESSAGE_BEGIN(MSG_PAS, SVC_TEMPENTITY, pev->origin);
-		WRITE_BYTE(TE_BEAMCYLINDER);
-		WRITE_CIRCLE(pev->origin, 800.0f);
-		WRITE_SHORT(m_iTrail);
-		WRITE_BYTE(0); // startframe
-		WRITE_BYTE(0); // framerate
-		WRITE_BYTE(3); // life
-		WRITE_BYTE(16);  // width
-		WRITE_BYTE(0);   // noise
-		WRITE_BYTE(255);   // r, g, b
-		WRITE_BYTE(255);   // r, g, b
-		WRITE_BYTE(255);   // r, g, b
-		WRITE_BYTE(255); // brightness
-		WRITE_BYTE(0);		// speed
-	MESSAGE_END();
-	UTIL_DynamicLight( pev->origin, 160.0f, 255, 180, 96, 1.0f, 100.0f );
+	const Visual* visual = GetVisual(ringVisual);
+	if (visual->modelIndex)
+	{
+		MESSAGE_BEGIN(MSG_PAS, SVC_TEMPENTITY, pev->origin);
+			WRITE_BYTE(TE_BEAMCYLINDER);
+			WRITE_CIRCLE(pev->origin, 800.0f);
+			WriteBeamVisual(visual);
+		MESSAGE_END();
+	}
+
+	const Visual* lightV = GetVisual(lightVisual);
+	SendDynLight(pev->origin, lightV, 10);
 }
 
 void CDisplacerBall::KillThink( void )
@@ -267,7 +297,7 @@ void CDisplacerBall::ExplodeThink( void )
 
 	pev->effects |= EF_NODRAW;
 
-	EMIT_SOUND(ENT(pev), CHAN_VOICE, "weapons/displacer_teleport.wav", VOL_NORM, ATTN_NORM);
+	EmitSoundScript(explodeSoundScript);
 
 	CBaseEntity* pAttacker = CBaseEntity::Instance( pev->owner );
 	pev->owner = NULL;
