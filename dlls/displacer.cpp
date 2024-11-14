@@ -255,43 +255,43 @@ void CDisplacer::Displace( void )
 #endif
 }
 
+#if !CLIENT_DLL
+extern CBaseEntity* GetDisplacerEarthTarget(CBaseEntity* pOther);
+#endif
+
 void CDisplacer::Teleport( void )
 {
 	ClearBeams();
 	ClearSpin();
 #if !CLIENT_DLL
-	CBaseEntity *pTarget = NULL;
-	Vector tmp( 0, 0, 0 );
+	CBaseEntity *pDestination = nullptr;
 
 	if( g_pGameRules->IsMultiplayer() && !g_pGameRules->IsCoOp() )
 	{
-		pTarget = GetClassPtr( (CBaseEntity *)VARS( EntSelectSpawnPoint( m_pPlayer ) ) );
+		pDestination = GetClassPtr( (CBaseEntity *)VARS( EntSelectSpawnPoint( m_pPlayer ) ) );
 	}
 	else
 	{
-		const char *pszName;
 		if( !m_pPlayer->m_fInXen )
-			pszName = "info_displacer_xen_target";
-		else
-			pszName = "info_displacer_earth_target";
-
-		CBaseEntity *pDisplacerTarget = NULL;
-
-		while ((pDisplacerTarget = UTIL_FindEntityByClassname( pDisplacerTarget, pszName )) != NULL)
 		{
-			if (!FBitSet(pDisplacerTarget->pev->spawnflags, SF_DISPLACER_TARGET_DISABLED))
+			CBaseEntity *pDisplacerTarget = nullptr;
+			while ((pDisplacerTarget = UTIL_FindEntityByClassname( pDisplacerTarget, "info_displacer_xen_target" )) != NULL)
 			{
-				pTarget = pDisplacerTarget;
-				break;
+				if (!FBitSet(pDisplacerTarget->pev->spawnflags, SF_DISPLACER_TARGET_DISABLED))
+				{
+					pDestination = pDisplacerTarget;
+					break;
+				}
 			}
 		}
+		else
+			pDestination = GetDisplacerEarthTarget(m_pPlayer);
 	}
 
-	if( pTarget )
-		tmp = pTarget->pev->origin;
-
-	if( pTarget && /*HACK*/( tmp != Vector( 0, 0, 0 )/*HACK*/ ) )
+	if( pDestination )
 	{
+		Vector newOrigin = pDestination->pev->origin;
+
 #if FEATURE_ROPE
 		if( (m_pPlayer->m_afPhysicsFlags & PFLAG_ONROPE) )
 			m_pPlayer->LetGoRope();
@@ -302,39 +302,38 @@ void CDisplacer::Teleport( void )
 
 		m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] -= DISPLACER_SECONDARY_USAGE;
 
-		UTIL_CleanSpawnPoint( tmp, 50 );
+		UTIL_CleanSpawnPoint( newOrigin, 50 );
 
 		EMIT_SOUND( m_pPlayer->edict(), CHAN_WEAPON, "weapons/displacer_self.wav", 1, ATTN_NORM );
 	 	CDisplacerBall::SelfCreate(m_pPlayer->pev, m_pPlayer->pev->origin);
 
-		// make origin adjustments (origin in center, not at feet)
-		//tmp.z -= m_pPlayer->pev->mins.z + 36;
-		tmp.z+=37;
+		newOrigin.z += 37;
 
 		m_pPlayer->pev->flags &= ~FL_ONGROUND;
+		m_pPlayer->m_DisplacerReturn = m_pPlayer->pev->origin;
+		m_pPlayer->m_DisplacerSndRoomtype = m_pPlayer->m_SndRoomtype;
+		UTIL_SetOrigin(m_pPlayer->pev, newOrigin);
 
-		UTIL_SetOrigin(m_pPlayer->pev, tmp);
-
-		m_pPlayer->pev->angles = pTarget->pev->angles;
-
-		m_pPlayer->pev->v_angle = pTarget->pev->angles;
-
+		m_pPlayer->pev->angles = pDestination->pev->angles;
+		m_pPlayer->pev->v_angle = pDestination->pev->angles;
 		m_pPlayer->pev->fixangle = TRUE;
 		m_pPlayer->pev->velocity = m_pPlayer->pev->basevelocity = g_vecZero;
+
+		m_flNextPrimaryAttack = m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 2.0f;
 
 		if( !g_pGameRules->IsMultiplayer())
 		{
 			m_pPlayer->m_fInXen = !m_pPlayer->m_fInXen;
 			if (m_pPlayer->m_fInXen)
-				m_pPlayer->pev->gravity = 0.6;
+				m_pPlayer->pev->gravity = 0.6f;
 			else
-				m_pPlayer->pev->gravity = 1.0;
+				m_pPlayer->pev->gravity = 1.0f;
 		}
 	}
 	else
 	{
 		EMIT_SOUND( m_pPlayer->edict(), CHAN_WEAPON, "buttons/button11.wav", 0.9f, ATTN_NORM );
-		m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 3.0;
+		m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 2.0f;
 		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 0.9;
 	}
 

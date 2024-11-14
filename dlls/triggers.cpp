@@ -2656,7 +2656,7 @@ public:
 	void EXPORT TeleportTouch( CBaseEntity *pOther );
 	void EXPORT TeleportUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 
-	virtual edict_t* GetTeleportTarget();
+	virtual edict_t* GetTeleportTarget(CBaseEntity *pToucher);
 	virtual CBaseEntity* GetLandmark();
 	bool TeleportToDestination( CBaseEntity *pOther );
 	void LetGoRope(CBaseEntity* pOther);
@@ -2743,7 +2743,7 @@ bool CTriggerTeleport::TeleportToDestination( CBaseEntity *pOther )
 		}
 	}
 
-	pentTarget = GetTeleportTarget();
+	pentTarget = GetTeleportTarget(pOther);
 	if( FNullEnt( pentTarget ) )
 		return false;
 
@@ -2859,7 +2859,7 @@ void CTriggerTeleport::TeleportTouch( CBaseEntity *pOther )
 	TeleportToDestination(pOther);
 }
 
-edict_t* CTriggerTeleport::GetTeleportTarget()
+edict_t* CTriggerTeleport::GetTeleportTarget(CBaseEntity* pToucher)
 {
 	const char* szName = STRING( pev->target );
 	if (FBitSet(pev->spawnflags, SF_TELEPORT_RANDOM_DESTINATION))
@@ -2888,7 +2888,7 @@ class CTriggerTeleportPlayer : public CTriggerTeleport
 public:
 	void Spawn( void );
 	void EXPORT TeleportPlayerUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
-	virtual edict_t* GetTeleportTarget();
+	edict_t* GetTeleportTarget(CBaseEntity* pToucher) override;
 };
 
 LINK_ENTITY_TO_CLASS( trigger_player_teleport, CTriggerTeleportPlayer )
@@ -2908,12 +2908,12 @@ void CTriggerTeleportPlayer::TeleportPlayerUse(CBaseEntity *pActivator, CBaseEnt
 	}
 }
 
-edict_t* CTriggerTeleportPlayer::GetTeleportTarget()
+edict_t* CTriggerTeleportPlayer::GetTeleportTarget(CBaseEntity* pToucher)
 {
 	if (FStringNull(pev->target)) {
 		return edict();
 	} else {
-		return CTriggerTeleport::GetTeleportTarget();
+		return CTriggerTeleport::GetTeleportTarget(pToucher);
 	}
 }
 
@@ -4149,6 +4149,38 @@ void CDisplacerTarget::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TY
 LINK_ENTITY_TO_CLASS(info_displacer_xen_target, CDisplacerTarget)
 LINK_ENTITY_TO_CLASS(info_displacer_earth_target, CDisplacerTarget)
 
+CBaseEntity* GetDisplacerEarthTarget(CBaseEntity* pOther)
+{
+	float flMinDist = 8192;
+	CBaseEntity* pEarthTarget = nullptr;
+	CBasePlayer* pPlayer = nullptr;
+	if (pOther && pOther->IsPlayer())
+	{
+		pPlayer = (CBasePlayer*)pOther;
+	}
+	CBaseEntity* pDestination = nullptr;
+	while ((pDestination = UTIL_FindEntityByClassname(pDestination, "info_displacer_earth_target")) != nullptr)
+	{
+		if (FBitSet(pDestination->pev->spawnflags, SF_DISPLACER_TARGET_DISABLED))
+			continue;
+		if (pPlayer)
+		{
+			const float flDist = (pPlayer->m_DisplacerReturn - pDestination->pev->origin).Length();
+			if (flDist <= flMinDist)
+			{
+				pEarthTarget = pDestination;
+				flMinDist = flDist;
+			}
+		}
+		else
+		{
+			pEarthTarget = pDestination;
+			break;
+		}
+	}
+	return pEarthTarget;
+}
+
 class CTriggerXenReturn : public CTriggerTeleport
 {
 public:
@@ -4156,7 +4188,7 @@ public:
 	void Precache( void );
 	void EXPORT TeleportTouch( CBaseEntity *pOther );
 
-	virtual edict_t* GetTeleportTarget();
+	edict_t* GetTeleportTarget(CBaseEntity* pToucher) override;
 };
 
 LINK_ENTITY_TO_CLASS(trigger_xen_return, CTriggerXenReturn)
@@ -4180,32 +4212,22 @@ void CTriggerXenReturn::TeleportTouch(CBaseEntity* pOther)
 	{
 		if (pOther->IsPlayer())
 		{
-			// Ensure the current player is marked as being
-			// on earth.
-			((CBasePlayer*)pOther)->m_fInXen = FALSE;
-
-			// Reset gravity to default.
-			pOther->pev->gravity = 1.0f;
+			CBasePlayer* pPlayer = (CBasePlayer*)pOther;
+			pPlayer->m_fInXen = FALSE;
+			pPlayer->pev->gravity = 1.0f;
+			pPlayer->m_SndRoomtype = pPlayer->m_DisplacerSndRoomtype;
 		}
 
 		// Play teleport sound.
-		EMIT_SOUND(ENT(pOther->pev), CHAN_STATIC, "weapons/displacer_self.wav", 1, ATTN_NORM );
+		EMIT_SOUND(ENT(pOther->pev), CHAN_WEAPON, "weapons/displacer_self.wav", 1, ATTN_NORM );
 	}
 }
 
-edict_t* CTriggerXenReturn::GetTeleportTarget()
+edict_t* CTriggerXenReturn::GetTeleportTarget(CBaseEntity* pToucher)
 {
-	edict_t* earthTarget = NULL;
-	while((earthTarget = FIND_ENTITY_BY_CLASSNAME(earthTarget, "info_displacer_earth_target")) != NULL)
-	{
-		if (!FBitSet(earthTarget->v.spawnflags, SF_DISPLACER_TARGET_DISABLED))
-		{
-			return earthTarget;
-		}
-	}
-	return NULL;
+	CBaseEntity* pEarthTarget = GetDisplacerEarthTarget(pToucher);
+	return pEarthTarget ? pEarthTarget->edict() : nullptr;
 }
-
 #endif
 
 enum

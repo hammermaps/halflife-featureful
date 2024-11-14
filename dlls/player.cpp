@@ -123,6 +123,8 @@ TYPEDESCRIPTION	CBasePlayer::m_playerSaveData[] =
 	DEFINE_FIELD( CBasePlayer, m_iFOV, FIELD_INTEGER ),
 #if FEATURE_DISPLACER
 	DEFINE_FIELD(CBasePlayer, m_fInXen, FIELD_BOOLEAN),
+	DEFINE_FIELD(CBasePlayer, m_DisplacerReturn, FIELD_VECTOR),
+	DEFINE_FIELD(CBasePlayer, m_DisplacerSndRoomtype, FIELD_INTEGER),
 #endif
 #if FEATURE_NIGHTVISION
 	DEFINE_FIELD(CBasePlayer, m_fNVGisON, FIELD_BOOLEAN),

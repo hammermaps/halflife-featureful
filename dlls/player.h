@@ -455,6 +455,8 @@ public:
 	float m_flNextRespawnMessageTime;
 #if FEATURE_DISPLACER
 	BOOL	m_fInXen;
+	Vector m_DisplacerReturn;
+	int m_DisplacerSndRoomtype;
 #endif
 	BOOL	m_fNVGisON;
 	friend class CDisplacer;
