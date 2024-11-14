@@ -374,6 +374,7 @@ void CPitWorm::Precache()
 
 	RegisterAndPrecacheSoundScript(hitGroundSoundScript);
 	RegisterAndPrecacheSoundScript(angrySoundScript);
+	RegisterAndPrecacheSoundScript(blastSoundScript);
 	RegisterAndPrecacheSoundScript(swipeSoundScript);
 	RegisterAndPrecacheSoundScript(shootSoundScript);
 
