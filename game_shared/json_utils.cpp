@@ -38,7 +38,7 @@ constexpr const char definitions[] = R"(
   },
   "range": {
     "type": ["string", "object", "number", "array"],
-    "pattern": "[0-9]+(\\.[0-9]+)?(,[0-9]+(\\.[0-9]+)?)?",
+    "pattern": "^[0-9]+(\\.[0-9]+)?(,[0-9]+(\\.[0-9]+)?)?$",
     "properties": {
       "min": {
         "type": "number"
@@ -56,7 +56,7 @@ constexpr const char definitions[] = R"(
   },
   "range_int": {
     "type": ["string", "object", "integer", "array"],
-    "pattern": "[0-9]+(,[0-9]+)?",
+    "pattern": "^[0-9]+(,[0-9]+)?$",
     "properties": {
       "min": {
         "type": "integer"
@@ -91,7 +91,6 @@ constexpr const char definitions[] = R"(
         "maxItems": 10
       },
       "channel": {
-        "type": "string",
         "enum": [
           "Auto",
           "auto",
@@ -111,17 +110,23 @@ constexpr const char definitions[] = R"(
         "$ref": "#/range"
       },
       "attenuation": {
-        "type": ["number", "string"],
-        "minimum": 0,
-        "enum": [
-          "Norm",
-          "norm",
-          "Idle",
-          "idle",
-          "Static",
-          "static",
-          "None",
-          "none"
+        "oneof": [
+          {
+            "enum": [
+              "Norm",
+              "norm",
+              "Idle",
+              "idle",
+              "Static",
+              "static",
+              "None",
+              "none"
+            ]
+          },
+          {
+            "type": "number",
+            "minimum": 0
+          }
         ]
       },
       "pitch": {
@@ -140,8 +145,7 @@ constexpr const char definitions[] = R"(
         "type": "string"
       },
       "rendermode": {
-        "type": "string",
-        "pattern": [
+        "enum": [
           "Normal",
           "normal",
           "Color",
@@ -163,23 +167,29 @@ constexpr const char definitions[] = R"(
         "$ref": "definitions.json#/alpha"
       },
       "renderfx": {
-        "type": ["integer", "string"],
-        "enum": [
-          "Normal",
-          "normal",
-          "Constant Glow",
-          "constant glow",
-          "Constant glow",
-          "Distort",
-          "distort",
-          "Hologram",
-          "hologram",
-          "Glow Shell",
-          "glow shell",
-          "Glow shell"
-        ],
-        "minimum": 0,
-        "maximum": 20
+        "oneof": [
+          {
+            "enum": [
+              "Normal",
+              "normal",
+              "Constant Glow",
+              "constant glow",
+              "Constant glow",
+              "Distort",
+              "distort",
+              "Hologram",
+              "hologram",
+              "Glow Shell",
+              "glow shell",
+              "Glow shell"
+            ]
+          },
+          {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 20
+          }
+        ]
       },
       "scale": {
         "$ref": "definitions.json#/range",
@@ -208,7 +218,6 @@ constexpr const char definitions[] = R"(
       "beamflags": {
         "type": "array",
         "items": {
-          "type": "string",
           "enum": [
             "Sine",
             "sine",
