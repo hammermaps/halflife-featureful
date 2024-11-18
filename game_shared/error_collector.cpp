@@ -1,20 +1,14 @@
 #include "error_collector.h"
+#include "logger.h"
 #include <cstdarg>
 #include <cstdio>
-
-#ifndef CLIENT_DLL
-#include "extdll.h"
-#include "enginecallback.h"
-#endif
 
 void ErrorCollector::AddError(const char *str)
 {
 	if (str)
 	{
 		_errors.push_back(str);
-#ifndef CLIENT_DLL
-		ALERT(at_error, "%s\n", str);
-#endif
+		LOG_ERROR("%s\n", str);
 	}
 }
 

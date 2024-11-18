@@ -332,15 +332,15 @@ void CAGrunt::PrescheduleThink( void )
 			const SoundScript* myIdleSoundScript = GetSoundScript(idleSoundScript.name);
 			if (myIdleSoundScript)
 			{
-				if (myIdleSoundScript->waveCount == 1)
+				if (myIdleSoundScript->waves.size() == 1)
 				{
 					num = 0;
 				}
-				else if (myIdleSoundScript->waveCount > 1)
+				else if (myIdleSoundScript->waves.size() > 1)
 				{
 					do
 					{
-						num = RANDOM_LONG(0, myIdleSoundScript->waveCount-1);
+						num = RANDOM_LONG(0, myIdleSoundScript->waves.size()-1);
 					}
 					while( num == m_iLastWord );
 				}

@@ -25,6 +25,8 @@ project (SVDLL)
 
 set (SVDLL_LIBRARY server)
 
+add_definitions(-DSERVER_DLL)
+
 if(NOT MSVC)
 	add_compile_options(-fno-exceptions) # GCC/Clang flag
 	add_compile_options(-fno-rtti) # GCC/Clang flag
@@ -201,8 +203,11 @@ set (SVDLL_SOURCES
 	../game_shared/tex_materials.cpp
 	../game_shared/parsetext.cpp
 	../game_shared/error_collector.cpp
+	../game_shared/file_utils.cpp
 	../game_shared/fx_types.cpp
+	../game_shared/json_config.cpp
 	../game_shared/json_utils.cpp
+	../game_shared/random_utils.cpp
 	../game_shared/util_shared.cpp
 	../game_shared/vcs_info.cpp
 )

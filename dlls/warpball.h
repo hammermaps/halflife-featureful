@@ -2,8 +2,15 @@
 #ifndef WARPBALL_H
 #define WARPBALL_H
 
+#include <map>
+#include <set>
 #include <string>
+#include <vector>
+#include "const_render.h"
+#include "const_sound.h"
 #include "template_property_types.h"
+#include "rapidjson/document.h"
+#include "json_config.h"
 
 #define WARPBALL_RED_DEFAULT 77
 #define WARPBALL_GREEN_DEFAULT 210
@@ -23,9 +30,8 @@
 
 struct WarpballSound
 {
-	WarpballSound(): sound(), soundName(0), volume(1.0f), attenuation(0.8f), pitch(100) {}
-	std::string sound;
-	string_t soundName;
+	WarpballSound(): sound(), volume(1.0f), attenuation(ATTN_NORM), pitch(100) {}
+	const char* sound;
 	float volume;
 	float attenuation;
 	IntRange pitch;
@@ -35,7 +41,6 @@ struct WarpballSprite
 {
 	WarpballSprite():
 		sprite(),
-		spriteName(0),
 		color(),
 		alpha(255),
 		scale(1.0f),
@@ -43,8 +48,7 @@ struct WarpballSprite
 		rendermode(kRenderGlow),
 		renderfx(kRenderFxNoDissipation)
 	{}
-	std::string sprite;
-	string_t spriteName;
+	const char* sprite;
 	Color color;
 	int alpha;
 	float scale;
@@ -57,15 +61,13 @@ struct WarpballBeam
 {
 	WarpballBeam():
 		sprite(),
-		spriteName(0),
 		texture(0),
 		color(),
 		alpha(220),
 		width(30),
 		noise(65),
 		life(0.5f, 1.6f) {}
-	std::string sprite;
-	string_t spriteName;
+	const char* sprite;
 	int texture;
 	Color color;
 	int alpha;
@@ -149,9 +151,38 @@ struct WarpballTemplate
 	WarpballPosition position;
 };
 
-void LoadWarpballTemplates();
-void PrecacheWarpballTemplate(const char* name, const char* entityClassname);
-const WarpballTemplate* FindWarpballTemplate(const char* warpballName, const char* entityClassname);
+struct WarpballTemplateCatalog : public JSONConfig
+{
+protected:
+	const char* Schema() const override;
+	bool ReadFromDocument(rapidjson::Document& document, const char* fileName) override;
+
+public:
+	const WarpballTemplate* FindWarpballTemplate(const char* warpballName, const char* entityClassname = nullptr);
+	void PrecacheWarpballTemplate(const char* name, const char* entityClassname);
+	void DumpWarpballTemplates();
+
+private:
+	WarpballTemplate* GetWarpballTemplateMutable(const char* warpballName, const char* entityClassname);
+	WarpballTemplate* GetWarpballTemplateByName(const char* warpballName);
+	bool AddWarpballTemplate(rapidjson::Value& allTemplatesJsonValue, const char* templateName, rapidjson::Value& templateJsonValue, const char* fileName, std::vector<std::string> inheritanceChain = std::vector<std::string>());
+
+	void AssignWarpballSound(WarpballSound& sound, rapidjson::Value& soundJson);
+	void AssignWarpballSprite(WarpballSprite& sprite, rapidjson::Value& spriteJson);
+	void AssignWarpballBeam(WarpballBeam& beam, rapidjson::Value& beamJson);
+
+	bool UpdateStringFromJson(const char*& str, rapidjson::Value& jsonValue, const char* key);
+	const char* MakeConstantString(const char* str);
+
+	std::map<std::string, std::map<std::string, std::string> > _entityMappings;
+	std::map<std::string, WarpballTemplate> _templates;
+	std::set<std::string> _stringSet;
+};
+
+extern WarpballTemplateCatalog g_WarpballCatalog;
+
+#if SERVER_DLL
 void PlayWarpballEffect(const WarpballTemplate& warpballTemplate, const Vector& vecOrigin, edict_t* playSoundEnt);
+#endif
 
 #endif

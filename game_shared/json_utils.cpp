@@ -1,11 +1,6 @@
-#if CLIENT_DLL
-#include "cl_dll.h"
-#else
-#include "extdll.h"
-#include "enginecallback.h"
-#endif
-
+#include "file_utils.h"
 #include "json_utils.h"
+#include "logger.h"
 
 #include "color_utils.h"
 #include "parsetext.h"
@@ -358,26 +353,14 @@ bool ReadJsonDocumentWithSchemaFromFile(Document &document, const char *fileName
 {
 	int fileSize;
 	char *pMemFile = nullptr;
-#if CLIENT_DLL
-	pMemFile = (char*)gEngfuncs.COM_LoadFile( fileName, 5, &fileSize );
-#else
-	pMemFile = (char*)g_engfuncs.pfnLoadFileForMe( fileName, &fileSize );
-#endif
+	pMemFile = ReadFileContents(fileName, fileSize);
 	if (!pMemFile)
 		return false;
 
-#if CLIENT_DLL
-	gEngfuncs.Con_DPrintf("Parsing %s\n", fileName);
-#else
-	ALERT(at_console, "Parsing %s\n", fileName);
-#endif
+	LOG("Parsing %s\n", fileName);
 
 	const bool success = ReadJsonDocumentWithSchema(document, pMemFile, fileSize, schemaText, fileName);
-#if CLIENT_DLL
-	gEngfuncs.COM_FreeFile(pMemFile);
-#else
-	g_engfuncs.pfnFreeFile(pMemFile);
-#endif
+	FreeFileContents(pMemFile);
 	return success;
 }
 

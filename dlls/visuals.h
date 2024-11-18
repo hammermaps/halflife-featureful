@@ -5,6 +5,7 @@
 #include "const_render.h"
 #include "template_property_types.h"
 #include "rapidjson/document.h"
+#include "json_config.h"
 
 #include <map>
 #include <set>
@@ -257,10 +258,9 @@ private:
 	NamedVisual visual;
 };
 
-class VisualSystem
+class VisualSystem : public JSONConfig
 {
 public:
-	bool ReadFromFile(const char* fileName);
 	void AddVisualFromJsonValue(const char* name, rapidjson::Value& value);
 	void EnsureVisualExists(const std::string& name);
 	const Visual* GetVisual(const char* name);
@@ -268,6 +268,9 @@ public:
 	const Visual* ProvideDefaultVisual(const char* name, const Visual& visual, const char* mixinName, const Visual& mixinVisual);
 	void DumpVisuals();
 	void DumpVisual(const char* name);
+protected:
+	const char* Schema() const;
+	bool ReadFromDocument(rapidjson::Document& document, const char* fileName);
 private:
 	void DumpVisualImpl(const char* name, const Visual& visual);
 
@@ -277,7 +280,5 @@ private:
 };
 
 extern VisualSystem g_VisualSystem;
-
-void DumpVisuals();
 
 #endif

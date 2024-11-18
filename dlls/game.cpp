@@ -25,6 +25,7 @@
 #include "inventory.h"
 #include "soundscripts.h"
 #include "visuals.h"
+#include "warpball.h"
 #include "ent_templates.h"
 #include "followers.h"
 #include "savetitles.h"
@@ -1361,7 +1362,34 @@ void ReportSoundReplacements()
 	g_soundReplacement.ReportSoundReplacements();
 }
 
-extern void DumpWarpballTemplates();
+void ReportSoundScripts()
+{
+	int argc = CMD_ARGC();
+	if (argc > 1)
+	{
+		for (int i=1; i<argc; ++i)
+			g_SoundScriptSystem.DumpSoundScript(CMD_ARGV(i));
+	}
+	else
+		g_SoundScriptSystem.DumpSoundScripts();
+}
+
+void ReportVisuals()
+{
+	int argc = CMD_ARGC();
+	if (argc > 1)
+	{
+		for (int i=1; i<argc; ++i)
+			g_VisualSystem.DumpVisual(CMD_ARGV(i));
+	}
+	else
+		g_VisualSystem.DumpVisuals();
+}
+
+void ReportWarpballTemplates()
+{
+	g_WarpballCatalog.DumpWarpballTemplates();
+}
 
 static void CVAR_REGISTER_INTEGER( cvar_t* cvar, int value )
 {
@@ -1396,7 +1424,6 @@ cvar_t sv_busters = { "sv_busters", "0" };
 
 extern void RegisterAmmoTypes();
 extern void ReportRegisteredAmmoTypes();
-extern void LoadWarpballTemplates();
 
 // Register your console variables here
 // This gets called one time when the game is initialied
@@ -1409,7 +1436,7 @@ void GameDLLInit( void )
 	ReadAmmoAmounts();
 
 	RegisterAmmoTypes();
-	LoadWarpballTemplates();
+	g_WarpballCatalog.ReadFromFile("templates/warpball.json");
 	ReadInventorySpec();
 	g_SoundScriptSystem.ReadFromFile("sound/soundscripts.json");
 	g_VisualSystem.ReadFromFile("templates/visuals.json");
@@ -2041,12 +2068,12 @@ void GameDLLInit( void )
 	g_engfuncs.pfnAddServerCommand("calc_velocity", Cmd_CalcVelocity);
 	g_engfuncs.pfnAddServerCommand("calc_state", Cmd_CalcState);
 	g_engfuncs.pfnAddServerCommand("dump_ammo_types", ReportRegisteredAmmoTypes);
-	g_engfuncs.pfnAddServerCommand("dump_warpballs", DumpWarpballTemplates);
+	g_engfuncs.pfnAddServerCommand("dump_warpballs", ReportWarpballTemplates);
 	g_engfuncs.pfnAddServerCommand("dump_precached_models", ReportPrecachedModels);
 	g_engfuncs.pfnAddServerCommand("dump_precached_sounds", ReportPrecachedSounds);
 	g_engfuncs.pfnAddServerCommand("dump_sound_replacements", ReportSoundReplacements);
-	g_engfuncs.pfnAddServerCommand("dump_soundscripts", DumpSoundScripts);
-	g_engfuncs.pfnAddServerCommand("dump_visuals", DumpVisuals);
+	g_engfuncs.pfnAddServerCommand("dump_soundscripts", ReportSoundScripts);
+	g_engfuncs.pfnAddServerCommand("dump_visuals", ReportVisuals);
 }
 
 bool ItemsPickableByTouch()

@@ -2943,20 +2943,20 @@ public:
 		pev->message = warpTarget;
 	}
 
-	inline string_t WarpballSound1() {
+	inline const char* WarpballSound1() {
 		if (!FStringNull(pev->noise1))
-			return pev->noise1;
-		return g_modFeatures.alien_teleport_sound ? MAKE_STRING(ALIEN_TELEPORT_SOUND) : MAKE_STRING(WARPBALL_SOUND1);
+			return STRING(pev->noise1);
+		return g_modFeatures.alien_teleport_sound ? ALIEN_TELEPORT_SOUND : WARPBALL_SOUND1;
 	}
-	inline string_t WarpballSound2() {
+	inline const char* WarpballSound2() {
 		if (FStringNull(pev->noise2))
 		{
 			if (g_modFeatures.alien_teleport_sound)
-				return iStringNull;
-			return FStringNull(pev->noise1) ? MAKE_STRING(WARPBALL_SOUND2) : iStringNull;
+				return nullptr;
+			return FStringNull(pev->noise1) ? WARPBALL_SOUND2 : nullptr;
 		}
 		else
-			return pev->noise2;
+			return STRING(pev->noise2);
 	}
 	inline float SoundAttenuation() {
 		return ::SoundAttenuation(m_soundRadius);
@@ -3107,11 +3107,11 @@ void CEnvWarpBall::Precache( void )
 		PRECACHE_MODEL( STRING(model2) );
 	}
 
-	PRECACHE_SOUND(STRING(WarpballSound1()));
+	PRECACHE_SOUND(WarpballSound1());
 
-	string_t sound2 = WarpballSound2();
-	if (!FStringNull(sound2))
-		PRECACHE_SOUND(STRING(sound2));
+	const char* sound2 = WarpballSound2();
+	if (sound2 != nullptr)
+		PRECACHE_SOUND(sound2);
 
 	UTIL_PrecacheOther("warpball_hurt");
 }
@@ -3173,13 +3173,13 @@ void CEnvWarpBall::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE 
 
 	if (!FBitSet(pev->spawnflags, SF_WARPBALL_NOSOUND))
 	{
-		w.sound1.soundName = WarpballSound1();
+		w.sound1.sound = WarpballSound1();
 		w.sound1.volume = SoundVolume();
 		w.sound1.attenuation = SoundAttenuation();
 
 		if (WarpballSound2())
 		{
-			w.sound2.soundName = WarpballSound2();
+			w.sound2.sound = WarpballSound2();
 			w.sound2.volume = SoundVolume();
 			w.sound2.attenuation = SoundAttenuation();
 		}
@@ -3192,7 +3192,7 @@ void CEnvWarpBall::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE 
 		w.shake.radius = Radius();
 	}
 
-	w.sprite1.spriteName = pev->model ? pev->model : MAKE_STRING(WARPBALL_SPRITE);
+	w.sprite1.sprite = pev->model ? STRING(pev->model) : WARPBALL_SPRITE;
 	w.sprite1.framerate = SpriteFramerate();
 
 	int red = pev->rendercolor.x;
@@ -3210,7 +3210,7 @@ void CEnvWarpBall::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE 
 	w.sprite1.scale = Scale();
 
 	if (!FStringNull(model2)) {
-		w.sprite2.spriteName = model2;
+		w.sprite2.sprite = STRING(model2);
 		w.sprite2.framerate = framerate2 > 0 ? framerate2 : SpriteFramerate();
 		int red2, green2, blue2;
 		if (rendercolor2 == g_vecZero)
@@ -3556,13 +3556,13 @@ void CEnvXenMaker::TrySpawn()
 
 	WarpballTemplate w;
 
-	w.sprite1.spriteName = MAKE_STRING(XENMAKER_SPRITE1);
+	w.sprite1.sprite = XENMAKER_SPRITE1;
 	w.sprite1.color = Color(m_vStartSpriteColor.x, m_vStartSpriteColor.y, m_vStartSpriteColor.z);
 	w.sprite1.alpha = m_iStartSpriteAlpha;
 	w.sprite1.scale = m_flStartSpriteScale;
 	w.sprite1.framerate = m_flStartSpriteFramerate;
 
-	w.sprite2.spriteName = MAKE_STRING(XENMAKER_SPRITE2);
+	w.sprite2.sprite = XENMAKER_SPRITE2;
 	w.sprite2.color = Color(m_vEndSpriteColor.x, m_vEndSpriteColor.y, m_vEndSpriteColor.z);
 	w.sprite2.alpha = m_iEndSpriteAlpha;
 	w.sprite2.scale = m_flEndSpriteScale;
@@ -3580,15 +3580,15 @@ void CEnvXenMaker::TrySpawn()
 	w.light.radius = m_flLightRadius;
 
 	if (g_modFeatures.alien_teleport_sound)
-		w.sound1.soundName = MAKE_STRING(ALIEN_TELEPORT_SOUND);
+		w.sound1.sound = ALIEN_TELEPORT_SOUND;
 	else
-		w.sound1.soundName = MAKE_STRING(XENMAKER_SOUND1);
+		w.sound1.sound = XENMAKER_SOUND1;
 
 	if (!g_modFeatures.alien_teleport_sound)
 	{
 		if (asTemplate)
 		{
-			w.sound2.soundName = MAKE_STRING(XENMAKER_SOUND2);
+			w.sound2.sound = XENMAKER_SOUND2;
 		}
 		else
 		{

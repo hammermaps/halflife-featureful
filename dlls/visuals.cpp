@@ -1,7 +1,8 @@
-#include "util.h"
 #include "visuals.h"
 #include "customentity.h"
 #include "error_collector.h"
+#include "logger.h"
+#include "util_shared.h"
 
 #include "json_utils.h"
 
@@ -20,7 +21,9 @@ void Visual::DoPrecache()
 {
 	if (HasModel())
 	{
+#if SERVER_DLL
 		modelIndex = PRECACHE_MODEL(model);
+#endif
 	}
 }
 
@@ -123,12 +126,13 @@ static bool ParseRenderFx(const char* str, int& renderfx)
 	return false;
 }
 
-bool VisualSystem::ReadFromFile(const char *fileName)
+const char* VisualSystem::Schema() const
 {
-	Document document;
-	if (!ReadJsonDocumentWithSchemaFromFile(document, fileName, visualsSchema))
-		return false;
+	return visualsSchema;
+}
 
+bool VisualSystem::ReadFromDocument(Document& document, const char *fileName)
+{
 	for (auto scriptIt = document.MemberBegin(); scriptIt != document.MemberEnd(); ++scriptIt)
 	{
 		const char* name = scriptIt->name.GetString();
@@ -168,7 +172,7 @@ void VisualSystem::AddVisualFromJsonValue(const char *name, Value &value)
 		{
 			if (visual.HasDefined(Visual::MODEL_DEFINED))
 			{
-				ALERT(at_warning, "Visual \"s\" has both 'model' and 'sprite' properties defined!\n", name);
+				LOG_WARNING("Visual \"%s\" has both 'model' and 'sprite' properties defined!\n", name);
 			}
 			else
 			{
@@ -350,21 +354,21 @@ static void PrintRange(const char* name, FloatRange range)
 {
 	if (range.max <= range.min)
 	{
-		ALERT(at_console, "%s: %g. ", name, range.min);
+		LOG("%s: %g. ", name, range.min);
 	}
 	else
 	{
-		ALERT(at_console, "%s: %g-%g. ", name, range.min, range.max);
+		LOG("%s: %g-%g. ", name, range.min, range.max);
 	}
 }
 
 void VisualSystem::DumpVisualImpl(const char *name, const Visual &visual)
 {
-	ALERT(at_console, "%s:\n", name);
+	LOG("%s:\n", name);
 
-	ALERT(at_console, "Model/Sprite: \"%s\"\n", visual.model ? visual.model : "");
+	LOG("Model/Sprite: \"%s\"\n", visual.model ? visual.model : "");
 
-	ALERT(at_console, "Rendermode: %s. Color: (%d, %d, %d). Alpha: %d. Renderfx: %s. ",
+	LOG("Rendermode: %s. Color: (%d, %d, %d). Alpha: %d. Renderfx: %s. ",
 		  RenderModeToString(visual.rendermode),
 		  visual.rendercolor.r, visual.rendercolor.g, visual.rendercolor.b,
 		  visual.renderamt,
@@ -375,7 +379,7 @@ void VisualSystem::DumpVisualImpl(const char *name, const Visual &visual)
 
 	if (visual.HasDefined(Visual::BEAMWIDTH_DEFINED))
 	{
-		ALERT(at_console, "Beam width: %d. Beam noise: %d. Beam scoll rate: %d. ", visual.beamWidth, visual.beamNoise, visual.beamScrollRate);
+		LOG("Beam width: %d. Beam noise: %d. Beam scoll rate: %d. ", visual.beamWidth, visual.beamNoise, visual.beamScrollRate);
 	}
 
 	if (visual.HasDefined(Visual::LIFE_DEFINED))
@@ -387,29 +391,29 @@ void VisualSystem::DumpVisualImpl(const char *name, const Visual &visual)
 	{
 		if (visual.radius.max <= visual.radius.min)
 		{
-			ALERT(at_console, "Radius: %d. ", visual.radius.min);
+			LOG("Radius: %d. ", visual.radius.min);
 		}
 		else
 		{
-			ALERT(at_console, "Radius: %d-%d. ", visual.radius.min, visual.radius.max);
+			LOG("Radius: %d-%d. ", visual.radius.min, visual.radius.max);
 		}
 	}
 
 	if (visual.HasDefined(Visual::BEAMFLAGS_DEFINED))
 	{
 		const int beamFlags = visual.beamFlags;
-		ALERT(at_console, "Beam flags: ");
+		LOG("Beam flags: ");
 		if (FBitSet(beamFlags, BEAM_FSINE))
-			ALERT(at_console, "Sine; ");
+			LOG("Sine; ");
 		if (FBitSet(beamFlags, BEAM_FSOLID))
-			ALERT(at_console, "Solid; ");
+			LOG("Solid; ");
 		if (FBitSet(beamFlags, BEAM_FSHADEIN))
-			ALERT(at_console, "Shadein; ");
+			LOG("Shadein; ");
 		if (FBitSet(beamFlags, BEAM_FSHADEOUT))
-			ALERT(at_console, "Shadeout; ");
+			LOG("Shadeout; ");
 	}
 
-	ALERT(at_console, "\n\n");
+	LOG("\n\n");
 }
 
 void VisualSystem::DumpVisuals()
@@ -446,19 +450,7 @@ void VisualSystem::DumpVisual(const char *name)
 			return;
 		}
 	}
-	ALERT(at_console, "Couldn't find a visual for %s\n", name);
+	LOG("Couldn't find a visual for %s\n", name);
 }
 
 VisualSystem g_VisualSystem;
-
-void DumpVisuals()
-{
-	int argc = CMD_ARGC();
-	if (argc > 1)
-	{
-		for (int i=1; i<argc; ++i)
-			g_VisualSystem.DumpVisual(CMD_ARGV(i));
-	}
-	else
-		g_VisualSystem.DumpVisuals();
-}

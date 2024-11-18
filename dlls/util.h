@@ -89,11 +89,6 @@ inline edict_t *FIND_ENTITY_BY_TARGET(edict_t *entStart, const char *pszName)
 #define WRITEKEY_VECTOR(pf, szKeyName, flX, flY, flZ)							\
 		ENGINE_FPRINTF(pf, "\"%s\" \"%f %f %f\"\n", szKeyName, flX, flY, flZ)
 
-// Keeps clutter down a bit, when using a float as a bit-vector
-#define SetBits(flBitVector, bits)		((flBitVector) = (int)(flBitVector) | (bits))
-#define ClearBits(flBitVector, bits)	((flBitVector) = (int)(flBitVector) & ~(bits))
-#define FBitSet(flBitVector, bit)		((int)(flBitVector) & (bit))
-
 // Makes these more explicit, and easier to find
 #define FILE_GLOBAL static
 #define DLL_GLOBAL
@@ -601,9 +596,6 @@ int RandomizeNumberFromRange(const IntRange& r);
 int RandomizeNumberFromRange(int minI, int maxI);
 
 void ReportAIStateByClassname(const char* name);
-
-const char* RenderModeToString(int rendermode);
-const char* RenderFxToString(int renderfx);
 
 inline Vector VectorFromColor(const Color& color) {
 	return Vector(color.r, color.g, color.b);

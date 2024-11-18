@@ -1,20 +1,31 @@
 #include <cassert>
 #include <cstdio>
-#include <map>
-#include <vector>
 #include <algorithm>
 #include <utility>
 
 #include "error_collector.h"
 #include "parsetext.h"
-#include "extdll.h"
-#include "util.h"
 #include "color_utils.h"
 #include "json_utils.h"
-#include "game.h"
-#include "effects.h"
-#include "soundent.h"
+#include "logger.h"
+
 #include "warpball.h"
+
+#include "soundent_bits.h"
+#if SERVER_DLL
+#include "effects.h"
+#include "game.h"
+#include "soundent.h"
+#endif
+
+static bool AlienTeleportSoundEnabled()
+{
+#if SERVER_DLL
+	return g_modFeatures.alien_teleport_sound;
+#else
+	return false;
+#endif
+}
 
 using namespace rapidjson;
 
@@ -242,7 +253,7 @@ static WarpballSprite DefaultWarpballSprite2()
 static WarpballSound DefaultWarpballSound1()
 {
 	WarpballSound sound;
-	if (g_modFeatures.alien_teleport_sound)
+	if (AlienTeleportSoundEnabled())
 		sound.sound = ALIEN_TELEPORT_SOUND;
 	else
 		sound.sound = WARPBALL_SOUND1;
@@ -252,7 +263,7 @@ static WarpballSound DefaultWarpballSound1()
 static WarpballSound DefaultWarpballSound2()
 {
 	WarpballSound sound;
-	if (!g_modFeatures.alien_teleport_sound)
+	if (!AlienTeleportSoundEnabled())
 		sound.sound = WARPBALL_SOUND2;
 	return sound;
 }
@@ -276,97 +287,99 @@ static WarpballTemplate DefaultWarpballTemplate()
 	return w;
 }
 
-struct WarpballTemplateCatalog
-{
-	std::map<std::string, std::map<std::string, std::string> > entityMappings;
-	std::map<std::string, WarpballTemplate> templates;
+const char* WarpballTemplateCatalog::Schema() const {
+	return warpballCatalogSchema;
+}
 
-	WarpballTemplate* GetWarpballTemplate(const char* warpballName, const char* entityClassname)
+bool WarpballTemplateCatalog::ReadFromDocument(Document& document, const char* fileName)
+{
+	bool fullSuccess = true;
+
+	auto templatesIt = document.FindMember("templates");
+	if (templatesIt != document.MemberEnd())
 	{
-		auto warpballTemplate = GetWarpballTemplateByName(warpballName);
-		if (warpballTemplate)
-			return warpballTemplate;
-		if (entityClassname && *entityClassname)
+		auto& templates = templatesIt->value;
+		for (auto templateIt = templates.MemberBegin(); templateIt != templates.MemberEnd(); ++templateIt)
 		{
-			auto mappingIt = entityMappings.find(warpballName);
-			if (mappingIt != entityMappings.end())
+			if (!AddWarpballTemplate(templates, templateIt->name.GetString(), templateIt->value, fileName))
+				fullSuccess = false;
+		}
+	}
+
+	auto mappingsIt = document.FindMember("entity_mappings");
+	if (mappingsIt != document.MemberEnd())
+	{
+		auto& entityMappings = mappingsIt->value;
+		for (auto mappingIt = entityMappings.MemberBegin(); mappingIt != entityMappings.MemberEnd(); mappingIt++)
+		{
+			const char* mappingName = mappingIt->name.GetString();
+			std::map<std::string, std::string> mapping;
+			auto& mappingJson = mappingIt->value;
+			for (auto pairIt = mappingJson.MemberBegin(); pairIt != mappingJson.MemberEnd(); ++pairIt)
 			{
-				auto& mapping = mappingIt->second;
-				auto entityIt = mapping.find(entityClassname);
-				if (entityIt != mapping.end())
+				auto entityName = pairIt->name.GetString();
+				auto warpballName = pairIt->value.GetString();
+				if (_templates.find(warpballName) == _templates.end())
 				{
-					warpballTemplate = GetWarpballTemplateByName(entityIt->second.c_str());
-					if (warpballTemplate)
-						return warpballTemplate;
+					g_errorCollector.AddFormattedError("%s: entity mapping '%s' refers to nonexistent template '%s'", fileName, mappingName, warpballName);
 				}
-				auto defaultIt = mapping.find("default");
-				if (defaultIt != mapping.end())
-				{
-					return GetWarpballTemplateByName(defaultIt->second.c_str());
-				}
+				mapping[entityName] = warpballName;
+			}
+			if (mapping.find("default") == mapping.end())
+			{
+				g_errorCollector.AddFormattedError("%s: entity mapping '%s' doesn't define 'default' template", fileName, mappingName);
+			}
+			else
+			{
+				_entityMappings[mappingName] = mapping;
 			}
 		}
-		return nullptr;
 	}
 
-private:
-	WarpballTemplate* GetWarpballTemplateByName(const char* warpballName)
+	return fullSuccess;
+}
+
+const WarpballTemplate* WarpballTemplateCatalog::FindWarpballTemplate(const char* warpballName, const char* entityClassname)
+{
+	return GetWarpballTemplateMutable(warpballName, entityClassname);
+}
+
+WarpballTemplate* WarpballTemplateCatalog::GetWarpballTemplateMutable(const char* warpballName, const char* entityClassname)
+{
+	auto warpballTemplate = GetWarpballTemplateByName(warpballName);
+	if (warpballTemplate)
+		return warpballTemplate;
+	if (entityClassname && *entityClassname)
 	{
-		auto it = templates.find(warpballName);
-		if (it != templates.end())
+		auto mappingIt = _entityMappings.find(warpballName);
+		if (mappingIt != _entityMappings.end())
 		{
-			return &it->second;
+			auto& mapping = mappingIt->second;
+			auto entityIt = mapping.find(entityClassname);
+			if (entityIt != mapping.end())
+			{
+				warpballTemplate = GetWarpballTemplateByName(entityIt->second.c_str());
+				if (warpballTemplate)
+					return warpballTemplate;
+			}
+			auto defaultIt = mapping.find("default");
+			if (defaultIt != mapping.end())
+			{
+				return GetWarpballTemplateByName(defaultIt->second.c_str());
+			}
 		}
-		return nullptr;
 	}
-};
-
-static void AssignWarpballSound(WarpballSound& sound, Value& soundJson)
-{
-	if (soundJson.IsNull())
-	{
-		sound = WarpballSound();
-	}
-	else
-	{
-		UpdatePropertyFromJson(sound.sound, soundJson, "sound");
-		UpdatePropertyFromJson(sound.volume, soundJson, "volume");
-		UpdatePropertyFromJson(sound.pitch, soundJson, "pitch");
-		UpdatePropertyFromJson(sound.attenuation, soundJson, "attenuation");
-	}
+	return nullptr;
 }
 
-static void AssignWarpballSprite(WarpballSprite& sprite, Value& spriteJson)
+WarpballTemplate* WarpballTemplateCatalog::GetWarpballTemplateByName(const char* warpballName)
 {
-	if (spriteJson.IsNull())
+	auto it = _templates.find(warpballName);
+	if (it != _templates.end())
 	{
-		sprite = WarpballSprite();
+		return &it->second;
 	}
-	else
-	{
-		UpdatePropertyFromJson(sprite.sprite, spriteJson, "sprite");
-		UpdatePropertyFromJson(sprite.color, spriteJson, "color");
-		UpdatePropertyFromJson(sprite.alpha, spriteJson, "alpha");
-		UpdatePropertyFromJson(sprite.scale, spriteJson, "scale");
-		UpdatePropertyFromJson(sprite.framerate, spriteJson, "framerate");
-	}
-}
-
-static void AssignWarpballBeam(WarpballBeam& beam, Value& beamJson)
-{
-	if (beamJson.IsNull())
-	{
-		beam = WarpballBeam();
-	}
-	else
-	{
-		UpdatePropertyFromJson(beam.sprite, beamJson, "sprite");
-		UpdatePropertyFromJson(beam.color, beamJson, "color");
-		UpdatePropertyFromJson(beam.alpha, beamJson, "alpha");
-		UpdatePropertyFromJson(beam.width, beamJson, "width");
-		UpdatePropertyFromJson(beam.noise, beamJson, "noise");
-		UpdatePropertyFromJson(beam.life, beamJson, "life");
-	}
+	return nullptr;
 }
 
 static void AssignWarpballLight(WarpballLight& light, Value& lightJson)
@@ -412,11 +425,11 @@ static void AssignWarpballAiSound(WarpballAiSound& aiSound, Value& aiSoundJson)
 		if (it != aiSoundJson.MemberEnd())
 		{
 			const char* valStr = it->value.GetString();
-			if (FStrEq(valStr, "combat"))
+			if (stricmp(valStr, "combat") == 0)
 			{
 				aiSound.type = bits_SOUND_COMBAT;
 			}
-			else if (FStrEq(valStr, "danger"))
+			else if (stricmp(valStr, "danger") == 0)
 			{
 				aiSound.type = bits_SOUND_DANGER;
 			}
@@ -436,7 +449,7 @@ static void AssignWarpballPosition(WarpballPosition& pos, Value& posJson)
 	}
 }
 
-static bool AddWarpballTemplate(const char* fileName, WarpballTemplateCatalog& catalog, Value& allTemplatesJsonValue, const char* templateName, Value& templateJsonValue, std::vector<std::string> inheritanceChain = std::vector<std::string>())
+bool WarpballTemplateCatalog::AddWarpballTemplate(Value& allTemplatesJsonValue, const char* templateName, Value& templateJsonValue, const char* fileName, std::vector<std::string> inheritanceChain)
 {
 	if (std::find(inheritanceChain.begin(), inheritanceChain.end(), templateName) != inheritanceChain.end())
 	{
@@ -452,8 +465,8 @@ static bool AddWarpballTemplate(const char* fileName, WarpballTemplateCatalog& c
 		return false;
 	}
 
-	auto existingTemplateIt = catalog.templates.find(templateName);
-	if (existingTemplateIt != catalog.templates.end())
+	auto existingTemplateIt = _templates.find(templateName);
+	if (existingTemplateIt != _templates.end())
 	{
 		// Already added, has been used as parent for another template
 		return false;
@@ -465,8 +478,8 @@ static bool AddWarpballTemplate(const char* fileName, WarpballTemplateCatalog& c
 	if (inheritsIt != templateJsonValue.MemberEnd())
 	{
 		const char* parentName = inheritsIt->value.GetString();
-		existingTemplateIt = catalog.templates.find(parentName);
-		if (existingTemplateIt != catalog.templates.end())
+		existingTemplateIt = _templates.find(parentName);
+		if (existingTemplateIt != _templates.end())
 		{
 			warpballTemplate = existingTemplateIt->second;
 			inherited = true;
@@ -477,10 +490,10 @@ static bool AddWarpballTemplate(const char* fileName, WarpballTemplateCatalog& c
 			if (parentIt != allTemplatesJsonValue.MemberEnd())
 			{
 				inheritanceChain.push_back(templateName);
-				if (AddWarpballTemplate(fileName, catalog, allTemplatesJsonValue, parentName, parentIt->value, inheritanceChain))
+				if (AddWarpballTemplate(allTemplatesJsonValue, parentName, parentIt->value, fileName, inheritanceChain))
 				{
-					existingTemplateIt = catalog.templates.find(parentName);
-					if (existingTemplateIt != catalog.templates.end())
+					existingTemplateIt = _templates.find(parentName);
+					if (existingTemplateIt != _templates.end())
 					{
 						warpballTemplate = existingTemplateIt->second;
 						inherited = true;
@@ -546,97 +559,110 @@ static bool AddWarpballTemplate(const char* fileName, WarpballTemplateCatalog& c
 		AssignWarpballPosition(warpballTemplate.position, positionIt->value);
 	}
 	UpdatePropertyFromJson(warpballTemplate.spawnDelay, templateJsonValue, "spawn_delay");
-	catalog.templates[templateName] = warpballTemplate;
+	_templates[templateName] = warpballTemplate;
 	return true;
+}
+
+void WarpballTemplateCatalog::AssignWarpballSound(WarpballSound& sound, Value &soundJson)
+{
+	if (soundJson.IsNull())
+	{
+		sound = WarpballSound();
+	}
+	else
+	{
+		UpdateStringFromJson(sound.sound, soundJson, "sound");
+		UpdatePropertyFromJson(sound.volume, soundJson, "volume");
+		UpdatePropertyFromJson(sound.pitch, soundJson, "pitch");
+		UpdatePropertyFromJson(sound.attenuation, soundJson, "attenuation");
+	}
+}
+
+void WarpballTemplateCatalog::AssignWarpballSprite(WarpballSprite& sprite, rapidjson::Value& spriteJson)
+{
+	if (spriteJson.IsNull())
+	{
+		sprite = WarpballSprite();
+	}
+	else
+	{
+		UpdateStringFromJson(sprite.sprite, spriteJson, "sprite");
+		UpdatePropertyFromJson(sprite.color, spriteJson, "color");
+		UpdatePropertyFromJson(sprite.alpha, spriteJson, "alpha");
+		UpdatePropertyFromJson(sprite.scale, spriteJson, "scale");
+		UpdatePropertyFromJson(sprite.framerate, spriteJson, "framerate");
+	}
+}
+
+void WarpballTemplateCatalog::AssignWarpballBeam(WarpballBeam& beam, rapidjson::Value& beamJson)
+{
+	if (beamJson.IsNull())
+	{
+		beam = WarpballBeam();
+	}
+	else
+	{
+		UpdateStringFromJson(beam.sprite, beamJson, "sprite");
+		UpdatePropertyFromJson(beam.color, beamJson, "color");
+		UpdatePropertyFromJson(beam.alpha, beamJson, "alpha");
+		UpdatePropertyFromJson(beam.width, beamJson, "width");
+		UpdatePropertyFromJson(beam.noise, beamJson, "noise");
+		UpdatePropertyFromJson(beam.life, beamJson, "life");
+	}
+}
+
+bool WarpballTemplateCatalog::UpdateStringFromJson(const char*& str, rapidjson::Value& jsonValue, const char* key)
+{
+	auto it = jsonValue.FindMember(key);
+	if (it != jsonValue.MemberEnd())
+	{
+		str = MakeConstantString(it->value.GetString());
+		return true;
+	}
+	return false;
+}
+
+const char* WarpballTemplateCatalog::MakeConstantString(const char* str)
+{
+	auto strIt = _stringSet.find(str);
+	if (strIt == _stringSet.end())
+	{
+		auto p = _stringSet.insert(str);
+		strIt = p.first;
+	}
+	return strIt->c_str();
 }
 
 WarpballTemplateCatalog g_WarpballCatalog;
 
-void LoadWarpballTemplates()
-{
-	const char* fileName = "templates/warpball.json";
-	Document document;
-	if (!ReadJsonDocumentWithSchemaFromFile(document, fileName, warpballCatalogSchema))
-		return;
-
-	auto templatesIt = document.FindMember("templates");
-	if (templatesIt != document.MemberEnd())
-	{
-		auto& templates = templatesIt->value;
-		for (auto templateIt = templates.MemberBegin(); templateIt != templates.MemberEnd(); ++templateIt)
-		{
-			AddWarpballTemplate(fileName, g_WarpballCatalog, templates, templateIt->name.GetString(), templateIt->value);
-		}
-	}
-
-	auto mappingsIt = document.FindMember("entity_mappings");
-	if (mappingsIt != document.MemberEnd())
-	{
-		auto& entityMappings = mappingsIt->value;
-		for (auto mappingIt = entityMappings.MemberBegin(); mappingIt != entityMappings.MemberEnd(); mappingIt++)
-		{
-			const char* mappingName = mappingIt->name.GetString();
-			std::map<std::string, std::string> mapping;
-			auto& mappingJson = mappingIt->value;
-			for (auto pairIt = mappingJson.MemberBegin(); pairIt != mappingJson.MemberEnd(); ++pairIt)
-			{
-				auto entityName = pairIt->name.GetString();
-				auto warpballName = pairIt->value.GetString();
-				if (g_WarpballCatalog.templates.find(warpballName) == g_WarpballCatalog.templates.end())
-				{
-					g_errorCollector.AddFormattedError("%s: entity mapping '%s' refers to nonexistent template '%s'", fileName, mappingName, warpballName);
-				}
-				mapping[entityName] = warpballName;
-			}
-			if (mapping.find("default") == mapping.end())
-			{
-				g_errorCollector.AddFormattedError("%s: entity mapping '%s' doesn't define 'default' template", fileName, mappingName);
-			}
-			else
-			{
-				g_WarpballCatalog.entityMappings[mappingName] = mapping;
-			}
-		}
-	}
-}
-
+#if SERVER_DLL
 static void PrecaheWarpballSprite(WarpballSprite& sprite)
 {
-	if (sprite.sprite.empty())
+	if (sprite.sprite)
 	{
-		sprite.spriteName = iStringNull;
-		return;
+		PRECACHE_MODEL(sprite.sprite);
 	}
-	sprite.spriteName = MAKE_STRING(sprite.sprite.c_str());
-	PRECACHE_MODEL(STRING(sprite.spriteName));
 }
 
 static void PrecacheWarpballSound(WarpballSound& sound)
 {
-	if (sound.sound.empty())
+	if (sound.sound)
 	{
-		sound.soundName = iStringNull;
-		return;
+		PRECACHE_SOUND(sound.sound);
 	}
-	sound.soundName = MAKE_STRING(sound.sound.c_str());
-	PRECACHE_SOUND(STRING(sound.soundName));
 }
 
 static void PrecacheWarpballBeam(WarpballBeam& beam)
 {
-	if (beam.sprite.empty())
+	if (beam.sprite)
 	{
-		beam.spriteName = iStringNull;
-		beam.texture = 0;
-		return;
+		beam.texture = PRECACHE_MODEL(beam.sprite);
 	}
-	beam.spriteName = MAKE_STRING(beam.sprite.c_str());
-	beam.texture = PRECACHE_MODEL(STRING(beam.spriteName));
 }
 
-void PrecacheWarpballTemplate(const char* name, const char* entityClassname)
+void WarpballTemplateCatalog::PrecacheWarpballTemplate(const char* name, const char* entityClassname)
 {
-	WarpballTemplate* w = g_WarpballCatalog.GetWarpballTemplate(name, entityClassname);
+	WarpballTemplate* w = g_WarpballCatalog.GetWarpballTemplateMutable(name, entityClassname);
 	if (w)
 	{
 		PrecaheWarpballSprite(w->sprite1);
@@ -647,16 +673,11 @@ void PrecacheWarpballTemplate(const char* name, const char* entityClassname)
 	}
 }
 
-const WarpballTemplate* FindWarpballTemplate(const char* warpballName, const char* entityClassname)
-{
-	return g_WarpballCatalog.GetWarpballTemplate(warpballName, entityClassname);
-}
-
 static void PlayWarpballSprite(const WarpballSprite& sprite, const Vector& vecOrigin)
 {
-	if (!FStringNull(sprite.spriteName))
+	if (sprite.sprite != nullptr)
 	{
-		CSprite *pSpr = CSprite::SpriteCreate( STRING(sprite.spriteName), vecOrigin, TRUE );
+		CSprite *pSpr = CSprite::SpriteCreate( sprite.sprite, vecOrigin, TRUE );
 		pSpr->AnimateAndDie(sprite.framerate);
 		pSpr->SetTransparency(sprite.rendermode, sprite.color.r, sprite.color.g, sprite.color.b, sprite.alpha, sprite.renderfx);
 		pSpr->SetScale(sprite.scale > 0 ? sprite.scale : 1.0f);
@@ -665,9 +686,9 @@ static void PlayWarpballSprite(const WarpballSprite& sprite, const Vector& vecOr
 
 static void PlayWarpballSound(const WarpballSound& sound, const Vector& vecOrigin, edict_t* playSoundEnt)
 {
-	if (!FStringNull(sound.soundName))
+	if (sound.sound != nullptr)
 	{
-		UTIL_EmitAmbientSound(playSoundEnt, vecOrigin, STRING(sound.soundName), sound.volume, sound.attenuation, 0, RandomizeNumberFromRange(sound.pitch));
+		UTIL_EmitAmbientSound(playSoundEnt, vecOrigin, sound.sound, sound.volume, sound.attenuation, 0, RandomizeNumberFromRange(sound.pitch));
 	}
 }
 
@@ -721,14 +742,15 @@ void PlayWarpballEffect(const WarpballTemplate& warpball, const Vector &vecOrigi
 		CSoundEnt::InsertSound(aiSound.type, vecOrigin, aiSound.radius, aiSound.duration);
 	}
 }
+#endif
 
 static void ReportWarpballSprite(const WarpballSprite& sprite)
 {
-	if (sprite.sprite.empty()) {
-		ALERT(at_console, "undefined\n");
+	if (sprite.sprite == nullptr) {
+		LOG("undefined\n");
 	} else {
-		ALERT(at_console, "'%s'. Color: (%d, %d, %d). Alpha: %d. Scale: %g. Framerate: %g\n",
-			sprite.sprite.c_str(),
+		LOG("'%s'. Color: (%d, %d, %d). Alpha: %d. Scale: %g. Framerate: %g\n",
+			sprite.sprite,
 			sprite.color.r, sprite.color.g, sprite.color.b, sprite.alpha,
 			sprite.scale, sprite.framerate);
 	}
@@ -736,20 +758,20 @@ static void ReportWarpballSprite(const WarpballSprite& sprite)
 
 static void ReportWarpballSound(const WarpballSound& sound)
 {
-	if (sound.sound.empty()) {
-		ALERT(at_console, "undefined\n");
+	if (sound.sound == nullptr) {
+		LOG("undefined\n");
 	} else {
-		ALERT(at_console, "'%s'. Volume: %g. Attenuation: %g. Pitch: %d\n", sound.sound.c_str(), sound.volume, sound.attenuation, sound.pitch);
+		LOG("'%s'. Volume: %g. Attenuation: %g. Pitch: %d-%d\n", sound.sound, sound.volume, sound.attenuation, sound.pitch.min, sound.pitch.max);
 	}
 }
 
 static void ReportWarpballBeam(const WarpballBeam& beam)
 {
-	if (beam.sprite.empty()) {
-		ALERT(at_console, "undefined\n");
+	if (beam.sprite == nullptr) {
+		LOG("undefined\n");
 	} else {
-		ALERT(at_console, "'%s. Color: (%d, %d, %d). Alpha: %d. Width: %d. Noise: %d. Life: %g-%g\n",
-			beam.sprite.c_str(), beam.color.r, beam.color.g, beam.color.b, beam.alpha,
+		LOG("'%s. Color: (%d, %d, %d). Alpha: %d. Width: %d. Noise: %d. Life: %g-%g\n",
+			beam.sprite, beam.color.r, beam.color.g, beam.color.b, beam.alpha,
 			beam.width, beam.noise, beam.life.min, beam.life.max);
 	}
 }
@@ -757,65 +779,65 @@ static void ReportWarpballBeam(const WarpballBeam& beam)
 static void ReportWarpballLight(const WarpballLight& light)
 {
 	if (!light.IsDefined()) {
-		ALERT(at_console, "undefined\n");
+		LOG("undefined\n");
 	} else {
-		ALERT(at_console, "Color: (%d, %d, %d). Radius: %d. Life: %g\n", light.color.r, light.color.g, light.color.b, light.radius, light.life);
+		LOG("Color: (%d, %d, %d). Radius: %d. Life: %g\n", light.color.r, light.color.g, light.color.b, light.radius, light.life);
 	}
 }
 
 static void ReportWarpballShake(const WarpballShake& shake)
 {
 	if (!shake.IsDefined()) {
-		ALERT(at_console, "undefined\n");
+		LOG("undefined\n");
 	} else {
-		ALERT(at_console, "Amplitude: %d. Frequency: %g. Duration: %g. Radius: %d\n", shake.amplitude, shake.frequency, shake.duration, shake.radius);
+		LOG("Amplitude: %d. Frequency: %g. Duration: %g. Radius: %d\n", shake.amplitude, shake.frequency, shake.duration, shake.radius);
 	}
 }
 
 static void ReportWarpballAiSound(const WarpballAiSound& aiSound)
 {
 	if (!aiSound.IsDefined()) {
-		ALERT(at_console, "undefined\n");
+		LOG("undefined\n");
 	} else {
-		ALERT(at_console, "Type: %d. Radius: %d. Duration: %g\n", aiSound.type, aiSound.radius, aiSound.duration);
+		LOG("Type: %d. Radius: %d. Duration: %g\n", aiSound.type, aiSound.radius, aiSound.duration);
 	}
 }
 
-void DumpWarpballTemplates()
+void WarpballTemplateCatalog::DumpWarpballTemplates()
 {
-	for (auto it = g_WarpballCatalog.templates.begin(); it != g_WarpballCatalog.templates.end(); ++it)
+	for (auto it = _templates.begin(); it != _templates.end(); ++it)
 	{
 		const WarpballTemplate& w = it->second;
-		ALERT(at_console, "Warpball '%s'\n", it->first.c_str());
+		LOG("Warpball '%s'\n", it->first.c_str());
 
-		ALERT(at_console, "Sprite 1: ");
+		LOG("Sprite 1: ");
 		ReportWarpballSprite(w.sprite1);
-		ALERT(at_console, "Sprite 2: ");
+		LOG("Sprite 2: ");
 		ReportWarpballSprite(w.sprite2);
 
-		ALERT(at_console, "Sound 1: ");
+		LOG("Sound 1: ");
 		ReportWarpballSound(w.sound1);
-		ALERT(at_console, "Sound 2: ");
+		LOG("Sound 2: ");
 		ReportWarpballSound(w.sound2);
 
-		ALERT(at_console, "Beam: ");
+		LOG("Beam: ");
 		ReportWarpballBeam(w.beam);
 
-		ALERT(at_console, "Beam radius: %d\n", w.beamRadius);
-		ALERT(at_console, "Beam count: %d-%d\n", w.beamCount.min, w.beamCount.max);
+		LOG("Beam radius: %d\n", w.beamRadius);
+		LOG("Beam count: %d-%d\n", w.beamCount.min, w.beamCount.max);
 
-		ALERT(at_console, "Light: ");
+		LOG("Light: ");
 		ReportWarpballLight(w.light);
 
-		ALERT(at_console, "Shake: ");
+		LOG("Shake: ");
 		ReportWarpballShake(w.shake);
 
-		ALERT(at_console, "Delay before monster spawn: %g\n", w.spawnDelay);
+		LOG("Delay before monster spawn: %g\n", w.spawnDelay);
 		if (!w.position.IsDefined())
-			ALERT(at_console, "Position: default\n");
+			LOG("Position: default\n");
 		else
-			ALERT(at_console, "Position: Vertical shift: %g\n", w.position.verticalShift);
+			LOG("Position: Vertical shift: %g\n", w.position.verticalShift);
 
-		ALERT(at_console, "\n");
+		LOG("\n");
 	}
 }

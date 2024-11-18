@@ -406,7 +406,7 @@ void CMonsterMaker::Precache( void )
 		m_childIsValid = UTIL_PrecacheMonster( STRING(m_iszMonsterClassname), m_reverseRelationship, &m_defaultMinHullSize, &m_defaultMaxHullSize, entityOverrides );
 
 	if (!FStringNull(WarpballName()))
-		PrecacheWarpballTemplate(STRING(WarpballName()), STRING(m_iszMonsterClassname));
+		g_WarpballCatalog.PrecacheWarpballTemplate(STRING(WarpballName()), STRING(m_iszMonsterClassname));
 
 	UTIL_PrecacheOther("monstermaker_hull");
 }
@@ -855,7 +855,7 @@ CBaseEntity* CMonsterMaker::SpawnMonster(const Vector &placePosition, const Vect
 void CMonsterMaker::StartWarpballEffect(const Vector &vecPosition, edict_t* warpballSoundEnt)
 {
 	const char* warpballName = STRING(WarpballName());
-	const WarpballTemplate* warpballTemplate = FindWarpballTemplate(warpballName, STRING(m_iszMonsterClassname));
+	const WarpballTemplate* warpballTemplate = g_WarpballCatalog.FindWarpballTemplate(warpballName, STRING(m_iszMonsterClassname));
 	if (warpballTemplate)
 	{
 		PlayWarpballEffect(*warpballTemplate, vecPosition, warpballSoundEnt);
@@ -912,7 +912,7 @@ int CMonsterMaker::MakeMonster( void )
 
 	if (!FStringNull(warpballName))
 	{
-		const WarpballTemplate* w = FindWarpballTemplate(STRING(warpballName), STRING(m_iszMonsterClassname));
+		const WarpballTemplate* w = g_WarpballCatalog.FindWarpballTemplate(STRING(warpballName), STRING(m_iszMonsterClassname));
 		if (w)
 		{
 			if (spawnDelay == 0.0f)

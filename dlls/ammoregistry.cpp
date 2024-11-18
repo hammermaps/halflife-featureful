@@ -1,24 +1,14 @@
 #include <cstring>
 
 #include "ammoregistry.h"
-
-#if CLIENT_DLL
-#include "cl_dll.h"
-#define AMMO_LOG gEngfuncs.Con_DPrintf
-#define AMMO_ERROR gEngfuncs.Con_Printf
-#else
-#include "util.h"
-#define AMMO_LOG(...) ALERT(at_aiconsole, ##__VA_ARGS__ )
-#define AMMO_ERROR(...) ALERT(at_error, ##__VA_ARGS__ )
-#endif
 #include "arraysize.h"
-
+#include "logger.h"
+#include "string_utils.h"
 
 void AmmoType::SetName(const char *ammoName)
 {
 #if CLIENT_DLL
-	strncpy(name, ammoName, sizeof(name));
-	name[sizeof(name)-1] = '\0';
+	strncpyEnsureTermination(name, ammoName);
 #else
 	name = ammoName;
 #endif
@@ -42,20 +32,20 @@ int AmmoRegistry::Register(const char *name, int maxAmmo, bool exhaustible)
 		const AmmoType* type = GetByIndex(index);
 		if (type->maxAmmo != maxAmmo || type->exhaustible != exhaustible)
 		{
-			AMMO_ERROR("Trying to re-register ammo '%s' with different parameters\n", name);
+			LOG_ERROR("Trying to re-register ammo '%s' with different parameters\n", name);
 		}
 		return index;
 	}
 
 	if (lastAmmoIndex >= MAX_AMMO_TYPES - 1)
 	{
-		AMMO_ERROR("Too many ammo types. Max is %d\n", MAX_AMMO_TYPES-1);
+		LOG_ERROR("Too many ammo types. Max is %d\n", MAX_AMMO_TYPES-1);
 		return -1;
 	}
 
 	if (maxAmmo <= 0)
 	{
-		AMMO_ERROR("Invalid max ammo (%d) for '%s'\n", maxAmmo, name);
+		LOG_ERROR("Invalid max ammo (%d) for '%s'\n", maxAmmo, name);
 		return -1;
 	}
 
@@ -74,7 +64,7 @@ void AmmoRegistry::RegisterOnClient(const char *name, int maxAmmo, int index, bo
 		return;
 	if (index <= 0 || index >= MAX_AMMO_TYPES)
 	{
-		AMMO_ERROR("Invalid ammo index %d\n", index);
+		LOG_ERROR("Invalid ammo index %d\n", index);
 		return;
 	}
 	AmmoType& type = ammoTypes[index - 1];
@@ -158,7 +148,7 @@ void AmmoRegistry::ReportRegisteredTypes()
 
 void AmmoRegistry::ReportRegisteredType(const AmmoType& ammoType)
 {
-	AMMO_LOG("%s. Max ammo: %d. Index: %d. %s\n", ammoType.name, ammoType.maxAmmo, ammoType.id, ammoType.exhaustible ? "Exhaustible" : "");
+	LOG_DEV("%s. Max ammo: %d. Index: %d. %s\n", ammoType.name, ammoType.maxAmmo, ammoType.id, ammoType.exhaustible ? "Exhaustible" : "");
 }
 
 AmmoRegistry g_AmmoRegistry;

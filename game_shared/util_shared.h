@@ -14,4 +14,12 @@ extern float		UTIL_AngleDistance( float next, float cur );
 
 extern void			UTIL_StringToVector( float *pVector, const char *pString, int* componentsRead = nullptr );
 
+const char* RenderModeToString(int rendermode);
+const char* RenderFxToString(int renderfx);
+
+// Keeps clutter down a bit, when using a float as a bit-vector
+#define SetBits(flBitVector, bits)		((flBitVector) = (int)(flBitVector) | (bits))
+#define ClearBits(flBitVector, bits)	((flBitVector) = (int)(flBitVector) & ~(bits))
+#define FBitSet(flBitVector, bit)		((int)(flBitVector) & (bit))
+
 #endif

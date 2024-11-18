@@ -20,7 +20,6 @@
 #if !defined(CDLL_DLL_H)
 #define CDLL_DLL_H
 #include "player_items.h"
-#include "mod_features.h"
 
 #define MAX_WEAPONS		32
 

@@ -1,7 +1,8 @@
 #include "soundscripts.h"
-#include "util.h"
-#include "icase_compare.h"
 #include "error_collector.h"
+#include "logger.h"
+#include "min_and_max.h"
+#include "random_utils.h"
 
 #include <map>
 #include <set>
@@ -20,40 +21,23 @@ const char* soundScriptsSchema = R"(
 }
 )";
 
-SoundScript::SoundScript(): waves(), waveCount(0), channel(CHAN_AUTO), volume(VOL_NORM), attenuation(ATTN_NORM), pitch(PITCH_NORM) {}
+SoundScript::SoundScript(): waves(), channel(CHAN_AUTO), volume(VOL_NORM), attenuation(ATTN_NORM), pitch(PITCH_NORM) {}
 
 SoundScript::SoundScript(int soundChannel, std::initializer_list<const char*> sounds, FloatRange soundVolume, float soundAttenuation, IntRange soundPitch)
-	: channel(soundChannel), volume(soundVolume), attenuation(soundAttenuation), pitch(soundPitch)
-{
-	SetSoundList(sounds);
-}
+	: waves(sounds), channel(soundChannel), volume(soundVolume), attenuation(soundAttenuation), pitch(soundPitch)
+{}
 
 SoundScript::SoundScript(int soundChannel, std::initializer_list<const char *> sounds, IntRange soundPitch)
-	: channel(soundChannel), volume(VOL_NORM), attenuation(ATTN_NORM), pitch(soundPitch)
-{
-	SetSoundList(sounds);
-}
-
-void SoundScript::SetSoundList(std::initializer_list<const char *> sounds)
-{
-	waveCount = Q_min(sounds.size(), MAX_RANDOM_SOUNDS);
-	size_t i = 0;
-	for (auto it = sounds.begin(); it != sounds.end(); ++it)
-	{
-		waves[i] = *it;
-		++i;
-		if (i >= waveCount)
-			break;
-	}
-}
+	: waves(sounds), channel(soundChannel), volume(VOL_NORM), attenuation(ATTN_NORM), pitch(soundPitch)
+{}
 
 const char* SoundScript::Wave() const
 {
-	if (waveCount > 1)
+	if (waves.size() > 1)
 	{
-		return waves[RANDOM_LONG(0, waveCount - 1)];
+		return waves[RandomInt(0, waves.size() - 1)];
 	}
-	else if (waveCount == 1)
+	else if (waves.size() == 1)
 	{
 		return waves[0];
 	}
@@ -208,12 +192,13 @@ static bool ParseAttenuation(const char* str, float& attenuation)
 	return false;
 }
 
-bool SoundScriptSystem::ReadFromFile(const char *fileName)
+const char* SoundScriptSystem::Schema() const
 {
-	Document document;
-	if (!ReadJsonDocumentWithSchemaFromFile(document, fileName, soundScriptsSchema))
-		return false;
+	return soundScriptsSchema;
+}
 
+bool SoundScriptSystem::ReadFromDocument(Document& document, const char* fileName)
+{
 	for (auto scriptIt = document.MemberBegin(); scriptIt != document.MemberEnd(); ++scriptIt)
 	{
 		const char* name = scriptIt->name.GetString();
@@ -238,8 +223,7 @@ void SoundScriptSystem::AddSoundScriptFromJsonValue(const char *name, Value &val
 		if (it != value.MemberEnd())
 		{
 			Value::Array arr = it->value.GetArray();
-			soundScript.waveCount = arr.Size();
-			for (size_t i=0; i<soundScript.waveCount; ++i)
+			for (size_t i=0; i<arr.Size(); ++i)
 			{
 				std::string str = arr[i].GetString();
 				auto strIt = _waveStringSet.find(str);
@@ -248,7 +232,7 @@ void SoundScriptSystem::AddSoundScriptFromJsonValue(const char *name, Value &val
 					auto p = _waveStringSet.insert(str);
 					strIt = p.first;
 				}
-				soundScript.waves[i] = strIt->c_str();
+				soundScript.waves.push_back(strIt->c_str());
 			}
 			soundScriptMeta.wavesSet = true;
 		}
@@ -310,7 +294,6 @@ void SoundScriptSystem::EnsureExistingScriptDefined(SoundScript& existing, Sound
 		if (!meta.wavesSet)
 		{
 			existing.waves = soundScript.waves;
-			existing.waveCount = soundScript.waveCount;
 		}
 
 		if (!meta.channelSet)
@@ -403,66 +386,66 @@ const SoundScript* SoundScriptSystem::ProvideDefaultSoundScript(const char *deri
 
 void SoundScriptSystem::DumpSoundScriptImpl(const char *name, const SoundScript &soundScript, const SoundScriptMeta &meta)
 {
-	ALERT(at_console, "%s:\n", name);
+	LOG("%s:\n", name);
 
-	ALERT(at_console, "Waves: ");
+	LOG("Waves: ");
 	if (meta.wavesSet)
 	{
-		for (size_t i=0; i<soundScript.waveCount; ++i)
+		for (size_t i=0; i<soundScript.waves.size(); ++i)
 		{
-			ALERT(at_console, "\"%s\"; ", soundScript.waves[i]);
+			LOG("\"%s\"; ", soundScript.waves[i]);
 		}
-		ALERT(at_console, "\n");
+		LOG("\n");
 	}
 	else
 	{
-		ALERT(at_console, "%s\n", notDefinedYet);
+		LOG("%s\n", notDefinedYet);
 	}
 
-	ALERT(at_console, "Channel: %s. ", meta.channelSet ? ChannelToString(soundScript.channel) : notDefinedYet);
+	LOG("Channel: %s. ", meta.channelSet ? ChannelToString(soundScript.channel) : notDefinedYet);
 
-	ALERT(at_console, "Volume: ");
+	LOG("Volume: ");
 	if (meta.volumeSet)
 	{
 		if (soundScript.volume.max <= soundScript.volume.min)
 		{
-			ALERT(at_console, "%g. ", soundScript.volume.min);
+			LOG("%g. ", soundScript.volume.min);
 		}
 		else
 		{
-			ALERT(at_console, "%g-%g. ", soundScript.volume.min, soundScript.volume.max);
+			LOG("%g-%g. ", soundScript.volume.min, soundScript.volume.max);
 		}
 	}
 	else
 	{
-		ALERT(at_console, "%s. ", notDefinedYet);
+		LOG("%s. ", notDefinedYet);
 	}
 
-	ALERT(at_console, "Attenuation: ");
+	LOG("Attenuation: ");
 	if (meta.attenuationSet)
 	{
-		ALERT(at_console, "%g. ", soundScript.attenuation);
+		LOG("%g. ", soundScript.attenuation);
 	}
 	else
 	{
-		ALERT(at_console, "%s. ", notDefinedYet);
+		LOG("%s. ", notDefinedYet);
 	}
 
-	ALERT(at_console, "Pitch: ");
+	LOG("Pitch: ");
 	if (meta.pitchSet)
 	{
 		if (soundScript.pitch.max <= soundScript.pitch.min)
 		{
-			ALERT(at_console, "%d\n\n", soundScript.pitch.min);
+			LOG("%d\n\n", soundScript.pitch.min);
 		}
 		else
 		{
-			ALERT(at_console, "%d-%d\n\n", soundScript.pitch.min, soundScript.pitch.max);
+			LOG("%d-%d\n\n", soundScript.pitch.min, soundScript.pitch.max);
 		}
 	}
 	else
 	{
-		ALERT(at_console, "%s\n\n", notDefinedYet);
+		LOG("%s\n\n", notDefinedYet);
 	}
 }
 
@@ -502,19 +485,7 @@ void SoundScriptSystem::DumpSoundScript(const char *name)
 			return;
 		}
 	}
-	ALERT(at_console, "Couldn't find a sound script for %s\n", name);
+	LOG("Couldn't find a sound script for %s\n", name);
 }
 
 SoundScriptSystem g_SoundScriptSystem;
-
-void DumpSoundScripts()
-{
-	int argc = CMD_ARGC();
-	if (argc > 1)
-	{
-		for (int i=1; i<argc; ++i)
-			g_SoundScriptSystem.DumpSoundScript(CMD_ARGV(i));
-	}
-	else
-		g_SoundScriptSystem.DumpSoundScripts();
-}

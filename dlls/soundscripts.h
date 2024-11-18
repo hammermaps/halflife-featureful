@@ -9,10 +9,12 @@
 #include <array>
 #include "rapidjson/document.h"
 #include "template_property_types.h"
+#include "json_config.h"
 
 #include <map>
 #include <set>
 #include <string>
+#include "fixed_vector.h"
 #include "icase_compare.h"
 
 constexpr size_t MAX_RANDOM_SOUNDS = 10;
@@ -22,17 +24,13 @@ struct SoundScript
 	SoundScript();
 	SoundScript(int soundChannel, std::initializer_list<const char*> sounds, FloatRange soundVolume, float soundAttenuation, IntRange soundPitch = PITCH_NORM);
 	SoundScript(int soundChannel, std::initializer_list<const char*> sounds, IntRange soundPitch = PITCH_NORM);
-	std::array<const char*, MAX_RANDOM_SOUNDS> waves;
-	size_t waveCount;
+	fixed_vector<const char*, MAX_RANDOM_SOUNDS> waves;
 	int channel;
 	FloatRange volume;
 	float attenuation;
 	IntRange pitch;
 
 	const char* Wave() const;
-
-private:
-	void SetSoundList(std::initializer_list<const char*> sounds);
 };
 
 struct NamedSoundScript : public SoundScript
@@ -95,16 +93,18 @@ struct SoundScriptMeta
 	bool pitchSet = false;
 };
 
-class SoundScriptSystem
+class SoundScriptSystem : public JSONConfig
 {
 public:
-	bool ReadFromFile(const char* fileName);
 	void AddSoundScriptFromJsonValue(const char* name, rapidjson::Value& value);
 	const SoundScript* GetSoundScript(const char* name);
 	const SoundScript* ProvideDefaultSoundScript(const char* name, const SoundScript& soundScript);
 	const SoundScript* ProvideDefaultSoundScript(const char* derivative, const char* base, const SoundScript& soundScript, const SoundScriptParamOverride paramOverride = SoundScriptParamOverride());
 	void DumpSoundScripts();
 	void DumpSoundScript(const char* name);
+protected:
+	const char* Schema() const;
+	bool ReadFromDocument(rapidjson::Document& document, const char* fileName);
 private:
 	void DumpSoundScriptImpl(const char* name, const SoundScript& soundScript, const SoundScriptMeta& meta);
 	void EnsureExistingScriptDefined(SoundScript& existing, SoundScriptMeta& meta, const SoundScript& soundScript);
@@ -117,7 +117,5 @@ private:
 };
 
 extern SoundScriptSystem g_SoundScriptSystem;
-
-void DumpSoundScripts();
 
 #endif

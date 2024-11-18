@@ -1,5 +1,6 @@
 #include "util_shared.h"
 #include "string_utils.h"
+#include "const_render.h"
 #include <cmath>
 #include <cstdlib>
 
@@ -219,5 +220,49 @@ void UTIL_StringToVector( float *pVector, const char *pString, int* componentsRe
 		*/
 		for( j = j + 1;j < 3; j++ )
 			pVector[j] = 0;
+	}
+}
+
+const char* RenderModeToString(int rendermode)
+{
+	switch (rendermode) {
+	case kRenderNormal:
+		return "Normal";
+	case kRenderTransColor:
+		return "Color";
+	case kRenderTransTexture:
+		return "Texture";
+	case kRenderGlow:
+		return "Glow";
+	case kRenderTransAlpha:
+		return "Solid";
+	case kRenderTransAdd:
+		return "Additive";
+	default:
+		return "Unknown";
+	}
+}
+
+const char* RenderFxToString(int renderfx)
+{
+	switch (renderfx) {
+	case kRenderFxNone:			return "Normal";
+	case kRenderFxPulseSlow:	return "Slow Pulse";
+	case kRenderFxPulseFast:	return "Fast Pulse";
+	case kRenderFxPulseSlowWide:return "Slow Wide Pulse";
+	case kRenderFxFadeSlow:		return "Slow Fade Away";
+	case kRenderFxFadeFast:		return "Fast Fade Away";
+	case kRenderFxSolidSlow:	return "Slow Become Solid";
+	case kRenderFxSolidFast:	return "Fast Become Solid";
+	case kRenderFxStrobeSlow:	return "Slow Strobe";
+	case kRenderFxStrobeFast:	return "Fast Strobe";
+	case kRenderFxStrobeFaster:	return "Faster Strobe";
+	case kRenderFxFlickerSlow:	return "Slow Flicker";
+	case kRenderFxFlickerFast:	return "Fast Flicker";
+	case kRenderFxNoDissipation:return "Constant Glow";
+	case kRenderFxDistort:		return "Distort";
+	case kRenderFxHologram:		return "Hologram";
+	case kRenderFxGlowShell:	return "Glow Shell";
+	default: return "Unknown";
 	}
 }
