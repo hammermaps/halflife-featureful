@@ -110,6 +110,7 @@ public:
 	int m_iTargetRanderamt;
 
 	int m_iFrustration;
+	float m_nextWalkFootstep;
 
 	int m_iShell;
 
@@ -825,13 +826,21 @@ void CHAssassin::RunAI( void )
 			pev->rendermode = kRenderNormal;
 	}
 
-	if( m_Activity == ACT_RUN || m_Activity == ACT_WALK )
+	if( m_Activity == ACT_RUN )
 	{
 		static int iStep = 0;
 		iStep = !iStep;
 		if( iStep )
 		{
 			EmitSoundScript(footstepSoundScript);
+		}
+	}
+	else if (m_Activity == ACT_WALK)
+	{
+		if (m_nextWalkFootstep <= gpGlobals->time)
+		{
+			EmitSoundScript(footstepSoundScript);
+			m_nextWalkFootstep = gpGlobals->time + 0.58f;
 		}
 	}
 }
