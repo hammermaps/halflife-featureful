@@ -1870,6 +1870,7 @@
 	width(integer) : "Width of beam (pixels*0.1 0-255)" : 20
 	NoiseAmplitude(integer) : "Amount of noise (0-255)" : 0
 	texture(sprite) : "Sprite Name" : "sprites/laserbeam.spr"
+	StartSprite(sprite) : "Start Sprite" : ""
 	EndSprite(sprite) : "End Sprite" : ""
 	TextureScroll(integer) : "Texture Scroll Rate (0-100)" : 35
 	framestart(integer) : "Starting Frame" : 0

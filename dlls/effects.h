@@ -318,6 +318,7 @@ public:
 	void	Precache( void );
 	void	KeyValue( KeyValueData *pkvd );
 
+	CSprite* CreateTerminalSprite(string_t spriteName);
 	void	TurnOn( void );
 	void	TurnOff( void );
 	int	IsOn( void );
@@ -330,8 +331,10 @@ public:
 	virtual int		Restore( CRestore &restore );
 	static	TYPEDESCRIPTION m_SaveData[];
 
-	CSprite	*m_pSprite;
-	string_t	m_iszSpriteName;
+	CSprite	*m_pStartSprite;
+	CSprite	*m_pEndSprite;
+	string_t	m_iszStartSpriteName;
+	string_t	m_iszEndSpriteName;
 	Vector	m_firePosition;
 };
 

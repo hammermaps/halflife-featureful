@@ -1008,12 +1008,28 @@ LINK_ENTITY_TO_CLASS( env_laser, CLaser )
 
 TYPEDESCRIPTION	CLaser::m_SaveData[] =
 {
-	DEFINE_FIELD( CLaser, m_pSprite, FIELD_CLASSPTR ),
-	DEFINE_FIELD( CLaser, m_iszSpriteName, FIELD_STRING ),
+	DEFINE_FIELD( CLaser, m_pStartSprite, FIELD_CLASSPTR ),
+	DEFINE_FIELD( CLaser, m_pEndSprite, FIELD_CLASSPTR ),
+	DEFINE_FIELD( CLaser, m_iszStartSpriteName, FIELD_STRING ),
+	DEFINE_FIELD( CLaser, m_iszEndSpriteName, FIELD_STRING ),
 	DEFINE_FIELD( CLaser, m_firePosition, FIELD_POSITION_VECTOR ),
 };
 
 IMPLEMENT_SAVERESTORE( CLaser, CBeam )
+
+CSprite* CLaser::CreateTerminalSprite(string_t spriteName)
+{
+	CSprite* pSprite = nullptr;
+	if(spriteName)
+	{
+		pSprite = CSprite::SpriteCreate( STRING(spriteName), pev->origin, TRUE );
+		if (pSprite)
+		{
+			pSprite->SetTransparency( kRenderGlow, (int)pev->rendercolor.x, (int)pev->rendercolor.y, (int)pev->rendercolor.z, (int)pev->renderamt, (int)pev->renderfx );
+		}
+	}
+	return pSprite;
+}
 
 void CLaser::Spawn( void )
 {
@@ -1030,13 +1046,8 @@ void CLaser::Spawn( void )
 
 	PointsInit( pev->origin, pev->origin );
 
-	if( !m_pSprite && m_iszSpriteName )
-		m_pSprite = CSprite::SpriteCreate( STRING( m_iszSpriteName ), pev->origin, TRUE );
-	else
-		m_pSprite = NULL;
-
-	if( m_pSprite )
-		m_pSprite->SetTransparency( kRenderGlow, (int)pev->rendercolor.x, (int)pev->rendercolor.y, (int)pev->rendercolor.z, (int)pev->renderamt, (int)pev->renderfx );
+	m_pStartSprite = CreateTerminalSprite(m_iszStartSpriteName);
+	m_pEndSprite = CreateTerminalSprite(m_iszEndSpriteName);
 
 	if( pev->targetname && !( pev->spawnflags & SF_BEAM_STARTON ) )
 		TurnOff();
@@ -1047,8 +1058,8 @@ void CLaser::Spawn( void )
 void CLaser::Precache( void )
 {
 	pev->modelindex = PRECACHE_MODEL( STRING( pev->model ) );
-	if( m_iszSpriteName )
-		PRECACHE_MODEL( STRING( m_iszSpriteName ) );
+	if( m_iszEndSpriteName )
+		PRECACHE_MODEL( STRING( m_iszEndSpriteName ) );
 }
 
 void CLaser::KeyValue( KeyValueData *pkvd )
@@ -1078,9 +1089,14 @@ void CLaser::KeyValue( KeyValueData *pkvd )
 		pev->model = ALLOC_STRING( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
+	else if (FStrEq(pkvd->szKeyName, "StartSprite"))
+	{
+		m_iszStartSpriteName = ALLOC_STRING(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
 	else if( FStrEq( pkvd->szKeyName, "EndSprite" ) )
 	{
-		m_iszSpriteName = ALLOC_STRING( pkvd->szValue );
+		m_iszEndSpriteName = ALLOC_STRING( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else if( FStrEq( pkvd->szKeyName, "framestart" ) )
@@ -1108,15 +1124,19 @@ void CLaser::TurnOff( void )
 {
 	pev->effects |= EF_NODRAW;
 	pev->nextthink = 0;
-	if( m_pSprite )
-		m_pSprite->TurnOff();
+	if( m_pStartSprite )
+		m_pStartSprite->TurnOff();
+	if( m_pEndSprite )
+		m_pEndSprite->TurnOff();
 }
 
 void CLaser::TurnOn( void )
 {
 	pev->effects &= ~EF_NODRAW;
-	if( m_pSprite )
-		m_pSprite->TurnOn();
+	if( m_pStartSprite )
+		m_pStartSprite->TurnOn();
+	if( m_pEndSprite )
+		m_pEndSprite->TurnOn();
 	pev->dmgtime = gpGlobals->time;
 	pev->nextthink = gpGlobals->time;
 }
@@ -1140,8 +1160,10 @@ void CLaser::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useTyp
 void CLaser::FireAtPoint(TraceResult &tr , entvars_t *pevAttacker)
 {
 	SetEndPos( tr.vecEndPos );
-	if( m_pSprite )
-		UTIL_SetOrigin( m_pSprite->pev, tr.vecEndPos );
+	if( m_pStartSprite )
+		UTIL_SetOrigin( m_pStartSprite->pev, pev->origin );
+	if( m_pEndSprite )
+		UTIL_SetOrigin( m_pEndSprite->pev, tr.vecEndPos );
 
 	BeamDamage( &tr, pevAttacker );
 	DoSparks( GetStartPos(), tr.vecEndPos );
