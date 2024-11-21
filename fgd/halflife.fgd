@@ -1621,6 +1621,7 @@
 		256: "Shade End" : 0
 		512: "Draw Solid" : 0
 		1024: "Draw Sine" : 0
+		4096: "No Camera Punch" : 0
 	]
 ]
 
@@ -1879,6 +1880,7 @@
 		16: "StartSparks" : 0
 		32: "EndSparks" : 0
 		64: "Decal End" : 0
+		4096: "No Camera Punch" : 0
 	]
 ]
 

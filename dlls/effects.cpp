@@ -755,7 +755,10 @@ void CBeam::BeamDamage(TraceResult *ptr , entvars_t *pevAttacker)
 		CBaseEntity *pHit = CBaseEntity::Instance( ptr->pHit );
 		if( pHit )
 		{
-			pHit->ApplyTraceAttack( pev, pevAttacker ? pevAttacker : pev, pev->dmg * ( gpGlobals->time - pev->dmgtime ), ( ptr->vecEndPos - pev->origin ).Normalize(), ptr, DMG_ENERGYBEAM );
+			int dmgType = DMG_ENERGYBEAM;
+			if (FBitSet(pev->spawnflags, SF_BEAM_NO_PUNCH))
+				dmgType |= DMG_NO_PUNCH;
+			pHit->ApplyTraceAttack( pev, pevAttacker ? pevAttacker : pev, pev->dmg * ( gpGlobals->time - pev->dmgtime ), ( ptr->vecEndPos - pev->origin ).Normalize(), ptr, dmgType );
 			if( pev->spawnflags & SF_BEAM_DECALS )
 			{
 				if( pHit->IsBSPModel() )
