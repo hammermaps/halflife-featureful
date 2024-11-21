@@ -41,7 +41,7 @@ public:
 		return *this;
 	}
 	template<size_t M>
-	fixed_vector<T, N>& operator=(const fixed_vector& o)
+	fixed_vector<T, N>& operator=(const fixed_vector<T, M>& o)
 	{
 		setVector(o);
 	}
