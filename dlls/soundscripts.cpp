@@ -172,26 +172,6 @@ static const char* ChannelToString(int channel)
 	}
 }
 
-static bool ParseAttenuation(const char* str, float& attenuation)
-{
-	constexpr std::pair<const char*, float> attenuations[] = {
-		{"norm", ATTN_NORM},
-		{"idle", ATTN_IDLE},
-		{"static", ATTN_STATIC},
-		{"none", ATTN_NONE},
-	};
-
-	for (auto& p : attenuations)
-	{
-		if (stricmp(str, p.first) == 0)
-		{
-			attenuation = p.second;
-			return true;
-		}
-	}
-	return false;
-}
-
 const char* SoundScriptSystem::Schema() const
 {
 	return soundScriptsSchema;
@@ -249,16 +229,7 @@ void SoundScriptSystem::AddSoundScriptFromJsonValue(const char *name, Value &val
 		auto it = value.FindMember("attenuation");
 		if (it != value.MemberEnd())
 		{
-			Value& attnValue = it->value;
-			if (attnValue.IsString())
-			{
-				soundScriptMeta.attenuationSet = ParseAttenuation(attnValue.GetString(), soundScript.attenuation);
-			}
-			else if (attnValue.IsNumber())
-			{
-				soundScript.attenuation = attnValue.GetFloat();
-				soundScriptMeta.attenuationSet = true;
-			}
+			soundScriptMeta.attenuationSet = UpdateAttenuationFromJson(soundScript.attenuation, it->value);
 		}
 	}
 	soundScriptMeta.pitchSet = UpdatePropertyFromJson(soundScript.pitch, value, "pitch");

@@ -91,7 +91,7 @@ const char warpballs[] = R"(
 				"pitch": 105
 			},
 			"sound2": {
-				"attenuation": 1.1,
+				"attenuation": "static",
 				"volume": 0.8,
 				"pitch": 110
 			},
@@ -158,7 +158,7 @@ const char warpballs[] = R"(
 				"amplitude": 6
 			},
 			"sound1": {
-				"attenuation": 0.6
+				"attenuation": "none"
 			},
 			"sound2": {
 				"attenuation": 0.6
@@ -268,7 +268,7 @@ TEST(WarpballTemplates, Parse) {
 		EXPECT_EQ(t->sound1.pitch, 105);
 
 		EXPECT_STREQ(t->sound2.sound, xen->sound2.sound);
-		EXPECT_EQ(t->sound2.attenuation, 1.1f);
+		EXPECT_EQ(t->sound2.attenuation, ATTN_STATIC);
 		EXPECT_EQ(t->sound2.volume, 0.8f);
 		EXPECT_EQ(t->sound2.pitch, 110);
 
@@ -306,7 +306,7 @@ TEST(WarpballTemplates, Parse) {
 		EXPECT_EQ(t->sprite2.sprite, nullptr);
 		EXPECT_EQ(t->beam.color, Color(240, 80, 160));
 		EXPECT_EQ(t->sound1.pitch, 105);
-		EXPECT_EQ(t->sound1.attenuation, 0.6f);
+		EXPECT_EQ(t->sound1.attenuation, ATTN_NONE);
 
 		EXPECT_TRUE(t->shake.IsDefined());
 	}

@@ -1,6 +1,7 @@
 #include "file_utils.h"
 #include "json_utils.h"
 #include "logger.h"
+#include "const_sound.h"
 
 #include "color_utils.h"
 #include "parsetext.h"
@@ -75,6 +76,26 @@ constexpr const char definitions[] = R"(
     "minItems": 3,
     "maxItems": 3
   },
+  "attenuation": {
+    "oneof": [
+      {
+        "enum": [
+          "Norm",
+          "norm",
+          "Idle",
+          "idle",
+          "Static",
+          "static",
+          "None",
+          "none"
+        ]
+      },
+      {
+        "type": "number",
+        "minimum": 0
+      }
+    ]
+  },
   "soundscript": {
     "type": ["object", "string"],
     "properties": {
@@ -105,24 +126,7 @@ constexpr const char definitions[] = R"(
         "$ref": "#/range"
       },
       "attenuation": {
-        "oneof": [
-          {
-            "enum": [
-              "Norm",
-              "norm",
-              "Idle",
-              "idle",
-              "Static",
-              "static",
-              "None",
-              "none"
-            ]
-          },
-          {
-            "type": "number",
-            "minimum": 0
-          }
-        ]
+        "$ref": "#/attenuation"
       },
       "pitch": {
         "$ref": "#/range_int"
@@ -560,6 +564,40 @@ bool UpdatePropertyFromJson(Vector& vector, Value& jsonValue, const char* key)
 		vector.y = arr[1].GetFloat();
 		vector.z = arr[2].GetFloat();
 
+		return true;
+	}
+	return false;
+}
+
+static bool ParseAttenuation(const char* str, float& attenuation)
+{
+	constexpr std::pair<const char*, float> attenuations[] = {
+		{"norm", ATTN_NORM},
+		{"idle", ATTN_IDLE},
+		{"static", ATTN_STATIC},
+		{"none", ATTN_NONE},
+	};
+
+	for (auto& p : attenuations)
+	{
+		if (stricmp(str, p.first) == 0)
+		{
+			attenuation = p.second;
+			return true;
+		}
+	}
+	return false;
+}
+
+bool UpdateAttenuationFromJson(float& attn, Value& jsonValue)
+{
+	if (jsonValue.IsString())
+	{
+		return ParseAttenuation(jsonValue.GetString(), attn);
+	}
+	else if (jsonValue.IsNumber())
+	{
+		attn = jsonValue.GetFloat();
 		return true;
 	}
 	return false;

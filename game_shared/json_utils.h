@@ -19,5 +19,6 @@ bool UpdatePropertyFromJson(Color& color, rapidjson::Value& jsonValue, const cha
 bool UpdatePropertyFromJson(FloatRange& floatRange, rapidjson::Value& jsonValue, const char* key);
 bool UpdatePropertyFromJson(IntRange& intRange, rapidjson::Value& jsonValue, const char* key);
 bool UpdatePropertyFromJson(Vector& vector, rapidjson::Value& jsonValue, const char* key);
+bool UpdateAttenuationFromJson(float& attn, rapidjson::Value& jsonValue);
 
 #endif

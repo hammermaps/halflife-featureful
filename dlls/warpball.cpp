@@ -78,8 +78,7 @@ const char warpballCatalogSchema[] = R"(
           "$ref": "definitions.json#/range_int"
         },
         "attenuation": {
-          "type": "number",
-          "minimum": 0
+          "$ref": "definitions.json#/attenuation",
         }
       },
       "additionalProperties": false
@@ -574,7 +573,12 @@ void WarpballTemplateCatalog::AssignWarpballSound(WarpballSound& sound, Value &s
 		UpdateStringFromJson(sound.sound, soundJson, "sound");
 		UpdatePropertyFromJson(sound.volume, soundJson, "volume");
 		UpdatePropertyFromJson(sound.pitch, soundJson, "pitch");
-		UpdatePropertyFromJson(sound.attenuation, soundJson, "attenuation");
+
+		auto attnIt = soundJson.FindMember("attenuation");
+		if (attnIt != soundJson.MemberEnd())
+		{
+			UpdateAttenuationFromJson(sound.attenuation, attnIt->value);
+		}
 	}
 }
 
