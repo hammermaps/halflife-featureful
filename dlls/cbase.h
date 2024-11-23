@@ -272,8 +272,16 @@ public:
 	const SoundScript* GetSoundScript(const char* name);
 	bool EmitSoundScript(const SoundScript* soundScript, const SoundScriptParamOverride paramsOverride = SoundScriptParamOverride(), int flags = 0);
 	bool EmitSoundScript(const char* name, const SoundScriptParamOverride paramsOverride = SoundScriptParamOverride(), int flags = 0);
+	bool EmitSoundScriptSelectedSample(const SoundScript* soundScript, int sampleIndex, const SoundScriptParamOverride paramsOverride = SoundScriptParamOverride(), int flags = 0);
+	bool EmitSoundScriptSelectedSample(const SoundScript* soundScript, const char* sample, const SoundScriptParamOverride paramsOverride = SoundScriptParamOverride(), int flags = 0);
+	bool EmitSoundScriptSelectedSample(const char* name, int sampleIndex, const SoundScriptParamOverride paramsOverride = SoundScriptParamOverride(), int flags = 0);
+	bool EmitSoundScriptSelectedSample(const char* name, const char* sample, const SoundScriptParamOverride paramsOverride = SoundScriptParamOverride(), int flags = 0);
 	void StopSoundScript(const SoundScript* soundScript);
 	void StopSoundScript(const char* name);
+	void StopSoundScriptSelectedSample(const SoundScript* soundScript, int sampleIndex);
+	void StopSoundScriptSelectedSample(const SoundScript* soundScript, const char* sample);
+	void StopSoundScriptSelectedSample(const char* name, int sampleIndex);
+	void StopSoundScriptSelectedSample(const char* name, const char* sample);
 	void EmitSoundScriptAmbient(const Vector& vecOrigin, const SoundScript* soundScript, const SoundScriptParamOverride paramsOverride = SoundScriptParamOverride(), int flags = 0);
 	void EmitSoundScriptAmbient(const Vector& vecOrigin, const char* name, const SoundScriptParamOverride paramsOverride = SoundScriptParamOverride(), int flags = 0);
 	void PrecacheSoundScript(const SoundScript& soundScript);

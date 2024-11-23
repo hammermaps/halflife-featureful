@@ -44,6 +44,13 @@ const char* SoundScript::Wave() const
 	return nullptr;
 }
 
+const char* SoundScript::Wave(int index) const
+{
+	if (index >= 0 && index < waves.size())
+		return waves[index];
+	return nullptr;
+}
+
 void SoundScriptParamOverride::OverrideVolumeAbsolute(FloatRange newVolume)
 {
 	volumeOverride = OVERRIDE_ABSOLUTE;

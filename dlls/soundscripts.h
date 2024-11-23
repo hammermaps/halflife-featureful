@@ -31,6 +31,7 @@ struct SoundScript
 	IntRange pitch;
 
 	const char* Wave() const;
+	const char* Wave(int index) const;
 };
 
 struct NamedSoundScript : public SoundScript

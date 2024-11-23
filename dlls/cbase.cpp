@@ -780,17 +780,7 @@ bool CBaseEntity::EmitSoundScript(const SoundScript *soundScript, const SoundScr
 	if (soundScript)
 	{
 		const char* sample = soundScript->Wave();
-		if (sample)
-		{
-			int channel = soundScript->channel;
-			FloatRange volume = soundScript->volume;
-			float attenuation = soundScript->attenuation;
-			IntRange pitch = soundScript->pitch;
-
-			paramsOverride.ApplyOverride(channel, volume, attenuation, pitch);
-
-			return EmitSoundDyn(soundScript->channel, sample, RandomizeNumberFromRange(volume), attenuation, flags, RandomizeNumberFromRange(pitch));
-		}
+		return EmitSoundScriptSelectedSample(soundScript, sample);
 	}
 	return false;
 }
@@ -805,16 +795,49 @@ bool CBaseEntity::EmitSoundScript(const char *name, const SoundScriptParamOverri
 	return false;
 }
 
+bool CBaseEntity::EmitSoundScriptSelectedSample(const SoundScript* soundScript, int sampleIndex, const SoundScriptParamOverride paramsOverride, int flags)
+{
+	if (soundScript)
+	{
+		const char* sample = soundScript->Wave(sampleIndex);
+		return EmitSoundScriptSelectedSample(soundScript, sample);
+	}
+	return false;
+}
+
+bool CBaseEntity::EmitSoundScriptSelectedSample(const SoundScript* soundScript, const char* sample, const SoundScriptParamOverride paramsOverride, int flags)
+{
+	if (soundScript && sample)
+	{
+		int channel = soundScript->channel;
+		FloatRange volume = soundScript->volume;
+		float attenuation = soundScript->attenuation;
+		IntRange pitch = soundScript->pitch;
+
+		paramsOverride.ApplyOverride(channel, volume, attenuation, pitch);
+
+		return EmitSoundDyn(soundScript->channel, sample, RandomizeNumberFromRange(volume), attenuation, flags, RandomizeNumberFromRange(pitch));
+	}
+	return false;
+}
+
+bool CBaseEntity::EmitSoundScriptSelectedSample(const char* name, int sampleIndex, const SoundScriptParamOverride paramsOverride, int flags)
+{
+	return EmitSoundScriptSelectedSample(GetSoundScript(name), sampleIndex, paramsOverride, flags);
+}
+
+bool CBaseEntity::EmitSoundScriptSelectedSample(const char* name, const char* sample, const SoundScriptParamOverride paramsOverride, int flags)
+{
+	return EmitSoundScriptSelectedSample(GetSoundScript(name), sample, paramsOverride, flags);
+}
+
 void CBaseEntity::StopSoundScript(const SoundScript* soundScript)
 {
 	if (soundScript)
 	{
 		const char* sample = soundScript->Wave();
-		if (sample)
-		{
-			// TODO: should we loop over all waves and stop each of them? We don't know which one has been playing
-			StopSound(soundScript->channel, sample);
-		}
+		// TODO: should we loop over all waves and stop each of them? We don't know which one has been playing
+		StopSoundScriptSelectedSample(soundScript, sample);
 	}
 }
 
@@ -825,6 +848,33 @@ void CBaseEntity::StopSoundScript(const char *name)
 	{
 		return StopSoundScript(soundScript);
 	}
+}
+
+void CBaseEntity::StopSoundScriptSelectedSample(const SoundScript* soundScript, int sampleIndex)
+{
+	if (soundScript)
+	{
+		const char* sample = soundScript->Wave(sampleIndex);
+		StopSoundScriptSelectedSample(soundScript, sample);
+	}
+}
+
+void CBaseEntity::StopSoundScriptSelectedSample(const SoundScript* soundScript, const char* sample)
+{
+	if (soundScript && sample)
+	{
+		StopSound(soundScript->channel, sample);
+	}
+}
+
+void CBaseEntity::StopSoundScriptSelectedSample(const char* name, int sampleIndex)
+{
+	StopSoundScriptSelectedSample(GetSoundScript(name), sampleIndex);
+}
+
+void CBaseEntity::StopSoundScriptSelectedSample(const char* name, const char* sample)
+{
+	StopSoundScriptSelectedSample(GetSoundScript(name), sample);
 }
 
 void CBaseEntity::EmitSoundScriptAmbient(const Vector& vecOrigin, const SoundScript* soundScript, const SoundScriptParamOverride paramsOverride, int flags)

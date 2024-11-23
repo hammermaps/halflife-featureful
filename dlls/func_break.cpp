@@ -959,10 +959,11 @@ public:
 
 	static TYPEDESCRIPTION m_SaveData[];
 
-	static const char *m_soundNames[3];
 	int m_lastSound;	// no need to save/restore, just keeps the same sound from playing twice in a row
 	float m_maxSpeed;
 	float m_soundTime;
+
+	static const NamedSoundScript moveSoundScript;
 };
 
 TYPEDESCRIPTION	CPushable::m_SaveData[] =
@@ -975,11 +976,11 @@ IMPLEMENT_SAVERESTORE( CPushable, CBreakable )
 
 LINK_ENTITY_TO_CLASS( func_pushable, CPushable )
 
-const char *CPushable::m_soundNames[3] =
-{
-	"debris/pushbox1.wav",
-	"debris/pushbox2.wav",
-	"debris/pushbox3.wav"
+const NamedSoundScript CPushable::moveSoundScript = {
+	CHAN_WEAPON,
+	{"debris/pushbox1.wav", "debris/pushbox2.wav", "debris/pushbox3.wav"},
+	0.5f, ATTN_NORM,
+	"Pushable.Move"
 };
 
 void CPushable::Spawn( void )
@@ -1010,8 +1011,7 @@ void CPushable::Spawn( void )
 
 void CPushable::Precache( void )
 {
-	for( int i = 0; i < 3; i++ )
-		PRECACHE_SOUND( m_soundNames[i] );
+	RegisterAndPrecacheSoundScript(moveSoundScript);
 
 	if( pev->spawnflags & SF_PUSH_BREAKABLE )
 		CBreakable::Precache();
@@ -1189,15 +1189,17 @@ void CPushable::Move( CBaseEntity *pOther, int push )
 		if( ( gpGlobals->time - m_soundTime ) > 0.7f )
 		{
 			m_soundTime = gpGlobals->time;
-			if( length > 0 && FBitSet( pev->flags, FL_ONGROUND ))
+			const SoundScript* myMoveSoundScript = GetSoundScript(moveSoundScript.name);
+			if (myMoveSoundScript && !myMoveSoundScript->waves.empty())
 			{
-				m_lastSound = RANDOM_LONG( 0, 2 );
-				EMIT_SOUND( ENT( pev ), CHAN_WEAPON, m_soundNames[m_lastSound], 0.5f, ATTN_NORM );
-				//SetThink( &StopSound );
-				//pev->nextthink = pev->ltime + 0.1f;
+				if( length > 0 && FBitSet( pev->flags, FL_ONGROUND ))
+				{
+					m_lastSound = RANDOM_LONG(0, myMoveSoundScript->waves.size()-1);
+					EmitSoundScriptSelectedSample(myMoveSoundScript, m_lastSound);
+				}
+				else
+					StopSoundScriptSelectedSample(myMoveSoundScript, m_lastSound);
 			}
-			else
-				STOP_SOUND( ENT( pev ), CHAN_WEAPON, m_soundNames[m_lastSound] );
 		}
 	}
 }

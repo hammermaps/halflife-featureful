@@ -352,7 +352,7 @@ void CAGrunt::PrescheduleThink( void )
 				if (num >= 0)
 				{
 					// play a new sound
-					EmitSoundDyn(myIdleSoundScript->channel, myIdleSoundScript->waves[num], RandomizeNumberFromRange(myIdleSoundScript->volume), myIdleSoundScript->attenuation, 0, RandomizeNumberFromRange(myIdleSoundScript->pitch));
+					EmitSoundScriptSelectedSample(myIdleSoundScript, num);
 				}
 			}
 
