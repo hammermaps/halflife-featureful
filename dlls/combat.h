@@ -75,9 +75,9 @@ void RadiusDamage(CBaseEntity* pLooker, Vector vecSrc, entvars_t *pevInflictor, 
 			// blast's don't tavel into or out of water
 			if (flags & RADIUSDAMAGE_DONT_TRAVEL_THROUGH_WATER)
 			{
-				if( bInWater && pEntity->pev->waterlevel == 0 )
+				if( bInWater && pEntity->pev->waterlevel == WL_NotInWater )
 					continue;
-				if( !bInWater && pEntity->pev->waterlevel == 3 )
+				if( !bInWater && pEntity->pev->waterlevel == WL_Eyes )
 					continue;
 			}
 

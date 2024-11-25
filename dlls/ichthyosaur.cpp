@@ -739,7 +739,7 @@ void CIchthyosaur::RunTask( Task_t *pTask )
 	case TASK_ICHTHYOSAUR_FLOAT:
 		pev->angles.x = UTIL_ApproachAngle( 0, pev->angles.x, 20 );
 		pev->velocity = pev->velocity * 0.8f;
-		if( pev->waterlevel > 1 && pev->velocity.z < 64 )
+		if( pev->waterlevel > WL_Feet && pev->velocity.z < 64 )
 		{
 			pev->velocity.z += 8;
 		}

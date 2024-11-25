@@ -101,7 +101,7 @@ void CShock::Precache()
 
 void CShock::FlyThink()
 {
-	if (pev->waterlevel == 3)
+	if (pev->waterlevel == WL_Eyes)
 	{
 		entvars_t *pevOwner = VARS(pev->owner);
 		EmitSoundScript(impactSoundScript);

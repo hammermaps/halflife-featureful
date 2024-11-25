@@ -128,7 +128,7 @@ void CPython::SecondaryAttack( void )
 void CPython::PrimaryAttack()
 {
 	// don't fire underwater
-	if( m_pPlayer->pev->waterlevel == 3 )
+	if( m_pPlayer->pev->waterlevel == WL_Eyes )
 	{
 		PlayEmptySound();
 		m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.15f;

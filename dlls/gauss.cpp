@@ -118,7 +118,7 @@ void CGauss::Holster()
 void CGauss::PrimaryAttack()
 {
 	// don't fire underwater
-	if( m_pPlayer->pev->waterlevel == 3 )
+	if( m_pPlayer->pev->waterlevel == WL_Eyes )
 	{
 		PlayEmptySound();
 		m_flNextSecondaryAttack = m_flNextPrimaryAttack = GetNextAttackDelay( 0.15f );
@@ -148,7 +148,7 @@ void CGauss::SecondaryAttack()
 	if( m_pPlayer->m_flStartCharge > gpGlobals->time )
 		m_pPlayer->m_flStartCharge = gpGlobals->time;
 	// don't fire underwater
-	if( m_pPlayer->pev->waterlevel == 3 )
+	if( m_pPlayer->pev->waterlevel == WL_Eyes )
 	{
 		if( m_fInAttack != 0 )
 		{

@@ -595,6 +595,11 @@ float RandomizeNumberFromRange(float minF, float maxF);
 int RandomizeNumberFromRange(const IntRange& r);
 int RandomizeNumberFromRange(int minI, int maxI);
 
+inline bool LineOfSightSeparatedByWaterSurface(int lookerWaterlevel, int targetWaterlevel)
+{
+	return (lookerWaterlevel != WL_Eyes && targetWaterlevel == WL_Eyes) || (lookerWaterlevel == WL_Eyes && targetWaterlevel == WL_NotInWater);
+}
+
 void ReportAIStateByClassname(const char* name);
 
 inline Vector VectorFromColor(const Color& color) {

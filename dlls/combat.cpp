@@ -1399,8 +1399,7 @@ BOOL CBaseEntity::FVisible( CBaseEntity *pEntity )
 		return FALSE;
 
 	// don't look through water
-	if( ( pev->waterlevel != 3 && pEntity->pev->waterlevel == 3 ) 
-		|| ( pev->waterlevel == 3 && pEntity->pev->waterlevel == 0 ) )
+	if( LineOfSightSeparatedByWaterSurface(pev->waterlevel, pEntity->pev->waterlevel) )
 		return FALSE;
 
 	vecLookerOrigin = pev->origin + pev->view_ofs;//look through the caller's 'eyes'

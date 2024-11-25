@@ -138,7 +138,7 @@ void CEgon::UseAmmo( int count )
 void CEgon::Attack( void )
 {
 	// don't fire underwater
-	if( m_pPlayer->pev->waterlevel == 3 )
+	if( m_pPlayer->pev->waterlevel == WL_Eyes )
 	{
 		if( m_fireState != FIRE_OFF
 #if !CLIENT_DLL

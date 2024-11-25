@@ -150,7 +150,7 @@ void CShockrifle::PrimaryAttack()
 	if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
 		return;
 
-	if (m_pPlayer->pev->waterlevel == 3)
+	if (m_pPlayer->pev->waterlevel == WL_Eyes)
 	{
 #if !CLIENT_DLL
 		int attenuation = 150 * m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType];

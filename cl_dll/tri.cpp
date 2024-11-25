@@ -141,7 +141,7 @@ static void RenderFogImpl(short r, short g, short b, float startDist, float endD
 void RenderFog ( void )
 {
 	const FogProperties& fog = gHUD.fog;
-	bool bFog = g_iWaterLevel < 3 && (fog.endDist > 0 || fog.density > 0);
+	bool bFog = g_iWaterLevel < WL_Eyes && (fog.endDist > 0 || fog.density > 0);
 	if (bFog)
 	{
 		RenderFogImpl(fog.r,fog.g,fog.b, fog.startDist, fog.endDist, fog.affectSkybox, fog.density, fog.type);

@@ -218,7 +218,7 @@ void CGrenade::DangerSoundThink( void )
 	CSoundEnt::InsertSound( bits_SOUND_DANGER, pev->origin + pev->velocity * 0.5f, pev->dmg * DEFAULT_EXPLOSION_RADIUS_MULTIPLIER, 0.2 );
 	pev->nextthink = gpGlobals->time + 0.2f;
 
-	if( pev->waterlevel != 0 )
+	if( pev->waterlevel != WL_NotInWater )
 	{
 		pev->velocity = pev->velocity * 0.5f;
 	}
@@ -334,7 +334,7 @@ void CGrenade::TumbleThink( void )
 	{
 		SetThink( &CGrenade::Detonate );
 	}
-	if( pev->waterlevel != 0 )
+	if( pev->waterlevel != WL_NotInWater )
 	{
 		pev->velocity = pev->velocity * 0.5f;
 		pev->framerate = 0.2f;

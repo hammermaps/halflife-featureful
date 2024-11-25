@@ -20,6 +20,7 @@
 #include "vector.h"
 #include "const_render.h"
 #include "const_sound.h"
+#include "const_waterlevel.h"
 
 //
 // Constants shared by the engine and dlls

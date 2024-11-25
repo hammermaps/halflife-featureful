@@ -263,7 +263,7 @@ void CLeech::SwitchLeechState( void )
 	{
 		Look( m_flDistLook );
 		CBaseEntity *pEnemy = BestVisibleEnemy();
-		if( pEnemy && pEnemy->pev->waterlevel != 0 )
+		if( pEnemy && pEnemy->pev->waterlevel != WL_NotInWater )
 		{
 			m_hEnemy = pEnemy;
 			SetState( MONSTERSTATE_COMBAT );

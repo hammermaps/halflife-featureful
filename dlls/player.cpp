@@ -1307,7 +1307,7 @@ void CBasePlayer::SetAnimation( PLAYER_ANIM playerAnim )
 		{
 			m_IdealActivity = m_Activity;
 		}
-		else if( pev->waterlevel > 1 )
+		else if( pev->waterlevel > WL_Feet )
 		{
 			if( speed == 0 )
 				m_IdealActivity = ACT_HOVER;
@@ -1323,7 +1323,7 @@ void CBasePlayer::SetAnimation( PLAYER_ANIM playerAnim )
 		{
 			if (FBitSet(pev->flags, FL_ONGROUND))
 			{
-				if (pev->waterlevel > 1)
+				if (pev->waterlevel > WL_Feet)
 				{
 					if (speed == 0)
 						m_IdealActivity = ACT_HOVER;
@@ -1473,7 +1473,7 @@ void CBasePlayer::WaterMove()
 	// waterlevel 2 - waist in water
 	// waterlevel 3 - head in water
 
-	if( pev->waterlevel != 3 ) 
+	if( pev->waterlevel != WL_Eyes )
 	{
 		// not underwater
 
@@ -1540,7 +1540,7 @@ void CBasePlayer::WaterMove()
 	}
 
 	// make bubbles
-	if( pev->waterlevel == 3 )
+	if( pev->waterlevel == WL_Eyes )
 	{
 		air = (int)( pev->air_finished - gpGlobals->time );
 		if( !RANDOM_LONG( 0, 0x1f ) && RANDOM_LONG( 0, AIRTIME - 1 ) >= air )
@@ -2108,7 +2108,7 @@ void CBasePlayer::Jump()
 	if( FBitSet( pev->flags, FL_WATERJUMP ) )
 		return;
 
-	if( pev->waterlevel >= 2 )
+	if( pev->waterlevel >= WL_Waist )
 	{
 		return;
 	}
@@ -3558,7 +3558,7 @@ void CBasePlayer::PostThink()
 			SetAnimation( PLAYER_IDLE );
 		else if( ( pev->velocity.x || pev->velocity.y ) && ( FBitSet( pev->flags, FL_ONGROUND ) ) )
 			SetAnimation( PLAYER_WALK );
-		else if( pev->waterlevel > 1 )
+		else if( pev->waterlevel > WL_Feet )
 			SetAnimation( PLAYER_WALK );
 	}
 
@@ -5751,7 +5751,7 @@ Vector CBasePlayer::AutoaimDeflection( const Vector &vecSrc, float flDist, float
 	if( tr.pHit && tr.pHit->v.takedamage != DAMAGE_NO )
 	{
 		// don't look through water
-		if( !( ( pev->waterlevel != 3 && tr.pHit->v.waterlevel == 3 ) || ( pev->waterlevel == 3 && tr.pHit->v.waterlevel == 0 ) ) )
+		if( !LineOfSightSeparatedByWaterSurface(pev->waterlevel, tr.pHit->v.waterlevel) )
 		{
 			if( tr.pHit->v.takedamage == DAMAGE_AIM )
 				m_fOnTarget = TRUE;
@@ -5786,7 +5786,7 @@ Vector CBasePlayer::AutoaimDeflection( const Vector &vecSrc, float flDist, float
 			continue;
 
 		// don't look through water
-		if( ( pev->waterlevel != 3 && pEntity->pev->waterlevel == 3 ) || ( pev->waterlevel == 3 && pEntity->pev->waterlevel == 0 ) )
+		if( LineOfSightSeparatedByWaterSurface(pev->waterlevel, pEntity->pev->waterlevel) )
 			continue;
 
 		center = pEntity->BodyTarget( vecSrc );

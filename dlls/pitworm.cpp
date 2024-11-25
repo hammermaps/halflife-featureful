@@ -394,8 +394,7 @@ BOOL CPitWorm::FVisible(CBaseEntity *pEntity)
 	if( FBitSet( pEntity->pev->flags, FL_NOTARGET ) )
 		return FALSE;
 
-	if( ( pev->waterlevel != 3 && pEntity->pev->waterlevel == 3 )
-		|| ( pev->waterlevel == 3 && pEntity->pev->waterlevel == 0 ) )
+	if( LineOfSightSeparatedByWaterSurface(pev->waterlevel, pEntity->pev->waterlevel) )
 		return FALSE;
 
 	TraceResult tr;
@@ -1408,7 +1407,7 @@ void CPitwormGib::Spawn()
 
 void CPitwormGib::GibFloat()
 {
-	if (pev->waterlevel == 3)
+	if (pev->waterlevel == WL_Eyes)
 	{
 		pev->movetype = MOVETYPE_FLY;
 		pev->velocity = pev->velocity * 0.8;
