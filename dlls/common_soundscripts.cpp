@@ -212,4 +212,24 @@ const NamedSoundScript vehicleIgnitionSoundScript = {
 	"Player.VehicleUse"
 };
 
+const NamedSoundScript underwaterExhaleSoundScript = {
+	CHAN_BODY,
+	{"player/pl_swim1.wav", "player/pl_swim2.wav", "player/pl_swim3.wav", "player/pl_swim4.wav"},
+	0.8f,
+	ATTN_NORM,
+	"Player.UnderwaterExhale"
+};
+
+const NamedSoundScript undrownSoundScript = {
+	CHAN_VOICE,
+	{"player/pl_wade1.wav"},
+	"Player.Undrown"
+};
+
+const NamedSoundScript emergeInhaleSoundScript = {
+	CHAN_VOICE,
+	{"player/pl_wade2.wav"},
+	"Player.EmergeInhale"
+};
+
 }

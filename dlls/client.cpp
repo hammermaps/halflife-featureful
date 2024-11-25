@@ -1008,10 +1008,9 @@ void ClientPrecache( void )
 	PRECACHE_SOUND( "player/pl_tile4.wav" );
 	PRECACHE_SOUND( "player/pl_tile5.wav" );
 
-	PRECACHE_SOUND( "player/pl_swim1.wav" );		// breathe bubbles
-	PRECACHE_SOUND( "player/pl_swim2.wav" );
-	PRECACHE_SOUND( "player/pl_swim3.wav" );
-	PRECACHE_SOUND( "player/pl_swim4.wav" );
+	pWorld->RegisterAndPrecacheSoundScript(Player::underwaterExhaleSoundScript); // breathe bubbles
+	pWorld->RegisterAndPrecacheSoundScript(Player::undrownSoundScript);
+	pWorld->RegisterAndPrecacheSoundScript(Player::emergeInhaleSoundScript);
 
 	PRECACHE_SOUND( "player/pl_ladder1.wav" );	// climb ladder rung
 	PRECACHE_SOUND( "player/pl_ladder2.wav" );
