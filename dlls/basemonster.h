@@ -387,12 +387,6 @@ public:
 		return true;
 	}
 
-	const EntTemplate* GetMyEntTemplate();
-	void SetMyHealth( const float defaultHealth );
-	const Visual* MyOwnVisual();
-	const char* MyOwnModel(const char* defaultModel);
-	void SetMyModel( const char* defaultModel );
-	void PrecacheMyModel( const char* defaultModel );
 	const char* MyNonDefaultGibModel();
 	const Visual* MyGibVisual();
 	int PrecacheMyGibModel( const char* model = nullptr );
@@ -476,9 +470,6 @@ public:
 	float m_flLastYawTime;
 
 	const char* taskFailReason;
-
-	const EntTemplate* m_cachedEntTemplate;
-	bool m_entTemplateChecked;
 };
 
 #define FREEROAM_MAPDEFAULT 0

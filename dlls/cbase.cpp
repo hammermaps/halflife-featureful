@@ -1074,6 +1074,83 @@ void CBaseEntity::ApplyVisual(const Visual *visual, const char* modelOverride)
 		pev->framerate = RandomizeNumberFromRange(visual->framerate);
 }
 
+const EntTemplate* CBaseEntity::GetMyEntTemplate()
+{
+	if (m_entTemplateChecked)
+	{
+		return m_cachedEntTemplate;
+	}
+	if (!FStringNull(m_entTemplate))
+	{
+		m_cachedEntTemplate = GetEntTemplate(STRING(m_entTemplate));
+		m_entTemplateChecked = true;
+		return m_cachedEntTemplate;
+	}
+	else
+	{
+		m_cachedEntTemplate = GetEntTemplate(STRING(pev->classname));
+		m_entTemplateChecked = true;
+		return m_cachedEntTemplate;
+	}
+}
+
+void CBaseEntity::SetMyHealth(const float defaultHealth)
+{
+	if (!pev->health) {
+		const EntTemplate* entTemplate = GetMyEntTemplate();
+		if (entTemplate && entTemplate->IsHealthDefined())
+			pev->health = entTemplate->Health();
+		else
+			pev->health = defaultHealth;
+	}
+}
+
+const Visual* CBaseEntity::MyOwnVisual()
+{
+	const EntTemplate* entTemplate = GetMyEntTemplate();
+	if (entTemplate)
+		return g_VisualSystem.GetVisual(entTemplate->OwnVisualName());
+	return nullptr;
+}
+
+const char* CBaseEntity::MyOwnModel(const char *defaultModel)
+{
+	if (!FStringNull(pev->model))
+		return STRING(pev->model);
+
+	const Visual* ownVisual = MyOwnVisual();
+	if (ownVisual && ownVisual->model)
+		return ownVisual->model;
+
+#if FEATURE_REVERSE_RELATIONSHIP_MODELS
+	if (m_reverseRelationship)
+	{
+		const char* reverseModel = ReverseRelationshipModel();
+		if (reverseModel)
+			return reverseModel;
+	}
+#endif
+	return defaultModel;
+}
+
+void CBaseEntity::SetMyModel(const char *defaultModel)
+{
+	ApplyVisual(MyOwnVisual());
+
+	if (FStringNull(pev->model))
+	{
+		if (defaultModel)
+			SET_MODEL(ENT(pev), defaultModel);
+	}
+}
+
+void CBaseEntity::PrecacheMyModel(const char *defaultModel)
+{
+	const char* myModel = MyOwnModel(defaultModel);
+	if (myModel)
+		PRECACHE_MODEL(myModel);
+}
+
 int CBaseEntity::Save( CSave &save )
 {
 	if( save.WriteEntVars( "ENTVARS", pev ) )

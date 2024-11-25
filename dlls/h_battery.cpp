@@ -30,24 +30,68 @@
 #include "customentity.h"
 #include "wallcharger.h"
 #include "player.h"
+#include "visuals_utils.h"
 
 class CRecharge : public CWallCharger
 {
 public:
-	const char* DefaultLoopingSound() { return "items/suitcharge1.wav"; }
 	int RechargeTime() { return (int)g_pGameRules->FlHEVChargerRechargeTime(); }
-	const char* DefaultRechargeSound() { return NULL; }
 	int ChargerCapacity() { return (int)(pev->health > 0 ? pev->health : gSkillData.suitchargerCapacity); }
-	const char* DefaultDenySound() { return "items/suitchargeno1.wav"; }
-	const char* DefaultChargeStartSound() { return "items/suitchargeok1.wav"; }
-	float SoundVolume() { return 0.85f; }
 	bool GiveCharge(CBaseEntity* pActivator)
 	{
 		return pActivator->TakeArmor(this, 1);
 	}
+
+	const NamedSoundScript& LoopingSoundScript() override {
+		return loopingSoundScript;
+	}
+	const NamedSoundScript& DenySoundScript() override {
+		return denySoundScript;
+	}
+	const NamedSoundScript& ChargeStartSoundScript() override {
+		return startSoundScript;
+	}
+	const NamedSoundScript& RechargeSoundScript() override {
+		return rechargeSoundScript;
+	}
+
+	static const NamedSoundScript denySoundScript;
+	static const NamedSoundScript startSoundScript;
+	static const NamedSoundScript loopingSoundScript;
+	static const NamedSoundScript rechargeSoundScript;
 };
 
 LINK_ENTITY_TO_CLASS( func_recharge, CRecharge )
+
+const NamedSoundScript CRecharge::denySoundScript = {
+	CHAN_ITEM,
+	{"items/suitchargeno1.wav"},
+	0.85f,
+	ATTN_NORM,
+	"SuitRecharge.Deny"
+};
+
+const NamedSoundScript CRecharge::startSoundScript = {
+	CHAN_ITEM,
+	{"items/suitchargeok1.wav"},
+	1.0f,
+	ATTN_NORM,
+	"SuitRecharge.Start"
+};
+
+const NamedSoundScript CRecharge::loopingSoundScript = {
+	CHAN_STATIC,
+	{"items/suitcharge1.wav"},
+	0.85f,
+	ATTN_NORM,
+	"SuitRecharge.ChargingLoop"
+};
+
+const NamedSoundScript CRecharge::rechargeSoundScript = {
+	CHAN_ITEM,
+	{},
+	"SuitRecharge.Recharge"
+};
 
 //-------------------------------------------------------------
 // Wall mounted suit charger (PS2 && Decay)
@@ -57,16 +101,28 @@ class CRechargeGlassDecay : public CBaseAnimating
 {
 public:
 	void Spawn();
+	void Precache();
+
+	static const NamedVisual rechargeGlass;
 };
+
+const NamedVisual CRechargeGlassDecay::rechargeGlass = BuildVisual("SuitRecharge.Glass")
+		.Model("models/hev_glass.mdl")
+		.RenderMode(kRenderTransTexture)
+		.Alpha(150);
 
 void CRechargeGlassDecay::Spawn()
 {
+	Precache();
 	pev->solid = SOLID_NOT;
 	pev->movetype = MOVETYPE_FLY;
 
-	SET_MODEL(ENT(pev), "models/hev_glass.mdl");
-	pev->renderamt = 150;
-	pev->rendermode = kRenderTransTexture;
+	ApplyVisual(GetVisual(rechargeGlass));
+}
+
+void CRechargeGlassDecay::Precache()
+{
+	RegisterVisual(rechargeGlass);
 }
 
 LINK_ENTITY_TO_CLASS(item_recharge_glass, CRechargeGlassDecay)
@@ -138,6 +194,8 @@ public:
 protected:
 	void SetMySequence(const char* sequence);
 	void CreateBeam();
+
+	static const NamedVisual beamVisual;
 };
 
 TYPEDESCRIPTION CRechargeDecay::m_SaveData[] =
@@ -154,6 +212,12 @@ TYPEDESCRIPTION CRechargeDecay::m_SaveData[] =
 };
 
 IMPLEMENT_SAVERESTORE( CRechargeDecay, CBaseAnimating )
+
+const NamedVisual CRechargeDecay::beamVisual = BuildVisual("SuitRecharge.Beam")
+		.Model("sprites/lgtning.spr")
+		.BeamParams(5, 10)
+		.RenderColor(0, 225, 0)
+		.Alpha(225);
 
 void CRechargeDecay::KeyValue( KeyValueData *pkvd )
 {
@@ -184,7 +248,7 @@ void CRechargeDecay::Spawn()
 	pev->solid = SOLID_SLIDEBOX;
 	pev->movetype = MOVETYPE_FLY;
 
-	SET_MODEL(ENT(pev), "models/hev.mdl");
+	SetMyModel("models/hev.mdl");
 	UTIL_SetSize(pev, Vector(-12, -16, 0), Vector(12, 16, 48));
 	UTIL_SetOrigin(pev, pev->origin);
 	pev->skin = 0;
@@ -208,20 +272,26 @@ LINK_ENTITY_TO_CLASS(item_recharge, CRechargeDecay)
 
 void CRechargeDecay::Precache(void)
 {
-	PRECACHE_MODEL("models/hev.mdl");
-	PRECACHE_MODEL("models/hev_glass.mdl");
-	PRECACHE_SOUND( "items/suitcharge1.wav" );
-	PRECACHE_SOUND( "items/suitchargeno1.wav" );
-	PRECACHE_SOUND( "items/suitchargeok1.wav" );
-	PRECACHE_MODEL( "sprites/lgtning.spr" );
+	PrecacheMyModel("models/hev.mdl");
+
+	RegisterAndPrecacheSoundScript(CRecharge::startSoundScript);
+	RegisterAndPrecacheSoundScript(CRecharge::denySoundScript);
+	RegisterAndPrecacheSoundScript(CRecharge::loopingSoundScript);
+	RegisterAndPrecacheSoundScript(CRecharge::rechargeSoundScript);
+
+	RegisterVisual(beamVisual);
 
 	CreateBeam();
 	if (m_iState != Idle)
 		TurnBeamOff();
 	m_glass = GetClassPtr( (CRechargeGlassDecay *)NULL );
-	m_glass->Spawn();
-	UTIL_SetOrigin( m_glass->pev, pev->origin );
-	m_glass->pev->angles = pev->angles;
+	if (m_glass)
+	{
+		m_glass->m_ownerEntTemplate = m_entTemplate;
+		m_glass->Spawn();
+		UTIL_SetOrigin(m_glass->pev, pev->origin);
+		m_glass->pev->angles = pev->angles;
+	}
 }
 
 void CRechargeDecay::AnimateAndWork()
@@ -325,7 +395,7 @@ void CRechargeDecay::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE
 		if( m_flSoundTime <= gpGlobals->time )
 		{
 			m_flSoundTime = gpGlobals->time + 0.62f;
-			EMIT_SOUND( ENT( pev ), CHAN_ITEM, "items/suitchargeno1.wav", 0.85, ATTN_NORM );
+			EmitSoundScript(CRecharge::denySoundScript);
 		}
 		return;
 	}
@@ -354,7 +424,7 @@ void CRechargeDecay::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE
 	case Idle:
 		m_flSoundTime = 0.56f + gpGlobals->time;
 		SetChargeState(GiveShot);
-		EMIT_SOUND( ENT( pev ), CHAN_ITEM, "items/suitchargeok1.wav", 1.0, ATTN_NORM );
+		EmitSoundScript(CRecharge::startSoundScript);
 		break;
 	case GiveShot:
 		if (m_fSequenceFinished)
@@ -366,7 +436,7 @@ void CRechargeDecay::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE
 		if (!m_playingChargeSound && m_flSoundTime <= gpGlobals->time)
 		{
 			m_playingChargeSound = TRUE;
-			EMIT_SOUND( ENT( pev ), CHAN_STATIC, "items/suitcharge1.wav", 1.0, ATTN_NORM );
+			EmitSoundScript(CRecharge::loopingSoundScript);
 		}
 		// We need to keep playing animation even though it's 1 frame only for controllers smoothing
 		SetChargeState(Healing);
@@ -406,7 +476,7 @@ void CRechargeDecay::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE
 
 void CRechargeDecay::Recharge( void )
 {
-//	/EMIT_SOUND( ENT( pev ), CHAN_ITEM, "items/suitcharge1.wav", 1.0, ATTN_NORM );
+	EmitSoundScript(CRecharge::rechargeSoundScript);
 	m_iJuice = ChargerCapacity();
 	SetBoneController(RECHARGER_COIL_CONTROLLER, 360);
 	SetBoneController(RECHARGER_COIL_CONTROLLER2, 0);
@@ -422,7 +492,7 @@ void CRechargeDecay::Off( void )
 	case GiveShot:
 	case Healing:
 		if (m_playingChargeSound) {
-			STOP_SOUND( ENT( pev ), CHAN_STATIC, "items/suitcharge1.wav" );
+			StopSoundScript(CRecharge::loopingSoundScript);
 			m_playingChargeSound = FALSE;
 		}
 		SetChargeState(RetractShot);
@@ -485,7 +555,7 @@ void CRechargeDecay::SetChargeState(int state)
 		SetMySequence("rest");
 		break;
 	case Deploy:
-		EMIT_SOUND( ENT( pev ), CHAN_ITEM, "items/suitchargeok1.wav", 1.0, ATTN_NORM );
+		EmitSoundScript(CRecharge::startSoundScript);
 		SetMySequence("deploy");
 		break;
 	case Idle:
@@ -530,20 +600,16 @@ void CRechargeDecay::SetChargeController(float yaw)
 
 void CRechargeDecay::CreateBeam()
 {
-	CBeam *beam = GetClassPtr( (CBeam *)NULL );
-	if( !beam )
+	CBeam *beam = CreateBeamFromVisual(GetVisual(beamVisual));
+	if (!beam)
 		return;
 
-	beam->BeamInit( "sprites/lgtning.spr", 5 );
-
+	beam->pev->spawnflags |= SF_BEAM_TEMPORARY;
 	beam->SetType( BEAM_ENTS );
 	beam->SetStartEntity( entindex() );
 	beam->SetEndEntity( entindex() );
 	beam->SetStartAttachment(3);
 	beam->SetEndAttachment(4);
-	beam->SetColor( 0, 225, 0 );
-	beam->SetBrightness( 225 );
-	beam->SetNoise( 10 );
 	beam->RelinkBeam();
 
 	m_beam = beam;

@@ -120,6 +120,8 @@ class CBasePlayerWeapon;
 class CBasePlayerAmmo;
 class CSquadMonster;
 
+class EntTemplate;
+
 #define SF_ITEM_TOUCH_ONLY 128
 #define SF_ITEM_USE_ONLY 256 //  ITEM_USE_ONLY = BUTTON_USE_ONLY = DOOR_USE_ONLY!!!
 
@@ -260,6 +262,9 @@ public:
 	string_t m_soundList; // sound replacement list file name
 	string_t m_objectHint; // the name of the spritehint template
 
+	const EntTemplate* m_cachedEntTemplate;
+	bool m_entTemplateChecked;
+
 	int PRECACHE_SOUND(const char* soundName);
 
 	bool EmitSoundDyn( int channel, const char *sample, float volume, float attenuation, int flags, int pitch );
@@ -300,6 +305,13 @@ public:
 	int OverridenRenderProps();
 	virtual void ApplyDefaultRenderProps(int overridenRenderProps) {}
 	void ApplyVisual(const Visual* visual, const char* modelOverride = nullptr);
+
+	const EntTemplate* GetMyEntTemplate();
+	void SetMyHealth(const float defaultHealth);
+	const Visual* MyOwnVisual();
+	const char* MyOwnModel(const char* defaultModel);
+	void SetMyModel(const char* defaultModel);
+	void PrecacheMyModel(const char* defaultModel);
 
 	// allow engine to allocate instance data
 	void *operator new( size_t stAllocateBlock, entvars_t *pev )

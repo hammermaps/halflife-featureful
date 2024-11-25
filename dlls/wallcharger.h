@@ -11,19 +11,25 @@ public:
 	void Precache( void );
 	void EXPORT Off( void );
 	void EXPORT Recharge( void );
-	const char* LoopingSound();
-	virtual const char* DefaultLoopingSound() = 0;
+
 	virtual int RechargeTime() = 0;
-	const char* RechargeSound();
-	virtual const char* DefaultRechargeSound() = 0;
 	virtual int ChargerCapacity() = 0;
-	const char* DenySound();
-	virtual const char* DefaultDenySound() = 0;
-	const char* ChargeStartSound();
-	virtual const char* DefaultChargeStartSound() = 0;
-	virtual float SoundVolume() = 0;
+
 	virtual bool GiveCharge(CBaseEntity* pActivator) = 0;
 	virtual bool AllowNoSuit() { return false; }
+
+	virtual const NamedSoundScript& LoopingSoundScript() = 0;
+	virtual const NamedSoundScript& DenySoundScript() = 0;
+	virtual const NamedSoundScript& ChargeStartSoundScript() = 0;
+	virtual const NamedSoundScript& RechargeSoundScript() = 0;
+
+	const char* CustomLoopingSound();
+	const char* CustomDenySound();
+	const char* CustomChargeStartSound();
+	const char* CustomRechargeSound();
+
+	void PlayChargerSound(const NamedSoundScript& soundScript, const char* customSample);
+	void StopChargerSound(const NamedSoundScript& soundScript, const char* customSample);
 
 	void KeyValue( KeyValueData *pkvd );
 	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
