@@ -16,6 +16,7 @@ def options(opt):
 	opt.load('vgui')
 
 def configure(conf):
+	conf.options.VGUI_DEV = os.path.join('vgui_support', 'vgui-dev') # vgui is in submodule
 	conf.env.USE_VGUI = conf.options.USE_VGUI
 	conf.env.USE_VOICEMGR = conf.options.USE_VOICEMGR
 
