@@ -780,7 +780,7 @@ bool CBaseEntity::EmitSoundScript(const SoundScript *soundScript, const SoundScr
 	if (soundScript)
 	{
 		const char* sample = soundScript->Wave();
-		return EmitSoundScriptSelectedSample(soundScript, sample);
+		return EmitSoundScriptSelectedSample(soundScript, sample, paramsOverride, flags);
 	}
 	return false;
 }
@@ -800,7 +800,7 @@ bool CBaseEntity::EmitSoundScriptSelectedSample(const SoundScript* soundScript, 
 	if (soundScript)
 	{
 		const char* sample = soundScript->Wave(sampleIndex);
-		return EmitSoundScriptSelectedSample(soundScript, sample);
+		return EmitSoundScriptSelectedSample(soundScript, sample, paramsOverride, flags);
 	}
 	return false;
 }
