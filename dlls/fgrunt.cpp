@@ -2931,12 +2931,15 @@ void CDeadFGrunt::Spawn()
 #define		TORCH_AE_ONGAS			( 20)
 #define		TORCH_AE_OFFGAS			( 21)
 
+#define TORCH_BEAM_SPRITE "sprites/xbeam3.spr"
+
 class CTorch : public CHFGrunt
 {
 public:
 	void Spawn( void );
 	int GetDefaultVoicePitch() { return 95; }
 	void Precache( void );
+	void Activate();
 	bool IsEnabledInMod() { return g_modFeatures.IsMonsterEnabled("human_grunt_torch"); }
 	const char* DefaultDisplayName() { return "Human Torch"; }
 	void HandleAnimEvent( MonsterEvent_t* pEvent );
@@ -2951,7 +2954,7 @@ public:
 
 	void DropMyItems(BOOL isGibbed);
 
-	void MakeGas( void );
+	void MakeGas( bool doSpark );
 	void UpdateGas( void );
 	void KillGas( void );
 
@@ -3014,6 +3017,7 @@ void CTorch::Precache()
 {
 	PrecacheMyModel("models/hgrunt_torch.mdl");
 	PrecacheMyGibModel();
+	PRECACHE_MODEL(TORCH_BEAM_SPRITE);
 
 	RegisterAndPrecacheSoundScript(painSoundScript, CHFGrunt::painSoundScript);
 	RegisterAndPrecacheSoundScript(dieSoundScript, CHFGrunt::dieSoundScript);
@@ -3029,6 +3033,14 @@ void CTorch::Precache()
 	TalkInit();
 	CTalkMonster::Precache();
 	RegisterTalkMonster();
+}
+
+void CTorch::Activate()
+{
+	CHFGrunt::Activate();
+	if (m_torchActive && !m_pBeam) {
+		MakeGas(false);
+	}
 }
 
 void CTorch::HandleAnimEvent(MonsterEvent_t *pEvent)
@@ -3051,8 +3063,7 @@ void CTorch::HandleAnimEvent(MonsterEvent_t *pEvent)
 		break;
 
 	case TORCH_AE_ONGAS:
-		MakeGas();
-		UpdateGas();
+		MakeGas(true);
 		break;
 
 	case TORCH_AE_OFFGAS:
@@ -3223,40 +3234,41 @@ void CTorch::PrescheduleThink()
 //=========================================================
 void CTorch::UpdateGas( void )
 {
-	TraceResult tr;
-	Vector			posGun, angleGun;
-
-	if (m_torchActive && !m_pBeam) {
-		MakeGas();
-	}
-
 	if ( m_pBeam )
 	{
-		UTIL_MakeVectors( pev->angles );
+		Vector vecTorchPos;
+		Vector vecTorchAng;
+		Vector vecEndPos;
+		Vector vecEndAng;
 
-		GetAttachment( 2, posGun, angleGun );
+		GetAttachment(2, vecTorchPos, vecTorchAng);
+		GetAttachment(3, vecEndPos, vecEndAng);
 
-		Vector vecEnd = (gpGlobals->v_forward * 5) + posGun;
-		UTIL_TraceLine( posGun, vecEnd, dont_ignore_monsters, edict(), &tr );
+		TraceResult tr;
+		UTIL_TraceLine(vecTorchPos, (vecEndPos - vecTorchPos).Normalize() * 5 + vecTorchPos, ignore_monsters, edict(), &tr);
 
 		if ( tr.flFraction != 1.0 )
 		{
-			m_pBeam->DoSparks( tr.vecEndPos, posGun );
-			UTIL_DecalTrace(&tr, DECAL_BIGSHOT1 + RANDOM_LONG(0,4));
+			m_pBeam->pev->spawnflags &= ~SF_BEAM_SPARKSTART;
+			m_pBeam->DoSparks( tr.vecEndPos, tr.vecEndPos );
+			UTIL_DecalTrace(&tr, DECAL_GUNSHOT1 + RANDOM_LONG(0,4));
 
-				MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, tr.vecEndPos );
-					WRITE_BYTE( TE_STREAK_SPLASH );
-					WRITE_VECTOR( tr.vecEndPos );		// origin
-					WRITE_VECTOR( tr.vecPlaneNormal );	// direction
-					WRITE_BYTE( 10 );	// Streak color 6
-					WRITE_SHORT( 60 );	// count
-					WRITE_SHORT( 25 );
-					WRITE_SHORT( 50 );	// Random velocity modifier
-				MESSAGE_END();
+			MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, tr.vecEndPos );
+				WRITE_BYTE( TE_STREAK_SPLASH );
+				WRITE_VECTOR( tr.vecEndPos );		// origin
+				WRITE_VECTOR( tr.vecPlaneNormal );	// direction
+				WRITE_BYTE( 10 );	// Streak color 6
+				WRITE_SHORT( 30 );	// count
+				WRITE_SHORT( 25 );
+				WRITE_SHORT( 50 );	// Random velocity modifier
+			MESSAGE_END();
 		}
+
+		m_pBeam->SetBrightness( RANDOM_LONG(192, 255) );
+
 		MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
 			WRITE_BYTE( TE_DLIGHT );
-			WRITE_VECTOR( posGun );		// origin
+			WRITE_VECTOR( vecEndPos );		// origin
 			WRITE_BYTE( RANDOM_LONG(4, 16) );	// radius
 			WRITE_BYTE( 251 );	// R
 			WRITE_BYTE( 68 );	// G
@@ -3268,7 +3280,7 @@ void CTorch::UpdateGas( void )
 		MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
 			WRITE_BYTE( TE_ELIGHT );
 			WRITE_SHORT( entindex( ) + 0x1000 * 3 );		// entity, attachment
-			WRITE_VECTOR( posGun );		// origin
+			WRITE_VECTOR( vecEndPos );		// origin
 			WRITE_COORD( RANDOM_LONG(8, 12) );	// radius
 			WRITE_BYTE( 251 );	// R
 			WRITE_BYTE( 68 );	// G
@@ -3279,36 +3291,27 @@ void CTorch::UpdateGas( void )
 	}
 }
 
-void CTorch::MakeGas( void )
+void CTorch::MakeGas( bool doSpark )
 {
-	Vector		posGun, angleGun;
-	TraceResult tr;
-	Vector vecEndPos;
-
-	UTIL_MakeVectors( pev->angles );
-	m_pBeam = CBeam::BeamCreate( g_pModelNameLaser, 7 );
+	m_torchActive = TRUE;
+	m_pBeam = CBeam::BeamCreate( TORCH_BEAM_SPRITE, 5 );
 
 	if ( m_pBeam )
 	{
-		GetAttachment( 4, posGun, angleGun );
-		GetAttachment( 3, posGun, angleGun );
-		UTIL_Sparks( posGun );
-		Vector vecEnd = (gpGlobals->v_forward * 5) + posGun;
-		UTIL_TraceLine( posGun, vecEnd, dont_ignore_monsters, edict(), &tr );
+		Vector posGun, angleGun;
+		GetAttachment( 2, posGun, angleGun );
 
 		m_pBeam->EntsInit( entindex(), entindex() );
-		m_pBeam->SetColor( 24, 121, 239 );
-		m_pBeam->SetBrightness( 190 );
+		m_pBeam->SetColor( 0, 0, 255 );
+		m_pBeam->SetBrightness( 255 );
 		m_pBeam->SetScrollRate( 20 );
 		m_pBeam->SetStartAttachment( 4 );
 		m_pBeam->SetEndAttachment( 3 );
-		m_pBeam->DoSparks( tr.vecEndPos, posGun );
+		if (doSpark)
+			m_pBeam->DoSparks( posGun, posGun );
 		m_pBeam->SetFlags( BEAM_FSHADEIN );
 		m_pBeam->pev->spawnflags = SF_BEAM_SPARKSTART | SF_BEAM_TEMPORARY;
-		UTIL_Sparks( tr.vecEndPos );
 	}
-
-	m_torchActive = TRUE;
 }
 
 void CTorch::KillGas( void )
