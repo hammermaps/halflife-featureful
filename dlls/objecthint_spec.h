@@ -5,6 +5,7 @@
 #include <map>
 #include <string>
 
+#include "json_config.h"
 #include "spritehint_flags.h"
 #include "template_property_types.h"
 
@@ -34,15 +35,17 @@ struct ObjectHintSpec
 	float verticalOffset = 0.0f;
 };
 
-struct ObjectHintCatalog
+struct ObjectHintCatalog : public JSONConfig
 {
-	void ReadFromFile(const char* fileName);
 	const ObjectHintSpec* GetSpec(const char* name);
 	const ObjectHintSpec* GetSpecByEntityName(const char* name);
 	const ObjectHintSpec* GetSpecByPickupName(const char* name);
 	float GetMaxDistance() const;
 	bool HasAnyTemplates() const;
 
+protected:
+	const char* Schema() const;
+	bool ReadFromDocument(rapidjson::Document& document, const char* fileName);
 private:
 	const ObjectHintSpec* GetSpec(const std::string& name);
 

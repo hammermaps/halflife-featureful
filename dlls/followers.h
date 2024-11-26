@@ -4,21 +4,24 @@
 
 #include <vector>
 #include <string>
+#include "json_config.h"
 
-class FollowersDescription
+class FollowersDescription : public JSONConfig
 {
 public:
 	FollowersDescription(): fastRecruitRange(500.0f) {}
-	bool ReadFromFile(const char* fileName);
 	float FastRecruitRange() const {
 		return fastRecruitRange;
 	}
-	std::vector<std::string>::const_iterator RecruitsBegin() {
+	std::vector<std::string>::const_iterator RecruitsBegin() const {
 		return fastRecruitMonsters.begin();
 	}
-	std::vector<std::string>::const_iterator RecruitsEnd() {
+	std::vector<std::string>::const_iterator RecruitsEnd() const {
 		return fastRecruitMonsters.cend();
 	}
+protected:
+	const char* Schema() const;
+	bool ReadFromDocument(rapidjson::Document& document, const char* fileName);
 private:
 	std::vector<std::string> fastRecruitMonsters;
 	float fastRecruitRange;

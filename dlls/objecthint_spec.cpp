@@ -145,12 +145,13 @@ static void ReportUndefinedTemplate(const char* fileName, const char* subject, c
 	g_errorCollector.AddFormattedError("%s: %s refers to the template '%s' which is not defined", fileName, subject, templateName);
 }
 
-void ObjectHintCatalog::ReadFromFile(const char* fileName)
+const char* ObjectHintCatalog::Schema() const
 {
-	Document document;
-	if (!ReadJsonDocumentWithSchemaFromFile(document, fileName, objectHintCatalogSchema))
-		return;
+	return objectHintCatalogSchema;
+}
 
+bool ObjectHintCatalog::ReadFromDocument(rapidjson::Document& document, const char* fileName)
+{
 	{
 		auto it = document.FindMember("visuals");
 		if (it != document.MemberEnd())
@@ -282,6 +283,8 @@ void ObjectHintCatalog::ReadFromFile(const char* fileName)
 			}
 		}
 	}
+
+	return true;
 }
 
 ObjectHintCatalog g_objectHintCatalog;

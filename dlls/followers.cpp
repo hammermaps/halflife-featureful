@@ -1,4 +1,4 @@
-#include "util.h"
+#include "logger.h"
 #include "string_utils.h"
 #include "json_utils.h"
 
@@ -27,12 +27,13 @@ const char followersSchema[] = R"(
 }
 )";
 
-bool FollowersDescription::ReadFromFile(const char *fileName)
+const char* FollowersDescription::Schema() const
 {
-	Document document;
-	if (!ReadJsonDocumentWithSchemaFromFile(document, fileName, followersSchema))
-		return false;
+	return followersSchema;
+}
 
+bool FollowersDescription::ReadFromDocument(rapidjson::Document& document, const char* fileName)
+{
 	auto monstersIt = document.FindMember("fast_recruit_monsters");
 	if (monstersIt != document.MemberEnd())
 	{
@@ -40,7 +41,7 @@ bool FollowersDescription::ReadFromFile(const char *fileName)
 		for (auto it = a.Begin(); it != a.End(); ++it)
 		{
 			const char* recruitName = it->GetString();
-			ALERT(at_console, "Registered recruit: %s\n", recruitName);
+			LOG("Registered recruit: %s\n", recruitName);
 			fastRecruitMonsters.push_back(std::string(recruitName));
 		}
 	}
