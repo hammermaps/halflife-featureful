@@ -186,11 +186,13 @@ const NamedVisual CController::sharedBallLightVisual = BuildVisual("Controller.E
 const NamedVisual CController::headOpenLightVisual = BuildVisual("Controller.HeadOpenLight")
 		.Radius(1)
 		.Life(2.0f)
+		.Decay(-32.0f)
 		.Mixin(&CController::sharedBallLightVisual);
 
 const NamedVisual CController::headShootLightVisual = BuildVisual("Controller.HeadShootLight")
 		.Radius(32)
 		.Life(1.0f)
+		.Decay(32.0f)
 		.Mixin(&CController::sharedBallLightVisual);
 
 const NamedVisual CController::energyBallLightVisual = BuildVisual("Controller.EnergyBallLight")
@@ -294,14 +296,7 @@ void CController::HandleAnimEvent( MonsterEvent_t *pEvent )
 
 			GetAttachment( 0, vecStart, angleGun );
 
-			const Visual* visual = GetVisual(headOpenLightVisual);
-			MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
-				WRITE_BYTE( TE_ELIGHT );
-				WRITE_SHORT( entindex() + 0x1000 );		// entity, attachment
-				WRITE_VECTOR( vecStart );		// origin
-				WriteEntLightVisual( visual );
-				WRITE_COORD( -32 ); // decay
-			MESSAGE_END();
+			SendEntLight(entindex(), vecStart, GetVisual(headOpenLightVisual), 1);
 
 			m_iBall[0] = 192;
 			m_iBallTime[0] = gpGlobals->time + atoi( pEvent->options ) / 15.0f;
@@ -312,20 +307,11 @@ void CController::HandleAnimEvent( MonsterEvent_t *pEvent )
 		case CONTROLLER_AE_BALL_SHOOT:
 		{
 			Vector vecStart, angleGun;
-			
 			GetAttachment( 0, vecStart, angleGun );
 
-			const Visual* visual = GetVisual(headShootLightVisual);
-			MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
-				WRITE_BYTE( TE_ELIGHT );
-				WRITE_SHORT( entindex() + 0x1000 );		// entity, attachment
-				WRITE_VECTOR( g_vecZero );		// origin
-				WriteEntLightVisual( visual );
-				WRITE_COORD( 32 ); // decay
-			MESSAGE_END();
+			SendEntLight(entindex(), g_vecZero, GetVisual(headShootLightVisual), 1);
 
 			CBaseMonster *pBall = (CBaseMonster*)Create( "controller_head_ball", vecStart, pev->angles, edict(), GetProjectileOverrides() );
-
 			pBall->pev->velocity = Vector( 0.0f, 0.0f, 32.0f );
 			if (m_pCine)
 			{
@@ -892,16 +878,13 @@ void CController::RunAI( void )
 		if (m_pBall[i])
 			UTIL_SetOrigin( m_pBall[i]->pev, vecStart );
 
-		const Visual* visual = GetVisual(energyBallLightVisual);
-		MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
-			WRITE_BYTE( TE_ELIGHT );
-			WRITE_SHORT( entindex() + 0x1000 * ( i + 3 ) );		// entity, attachment
-			WRITE_VECTOR( vecStart );		// origin
-			WRITE_COORD( m_iBallCurrent[i] / 8 );	// radius
-			WRITE_COLOR( visual->rendercolor );
-			WRITE_BYTE( RandomizeNumberFromRange(visual->life)*10 );	// life * 10
-			WRITE_COORD( 0 ); // decay
-		MESSAGE_END();
+		const Visual* pVisual = GetVisual(energyBallLightVisual);
+		if (pVisual)
+		{
+			Visual visual = *pVisual;
+			visual.radius = m_iBallCurrent[i] / 8;
+			SendEntLight(entindex(), vecStart, &visual, i+3);
+		}
 	}
 }
 
@@ -1288,16 +1271,13 @@ void CControllerHeadBall::HuntThink( void )
 		return;
 	}
 
-	const Visual* visual = GetVisual(headBallLightVisual);
-	MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
-		WRITE_BYTE( TE_ELIGHT );
-		WRITE_SHORT( entindex() );		// entity, attachment
-		WRITE_VECTOR( pev->origin );		// origin
-		WRITE_COORD( pev->renderamt / 16 );	// radius
-		WRITE_COLOR( visual->rendercolor );
-		WRITE_BYTE( RandomizeNumberFromRange(visual->life)*10 );	// life * 10
-		WRITE_COORD( 0 ); // decay
-	MESSAGE_END();
+	const Visual* pVisual = GetVisual(headBallLightVisual);
+	if (pVisual)
+	{
+		Visual visual = *pVisual;
+		visual.radius = (int)(pev->renderamt / 16);
+		SendEntLight(entindex(), pev->origin, &visual);
+	}
 
 	MovetoTarget( m_hEnemy->Center() );
 

@@ -15,11 +15,8 @@ void WriteBeamFollowVisual(const Visual* visual);
 
 void WriteSpriteVisual(const Visual* visual);
 
-void WriteDynLightVisual(const Visual* visual);
-
-void WriteEntLightVisual(const Visual* visual);
-
-void SendDynLight(const Vector& vecOrigin, const Visual* visual, int decay = 0);
+void SendDynLight(const Vector& vecOrigin, const Visual* visual);
+void SendEntLight(int entIndex, const Vector& vecOrigin, const Visual* visual, int attachment = 0);
 void SendSprite(const Vector& vecOrigin, const Visual* visual);
 void SendSpray(const Vector& position, const Vector& direction, const Visual* visual, int count, int speed, int noise);
 void SendSmoke(const Vector& position, const Visual* visual);

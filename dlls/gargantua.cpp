@@ -896,13 +896,7 @@ void CGargantua::FlameUpdate( void )
 			// RadiusDamage( trace.vecEndPos, pev, pev, gSkillData.gargantuaDmgFire, CLASS_ALIEN_MONSTER, DMG_BURN );
 			FlameDamage( vecStart, trace.vecEndPos, pev, pev, FireAttackDamage(), Classify(), DMG_BURN );
 
-			MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
-				WRITE_BYTE( TE_ELIGHT );
-				WRITE_SHORT( entindex() + 0x1000 * ( i + 2 ) );		// entity, attachment
-				WRITE_VECTOR( vecStart );		// origin
-				WriteEntLightVisual(m_flameVisual);
-				WRITE_COORD( 0 ); // decay
-			MESSAGE_END();
+			SendEntLight(entindex(), vecStart, m_flameVisual, i + 2);
 		}
 	}
 	if( streaks )

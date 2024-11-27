@@ -74,29 +74,42 @@ void WriteSpriteVisual(const Visual *visual)
 	WRITE_BYTE( RandomizeNumberFromRange(visual->life)*10 );
 }
 
-void WriteDynLightVisual(const Visual *visual)
-{
-	WRITE_BYTE( RandomizeNumberFromRange(visual->radius) * 0.1f );	// radius * 0.1
-	WRITE_COLOR( visual->rendercolor );
-	WRITE_BYTE( RandomizeNumberFromRange(visual->life)*10 );	// time * 10
-}
-
-void WriteEntLightVisual(const Visual *visual)
-{
-	WRITE_COORD( RandomizeNumberFromRange(visual->radius) );	// radius
-	WRITE_COLOR( visual->rendercolor );
-	WRITE_BYTE( RandomizeNumberFromRange(visual->life)*10 );	// life * 10
-}
-
-void SendDynLight(const Vector& vecOrigin, const Visual* visual, int decay)
+void SendDynLight(const Vector& vecOrigin, const Visual* visual)
 {
 	if (!visual)
 		return;
+
+	const int radiusToSend = (int)(RandomizeNumberFromRange(visual->radius) * 0.1f);
+	if (radiusToSend <= 0)
+		return;
+
 	MESSAGE_BEGIN(MSG_PVS, SVC_TEMPENTITY, vecOrigin);
 		WRITE_BYTE(TE_DLIGHT);
 		WRITE_VECTOR(vecOrigin);
-		WriteDynLightVisual(visual);
-		WRITE_BYTE(decay);
+		WRITE_BYTE(radiusToSend);
+		WRITE_COLOR(visual->rendercolor);
+		WRITE_BYTE(RandomizeNumberFromRange(visual->life) * 10);
+		WRITE_BYTE((int)(visual->decay * 0.1f));
+	MESSAGE_END();
+}
+
+void SendEntLight(int entIndex, const Vector& vecOrigin, const Visual* visual, int attachment)
+{
+	if (!visual)
+		return;
+
+	const float radiusToSend = RandomizeNumberFromRange(visual->radius);
+	if (radiusToSend <= 0)
+		return;
+
+	MESSAGE_BEGIN(MSG_BROADCAST, SVC_TEMPENTITY);
+		WRITE_BYTE(TE_ELIGHT);
+		WRITE_SHORT(entIndex + 0x1000 * attachment);		// entity, attachment
+		WRITE_VECTOR(vecOrigin);		// origin
+		WRITE_COORD(radiusToSend);	// radius
+		WRITE_COLOR(visual->rendercolor);
+		WRITE_BYTE(RandomizeNumberFromRange(visual->life) * 10);	// life * 10
+		WRITE_COORD(visual->decay); // decay
 	MESSAGE_END();
 }
 

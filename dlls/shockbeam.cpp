@@ -60,7 +60,8 @@ const NamedVisual CShock::beam2Visual = BuildVisual("ShockBeam.Beam2")
 const NamedVisual CShock::lightVisual = BuildVisual("ShockBeam.Light")
 		.Radius(80)
 		.RenderColor(8, 253, 253)
-		.Life(0.5f);
+		.Life(0.5f)
+		.Decay(100.0f);
 
 const NamedVisual CShock::shellVisual = BuildVisual("ShockBeam.Shell")
 		.RenderColor(0, 220, 255)
@@ -138,7 +139,7 @@ void CShock::Touch(CBaseEntity *pOther)
 
 	TraceResult tr = UTIL_GetGlobalTrace( );
 
-	SendDynLight(pev->origin, GetVisual(lightVisual), 10);
+	SendDynLight(pev->origin, GetVisual(lightVisual));
 
 	CBaseMonster* pMonster = pOther->MyMonsterPointer();
 	if (pMonster && pMonster->IsAlive())

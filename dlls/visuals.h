@@ -38,6 +38,7 @@ struct Visual
 		LIFE_DEFINED = (1 << 10),
 		RADIUS_DEFINED = (1 << 11),
 		BEAMFLAGS_DEFINED = (1 << 12),
+		DECAY_DEFINED = (1 << 13),
 	};
 
 	const char* model = nullptr;
@@ -53,6 +54,7 @@ struct Visual
 	FloatRange life = 0.0f;
 	IntRange radius = 0;
 	int beamFlags = 0;
+	float decay = 0.0f;
 
 	int modelIndex = 0;
 
@@ -120,6 +122,11 @@ struct Visual
 	{
 		this->beamFlags = flags;
 		MarkAsDefined(BEAMFLAGS_DEFINED);
+	}
+	inline void SetDecay(float decay)
+	{
+		this->decay = decay;
+		MarkAsDefined(DECAY_DEFINED);
 	}
 
 	inline bool HasModel() const {
@@ -247,6 +254,10 @@ struct BuildVisual
 	}
 	inline BuildVisual& BeamFlags(int flags) {
 		visual.SetBeamFlags(flags);
+		return *this;
+	}
+	inline BuildVisual& Decay(float decay) {
+		visual.SetDecay(decay);
 		return *this;
 	}
 	inline BuildVisual& Mixin(const NamedVisual* mixin)

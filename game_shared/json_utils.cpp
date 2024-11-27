@@ -228,6 +228,9 @@ constexpr const char definitions[] = R"(
             "shadeout"
           ]
         }
+      },
+      "decay": {
+        "type": "number"
       }
     },
     "additionalProperties": false

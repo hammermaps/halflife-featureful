@@ -53,7 +53,8 @@ const NamedVisual CDisplacerBall::ringVisual = BuildVisual("DisplacerBall.Ring")
 const NamedVisual CDisplacerBall::lightVisual = BuildVisual("DisplacerBall.Light")
 		.Radius(160)
 		.RenderColor(255, 180, 96)
-		.Life(1.0f);
+		.Life(1.0f)
+		.Decay(100.0f);
 
 const NamedSoundScript CDisplacerBall::impactSoundScript = {
 	CHAN_WEAPON,
@@ -272,8 +273,7 @@ void CDisplacerBall::Circle( void )
 		MESSAGE_END();
 	}
 
-	const Visual* lightV = GetVisual(lightVisual);
-	SendDynLight(pev->origin, lightV, 10);
+	SendDynLight(pev->origin, GetVisual(lightVisual));
 }
 
 void CDisplacerBall::KillThink( void )

@@ -70,7 +70,8 @@ const NamedVisual CSpore::trailVisual = BuildVisual::Spray("Spore.Trail")
 const NamedVisual CSpore::lightVisual = BuildVisual("Spore.Light")
 		.Radius(100)
 		.RenderColor(15, 220, 40)
-		.Life(0.5f);
+		.Life(0.5f)
+		.Decay(100.0f);
 
 void CSpore::Precache(void)
 {
@@ -175,7 +176,7 @@ void CSpore::IgniteThink()
 
 	SendSpray(pev->origin, tr.vecPlaneNormal, GetVisual(sprayVisual), 100, 40, 180);
 
-	SendDynLight(pev->origin, GetVisual(lightVisual), 10);
+	SendDynLight(pev->origin, GetVisual(lightVisual));
 
 	SendSprite(pev->origin, GetVisual(RANDOM_LONG(0, 1) ? blowVisual : blowAltVisual));
 

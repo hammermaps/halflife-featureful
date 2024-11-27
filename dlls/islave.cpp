@@ -276,7 +276,7 @@ void CChargeToken::HuntThink()
 	pev->nextthink = gpGlobals->time + 0.1;
 	Animate();
 
-	MakeEntLight();
+	//MakeEntLight();
 
 	if( gpGlobals->time - pev->dmgtime > VTOKEN_LIFESPAN || m_hTarget == 0 || !IsInWorld())
 	{
@@ -348,17 +348,14 @@ void CChargeToken::Launch(CBaseEntity* pTarget, const Vector& pos)
 
 void CChargeToken::MakeEntLight(int timeDs)
 {
-	const Visual* visual = GetVisual(tokenLightVisual);
-
-	MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
-		WRITE_BYTE( TE_ELIGHT );
-		WRITE_SHORT( entindex() );		// entity, attachment
-		WRITE_VECTOR( pev->origin );		// origin
-		WRITE_COORD( RandomizeNumberFromRange(visual->radius) * pev->renderamt / 225 );	// radius
-		WRITE_COLOR( visual->rendercolor );
-		WRITE_BYTE( timeDs );	// life * 10
-		WRITE_COORD( 0 ); // decay
-	MESSAGE_END();
+	const Visual* pVisual = GetVisual(tokenLightVisual);
+	if (pVisual)
+	{
+		Visual visual = *pVisual;
+		visual.life = timeDs * 0.1f;
+		visual.radius = RandomizeNumberFromRange(visual.radius) * pev->renderamt / 225;
+		SendEntLight(entindex(), pev->origin, &visual);
+	}
 }
 
 class CISlave : public CFollowingMonster
@@ -435,7 +432,6 @@ public:
 	void RemoveHandGlows();
 	void RemoveChargeToken();
 	void CoilBeam();
-	void MakeDynamicLight(const Vector& vecSrc, const char* visualName, int t);
 
 	Vector HandPosition(int side);
 
@@ -734,10 +730,12 @@ const NamedVisual CISlave::powerupLightVisual = BuildVisual("Vortigaunt.PowerupL
 
 const NamedVisual CISlave::idleLightVisual = BuildVisual("Vortigaunt.IdleLight")
 		.Radius(80)
+		.Life(1.0f)
 		.Mixin(&CISlave::beamLightColorVisual);
 
 const NamedVisual CISlave::summonLightVisual = BuildVisual("Vortigaunt.SummonLight")
 		.Radius(100)
+		.Life(1.5f)
 		.Mixin(&CISlave::beamLightColorVisual);
 
 //=========================================================
@@ -814,8 +812,8 @@ void CISlave::IdleSound( void )
 		ArmBeamMessage( side );
 
 		UTIL_MakeAimVectors( pev->angles );
-		Vector vecSrc = pev->origin + gpGlobals->v_right * 2 * side;
-		MakeDynamicLight(vecSrc, idleLightVisual, 10);
+		const Vector vecSrc = pev->origin + gpGlobals->v_right * 2 * side;
+		SendDynLight(vecSrc, GetVisual(idleLightVisual));
 
 		EmitSoundScript(idleZapSoundScript);
 	}
@@ -967,8 +965,14 @@ void CISlave::HandleAnimEvent( MonsterEvent_t *pEvent )
 
 			if( m_iBeams == 0 )
 			{
-				Vector vecSrc = pev->origin + gpGlobals->v_forward * 2;
-				MakeDynamicLight(vecSrc, powerupLightVisual, (int)(20/pev->framerate));
+				const Vector vecSrc = pev->origin + gpGlobals->v_forward * 2;
+				const Visual* pPowerupLightVisual = GetVisual(powerupLightVisual);
+				if (pPowerupLightVisual)
+				{
+					Visual powerupVis = *pPowerupLightVisual;
+					powerupVis.life = (2.0f/pev->framerate);
+					SendDynLight(vecSrc, &powerupVis);
+				}
 			}
 			if( CanRevive() )
 			{
@@ -1219,8 +1223,8 @@ void CISlave::StartTask( Task_t *pTask )
 			m_IdealActivity = ACT_CROUCH;
 			EmitSoundScript(summonStartSoundScript);
 			UTIL_MakeAimVectors( pev->angles );
-			Vector vecSrc = pev->origin + gpGlobals->v_forward * 8;
-			MakeDynamicLight(vecSrc, summonLightVisual, 15);
+			const Vector vecSrc = pev->origin + gpGlobals->v_forward * 8;
+			SendDynLight(vecSrc, GetVisual(summonLightVisual));
 			HandsGlowOn();
 			CreateSummonBeams();
 		}
@@ -1252,7 +1256,7 @@ void CISlave::StartTask( Task_t *pTask )
 				Remember(bits_MEMORY_ISLAVE_HAS_LAUNCHED_TOKEN);
 				m_chargeToken->SetAttachment(edict(), 1);
 				UTIL_SetOrigin(m_chargeToken->pev, pev->origin);
-				m_chargeToken->MakeEntLight(6);
+				m_chargeToken->MakeEntLight(20);
 				TaskComplete();
 			}
 			else
@@ -2042,20 +2046,6 @@ void CISlave::CoilBeam()
 		WRITE_BYTE( TE_BEAMCYLINDER );
 		WRITE_CIRCLE( coilOrigin2, ISLAVE_COIL_ATTACK_RADIUS*2 );
 		WriteBeamVisual(visual);
-	MESSAGE_END();
-}
-
-void CISlave::MakeDynamicLight(const Vector &vecSrc, const char* visualName, int t)
-{
-	const Visual* visual = GetVisual(visualName);
-
-	MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, vecSrc );
-		WRITE_BYTE( TE_DLIGHT );
-		WRITE_VECTOR( vecSrc );
-		WRITE_BYTE( RandomizeNumberFromRange(visual->radius) * 0.1f );		// radius * 0.1
-		WRITE_COLOR( visual->rendercolor );
-		WRITE_BYTE( t );		// time * 10
-		WRITE_BYTE( 0 );		// decay * 0.1
 	MESSAGE_END();
 }
 

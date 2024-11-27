@@ -81,6 +81,10 @@ void Visual::CompleteFrom(const Visual &visual)
 	{
 		SetBeamFlags(visual.beamFlags);
 	}
+	if (ShouldCompleteFrom(visual, DECAY_DEFINED))
+	{
+		SetDecay(visual.decay);
+	}
 }
 
 static bool ParseRenderMode(const char* str, int& rendermode)
@@ -300,6 +304,12 @@ void VisualSystem::AddVisualFromJsonValue(const char *name, Value &value)
 		}
 	}
 
+	float decay;
+	if (UpdatePropertyFromJson(decay, value, "decay"))
+	{
+		visual.SetDecay(decay);
+	}
+
 	_visuals[name] = visual;
 }
 
@@ -397,6 +407,11 @@ void VisualSystem::DumpVisualImpl(const char *name, const Visual &visual)
 		{
 			LOG("Radius: %d-%d. ", visual.radius.min, visual.radius.max);
 		}
+	}
+
+	if (visual.HasDefined(Visual::DECAY_DEFINED))
+	{
+		LOG("Decay: %g. ", visual.decay);
 	}
 
 	if (visual.HasDefined(Visual::BEAMFLAGS_DEFINED))
