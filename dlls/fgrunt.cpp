@@ -34,6 +34,7 @@
 #include	"gamerules.h"
 #include	"studio.h"
 #include	"common_soundscripts.h"
+#include	"visuals_utils.h"
 
 #if FEATURE_OPFOR_GRUNT
 //=========================================================
@@ -2931,8 +2932,6 @@ void CDeadFGrunt::Spawn()
 #define		TORCH_AE_ONGAS			( 20)
 #define		TORCH_AE_OFFGAS			( 21)
 
-#define TORCH_BEAM_SPRITE "sprites/xbeam3.spr"
-
 class CTorch : public CHFGrunt
 {
 public:
@@ -2976,6 +2975,10 @@ public:
 	void PlayPainSound() { EmitSoundScriptTalk(painSoundScript); }
 	void DeathSound() { EmitSoundScriptTalk(dieSoundScript); }
 	void PlayCallForMedic() { EmitSoundScriptTalk(callMedicSoundScript); }
+
+	static const NamedVisual beamVisual;
+	static const NamedVisual dynLightVisual;
+	static const NamedVisual entLightVisual;
 protected:
 	bool HasWeaponEquiped();
 };
@@ -2989,6 +2992,24 @@ TYPEDESCRIPTION	CTorch::m_SaveData[] =
 };
 
 IMPLEMENT_SAVERESTORE( CTorch, CHFGrunt )
+
+const NamedVisual CTorch::beamVisual = BuildVisual("TorchGrunt.Beam")
+		.Model("sprites/xbeam3.spr")
+		.BeamWidth(5)
+		.RenderColor(0, 0, 255)
+		.Alpha(255)
+		.BeamScrollRate(20)
+		.BeamFlags(BEAM_FSHADEIN);
+
+const NamedVisual CTorch::dynLightVisual = BuildVisual("TorchGrunt.DynLight")
+		.RenderColor(251, 68, 36)
+		.Life(0.1f)
+		.Radius({40, 120});
+
+const NamedVisual CTorch::entLightVisual = BuildVisual("TorchGrunt.EntLight")
+		.RenderColor(251, 68, 36)
+		.Life(0.1f)
+		.Radius({8, 12});
 
 void CTorch::Spawn()
 {
@@ -3017,7 +3038,6 @@ void CTorch::Precache()
 {
 	PrecacheMyModel("models/hgrunt_torch.mdl");
 	PrecacheMyGibModel();
-	PRECACHE_MODEL(TORCH_BEAM_SPRITE);
 
 	RegisterAndPrecacheSoundScript(painSoundScript, CHFGrunt::painSoundScript);
 	RegisterAndPrecacheSoundScript(dieSoundScript, CHFGrunt::dieSoundScript);
@@ -3028,6 +3048,10 @@ void CTorch::Precache()
 
 	PRECACHE_SOUND("fgrunt/torch_light.wav");
 	PRECACHE_SOUND("fgrunt/torch_cut_loop.wav");
+
+	RegisterVisual(beamVisual);
+	RegisterVisual(dynLightVisual);
+	RegisterVisual(entLightVisual);
 
 	PrecacheCommon();
 	TalkInit();
@@ -3264,52 +3288,30 @@ void CTorch::UpdateGas( void )
 			MESSAGE_END();
 		}
 
-		m_pBeam->SetBrightness( RANDOM_LONG(192, 255) );
+		const Visual* bVisual = GetVisual(beamVisual);
+		if (bVisual)
+			m_pBeam->SetBrightness( RANDOM_LONG(bVisual->renderamt*3/4, bVisual->renderamt) );
 
-		MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
-			WRITE_BYTE( TE_DLIGHT );
-			WRITE_VECTOR( vecEndPos );		// origin
-			WRITE_BYTE( RANDOM_LONG(4, 16) );	// radius
-			WRITE_BYTE( 251 );	// R
-			WRITE_BYTE( 68 );	// G
-			WRITE_BYTE( 36 );	// B
-			WRITE_BYTE( 1 );	// life * 10
-			WRITE_BYTE( 0 ); // decay
-		MESSAGE_END();
-
-		MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
-			WRITE_BYTE( TE_ELIGHT );
-			WRITE_SHORT( entindex( ) + 0x1000 * 3 );		// entity, attachment
-			WRITE_VECTOR( vecEndPos );		// origin
-			WRITE_COORD( RANDOM_LONG(8, 12) );	// radius
-			WRITE_BYTE( 251 );	// R
-			WRITE_BYTE( 68 );	// G
-			WRITE_BYTE( 36 );	// B
-			WRITE_BYTE( 1 );	// life * 10
-			WRITE_COORD( 0 ); // decay
-		MESSAGE_END();
+		SendDynLight(vecEndPos, GetVisual(dynLightVisual));
+		SendEntLight(entindex(), vecEndPos, GetVisual(entLightVisual), 3);
 	}
 }
 
 void CTorch::MakeGas( bool doSpark )
 {
 	m_torchActive = TRUE;
-	m_pBeam = CBeam::BeamCreate( TORCH_BEAM_SPRITE, 5 );
 
+	m_pBeam = CreateBeamFromVisual(GetVisual(beamVisual));
 	if ( m_pBeam )
 	{
 		Vector posGun, angleGun;
 		GetAttachment( 2, posGun, angleGun );
 
 		m_pBeam->EntsInit( entindex(), entindex() );
-		m_pBeam->SetColor( 0, 0, 255 );
-		m_pBeam->SetBrightness( 255 );
-		m_pBeam->SetScrollRate( 20 );
 		m_pBeam->SetStartAttachment( 4 );
 		m_pBeam->SetEndAttachment( 3 );
 		if (doSpark)
 			m_pBeam->DoSparks( posGun, posGun );
-		m_pBeam->SetFlags( BEAM_FSHADEIN );
 		m_pBeam->pev->spawnflags = SF_BEAM_SPARKSTART | SF_BEAM_TEMPORARY;
 	}
 }
