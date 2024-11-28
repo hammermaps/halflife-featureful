@@ -62,18 +62,6 @@ void WriteBeamFollowVisual(const Visual *visual)
 	WRITE_BYTE( visual->renderamt );	// brightness
 }
 
-void WriteSpriteVisual(const Visual *visual)
-{
-	WRITE_SHORT( visual->modelIndex );		// model
-	WRITE_BYTE( RandomizeNumberFromRange(visual->scale) * 10 );				// size * 10
-	WRITE_BYTE( visual->rendermode );
-	WRITE_COLOR( visual->rendercolor );
-	WRITE_BYTE( visual->renderamt );			// brightness
-	WRITE_BYTE( visual->renderfx );
-	WRITE_SHORT( (int)RandomizeNumberFromRange(visual->framerate) * 10 );
-	WRITE_BYTE( RandomizeNumberFromRange(visual->life)*10 );
-}
-
 void SendDynLight(const Vector& vecOrigin, const Visual* visual)
 {
 	if (!visual)
@@ -119,7 +107,14 @@ void SendSprite(const Vector& vecOrigin, const Visual* visual)
 		return;
 	MESSAGE_BEGIN(MSG_PVS, gmsgSprite, vecOrigin);
 		WRITE_VECTOR(vecOrigin);
-		WriteSpriteVisual(visual);
+		WRITE_SHORT( visual->modelIndex );		// model
+		WRITE_BYTE( RandomizeNumberFromRange(visual->scale) * 10 );				// size * 10
+		WRITE_BYTE( visual->rendermode );
+		WRITE_COLOR( visual->rendercolor );
+		WRITE_BYTE( visual->renderamt );			// brightness
+		WRITE_BYTE( visual->renderfx );
+		WRITE_SHORT( (int)RandomizeNumberFromRange(visual->framerate) * 10 );
+		WRITE_BYTE( RandomizeNumberFromRange(visual->life)*10 );
 	MESSAGE_END();
 }
 

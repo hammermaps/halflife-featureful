@@ -27,6 +27,8 @@
 #include	"studio.h"
 #include	"game.h"
 #include	"mod_features.h"
+#include	"common_soundscripts.h"
+#include	"visuals_utils.h"
 
 //=========================================================
 // Monster's Anim Events Go Here
@@ -160,10 +162,6 @@ void CBloater::Precache()
 
 #define bits_MEMORY_FLOATER_PROVOKED bits_MEMORY_CUSTOM1
 
-
-#define FLOATER_NORMAL_COLOR Vector(127, 0, 255)
-#define FLOATER_PREPROVOKED_COLOR Vector(0, 255, 255)
-
 class CFloater : public CBaseMonster
 {
 public:
@@ -218,6 +216,7 @@ public:
 	BOOL ShouldAdvanceRoute( float flWaypointDist );
 
 	void StartBloating();
+	void ChangeGlowVisual(CSprite* pGlow, const Visual& newGlow);
 	void ExplodeEffect();
 	void MakeProvoked(bool alertOthers = true);
 	void AlertOthers();
@@ -239,6 +238,15 @@ public:
 	static const NamedSoundScript howlSoundScript;
 	static const NamedSoundScript bloatSoundScript;
 	static const NamedSoundScript explodeSoundScript;
+
+	static const NamedVisual blowVisual;
+	static const NamedVisual blowAltVisual;
+	static const NamedVisual blowSprayVisual;
+	static const NamedVisual blowLightVisual;
+
+	static const NamedVisual glowVisual;
+	static const NamedVisual glowUnprovokedVisual;
+	static const NamedVisual glowBloatingVisual;
 
 protected:
 	inline float OriginalScale() const { return m_originalScale; }
@@ -267,7 +275,6 @@ protected:
 	}
 	void GlowUpdate();
 	void GlowUpdate(CSprite* glow);
-	CSprite* CreateGlow(const Vector &glowColor, int attachment);
 
 	Vector m_velocity;
 
@@ -284,9 +291,6 @@ protected:
 		}
 	}
 
-	int m_tinySpit;
-	int m_explode1;
-	int m_explode2;
 	bool m_hasAttachments;
 };
 
@@ -346,6 +350,43 @@ const NamedSoundScript CFloater::explodeSoundScript = {
 	"Floater.Explode"
 };
 
+const NamedVisual CFloater::blowVisual = BuildVisual::Animated("Floater.Blow")
+		.Model("sprites/spore_exp_01.spr")
+		.RenderMode(kRenderTransAdd)
+		.Scale(2.0f)
+		.Alpha(120);
+
+const NamedVisual CFloater::blowAltVisual = BuildVisual::Animated("Floater.BlowAlt")
+		.Model("sprites/spore_exp_c_01.spr")
+		.RenderMode(kRenderTransAdd)
+		.Scale(2.0f)
+		.Alpha(120);
+
+const NamedVisual CFloater::blowSprayVisual = BuildVisual::Spray("Floater.BlowSpray")
+		.Model("sprites/tinyspit.spr");
+
+const NamedVisual CFloater::blowLightVisual = BuildVisual("Floater.BlowLight")
+		.Radius(120)
+		.RenderColor(60, 180, 0)
+		.Life(2.0f)
+		.Decay(120.0f);
+
+const NamedVisual CFloater::glowVisual = BuildVisual("Floater.Glow")
+		.Model("sprites/glow02.spr")
+		.RenderMode(kRenderGlow)
+		.RenderFx(kRenderFxNoDissipation)
+		.RenderColor(127, 0, 255)
+		.Alpha(220)
+		.Scale(0.2f);
+
+const NamedVisual CFloater::glowUnprovokedVisual = BuildVisual("Floater.GlowUnprovoked")
+		.RenderColor(0, 255, 255)
+		.Mixin(&CFloater::glowVisual);
+
+const NamedVisual CFloater::glowBloatingVisual = BuildVisual("Floater.GlowBloating")
+		.RenderColor(255, 0, 0)
+		.Mixin(&CFloater::glowVisual);
+
 int CFloater::DefaultISoundMask()
 {
 	int bits = bits_SOUND_WORLD | bits_SOUND_COMBAT | bits_SOUND_DANGER;
@@ -393,11 +434,20 @@ void CFloater::Spawn()
 
 	if (m_hasAttachments)
 	{
-		Vector glowColor(FLOATER_NORMAL_COLOR);
+		const Visual* pGlowVisual = nullptr;
 		if (FBitSet(pev->spawnflags, SF_MONSTER_WAIT_UNTIL_PROVOKED))
-			glowColor = FLOATER_PREPROVOKED_COLOR;
-		m_leftGlow = CreateGlow(glowColor,2);
-		m_rightGlow = CreateGlow(glowColor,1);
+			pGlowVisual = GetVisual(glowUnprovokedVisual);
+		else
+			pGlowVisual = GetVisual(glowVisual);
+		if (pGlowVisual)
+		{
+			m_leftGlow = CreateSpriteFromVisual(pGlowVisual, pev->origin);
+			if (m_leftGlow)
+				m_leftGlow->SetAttachment(edict(), 2);
+			m_rightGlow = CreateSpriteFromVisual(pGlowVisual, pev->origin);
+			if (m_rightGlow)
+				m_rightGlow->SetAttachment(edict(), 1);
+		}
 	}
 	else
 	{
@@ -417,9 +467,14 @@ void CFloater::Precache()
 	PrecacheMyModel( "models/floater.mdl" );
 	PrecacheMyGibModel();
 
-	m_tinySpit = PRECACHE_MODEL("sprites/tinyspit.spr");
-	m_explode1 = PRECACHE_MODEL("sprites/spore_exp_01.spr");
-	m_explode2 = PRECACHE_MODEL("sprites/spore_exp_c_01.spr");
+	RegisterVisual(blowSprayVisual);
+	RegisterVisual(blowVisual);
+	RegisterVisual(blowAltVisual);
+	RegisterVisual(blowLightVisual);
+
+	RegisterVisual(glowVisual);
+	RegisterVisual(glowUnprovokedVisual);
+	RegisterVisual(glowBloatingVisual);
 
 	RegisterAndPrecacheSoundScript(idleSoundScript);
 	RegisterAndPrecacheSoundScript(alertSoundScript);
@@ -427,8 +482,6 @@ void CFloater::Precache()
 	RegisterAndPrecacheSoundScript(howlSoundScript);
 	RegisterAndPrecacheSoundScript(bloatSoundScript);
 	RegisterAndPrecacheSoundScript(explodeSoundScript);
-
-	PRECACHE_MODEL(FLOATER_GLOW_SPRITE);
 
 	g_howlTime = 0;
 	CheckForAttachments();
@@ -878,7 +931,7 @@ void CFloater::Killed(entvars_t *pevInflictor, entvars_t *pevAttacker, int iGib)
 
 void CFloater::GibMonster()
 {
-	EMIT_SOUND( ENT( pev ), CHAN_WEAPON, "common/bodysplat.wav", 1, ATTN_NORM );
+	EmitSoundScript(NPC::bodySplatSoundScript);
 
 	CGib::SpawnRandomClientGibs( pev, GibCount(), GibModel() );
 
@@ -897,44 +950,65 @@ void CFloater::UpdateOnRemove()
 
 void CFloater::GlowUpdate()
 {
-	UTIL_MakeVectors(pev->angles);
 	GlowUpdate(m_leftGlow);
 	GlowUpdate(m_rightGlow);
 }
 
 void CFloater::GlowUpdate(CSprite* glow)
 {
-	//const float scale = pev->scale ? pev->scale : 1;
-	const float blueSpeed = 16;
-	const float redSpeed = 6;
 	if (glow)
 	{
 		if (Bloating())
 		{
-			glow->pev->rendercolor.z = UTIL_Approach(0,glow->pev->rendercolor.z,blueSpeed);
-			glow->pev->rendercolor.x = UTIL_Approach(255,glow->pev->rendercolor.x,redSpeed);
+			const Visual* pGlowVisual = GetVisual(glowVisual);
+			const Visual* pGlowBloatingVisual = GetVisual(glowBloatingVisual);
+
+			if (pGlowVisual && pGlowBloatingVisual)
+			{
+				const float redSpeed = abs(pGlowVisual->rendercolor.r - pGlowBloatingVisual->rendercolor.r) / 8.0f;
+				const float greenSpeed = abs(pGlowVisual->rendercolor.g - pGlowBloatingVisual->rendercolor.g) / 8.0f;
+				const float blueSpeed = abs(pGlowVisual->rendercolor.b - pGlowBloatingVisual->rendercolor.b) / 8.0f;
+				const float alphaSpeed = abs(pGlowVisual->renderamt - pGlowBloatingVisual->renderamt) / 8.0f;
+
+				glow->pev->rendercolor.x = UTIL_Approach(pGlowBloatingVisual->rendercolor.r, glow->pev->rendercolor.x, redSpeed);
+				glow->pev->rendercolor.y = UTIL_Approach(pGlowBloatingVisual->rendercolor.g, glow->pev->rendercolor.y, greenSpeed);
+				glow->pev->rendercolor.z = UTIL_Approach(pGlowBloatingVisual->rendercolor.b, glow->pev->rendercolor.z, blueSpeed);
+				glow->pev->renderamt = UTIL_Approach(pGlowBloatingVisual->renderamt, glow->pev->renderamt, alphaSpeed);
+			}
 		}
 		UTIL_SetOrigin( glow->pev, pev->origin );
 	}
 }
 
-CSprite* CFloater::CreateGlow(const Vector& glowColor, int attachment)
-{
-	CSprite* glow = CSprite::SpriteCreate( FLOATER_GLOW_SPRITE, pev->origin, FALSE );
-	if (glow)
-	{
-		glow->SetTransparency(kRenderGlow, glowColor.x, glowColor.y, glowColor.z, 220, kRenderFxNoDissipation);
-		glow->SetScale(0.2);
-		glow->SetAttachment(edict(), attachment);
-	}
-	return glow;
-}
-
 void CFloater::StartBloating()
 {
 	EmitSoundScript(bloatSoundScript);
-	SetTargetScale( OriginalScale() * 1.5 );
+	SetTargetScale( OriginalScale() * 1.5f );
 	SetStartBloatingTime( gpGlobals->time );
+
+	if (m_leftGlow || m_rightGlow)
+	{
+		const Visual* pGlowBloatingVisual = GetVisual(glowBloatingVisual);
+		if (pGlowBloatingVisual)
+		{
+			if (m_leftGlow)
+				ChangeGlowVisual(m_leftGlow, *pGlowBloatingVisual);
+			if (m_rightGlow)
+				ChangeGlowVisual(m_rightGlow, *pGlowBloatingVisual);
+		}
+	}
+}
+
+void CFloater::ChangeGlowVisual(CSprite* pGlow, const Visual& newGlow)
+{
+	const char* model = newGlow.model;
+	if (model && !FStrEq(STRING(pGlow->pev->model), model))
+	{
+		SET_MODEL(pGlow->edict(), model);
+	}
+	pGlow->pev->rendermode = newGlow.rendermode;
+	pGlow->pev->renderfx = newGlow.renderfx;
+	pGlow->SetScale(RandomizeNumberFromRange(newGlow.scale));
 }
 
 void CFloater::ExplodeEffect()
@@ -942,34 +1016,12 @@ void CFloater::ExplodeEffect()
 	Vector up(0,0,1);
 	Vector exploOrigin = pev->origin;
 	exploOrigin.z += 32.0f;
-	MESSAGE_BEGIN(MSG_PVS, SVC_TEMPENTITY, exploOrigin);
-		WRITE_BYTE(TE_SPRITE_SPRAY);
-		WRITE_VECTOR(exploOrigin);	// pos
-		WRITE_VECTOR(up);			// dir
-		WRITE_SHORT(m_tinySpit);	// model
-		WRITE_BYTE(25);// count
-		WRITE_BYTE(15);		// speed
-		WRITE_BYTE(500);	// noise ( client will divide by 100 )
-	MESSAGE_END();
 
-	MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, exploOrigin );
-		WRITE_BYTE( TE_SPRITE );
-		WRITE_VECTOR( exploOrigin );
-		WRITE_SHORT( RANDOM_LONG( 0, 1 ) ? m_explode1 : m_explode2 );
-		WRITE_BYTE( 20 ); // scale * 10
-		WRITE_BYTE( 120 ); // framerate
-	MESSAGE_END();
+	SendSpray(exploOrigin, up, GetVisual(blowSprayVisual), 25, 15, 500);
 
-	MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, exploOrigin );
-		WRITE_BYTE(TE_DLIGHT);
-		WRITE_VECTOR( exploOrigin );
-		WRITE_BYTE( 12 );		// radius * 0.1
-		WRITE_BYTE( 60 );		// r
-		WRITE_BYTE( 180 );		// g
-		WRITE_BYTE( 0 );		// b
-		WRITE_BYTE( 20 );		// time * 10
-		WRITE_BYTE( 20 );		// decay * 0.1
-	MESSAGE_END( );
+	SendSprite(exploOrigin, GetVisual(RANDOM_LONG(0, 1) ? blowVisual : blowAltVisual));
+
+	SendDynLight(exploOrigin, GetVisual(blowLightVisual));
 
 	EmitSoundScript(explodeSoundScript);
 
@@ -986,11 +1038,24 @@ void CFloater::MakeProvoked(bool alertOthers)
 {
 	if (!IsProvoked())
 	{
-		Vector glowColor = FLOATER_NORMAL_COLOR;
-		if (m_leftGlow)
-			m_leftGlow->SetColor(glowColor.x, glowColor.y, glowColor.z);
-		if (m_rightGlow)
-			m_rightGlow->SetColor(glowColor.x, glowColor.y, glowColor.z);
+		if (m_leftGlow || m_rightGlow)
+		{
+			const Visual* pGlowVisual = GetVisual(glowVisual);
+			if (pGlowVisual)
+			{
+				if (m_leftGlow)
+				{
+					ChangeGlowVisual(m_leftGlow, *pGlowVisual);
+					m_leftGlow->SetColor(pGlowVisual->rendercolor.r, pGlowVisual->rendercolor.g, pGlowVisual->rendercolor.b);
+				}
+				if (m_rightGlow)
+				{
+					ChangeGlowVisual(m_rightGlow, *pGlowVisual);
+					m_rightGlow->SetColor(pGlowVisual->rendercolor.r, pGlowVisual->rendercolor.g, pGlowVisual->rendercolor.b);
+				}
+			}
+		}
+
 		Remember(bits_MEMORY_FLOATER_PROVOKED);
 		if (alertOthers)
 			AlertOthers();

@@ -13,8 +13,6 @@ void WriteBeamVisual(const Visual* visual);
 
 void WriteBeamFollowVisual(const Visual* visual);
 
-void WriteSpriteVisual(const Visual* visual);
-
 void SendDynLight(const Vector& vecOrigin, const Visual* visual);
 void SendEntLight(int entIndex, const Vector& vecOrigin, const Visual* visual, int attachment = 0);
 void SendSprite(const Vector& vecOrigin, const Visual* visual);
