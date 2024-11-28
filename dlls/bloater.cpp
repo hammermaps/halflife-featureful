@@ -504,6 +504,7 @@ void CFloater::FloaterTouch(CBaseEntity *pOther)
 // Chase enemy schedule
 Task_t tlFloaterChaseEnemy[] =
 {
+	{ TASK_SET_FAIL_SCHEDULE, (float)SCHED_CHASE_ENEMY_FAILED },
 	{ TASK_GET_PATH_TO_ENEMY, (float)64 },
 	{ TASK_WAIT_FOR_MOVEMENT, (float)0 },
 };
@@ -658,6 +659,11 @@ Schedule_t *CFloater::GetScheduleOfType( int Type )
 		return slFloaterTakeCover;
 	case SCHED_FAIL:
 		return slFloaterFail;
+	case SCHED_CHASE_ENEMY_FAILED:
+		if (HasMemory(bits_MEMORY_BLOCKER_IS_ENEMY))
+			return CBaseMonster::GetScheduleOfType(SCHED_CHASE_ENEMY);
+		else
+			return slFloaterFail;
 	}
 
 	return CBaseMonster::GetScheduleOfType( Type );
@@ -800,6 +806,11 @@ void CFloater::Move( float flInterval )
 					}
 					else
 					{
+						if (m_movementGoal == MOVEGOAL_ENEMY && pBlocker && pBlocker == m_hEnemy)
+						{
+							Remember(bits_MEMORY_BLOCKER_IS_ENEMY);
+						}
+
 						TaskFail("failed to move");
 						//ALERT( at_aiconsole, "%f, %f, %f\n", pev->origin.z, ( pev->origin + ( vecDir * flCheckDist ) ).z, m_Route[m_iRouteIndex].vecLocation.z );
 					}
