@@ -120,7 +120,7 @@ class CBasePlayerWeapon;
 class CBasePlayerAmmo;
 class CSquadMonster;
 
-class EntTemplate;
+struct EntTemplate;
 
 #define SF_ITEM_TOUCH_ONLY 128
 #define SF_ITEM_USE_ONLY 256 //  ITEM_USE_ONLY = BUTTON_USE_ONLY = DOOR_USE_ONLY!!!

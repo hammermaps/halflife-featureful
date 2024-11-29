@@ -366,7 +366,7 @@ bool EntTemplateSystem::ReadFromFile(const char *fileName)
 			if (it != value.MemberEnd())
 			{
 				const char* targetType = it->value.GetString();
-				const std::pair<const char*, float> sizeValues[] = {
+				const std::pair<const char*, int> sizeValues[] = {
 					{"no", GRAPPLE_NOT_A_TARGET},
 					{"small", GRAPPLE_SMALL},
 					{"medium", GRAPPLE_MEDIUM},

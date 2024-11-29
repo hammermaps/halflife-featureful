@@ -15,7 +15,7 @@
 #define CHAN_BOT			501	// channel used for bot chatter.
 
 // attenuation values
-#define ATTN_NONE			0
+#define ATTN_NONE			0.0f
 #define ATTN_NORM			0.8f
 #define ATTN_IDLE			2.0f
 #define ATTN_STATIC			1.25f
