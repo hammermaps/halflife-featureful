@@ -2701,12 +2701,17 @@ public:
 	void Spawn( void );
 	void Precache( void );
 	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
+	EntityOverrides SodacanOverrides() const {
+		EntityOverrides entOverrides;
+		entOverrides.model = pev->model;
+		entOverrides.ownerEntTemplate = m_entTemplate;
+		return entOverrides;
+	}
 };
 
 void CEnvBeverage::Precache( void )
 {
-	PRECACHE_MODEL( FStringNull( pev->model ) ? DEFAULT_CAN_MODEL : STRING( pev->model ) );
-	PRECACHE_SOUND( "weapons/g_bounce3.wav" );
+	UTIL_PrecacheOther("item_sodacan", SodacanOverrides());
 }
 
 LINK_ENTITY_TO_CLASS( env_beverage, CEnvBeverage )
@@ -2728,7 +2733,7 @@ void CEnvBeverage::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE 
 	else
 		vecPos = pev->origin;
 
-	CBaseEntity *pCan = CBaseEntity::CreateNoSpawn( "item_sodacan", vecPos, pev->angles, edict() );
+	CBaseEntity *pCan = CBaseEntity::CreateNoSpawn( "item_sodacan", vecPos, pev->angles, edict(), SodacanOverrides() );
 
 	if (pCan)
 	{
@@ -2778,12 +2783,28 @@ public:
 	void Precache( void );
 	void EXPORT CanThink( void );
 	void EXPORT CanTouch( CBaseEntity *pOther );
+
+	static const NamedSoundScript bounceSoundScript;
+	static const NamedSoundScript drinkSoundScript;
+};
+
+const NamedSoundScript CItemSoda::bounceSoundScript = {
+	CHAN_WEAPON,
+	{"weapons/g_bounce3.wav"},
+	"ItemSoda.Bounce"
+};
+
+const NamedSoundScript CItemSoda::drinkSoundScript = {
+	CHAN_STATIC,
+	{},
+	"ItemSoda.Drink"
 };
 
 void CItemSoda::Precache( void )
 {
-	PRECACHE_MODEL( FStringNull( pev->model ) ? DEFAULT_CAN_MODEL : STRING( pev->model ) );
-	PRECACHE_SOUND( "weapons/g_bounce3.wav" );
+	PrecacheMyModel(DEFAULT_CAN_MODEL);
+	RegisterAndPrecacheSoundScript(bounceSoundScript);
+	RegisterAndPrecacheSoundScript(drinkSoundScript);
 }
 
 LINK_ENTITY_TO_CLASS( item_sodacan, CItemSoda )
@@ -2794,7 +2815,7 @@ void CItemSoda::Spawn( void )
 	pev->solid = SOLID_NOT;
 	pev->movetype = MOVETYPE_TOSS;
 
-	SET_MODEL( ENT( pev ), FStringNull( pev->model ) ? DEFAULT_CAN_MODEL : STRING( pev->model ) );
+	SetMyModel(DEFAULT_CAN_MODEL);
 	UTIL_SetSize( pev, Vector( 0, 0, 0 ), Vector( 0, 0, 0 ) );
 	
 	SetThink( &CItemSoda::CanThink );
@@ -2803,7 +2824,7 @@ void CItemSoda::Spawn( void )
 
 void CItemSoda::CanThink( void )
 {
-	EMIT_SOUND( ENT( pev ), CHAN_WEAPON, "weapons/g_bounce3.wav", 1, ATTN_NORM );
+	EmitSoundScript(bounceSoundScript);
 
 	pev->solid = SOLID_TRIGGER;
 	UTIL_SetSize( pev, Vector( -8, -8, 0 ), Vector( 8, 8, 8 ) );
@@ -2819,6 +2840,7 @@ void CItemSoda::CanTouch( CBaseEntity *pOther )
 	}
 
 	// spoit sound here
+	pOther->EmitSoundScript(GetSoundScript(drinkSoundScript));
 	pOther->TakeHealth( this, pev->health ? pev->health : gSkillData.sodaHeal, DMG_GENERIC );// a bit of health.
 
 	if( !FNullEnt( pev->owner ) )
