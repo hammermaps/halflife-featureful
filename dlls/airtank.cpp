@@ -34,6 +34,10 @@ class CAirtank : public CGrenade
 	static	TYPEDESCRIPTION m_SaveData[];
 
 	int m_state;
+	float m_denySoundTime;
+
+	static const NamedSoundScript supplySoundScript;
+	static const NamedSoundScript denySoundScript;
 };
 
 LINK_ENTITY_TO_CLASS( item_airtank, CAirtank )
@@ -45,6 +49,18 @@ TYPEDESCRIPTION	CAirtank::m_SaveData[] =
 
 IMPLEMENT_SAVERESTORE( CAirtank, CGrenade )
 
+const NamedSoundScript CAirtank::supplySoundScript = {
+	CHAN_VOICE,
+	{"doors/aliendoor3.wav"},
+	"AirTank.Supply"
+};
+
+const NamedSoundScript CAirtank::denySoundScript = {
+	CHAN_BODY,
+	{"player/pl_swim2.wav"},
+	"AirTank.Deny"
+};
+
 void CAirtank::Spawn( void )
 {
 	Precache();
@@ -52,7 +68,7 @@ void CAirtank::Spawn( void )
 	pev->movetype = MOVETYPE_FLY;
 	pev->solid = SOLID_BBOX;
 
-	SET_MODEL( ENT( pev ), "models/w_oxygen.mdl" );
+	SetMyModel("models/w_oxygen.mdl");
 	UTIL_SetSize( pev, Vector( -16, -16, 0), Vector( 16, 16, 36 ) );
 	UTIL_SetOrigin( pev, pev->origin );
 
@@ -69,8 +85,9 @@ void CAirtank::Spawn( void )
 void CAirtank::Precache( void )
 {
 	PrecacheBaseGrenadeSounds();
-	PRECACHE_MODEL( "models/w_oxygen.mdl" );
-	PRECACHE_SOUND( "doors/aliendoor3.wav" );
+	PrecacheMyModel("models/w_oxygen.mdl");
+	RegisterAndPrecacheSoundScript(supplySoundScript);
+	RegisterAndPrecacheSoundScript(denySoundScript);
 }
 
 void CAirtank::Killed( entvars_t *pevInflictor, entvars_t *pevAttacker, int iGib )
@@ -97,7 +114,11 @@ void CAirtank::TankTouch( CBaseEntity *pOther )
 	if( !m_state )
 	{
 		// "no oxygen" sound
-		EMIT_SOUND( ENT( pev ), CHAN_BODY, "player/pl_swim2.wav", 1.0, ATTN_NORM );
+		if (m_denySoundTime <= gpGlobals->time)
+		{
+			EmitSoundScript(denySoundScript);
+			m_denySoundTime = gpGlobals->time + 1.0f;
+		}
 		return;
 	}
 
@@ -105,7 +126,7 @@ void CAirtank::TankTouch( CBaseEntity *pOther )
 	pOther->pev->air_finished = gpGlobals->time + 12;
 
 	// suit recharge sound
-	EMIT_SOUND( ENT( pev ), CHAN_VOICE, "doors/aliendoor3.wav", 1.0, ATTN_NORM );
+	EmitSoundScript(supplySoundScript);
 
 	// recharge airtank in 30 seconds
 	pev->nextthink = gpGlobals->time + 30;

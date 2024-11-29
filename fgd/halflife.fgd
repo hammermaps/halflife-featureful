@@ -3631,7 +3631,10 @@
 // items
 //
 
-@PointClass size(-16 -16 0, 16 16 36) base(Targetname, Appearflags, Angles, Global, Scalable) studio("models/w_oxygen.mdl") = item_airtank : "Oxygen tank" []
+@PointClass size(-16 -16 0, 16 16 36) base(Targetname, Appearflags, Angles, Global, Scalable, EntityTemplate) studio("models/w_oxygen.mdl") = item_airtank : "Oxygen tank"
+[
+	model(studio) : "Custom Model"
+]
 @PointClass size(-16 -16 0, 16 16 36) base(Item) studio("models/w_antidote.mdl") = item_antidote : "Poison antidote"
 [
 	noise(sound) : "Pickup sound" : "items/gunpickup4.wav"
