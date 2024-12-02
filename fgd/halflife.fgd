@@ -1772,7 +1772,7 @@
 	scale(string) : "Custom sprite scale"
 ]
 
-@PointClass base(Targetname, Angles) flags(Angle) size(-8 -8 -8, 8 8 8) = env_extinguisher : "Fire Extinguisher Blast"
+@PointClass base(Targetname, Angles, EntityTemplate) flags(Angle) size(-8 -8 -8, 8 8 8) = env_extinguisher : "Fire Extinguisher Blast"
 [
 	target(target_destination) : "Target on start/end" : : "Fire this target two times: when the entity is activated and when it's drained."
 	spawnflags(flags) =

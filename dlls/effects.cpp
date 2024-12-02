@@ -35,6 +35,7 @@
 #include "fx_flags.h"
 #include "warpball.h"
 #include "combat.h"
+#include "visuals_utils.h"
 
 #define FEATURE_ENV_WARPBALL 1
 #define FEATURE_ENV_XENMAKER 1
@@ -5579,10 +5580,6 @@ void CParticleShooter::ShootParticle()
 	}
 }
 
-#define EXTINGUISHER_EXPLO_SOUND "weapons/explode3.wav"
-#define EXTINGUISHER_STEAM_SOUND "ambience/steamjet1.wav"
-#define EXTINGUISHER_SPRITE "sprites/xsmoke1.spr"
-
 #define SF_EXTINGUISHER_REPEATABLE 1
 
 class CEnvExtinguisher : public CPointEntity
@@ -5593,9 +5590,36 @@ public:
 
 	void EXPORT ExtinguisherUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 	void EXPORT TurnOff();
+
+	static const NamedSoundScript startSoundScript;
+	static const NamedSoundScript sizzleSoundScript;
+
+	static const NamedVisual spriteVisual;
 };
 
 LINK_ENTITY_TO_CLASS( env_extinguisher, CEnvExtinguisher )
+
+const NamedSoundScript CEnvExtinguisher::startSoundScript = {
+	CHAN_WEAPON,
+	{"weapons/explode3.wav"},
+	1.0f,
+	ATTN_STATIC,
+	"Extinguisher.Start"
+};
+
+const NamedSoundScript CEnvExtinguisher::sizzleSoundScript = {
+	CHAN_VOICE,
+	{"ambience/steamjet1.wav"},
+	1.0f,
+	ATTN_STATIC,
+	"Extinguisher.Sizzle"
+};
+
+const NamedVisual CEnvExtinguisher::spriteVisual = BuildVisual::Animated("Extinguisher.Sprite")
+	.Model("sprites/xsmoke1.spr")
+	.Scale(1.0f)
+	.RenderMode(kRenderTransAdd)
+	.Alpha(125);
 
 void CEnvExtinguisher::Spawn()
 {
@@ -5606,46 +5630,44 @@ void CEnvExtinguisher::Spawn()
 
 void CEnvExtinguisher::Precache()
 {
-	PRECACHE_MODEL(EXTINGUISHER_SPRITE);
-	PRECACHE_SOUND(EXTINGUISHER_EXPLO_SOUND);
-	PRECACHE_SOUND(EXTINGUISHER_STEAM_SOUND);
+	RegisterAndPrecacheSoundScript(startSoundScript);
+	RegisterAndPrecacheSoundScript(sizzleSoundScript);
+	RegisterVisual(spriteVisual);
 }
 
 void CEnvExtinguisher::ExtinguisherUse(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
 {
-	EMIT_SOUND( edict(), CHAN_WEAPON, EXTINGUISHER_EXPLO_SOUND, 1.0f, ATTN_STATIC );
-	EMIT_SOUND( edict(), CHAN_VOICE, EXTINGUISHER_STEAM_SOUND, 1.0f, ATTN_STATIC );
+	EmitSoundScript(startSoundScript);
+	EmitSoundScript(sizzleSoundScript);
 
 	UTIL_MakeVectors(pev->angles);
 
-	const float scales[3] = {1.0f, 1.5f, 1.75f};
+	const Visual* pVisual = GetVisual(spriteVisual);
+
+	const float baseScale = RandomizeNumberFromRange(pVisual->scale);
+
+	const float scales[3] = {baseScale, baseScale * 1.5f,  baseScale * 1.75f};
 	const float turnoffTime = gpGlobals->time + 1.5f;
 
 	for (int i=0; i<ARRAYSIZE(scales); ++i)
 	{
-		CSprite* blastSprite = CSprite::SpriteCreate(EXTINGUISHER_SPRITE, pev->origin + i*(gpGlobals->v_forward * 16.0f), FALSE);
+		CSprite* blastSprite = CreateSpriteFromVisual(pVisual, pev->origin + i*(gpGlobals->v_forward * 16.0f));
 		if (blastSprite)
 		{
+			blastSprite->SetScale(scales[i]);
 			blastSprite->AnimateAndDie(10.0f);
 			blastSprite->pev->dmgtime = turnoffTime;
-			blastSprite->pev->renderamt = 125;
-			blastSprite->pev->rendermode = kRenderTransAdd;
-			blastSprite->pev->scale = scales[i];
 		}
 	}
 
+	SetUse(NULL);
 	if (!FStringNull(pev->target))
 	{
-		if (!FStringNull(pev->targetname) && FStrEq(STRING(pev->target), STRING(pev->targetname))) {
-			ALERT(at_error, "%s (%s) triggers itself!\n", STRING(pev->classname), STRING(pev->targetname));
-		} else {
-			FireTargets(STRING(pev->target), this, this, USE_ON, 0.0f);
-		}
+		FireTargets(STRING(pev->target), this, this, USE_ON, 0.0f);
 	}
 
 	SetThink(&CEnvExtinguisher::TurnOff);
 	pev->nextthink = turnoffTime;
-	SetUse(NULL);
 }
 
 void CEnvExtinguisher::TurnOff()
@@ -5655,7 +5677,7 @@ void CEnvExtinguisher::TurnOff()
 		FireTargets(STRING(pev->target), this, this, USE_OFF, 0.0f);
 	}
 
-	STOP_SOUND( edict(), CHAN_VOICE, EXTINGUISHER_STEAM_SOUND );
+	StopSoundScript(sizzleSoundScript);
 
 	SetThink(NULL);
 	if (FBitSet(pev->spawnflags, SF_EXTINGUISHER_REPEATABLE))
