@@ -596,6 +596,12 @@ void CBaseEntity::ApplyDamageToHealth(float flDamage)
 	}
 }
 
+void CBaseEntity::SetNonLethalHealthThreshold()
+{
+	if (m_healthMinThreshold <= 0.0f)
+		m_healthMinThreshold = 1.0f;
+}
+
 int CBaseEntity::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType )
 {
 	Vector vecTemp;

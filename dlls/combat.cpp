@@ -1122,14 +1122,14 @@ int CBaseMonster::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, f
 
 	AddScoreForDamage(pevAttacker, this, flTake);
 
+	if ((m_MonsterState == MONSTERSTATE_SCRIPT && takeDamagePolicy == SCRIPT_TAKE_DAMAGE_POLICY_NONLETHAL) || FBitSet(bitsDamageType, DMG_NONLETHAL))
+		SetNonLethalHealthThreshold();
+
 	ApplyDamageToHealth(flTake);
 
 	// HACKHACK Don't kill monsters in a script.  Let them break their scripts first
 	if( m_MonsterState == MONSTERSTATE_SCRIPT )
 	{
-		if (takeDamagePolicy == SCRIPT_TAKE_DAMAGE_POLICY_NONLETHAL && pev->health <= 0.0f)
-			pev->health = 1.0f;
-
 		if ( m_pCine && m_pCine->m_interruptionPolicy == SCRIPT_INTERRUPTION_POLICY_ONLY_DEATH )
 		{
 			if (pev->health <= 0.0f)
@@ -1142,24 +1142,17 @@ int CBaseMonster::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, f
 
 	if( pev->health <= 0 )
 	{
-		if (FBitSet(bitsDamageType, DMG_NONLETHAL))
+		int gibType = GIB_NORMAL;
+		if( bitsDamageType & DMG_ALWAYSGIB )
 		{
-			pev->health = 1;
+			gibType = GIB_ALWAYS;
 		}
-		else
+		else if( bitsDamageType & DMG_NEVERGIB )
 		{
-			int gibType = GIB_NORMAL;
-			if( bitsDamageType & DMG_ALWAYSGIB )
-			{
-				gibType = GIB_ALWAYS;
-			}
-			else if( bitsDamageType & DMG_NEVERGIB )
-			{
-				gibType = GIB_NEVER;
-			}
-			Killed( pevInflictor, pevAttacker, gibType );
-			return 0;
+			gibType = GIB_NEVER;
 		}
+		Killed( pevInflictor, pevAttacker, gibType );
+		return 0;
 	}
 
 	// react to the damage (get mad)

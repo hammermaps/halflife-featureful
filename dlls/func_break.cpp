@@ -640,20 +640,17 @@ int CBreakable::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, flo
 	g_vecAttackDir = vecTemp.Normalize();
 
 	if (pev->takedamage != DAMAGE_NO)
+	{
+		if (FBitSet(bitsDamageType, DMG_NONLETHAL))
+			SetNonLethalHealthThreshold();
 		ApplyDamageToHealth(flDamage);
+	}
 
 	if( pev->health <= 0 )
 	{
-		if (FBitSet(bitsDamageType, DMG_NONLETHAL))
-		{
-			pev->health = 1;
-		}
-		else
-		{
-			Killed( pevInflictor, pevAttacker, GIB_NORMAL );
-			DieToActivator(CBaseEntity::Instance(pevAttacker));
-			return 0;
-		}
+		Killed( pevInflictor, pevAttacker, GIB_NORMAL );
+		DieToActivator(CBaseEntity::Instance(pevAttacker));
+		return 0;
 	}
 
 	// Make a shard noise each time func breakable is hit.

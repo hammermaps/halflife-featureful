@@ -449,6 +449,7 @@ public:
 	virtual bool HandleDoorBlockage(CBaseEntity* pDoor) { return false; }
 
 	void ApplyDamageToHealth(float flDamage);
+	void SetNonLethalHealthThreshold();
 	float m_healthMinThreshold;
 
 	virtual bool IsUsefulToDisplayHint(CBaseEntity* pPlayer) { return true; }
