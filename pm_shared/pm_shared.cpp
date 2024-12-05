@@ -18,6 +18,7 @@
 #include <cstring> // strcpy
 #include <cstdlib> // atoi
 #include <cctype>  // isspace
+#include <algorithm>
 #include "mathlib.h"
 #if HAVE_TGMATH_H
 #include <tgmath.h>
@@ -95,10 +96,14 @@ playermove_t *pmove = NULL;
 static Vector rgv3tStuckTable[54];
 static int rgStuckLast[MAX_CLIENTS][2];
 
+struct MatTexture
+{
+	fixed_string<CBTEXTURENAMEMAX> name;
+	char type;
+};
+
 // Texture names
-static int gcTextures = 0;
-static char grgszTextureName[CTEXTURESMAX][CBTEXTURENAMEMAX];	
-static char grgchTextureType[CTEXTURESMAX];
+static fixed_vector<MatTexture, CTEXTURESMAX> gTextures;
 
 bool g_onladder = true;
 
@@ -116,50 +121,31 @@ static void PM_TraceModel( physent_t *pe, float *start, float *end, trace_t *tra
 	pmove->PM_TraceModel(pe, start, end, trace);
 }
 
-void PM_SwapTextures( int i, int j )
-{
-	char chTemp;
-	char szTemp[CBTEXTURENAMEMAX];
-
-	strcpy( szTemp, grgszTextureName[i] );
-	chTemp = grgchTextureType[i];
-	
-	strcpy( grgszTextureName[i], grgszTextureName[j] );
-	grgchTextureType[i] = grgchTextureType[j];
-
-	strcpy( grgszTextureName[j], szTemp );
-	grgchTextureType[j] = chTemp;
-}
-
 std::set<char> PM_GetPossibleMaterials()
 {
 	std::set<char> materials;
-	for (int i = 0; i < gcTextures; ++i)
+	for (const auto& t : gTextures)
 	{
-		materials.insert(grgchTextureType[i]);
+		materials.insert(t.type);
 	}
 	return materials;
 }
 
-void PM_SortTextures( void )
+struct MatTextureComparator
 {
-	// Bubble sort, yuck, but this only occurs at startup and it's only 512 elements...
-	//
-	int i, j;
-
-	for( i = 0; i < gcTextures; i++ )
+	bool operator()(const MatTexture& lhs, const char* rhs)
 	{
-		for( j = i + 1; j < gcTextures; j++ )
-		{
-			if( stricmp( grgszTextureName[i], grgszTextureName[j] ) > 0 )
-			{
-				// Swap
-				//
-				PM_SwapTextures( i, j );
-			}
-		}
+		return stricmp(lhs.name.c_str(), rhs) < 0;
 	}
-}
+	bool operator()(const char* lhs, const MatTexture& rhs)
+	{
+		return stricmp(lhs, rhs.name.c_str()) < 0;
+	}
+	bool operator()(const MatTexture& lhs, const MatTexture& rhs)
+	{
+		return stricmp(lhs.name.c_str(), rhs.name.c_str()) < 0;
+	}
+};
 
 void PM_InitTextureTypes( void )
 {
@@ -172,10 +158,7 @@ void PM_InitTextureTypes( void )
 	if( bTextureTypeInit )
 		return;
 
-	memset(&( grgszTextureName[0][0] ), 0, sizeof( grgszTextureName ) );
-	memset( grgchTextureType, 0, sizeof( grgchTextureType ) );
-
-	gcTextures = 0;
+	gTextures.clear();
 
 	pMemFile = pmove->COM_LoadFile( "sound/materials.txt", 5, &fileSize );
 	if( !pMemFile )
@@ -184,7 +167,7 @@ void PM_InitTextureTypes( void )
 	memset( buffer, 0, sizeof( buffer ) );
 
 	// for each line in the file...
-	while( pmove->memfgets( pMemFile, fileSize, &filePos, buffer, 511 ) != NULL && (gcTextures < CTEXTURESMAX ) )
+	while( pmove->memfgets( pMemFile, fileSize, &filePos, buffer, 511 ) != NULL && (gTextures.size() < CTEXTURESMAX ) )
 	{
 		// skip whitespace
 		i = 0;
@@ -199,7 +182,7 @@ void PM_InitTextureTypes( void )
 			continue;
 
 		// get texture type
-		grgchTextureType[gcTextures] = toupper( buffer[i++] );
+		const char textureType = toupper( buffer[i++] );
 
 		// skip whitespace
 		while( buffer[i] && isspace( buffer[i] ) )
@@ -219,46 +202,26 @@ void PM_InitTextureTypes( void )
 		// null-terminate name and save in sentences array
 		j = Q_min( j, CBTEXTURENAMEMAX - 1 + i );
 		buffer[j] = 0;
-		strcpy( &( grgszTextureName[gcTextures++][0] ), &( buffer[i] ) );
+		gTextures.push_back({buffer + i, textureType});
 	}
 
 	// Must use engine to free since we are in a .dll
 	pmove->COM_FreeFile( pMemFile );
 
-	PM_SortTextures();
+	std::sort(gTextures.begin(), gTextures.end(), MatTextureComparator());
 
 	bTextureTypeInit = true;
 }
 
 char PM_FindTextureType( const char *name )
 {
-	int left, right, pivot;
-	int val;
-
 	assert( pm_shared_initialized );
 
-	left = 0;
-	right = gcTextures - 1;
-
-	while( left <= right )
+	auto result = std::equal_range(gTextures.begin(), gTextures.end(), name, MatTextureComparator());
+	if (result.first != result.second)
 	{
-		pivot = ( left + right ) / 2;
-
-		val = strnicmp( name, grgszTextureName[pivot], CBTEXTURENAMEMAX - 1 );
-		if( val == 0 )
-		{
-			return grgchTextureType[pivot];
-		}
-		else if( val > 0 )
-		{
-			left = pivot + 1;
-		}
-		else if( val < 0 )
-		{
-			right = pivot - 1;
-		}
+		return result.first->type;
 	}
-
 	return g_MaterialRegistry.DefaultMaterial();
 }
 
