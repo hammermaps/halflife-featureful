@@ -50,6 +50,7 @@ extern const NamedSoundScript weaponEmptySoundScript;
 
 namespace Player
 {
+extern const NamedSoundScript sprayPaintSoundScript;
 extern const NamedSoundScript fallBodySplatSoundScript;
 extern const NamedSoundScript trainUseSoundScript;
 extern const NamedSoundScript vehicleIgnitionSoundScript;

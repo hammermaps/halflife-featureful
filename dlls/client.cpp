@@ -980,7 +980,7 @@ void ClientPrecache( void )
 	CBaseEntity* pWorld = CBaseEntity::Instance(pevWorld);
 
 	// setup precaches always needed
-	PRECACHE_SOUND( "player/sprayer.wav" );			// spray paint sound for PreAlpha
+	pWorld->RegisterAndPrecacheSoundScript(Player::sprayPaintSoundScript);
 
 	// PRECACHE_SOUND( "player/pl_jumpland2.wav" );		// UNDONE: play 2x step sound
 

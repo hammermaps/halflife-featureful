@@ -190,6 +190,12 @@ const NamedSoundScript weaponEmptySoundScript = {
 namespace Player
 {
 
+const NamedSoundScript sprayPaintSoundScript = {
+	CHAN_VOICE,
+	{"player/sprayer.wav"},
+	"SprayCan.Paint"
+};
+
 const NamedSoundScript fallBodySplatSoundScript = {
 	CHAN_ITEM,
 	{"common/bodysplat.wav"},

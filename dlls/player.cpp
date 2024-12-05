@@ -4187,7 +4187,7 @@ void CSprayCan::Spawn( entvars_t *pevOwner )
 	pev->frame = 0;
 
 	pev->nextthink = gpGlobals->time + 0.1f;
-	EMIT_SOUND( ENT( pev ), CHAN_VOICE, "player/sprayer.wav", 1, ATTN_NORM );
+	EmitSoundScript(Player::sprayPaintSoundScript);
 }
 
 void CSprayCan::Think( void )
