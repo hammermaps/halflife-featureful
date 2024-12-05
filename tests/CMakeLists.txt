@@ -17,9 +17,10 @@ include_directories (. ../common ../engine ../pm_shared ../game_shared ../dlls)
 add_executable(test
 	fixed_string_test.cpp
 	fixed_vector_test.cpp
-	parsetext_test.cpp
 	followers_test.cpp
+	materials_test.cpp
 	objecthint_test.cpp
+	parsetext_test.cpp
 	soundscripts_test.cpp
 	visuals_test.cpp
 	warpball_test.cpp
@@ -29,6 +30,7 @@ add_executable(test
 	../game_shared/json_utils.cpp
 	../game_shared/parsetext.cpp
 	../game_shared/random_utils.cpp
+	../game_shared/tex_materials.cpp
 	../game_shared/util_shared.cpp
 	../dlls/followers.cpp
 	../dlls/objecthint_spec.cpp

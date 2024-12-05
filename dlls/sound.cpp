@@ -27,6 +27,7 @@
 #include "pm_shared.h"
 #include "locus.h"
 #include "soundreplacement.h"
+#include "bullet_types.h"
 
 // ==================== GENERIC AMBIENT SOUND ======================================
 
@@ -1810,9 +1811,6 @@ float TEXTURETYPE_PlaySound( TraceResult *ptr,  Vector vecSrc, Vector vecEnd, in
 	const char *pTextureName;
 	float rgfl1[3];
 	float rgfl2[3];
-	const char *rgsz[4];
-	int cnt;
-	float fattn = ATTN_NORM;
 
 	if( !g_pGameRules->PlayTextureSounds() )
 		return 0.0f;
@@ -1823,7 +1821,7 @@ float TEXTURETYPE_PlaySound( TraceResult *ptr,  Vector vecSrc, Vector vecEnd, in
 
 	if( pEntity && pEntity->HasFlesh() )
 		// hit body
-		chTextureType = CHAR_TEX_FLESH;
+		chTextureType = g_MaterialRegistry.FleshMaterial();
 	else
 	{
 		// hit world
@@ -1852,8 +1850,15 @@ float TEXTURETYPE_PlaySound( TraceResult *ptr,  Vector vecSrc, Vector vecEnd, in
 		}
 	}
 
-	if (!GetTextureMaterialProperties(chTextureType, &fvol, &fvolbar, rgsz, &cnt, &fattn, iBulletType))
-		return 0.0;
+	const MaterialData* mData = g_MaterialRegistry.GetMaterialDataWithFallback(chTextureType);
+	if (!mData || mData->hit.waves.empty())
+		return 0.0f;
+
+	if (chTextureType == g_MaterialRegistry.FleshMaterial() && iBulletType == BULLET_PLAYER_CROWBAR)
+		return 0.0f;
+
+	fvol = mData->hit.volume;
+	fvolbar = mData->hit.volumebar;
 
 	// did we hit a breakable?
 	if( pEntity && FClassnameIs( pEntity->pev, "func_breakable" ) )
@@ -1862,7 +1867,7 @@ float TEXTURETYPE_PlaySound( TraceResult *ptr,  Vector vecSrc, Vector vecEnd, in
 		fvol /= 1.5f;
 		fvolbar /= 2.0f;
 	}
-	else if( chTextureType == CHAR_TEX_COMPUTER )
+	else if( mData->hit.playSparks )
 	{
 		// play random spark if computer
 		if( ptr->flFraction != 1.0f && RANDOM_LONG( 0, 1 ) )
@@ -1889,8 +1894,7 @@ float TEXTURETYPE_PlaySound( TraceResult *ptr,  Vector vecSrc, Vector vecEnd, in
 	}
 
 	// play material hit sound
-	UTIL_EmitAmbientSound( ENT( 0 ), ptr->vecEndPos, rgsz[RANDOM_LONG( 0, cnt - 1 )], fvol, fattn, 0, 96 + RANDOM_LONG( 0, 0xf ) );
-	//EMIT_SOUND_DYN( ENT( m_pPlayer->pev ), CHAN_WEAPON, rgsz[RANDOM_LONG( 0, cnt - 1 )], fvol, ATTN_NORM, 0, 96 + RANDOM_LONG( 0, 0xf ) );
+	UTIL_EmitAmbientSound( ENT( 0 ), ptr->vecEndPos, mData->hit.waves[RANDOM_LONG(0, mData->hit.waves.size() - 1)].c_str(), fvol, mData->hit.attn, 0, 96 + RANDOM_LONG( 0, 0xf ) );
 
 	return fvolbar;
 }

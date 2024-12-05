@@ -67,7 +67,7 @@ static bool DidHitSky(pmtrace_t *ptr, float *vecSrc, float *vecEnd)
 char EV_HLDM_GetTextureSound( int idx, pmtrace_t *ptr, float *vecSrc, float *vecEnd, int iBulletType, bool& isSky )
 {
 	// hit the world, try to play sound based on texture material type
-	char chTextureType = CHAR_TEX_CONCRETE;
+	char chTextureType = g_MaterialRegistry.DefaultMaterial();
 
 	int entity;
 	cl_entity_t *ent;
@@ -87,7 +87,7 @@ char EV_HLDM_GetTextureSound( int idx, pmtrace_t *ptr, float *vecSrc, float *vec
 	    || ( ( ent = gEngfuncs.GetEntityByIndex( entity )) && ( ent->curstate.eflags & EFLAG_FLESH_SOUND )))
 	{
 		// hit body
-		chTextureType = CHAR_TEX_FLESH;
+		chTextureType = g_MaterialRegistry.FleshMaterial();
 	}
 	else
 	{
@@ -123,35 +123,17 @@ char EV_HLDM_GetTextureSound( int idx, pmtrace_t *ptr, float *vecSrc, float *vec
 
 float EV_HLDM_PlayTextureSound( pmtrace_t *ptr, char chTextureType, int iBulletType )
 {
-	float fvol;
-	float fvolbar;
-	const char *rgsz[4];
-	int cnt;
-	float fattn = ATTN_NORM;
+	const MaterialData* mData = g_MaterialRegistry.GetMaterialDataWithFallback(chTextureType);
+	if (!mData || mData->hit.waves.empty())
+		return 0.0f;
 
-	if (!GetTextureMaterialProperties(chTextureType, &fvol, &fvolbar, rgsz, &cnt, &fattn, iBulletType))
-		return 0;
+	if (chTextureType == g_MaterialRegistry.FleshMaterial() && iBulletType == BULLET_PLAYER_CROWBAR)
+		return 0.0f;
+
 	// play material hit sound
-	gEngfuncs.pEventAPI->EV_PlaySound( 0, ptr->endpos, CHAN_STATIC, rgsz[gEngfuncs.pfnRandomLong( 0, cnt - 1 )], fvol, fattn, 0, 96 + gEngfuncs.pfnRandomLong( 0, 0xf ) );
+	gEngfuncs.pEventAPI->EV_PlaySound( 0, ptr->endpos, CHAN_STATIC, mData->hit.waves[gEngfuncs.pfnRandomLong(0, mData->hit.waves.size() - 1)].c_str(), mData->hit.volume, mData->hit.attn, 0, 96 + gEngfuncs.pfnRandomLong( 0, 0xf ) );
 
-	return fvol;
-}
-
-void EV_SmokeColorFromTextureType(char cTextureType, int& r_smoke, int& g_smoke, int& b_smoke)
-{
-	switch (cTextureType) {
-	case CHAR_TEX_CONCRETE:
-		r_smoke = g_smoke = b_smoke = 65;
-		break;
-	case CHAR_TEX_WOOD:
-		r_smoke = 75;
-		g_smoke = 42;
-		b_smoke = 15;
-		break;
-	default:
-		r_smoke = g_smoke = b_smoke = 40;
-		break;
-	}
+	return mData->hit.volume;
 }
 
 char *EV_HLDM_DamageDecal( physent_t *pe )
@@ -364,7 +346,9 @@ void EV_HLDM_DecalGunshot( pmtrace_t *pTrace, int iBulletType, char cTextureType
 	{
 		EV_HLDM_GunshotDecalTrace( pTrace, EV_HLDM_DamageDecal( pe ) );
 
-		if( cTextureType != CHAR_TEX_WOOD && gHUD.WeaponSparksEnabled() )
+		const MaterialData* mData = g_MaterialRegistry.GetMaterialDataWithFallback(cTextureType);
+
+		if( mData && mData->hit.allowWeaponSparks && gHUD.WeaponSparksEnabled() )
 		{
 			Vector dir = pTrace->plane.normal;
 			dir.x = dir.x * dir.x * gEngfuncs.pfnRandomFloat( 4.0f, 12.0f );
@@ -373,11 +357,10 @@ void EV_HLDM_DecalGunshot( pmtrace_t *pTrace, int iBulletType, char cTextureType
 			gEngfuncs.pEfxAPI->R_StreakSplash( pTrace->endpos, dir, 4, Com_RandomLong( 5, 10 ), dir.z, -75.0f, 75.0f );
 		}
 
-		if (gHUD.WeaponWallpuffEnabled())
+		if (mData && mData->hit.allowWallpuff && gHUD.WeaponWallpuffEnabled())
 		{
-			int r_smoke, g_smoke, b_smoke;
-			EV_SmokeColorFromTextureType(cTextureType, r_smoke, g_smoke, b_smoke);
-			EV_CreateShotSmoke( SMOKE_WALLPUFF, pTrace->endpos + pTrace->plane.normal * 5, pTrace->plane.normal, 25, 0.5f, r_smoke, g_smoke, b_smoke, true );
+			const Color smoke = mData->hit.wallpuffColor;
+			EV_CreateShotSmoke( SMOKE_WALLPUFF, pTrace->endpos + pTrace->plane.normal * 5, pTrace->plane.normal, 25, 0.5f, smoke.r, smoke.g, smoke.b, true );
 		}
 	}
 }

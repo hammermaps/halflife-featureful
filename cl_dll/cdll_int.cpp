@@ -34,6 +34,7 @@
 #include "pmtrace.h"
 
 #include "cl_msg.h"
+#include "tex_materials.h"
 
 #include "vcs_info.h"
 
@@ -433,6 +434,8 @@ the hud variables.
 
 void DLLEXPORT HUD_Init( void )
 {
+	g_MaterialRegistry.FillDefaults();
+	g_MaterialRegistry.ReadFromFile("features/materials.json");
 	InitInput();
 	gHUD.Init();
 #if USE_VGUI

@@ -31,6 +31,7 @@
 #include "savetitles.h"
 #include "objecthint_spec.h"
 #include "vcs_info.h"
+#include "tex_materials.h"
 
 ModFeatures g_modFeatures;
 
@@ -1391,6 +1392,22 @@ void ReportWarpballTemplates()
 	g_WarpballCatalog.DumpWarpballTemplates();
 }
 
+void ReportMaterials()
+{
+	int argc = CMD_ARGC();
+	if (argc > 1)
+	{
+		for (int i=1; i<argc; ++i)
+		{
+			const char* str = CMD_ARGV(i);
+			if (*str)
+				g_MaterialRegistry.DumpMaterial(*str);
+		}
+	}
+	else
+		g_MaterialRegistry.DumpMaterials();
+}
+
 static void CVAR_REGISTER_INTEGER( cvar_t* cvar, int value )
 {
 	char valueStr[12];
@@ -1429,6 +1446,8 @@ extern void ReportRegisteredAmmoTypes();
 // This gets called one time when the game is initialied
 void GameDLLInit( void )
 {
+	g_MaterialRegistry.FillDefaults();
+
 	ReadServerFeatures();
 	ReadEnabledMonsters();
 	ReadEnabledWeapons();
@@ -1444,6 +1463,7 @@ void GameDLLInit( void )
 	g_FollowersDescription.ReadFromFile("features/followers.json");
 	ReadSaveTitles();
 	g_objectHintCatalog.ReadFromFile("templates/objecthint.json");
+	g_MaterialRegistry.ReadFromFile("features/materials.json");
 
 	// Register cvars here:
 
@@ -2074,6 +2094,7 @@ void GameDLLInit( void )
 	g_engfuncs.pfnAddServerCommand("dump_sound_replacements", ReportSoundReplacements);
 	g_engfuncs.pfnAddServerCommand("dump_soundscripts", ReportSoundScripts);
 	g_engfuncs.pfnAddServerCommand("dump_visuals", ReportVisuals);
+	g_engfuncs.pfnAddServerCommand("dump_materials", ReportMaterials);
 }
 
 bool ItemsPickableByTouch()

@@ -42,6 +42,7 @@
 #include "nodes.h"
 #include "game.h"
 #include "common_soundscripts.h"
+#include "tex_materials.h"
 
 extern DLL_GLOBAL ULONG		g_ulModelIndexPlayer;
 extern DLL_GLOBAL BOOL		g_fGameOver;
@@ -952,7 +953,28 @@ void StartFrame( void )
 	g_ulFrameCount++;
 }
 
-int PM_IsThereSnowTexture();
+std::set<char> PM_GetPossibleMaterials();
+
+template<typename S, size_t N>
+void PrecacheSoundArray(const fixed_vector<S, N>& array)
+{
+	for (auto it = array.begin(); it != array.end(); ++it)
+	{
+		::PRECACHE_SOUND(it->c_str());
+	}
+}
+
+void PrecacheMaterialStepData(const MaterialStepData& data)
+{
+	PrecacheSoundArray(data.left);
+	PrecacheSoundArray(data.right);
+}
+
+void PrecacheMaterialData(const MaterialData& data)
+{
+	PrecacheSoundArray(data.hit.waves);
+	PrecacheMaterialStepData(data.step);
+}
 
 void ClientPrecache( void )
 {
@@ -967,80 +989,64 @@ void ClientPrecache( void )
 	PRECACHE_SOUND( "player/pl_fallpain2.wav" );
 	PRECACHE_SOUND( "player/pl_fallpain3.wav" );
 
-	PRECACHE_SOUND( "player/pl_step1.wav" );		// walk on concrete
-	PRECACHE_SOUND( "player/pl_step2.wav" );
-	PRECACHE_SOUND( "player/pl_step3.wav" );
-	PRECACHE_SOUND( "player/pl_step4.wav" );
-
 	PRECACHE_SOUND( "common/npc_step1.wav" );		// NPC walk on concrete
 	PRECACHE_SOUND( "common/npc_step2.wav" );
 	PRECACHE_SOUND( "common/npc_step3.wav" );
 	PRECACHE_SOUND( "common/npc_step4.wav" );
 
-	PRECACHE_SOUND( "player/pl_metal1.wav" );		// walk on metal
-	PRECACHE_SOUND( "player/pl_metal2.wav" );
-	PRECACHE_SOUND( "player/pl_metal3.wav" );
-	PRECACHE_SOUND( "player/pl_metal4.wav" );
+	const char defaultMaterial = g_MaterialRegistry.DefaultMaterial();
+	const char fleshMaterial = g_MaterialRegistry.FleshMaterial();
 
-	PRECACHE_SOUND( "player/pl_dirt1.wav" );		// walk on dirt
-	PRECACHE_SOUND( "player/pl_dirt2.wav" );
-	PRECACHE_SOUND( "player/pl_dirt3.wav" );
-	PRECACHE_SOUND( "player/pl_dirt4.wav" );
+	const MaterialData* mDefaultData = g_MaterialRegistry.GetMaterialData(defaultMaterial);
+	if (mDefaultData)
+	{
+		PrecacheMaterialData(*mDefaultData);
+	}
+	const MaterialData* mFleshData = g_MaterialRegistry.GetMaterialData(fleshMaterial);
+	if (mFleshData)
+	{
+		PrecacheMaterialData(*mFleshData);
+	}
 
-	PRECACHE_SOUND( "player/pl_duct1.wav" );		// walk in duct
-	PRECACHE_SOUND( "player/pl_duct2.wav" );
-	PRECACHE_SOUND( "player/pl_duct3.wav" );
-	PRECACHE_SOUND( "player/pl_duct4.wav" );
+	std::set<char> materials = PM_GetPossibleMaterials();
+	for (auto it = materials.begin(); it != materials.end(); ++it)
+	{
+		if (*it == defaultMaterial || *it == fleshMaterial)
+			continue; // already precached
+		const MaterialData* mData = g_MaterialRegistry.GetMaterialData(*it);
+		if (mData)
+		{
+			PrecacheMaterialData(*mData);
+		}
+	}
 
-	PRECACHE_SOUND( "player/pl_grate1.wav" );		// walk on grate
-	PRECACHE_SOUND( "player/pl_grate2.wav" );
-	PRECACHE_SOUND( "player/pl_grate3.wav" );
-	PRECACHE_SOUND( "player/pl_grate4.wav" );
+	const MaterialStepData* ladderStepData = g_MaterialRegistry.GetLadderStepData();
+	if (ladderStepData)
+	{
+		PrecacheMaterialStepData(*ladderStepData);
+	}
 
-	PRECACHE_SOUND( "player/pl_slosh1.wav" );		// walk in shallow water
-	PRECACHE_SOUND( "player/pl_slosh2.wav" );
-	PRECACHE_SOUND( "player/pl_slosh3.wav" );
-	PRECACHE_SOUND( "player/pl_slosh4.wav" );
+	const MaterialStepData* wadeStepData = g_MaterialRegistry.GetWadeStepData();
+	if (wadeStepData)
+	{
+		PrecacheMaterialStepData(*wadeStepData);
+	}
 
-	PRECACHE_SOUND( "player/pl_tile1.wav" );		// walk on tile
-	PRECACHE_SOUND( "player/pl_tile2.wav" );
-	PRECACHE_SOUND( "player/pl_tile3.wav" );
-	PRECACHE_SOUND( "player/pl_tile4.wav" );
-	PRECACHE_SOUND( "player/pl_tile5.wav" );
+	// Need for water sounds in pm_shared
+	// TODO: make into soundscript?
+	PRECACHE_SOUND("player/pl_wade1.wav");
+	PRECACHE_SOUND("player/pl_wade2.wav");
+	PRECACHE_SOUND("player/pl_wade3.wav");
+	PRECACHE_SOUND("player/pl_wade4.wav");
 
 	pWorld->RegisterAndPrecacheSoundScript(Player::underwaterExhaleSoundScript); // breathe bubbles
 	pWorld->RegisterAndPrecacheSoundScript(Player::undrownSoundScript);
 	pWorld->RegisterAndPrecacheSoundScript(Player::emergeInhaleSoundScript);
 
-	PRECACHE_SOUND( "player/pl_ladder1.wav" );	// climb ladder rung
-	PRECACHE_SOUND( "player/pl_ladder2.wav" );
-	PRECACHE_SOUND( "player/pl_ladder3.wav" );
-	PRECACHE_SOUND( "player/pl_ladder4.wav" );
-
-	PRECACHE_SOUND( "player/pl_wade1.wav" );		// wade in water
-	PRECACHE_SOUND( "player/pl_wade2.wav" );
-	PRECACHE_SOUND( "player/pl_wade3.wav" );
-	PRECACHE_SOUND( "player/pl_wade4.wav" );
-
-	if (PM_IsThereSnowTexture())
-	{
-		PRECACHE_SOUND( "player/pl_snow1.wav" );
-		PRECACHE_SOUND( "player/pl_snow2.wav" );
-		PRECACHE_SOUND( "player/pl_snow3.wav" );
-		PRECACHE_SOUND( "player/pl_snow4.wav" );
-	}
-
-	PRECACHE_SOUND( "debris/wood1.wav" );			// hit wood texture
-	PRECACHE_SOUND( "debris/wood2.wav" );
-	PRECACHE_SOUND( "debris/wood3.wav" );
-
 	pWorld->RegisterAndPrecacheSoundScript(Player::trainUseSoundScript);		// use a train
 
 	PRECACHE_SOUND( "buttons/spark5.wav" );		// hit computer texture
 	PRECACHE_SOUND( "buttons/spark6.wav" );
-	PRECACHE_SOUND( "debris/glass1.wav" );
-	PRECACHE_SOUND( "debris/glass2.wav" );
-	PRECACHE_SOUND( "debris/glass3.wav" );
 
 	PRECACHE_SOUND( SOUND_FLASHLIGHT_ON );
 	PRECACHE_SOUND( SOUND_FLASHLIGHT_OFF );

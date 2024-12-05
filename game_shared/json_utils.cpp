@@ -425,6 +425,20 @@ bool UpdatePropertyFromJson(bool& b, Value& jsonValue, const char* key)
 	return false;
 }
 
+bool UpdatePropertyFromJson(char& c, Value& jsonValue, const char* key)
+{
+	auto it = jsonValue.FindMember(key);
+	if (it != jsonValue.MemberEnd())
+	{
+		if (it->value.GetStringLength() == 1)
+		{
+			c = *it->value.GetString();
+			return true;
+		}
+	}
+	return false;
+}
+
 bool UpdatePropertyFromJson(Color& color, Value& jsonValue, const char* key)
 {
 	auto it = jsonValue.FindMember(key);
