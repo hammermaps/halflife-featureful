@@ -913,9 +913,9 @@ void CBaseEntity::EmitSoundScriptAmbient(const Vector& vecOrigin, const char *na
 
 void CBaseEntity::PrecacheSoundScript(const SoundScript& soundScript)
 {
-	for (size_t i=0; i<soundScript.waves.size(); ++i)
+	for (const auto& wave : soundScript.waves)
 	{
-		PRECACHE_SOUND(soundScript.waves[i]);
+		PRECACHE_SOUND(wave);
 	}
 }
 

@@ -12,35 +12,35 @@ using namespace rapidjson;
 
 const char hudInventorySchema[] = R"(
 {
-  "type": "object",
-  "properties": {
-    "default_sprite_alpha": "definitions.json#/alpha",
-    "text_alpha": "definitions.json#/alpha",
-    "items": {
-      "additionalProperties": {
-        "type": "object",
-        "properties": {
-          "sprite": {
-            "type": ["string", "null"]
-          },
-          "color": {
-            "$ref": "definitions.json#/color"
-          },
-          "alpha": {
-            "$ref": "definitions.json#/alpha"
-          },
-          "position": {
-            "type": "string",
-            "pattern": "^topleft|status|bottom|topright|hide$"
-          },
-          "show_in_history": {
-            "type": "boolean"
-          }
-        },
-        "additionalProperties": false
-      }
-    }
-  }
+	"type": "object",
+	"properties": {
+		"default_sprite_alpha": "definitions.json#/alpha",
+		"text_alpha": "definitions.json#/alpha",
+		"items": {
+			"additionalProperties": {
+				"type": "object",
+				"properties": {
+					"sprite": {
+						"type": ["string", "null"]
+					},
+					"color": {
+						"$ref": "definitions.json#/color"
+					},
+					"alpha": {
+						"$ref": "definitions.json#/alpha"
+					},
+					"position": {
+						"type": "string",
+						"pattern": "^topleft|status|bottom|topright|hide$"
+					},
+					"show_in_history": {
+						"type": "boolean"
+					}
+				},
+				"additionalProperties": false
+			}
+		}
+	}
 }
 )";
 

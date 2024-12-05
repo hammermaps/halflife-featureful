@@ -14,7 +14,7 @@ bool SoundReplacementList::IsValid() const {
 	return _isValid;
 }
 
-const std::string& SoundReplacementList::ReplacementFor(const std::string &soundName)
+const std::string& SoundReplacementList::ReplacementFor(const std::string &soundName) const
 {
 	auto it = _replacementMap.find(soundName);
 	if (it != _replacementMap.end()) {
@@ -130,11 +130,11 @@ bool SoundReplacementSystem::EnsureReplacementFile(const char *fileName)
 	return true;
 }
 
-const std::string& SoundReplacementSystem::FindReplacement(const char *fileName, const char *originalSoundName)
+const std::string& SoundReplacementSystem::FindReplacement(const char *fileName, const char *originalSoundName) const
 {
 	auto fileIt = _fileMap.find(fileName);
 	if (fileIt != _fileMap.end()) {
-		SoundReplacementList& soundReplacementFile = fileIt->second;
+		const SoundReplacementList& soundReplacementFile = fileIt->second;
 		if (soundReplacementFile.IsValid()) {
 			return soundReplacementFile.ReplacementFor(originalSoundName);
 		}
@@ -142,7 +142,7 @@ const std::string& SoundReplacementSystem::FindReplacement(const char *fileName,
 	return SoundReplacementSystem::emptyString;
 }
 
-void SoundReplacementList::ReportReplacements()
+void SoundReplacementList::ReportReplacements() const
 {
 	for (auto& p : _replacementMap)
 	{
@@ -150,7 +150,7 @@ void SoundReplacementList::ReportReplacements()
 	}
 }
 
-void SoundReplacementSystem::ReportSoundReplacements()
+void SoundReplacementSystem::ReportSoundReplacements() const
 {
 	for (auto& p : _fileMap)
 	{

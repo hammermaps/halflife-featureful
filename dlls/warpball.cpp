@@ -31,200 +31,200 @@ using namespace rapidjson;
 
 const char warpballCatalogSchema[] = R"(
 {
-  "type": "object",
-  "definitions": {
-    "sprite_name": {
-      "type": "string",
-      "pattern": ".+\\.spr"
-    },
-    "sprite": {
-      "type": ["object", "null"],
-      "properties": {
-        "sprite": {
-          "$ref": "#/definitions/sprite_name"
-        },
-        "framerate": {
-          "type": "number",
-          "minimum": 0
-        },
-        "scale": {
-          "type": "number",
-          "exclusiveMinimum": 0
-        },
-        "alpha": {
-          "type": "integer",
-          "minimum": 0,
-          "maximum": 255
-        },
-        "color": {
-          "$ref": "#/definitions/color"
-        }
-      },
-      "additionalProperties": false
-    },
-    "sound": {
-      "type": ["object", "null"],
-      "properties": {
-        "sound": {
-          "type": "string",
-          "pattern": ".+\\.wav"
-        },
-        "volume": {
-          "type": "number",
-          "exclusiveMinimum": 0,
-          "maximum": 1.0
-        },
-        "pitch": {
-          "$ref": "definitions.json#/range_int"
-        },
-        "attenuation": {
-          "$ref": "definitions.json#/attenuation",
-        }
-      },
-      "additionalProperties": false
-    }
-  },
-  "properties": {
-    "entity_mappings": {
-      "type": "object",
-      "additionalProperties": {
-        "type": "object",
-        "additionalProperties": {
-          "type": "string",
-          "minLength": 1
-        }
-      }
-    },
-    "templates": {
-      "type": "object",
-      "additionalProperties": {
-        "type": "object",
-        "properties": {
-          "inherits": {
-            "type": "string"
-          },
-          "sound1": {
-            "$ref": "#/definitions/sound"
-          },
-          "sound2": {
-            "$ref": "#/definitions/sound"
-          },
-          "sprite1": {
-            "$ref": "#/definitions/sprite"
-          },
-          "sprite2": {
-            "$ref": "#/definitions/sprite"
-          },
-          "beam": {
-            "type": "object",
-            "properties": {
-              "sprite": {
-                "$ref": "#/definitions/sprite_name"
-              },
-              "color": {
-                "$ref": "definitions.json#/color"
-              },
-              "alpha": {
-                "$ref": "definitions.json#/alpha"
-              },
-              "width": {
-                "type": "integer",
-                "minimum": 1
-              },
-              "noise": {
-                "type": "integer"
-              },
-              "life": {
-                "$ref": "definitions.json#/range"
-              }
-            },
-            "additionalProperties": false
-          },
-          "beam_radius": {
-            "type": "integer",
-            "minumum": 1
-          },
-          "beam_count": {
-            "$ref": "definitions.json#/range_int"
-          },
-          "light": {
-            "type": ["object", "null"],
-            "properties": {
-              "color": {
-                "$ref": "definitions.json#/color"
-              },
-              "radius": {
-                "type": "integer"
-              },
-              "life": {
-                "type": "number",
-                "minimum": 0
-              }
-            },
-            "additionalProperties": false
-          },
-          "shake": {
-            "type": ["object", "null"],
-            "properties": {
-              "radius": {
-                "type": "integer",
-                "minimum": 0
-              },
-              "duration": {
-                "type": "number",
-                "minimum": 0.0
-              },
-              "frequency": {
-                "type": "number",
-                "exclusiveMinimum": 0,
-                "maximum": 255.0
-              },
-              "amplitude": {
-                "type": "number",
-                "minimum": 0,
-                "maximum": 16
-              }
-            },
-            "additionalProperties": false
-          },
-          "ai_sound": {
-            "type": ["object", "null"],
-            "properties": {
-              "type": {
-                "type": "string",
-                "pattern": "^combat|danger$"
-              },
-              "duration": {
-                "type": "number",
-                "minimum": 0
-              },
-              "radius": {
-                "type": "integer",
-                "minimum": 0
-              }
-            },
-            "additionalProperties": false
-          },
-          "spawn_delay": {
-            "type": "number",
-            "minimum": 0
-          },
-          "position": {
-            "type": ["object", "null"],
-            "properties": {
-              "vertical_shift": {
-                "type": "number"
-              }
-            },
-            "additionalProperties": false
-          }
-        },
-        "additionalProperties": false
-      }
-    }
-  },
-  "additionalProperties": false,
-  "required": ["templates"]
+	"type": "object",
+	"definitions": {
+		"sprite_name": {
+			"type": "string",
+			"pattern": ".+\\.spr"
+		},
+		"sprite": {
+			"type": ["object", "null"],
+			"properties": {
+				"sprite": {
+					"$ref": "#/definitions/sprite_name"
+				},
+				"framerate": {
+					"type": "number",
+					"minimum": 0
+				},
+				"scale": {
+					"type": "number",
+					"exclusiveMinimum": 0
+				},
+				"alpha": {
+					"type": "integer",
+					"minimum": 0,
+					"maximum": 255
+				},
+				"color": {
+					"$ref": "#/definitions/color"
+				}
+			},
+			"additionalProperties": false
+		},
+		"sound": {
+			"type": ["object", "null"],
+			"properties": {
+				"sound": {
+					"type": "string",
+					"pattern": ".+\\.wav"
+				},
+				"volume": {
+					"type": "number",
+					"exclusiveMinimum": 0,
+					"maximum": 1.0
+				},
+				"pitch": {
+					"$ref": "definitions.json#/range_int"
+				},
+				"attenuation": {
+					"$ref": "definitions.json#/attenuation"
+				}
+			},
+			"additionalProperties": false
+		}
+	},
+	"properties": {
+		"entity_mappings": {
+			"type": "object",
+			"additionalProperties": {
+				"type": "object",
+				"additionalProperties": {
+					"type": "string",
+					"minLength": 1
+				}
+			}
+		},
+		"templates": {
+			"type": "object",
+			"additionalProperties": {
+				"type": "object",
+				"properties": {
+					"inherits": {
+						"type": "string"
+					},
+					"sound1": {
+						"$ref": "#/definitions/sound"
+					},
+					"sound2": {
+						"$ref": "#/definitions/sound"
+					},
+					"sprite1": {
+						"$ref": "#/definitions/sprite"
+					},
+					"sprite2": {
+						"$ref": "#/definitions/sprite"
+					},
+					"beam": {
+						"type": "object",
+						"properties": {
+							"sprite": {
+								"$ref": "#/definitions/sprite_name"
+							},
+							"color": {
+								"$ref": "definitions.json#/color"
+							},
+							"alpha": {
+								"$ref": "definitions.json#/alpha"
+							},
+							"width": {
+								"type": "integer",
+								"minimum": 1
+							},
+							"noise": {
+								"type": "integer"
+							},
+							"life": {
+								"$ref": "definitions.json#/range"
+							}
+						},
+						"additionalProperties": false
+					},
+					"beam_radius": {
+						"type": "integer",
+						"minumum": 1
+					},
+					"beam_count": {
+						"$ref": "definitions.json#/range_int"
+					},
+					"light": {
+						"type": ["object", "null"],
+						"properties": {
+							"color": {
+								"$ref": "definitions.json#/color"
+							},
+							"radius": {
+								"type": "integer"
+							},
+							"life": {
+								"type": "number",
+								"minimum": 0
+							}
+						},
+						"additionalProperties": false
+					},
+					"shake": {
+						"type": ["object", "null"],
+						"properties": {
+							"radius": {
+								"type": "integer",
+								"minimum": 0
+							},
+							"duration": {
+								"type": "number",
+								"minimum": 0.0
+							},
+							"frequency": {
+								"type": "number",
+								"exclusiveMinimum": 0,
+								"maximum": 255.0
+							},
+							"amplitude": {
+								"type": "number",
+								"minimum": 0,
+								"maximum": 16
+							}
+						},
+						"additionalProperties": false
+					},
+					"ai_sound": {
+						"type": ["object", "null"],
+						"properties": {
+							"type": {
+								"type": "string",
+								"pattern": "^combat|danger$"
+							},
+							"duration": {
+								"type": "number",
+								"minimum": 0
+							},
+							"radius": {
+								"type": "integer",
+								"minimum": 0
+							}
+						},
+						"additionalProperties": false
+					},
+					"spawn_delay": {
+						"type": "number",
+						"minimum": 0
+					},
+					"position": {
+						"type": ["object", "null"],
+						"properties": {
+							"vertical_shift": {
+								"type": "number"
+							}
+						},
+						"additionalProperties": false
+					}
+				},
+				"additionalProperties": false
+			}
+		}
+	},
+	"additionalProperties": false,
+	"required": ["templates"]
 }
 )";
 
@@ -807,7 +807,7 @@ static void ReportWarpballAiSound(const WarpballAiSound& aiSound)
 	}
 }
 
-void WarpballTemplateCatalog::DumpWarpballTemplates()
+void WarpballTemplateCatalog::DumpWarpballTemplates() const
 {
 	for (auto it = _templates.begin(); it != _templates.end(); ++it)
 	{

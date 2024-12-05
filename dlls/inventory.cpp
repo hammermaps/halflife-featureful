@@ -9,21 +9,21 @@ using namespace rapidjson;
 
 const char inventorySpecSchema[] = R"(
 {
-  "type": "object",
-  "properties": {
-    "items": {
-      "additionalProperties": {
-        "type": "object",
-        "properties": {
-          "max_count": {
-            "type": "integer",
-            "minimum": 0
-          }
-        },
-        "additionalProperties": false
-      }
-    }
-  }
+	"type": "object",
+	"properties": {
+		"items": {
+			"additionalProperties": {
+				"type": "object",
+				"properties": {
+					"max_count": {
+						"type": "integer",
+						"minimum": 0
+					}
+				},
+				"additionalProperties": false
+			}
+		}
+	}
 }
 )";
 

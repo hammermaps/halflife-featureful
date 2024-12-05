@@ -138,7 +138,7 @@ void AmmoRegistry::SetMaxAmmo(const char *name, int maxAmmo)
 	}
 }
 
-void AmmoRegistry::ReportRegisteredTypes()
+void AmmoRegistry::ReportRegisteredTypes() const
 {
 	for (int i = 0; i<lastAmmoIndex; ++i)
 	{
@@ -146,7 +146,7 @@ void AmmoRegistry::ReportRegisteredTypes()
 	}
 }
 
-void AmmoRegistry::ReportRegisteredType(const AmmoType& ammoType)
+void AmmoRegistry::ReportRegisteredType(const AmmoType& ammoType) const
 {
 	LOG_DEV("%s. Max ammo: %d. Index: %d. %s\n", ammoType.name, ammoType.maxAmmo, ammoType.id, ammoType.exhaustible ? "Exhaustible" : "");
 }

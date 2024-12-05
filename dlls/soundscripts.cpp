@@ -14,10 +14,10 @@ using namespace rapidjson;
 
 const char* soundScriptsSchema = R"(
 {
-  "type": "object",
-  "additionalProperties": {
-    "$ref": "definitions.json#/soundscript"
-  }
+	"type": "object",
+	"additionalProperties": {
+		"$ref": "definitions.json#/soundscript"
+	}
 }
 )";
 
@@ -362,16 +362,16 @@ const SoundScript* SoundScriptSystem::ProvideDefaultSoundScript(const char *deri
 	return nullptr;
 }
 
-void SoundScriptSystem::DumpSoundScriptImpl(const char *name, const SoundScript &soundScript, const SoundScriptMeta &meta)
+void SoundScriptSystem::DumpSoundScriptImpl(const char *name, const SoundScript &soundScript, const SoundScriptMeta &meta) const
 {
 	LOG("%s:\n", name);
 
 	LOG("Waves: ");
 	if (meta.wavesSet)
 	{
-		for (size_t i=0; i<soundScript.waves.size(); ++i)
+		for (const auto& wave : soundScript.waves)
 		{
-			LOG("\"%s\"; ", soundScript.waves[i]);
+			LOG("\"%s\"; ", wave);
 		}
 		LOG("\n");
 	}
@@ -427,7 +427,7 @@ void SoundScriptSystem::DumpSoundScriptImpl(const char *name, const SoundScript 
 	}
 }
 
-void SoundScriptSystem::DumpSoundScripts()
+void SoundScriptSystem::DumpSoundScripts() const
 {
 	for (const auto& p : _soundScripts)
 	{
@@ -435,17 +435,17 @@ void SoundScriptSystem::DumpSoundScripts()
 	}
 }
 
-void SoundScriptSystem::DumpSoundScript(const char *name)
+void SoundScriptSystem::DumpSoundScript(const char *name) const
 {
 	if (!*name)
 		return;
-	_temp = name;
-	if (_temp[_temp.size()-1] == '.' || _temp[_temp.size()-1] == '#')
+	std::string temp = name;
+	if (temp[temp.size()-1] == '.' || temp[temp.size()-1] == '#')
 	{
 		bool foundSomething = false;
 		for (const auto& p : _soundScripts)
 		{
-			if (strnicmp(p.first.c_str(), _temp.c_str(), _temp.size()) == 0)
+			if (strnicmp(p.first.c_str(), temp.c_str(), temp.size()) == 0)
 			{
 				foundSomething = true;
 				DumpSoundScriptImpl(p.first.c_str(),  p.second.first, p.second.second);
@@ -456,7 +456,7 @@ void SoundScriptSystem::DumpSoundScript(const char *name)
 	}
 	else
 	{
-		auto it = _soundScripts.find(_temp);
+		auto it = _soundScripts.find(temp);
 		if (it != _soundScripts.end())
 		{
 			DumpSoundScriptImpl(name, it->second.first, it->second.second);

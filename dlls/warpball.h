@@ -160,7 +160,7 @@ protected:
 public:
 	const WarpballTemplate* FindWarpballTemplate(const char* warpballName, const char* entityClassname = nullptr);
 	void PrecacheWarpballTemplate(const char* name, const char* entityClassname);
-	void DumpWarpballTemplates();
+	void DumpWarpballTemplates() const;
 
 private:
 	WarpballTemplate* GetWarpballTemplateMutable(const char* warpballName, const char* entityClassname);

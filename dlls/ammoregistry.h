@@ -30,9 +30,9 @@ public:
 	int GetMaxAmmo(const char* name) const;
 	int GetMaxAmmo(int index) const;
 	void SetMaxAmmo(const char* name, int maxAmmo);
-	void ReportRegisteredTypes();
+	void ReportRegisteredTypes() const;
 private:
-	void ReportRegisteredType(const AmmoType &ammoType);
+	void ReportRegisteredType(const AmmoType &ammoType) const;
 
 	AmmoType ammoTypes[MAX_AMMO_TYPES-1];
 

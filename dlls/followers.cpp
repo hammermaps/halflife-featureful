@@ -8,22 +8,22 @@ using namespace rapidjson;
 
 const char followersSchema[] = R"(
 {
-  "type": "object",
-  "properties": {
-    "fast_recruit_monsters": {
-      "type": "array",
-      "items": {
-        "type": "string",
-        "pattern": "^monster_.*$"
-      },
-      "uniqueItems": true
-    },
-    "fast_recruit_range": {
-      "type": "number",
-      "exclusiveMinimum": 0
-    }
-  },
-  "additionalProperties": false
+	"type": "object",
+	"properties": {
+		"fast_recruit_monsters": {
+			"type": "array",
+			"items": {
+				"type": "string",
+				"pattern": "^monster_.*$"
+			},
+			"uniqueItems": true
+		},
+		"fast_recruit_range": {
+			"type": "number",
+			"exclusiveMinimum": 0
+		}
+	},
+	"additionalProperties": false
 }
 )";
 

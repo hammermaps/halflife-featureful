@@ -13,67 +13,67 @@ using namespace rapidjson;
 
 const char* entTemplatesSchema = R"(
 {
-  "definitions": {
-    "template": {
-      "type": "object",
-      "properties": {
-        "own_visual": {
-          "$ref": "definitions.json#/visual"
-        },
-        "gib_visual": {
-          "$ref": "definitions.json#/visual"
-        },
-        "size": {
-          "type": ["object", "string"],
-          "properties": {
-            "mins": "definitions.json#/vector",
-            "maxs": "definitions.json#/vector"
-          },
-          "additionalProperties": false,
-          "required": ["mins", "maxs"]
-        },
-        "classify": {
-          "type": "string"
-        },
-        "blood": {
-          "type": "string"
-        },
-        "field_of_view": {
-          "type": ["number", "string"],
-          "minimum": -1.0,
-          "exclusiveMaximum": 1.0
-        },
-        "health": {
-          "type": "number",
-          "exclusiveMinimum": 0.0
-        },
-        "soundscripts": {
-          "type": "object",
-          "additionalProperties": {
-            "$ref": "definitions.json#/soundscript"
-          }
-        },
-        "visuals": {
-          "type": "object",
-          "additionalProperties": {
-            "$ref": "definitions.json#/visual"
-          }
-        },
-        "size_for_grapple": {
-          "type": "string"
-        },
-        "speech_prefix": {
-          "type": "string",
-          "minLength": 1
-        }
-      },
-      "additionalProperties": false
-    }
-  },
-  "type": "object",
-  "additionalProperties": {
-    "$ref": "#/definitions/template"
-  }
+	"definitions": {
+		"template": {
+			"type": "object",
+			"properties": {
+				"own_visual": {
+					"$ref": "definitions.json#/visual"
+				},
+				"gib_visual": {
+					"$ref": "definitions.json#/visual"
+				},
+				"size": {
+					"type": ["object", "string"],
+					"properties": {
+						"mins": "definitions.json#/vector",
+						"maxs": "definitions.json#/vector"
+					},
+					"additionalProperties": false,
+					"required": ["mins", "maxs"]
+				},
+				"classify": {
+					"type": "string"
+				},
+				"blood": {
+					"type": "string"
+				},
+				"field_of_view": {
+					"type": ["number", "string"],
+					"minimum": -1.0,
+					"exclusiveMaximum": 1.0
+				},
+				"health": {
+					"type": "number",
+					"exclusiveMinimum": 0.0
+				},
+				"soundscripts": {
+					"type": "object",
+					"additionalProperties": {
+						"$ref": "definitions.json#/soundscript"
+					}
+				},
+				"visuals": {
+					"type": "object",
+					"additionalProperties": {
+						"$ref": "definitions.json#/visual"
+					}
+				},
+				"size_for_grapple": {
+					"type": "string"
+				},
+				"speech_prefix": {
+					"type": "string",
+					"minLength": 1
+				}
+			},
+			"additionalProperties": false
+		}
+	},
+	"type": "object",
+	"additionalProperties": {
+		"$ref": "#/definitions/template"
+	}
 }
 )";
 

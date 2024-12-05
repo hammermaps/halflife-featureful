@@ -734,8 +734,7 @@ void ClientCommand( edict_t *pEntity )
 
 		// check the length of the command (prevents crash)
 		// max total length is 192 ...and we're adding a string below ("Unknown command: %s\n")
-		strncpy( command, pcmd, sizeof(command) - 1);
-		command[sizeof(command) - 1] = '\0';
+		strncpyEnsureTermination( command, pcmd );
 
 		// First parse the name and remove any %'s
 		for( char *pApersand = command; *pApersand; pApersand++ )
@@ -770,8 +769,7 @@ void ClientUserInfoChanged( edict_t *pEntity, char *infobuffer )
 	{
 		char sName[256];
 		char *pName = g_engfuncs.pfnInfoKeyValue( infobuffer, "name" );
-		strncpy( sName, pName, sizeof(sName) - 1 );
-		sName[sizeof(sName) - 1] = '\0';
+		strncpyEnsureTermination( sName, pName );
 
 		// First parse the name and remove any %'s
 		for( char *pApersand = sName; pApersand != NULL && *pApersand != 0; pApersand++ )

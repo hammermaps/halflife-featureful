@@ -7,87 +7,87 @@ using namespace rapidjson;
 
 const char objectHintCatalogSchema[] = R"(
 {
-  "type": "object",
-  "definitions": {
-    "visual": {
-      "type": "object",
-      "properties": {
-        "sprite": {
-          "type": "string",
-          "pattern": "^.+\\.spr$"
-        },
-        "color": {
-          "$ref": "definitions.json#/color"
-        },
-        "scale": {
-          "type": "number",
-          "exclusiveMinimum": 0
-        }
-      },
-      "additionalProperties": false
-    },
-    "visual_set": {
-      "type": "object",
-      "properties": {
-        "default": {
-          "type": ["string", "null"]
-        },
-        "unusable": {
-          "type": ["string", "null"]
-        },
-        "locked": {
-          "type": ["string", "null"]
-        }
-      },
-      "additionalProperties": false
-    },
-    "objecthint_spec": {
-      "type": "object",
-      "properties": {
-        "distance": {
-          "type": "number",
-          "exclusiveMinimum": 0
-        },
-        "scan": {
-          "$ref": "#/definitions/visual_set"
-        },
-        "interaction": {
-          "$ref": "#/definitions/visual_set"
-        },
-        "vertical_offset": {
-          "type": "number"
-        }
-      },
-      "additionalProperties": false
-    }
-  },
-  "properties": {
-    "visuals": {
-      "type": "object",
-      "additionalProperties": {
-        "$ref": "#/definitions/visual"
-      }
-    },
-    "templates": {
-      "type": "object",
-      "additionalProperties": {
-        "$ref": "#/definitions/objecthint_spec"
-      }
-    },
-    "entity_mapping": {
-      "type": "object",
-      "additionalProperties": {
-        "type": "string"
-      }
-    },
-    "pickup_mapping": {
-      "type": "object",
-      "additionalProperties": {
-        "type": "string"
-      }
-    }
-  },
-  "additionalProperties": false
+	"type": "object",
+	"definitions": {
+		"visual": {
+			"type": "object",
+			"properties": {
+				"sprite": {
+					"type": "string",
+					"pattern": "^.+\\.spr$"
+				},
+				"color": {
+					"$ref": "definitions.json#/color"
+				},
+				"scale": {
+					"type": "number",
+					"exclusiveMinimum": 0
+				}
+			},
+			"additionalProperties": false
+		},
+		"visual_set": {
+			"type": "object",
+			"properties": {
+				"default": {
+					"type": ["string", "null"]
+				},
+				"unusable": {
+					"type": ["string", "null"]
+				},
+				"locked": {
+					"type": ["string", "null"]
+				}
+			},
+			"additionalProperties": false
+		},
+		"objecthint_spec": {
+			"type": "object",
+			"properties": {
+				"distance": {
+					"type": "number",
+					"exclusiveMinimum": 0
+				},
+				"scan": {
+					"$ref": "#/definitions/visual_set"
+				},
+				"interaction": {
+					"$ref": "#/definitions/visual_set"
+				},
+				"vertical_offset": {
+					"type": "number"
+				}
+			},
+			"additionalProperties": false
+		}
+	},
+	"properties": {
+		"visuals": {
+			"type": "object",
+			"additionalProperties": {
+				"$ref": "#/definitions/visual"
+			}
+		},
+		"templates": {
+			"type": "object",
+			"additionalProperties": {
+				"$ref": "#/definitions/objecthint_spec"
+			}
+		},
+		"entity_mapping": {
+			"type": "object",
+			"additionalProperties": {
+				"type": "string"
+			}
+		},
+		"pickup_mapping": {
+			"type": "object",
+			"additionalProperties": {
+				"type": "string"
+			}
+		}
+	},
+	"additionalProperties": false
 }
 )";
 

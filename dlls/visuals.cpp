@@ -10,10 +10,10 @@ using namespace rapidjson;
 
 const char* visualsSchema = R"(
 {
-  "type": "object",
-  "additionalProperties": {
-    "$ref": "definitions.json#/visual"
-  }
+	"type": "object",
+	"additionalProperties": {
+		"$ref": "definitions.json#/visual"
+	}
 }
 )";
 
@@ -372,7 +372,7 @@ static void PrintRange(const char* name, FloatRange range)
 	}
 }
 
-void VisualSystem::DumpVisualImpl(const char *name, const Visual &visual)
+void VisualSystem::DumpVisualImpl(const char *name, const Visual &visual) const
 {
 	LOG("%s:\n", name);
 
@@ -431,7 +431,7 @@ void VisualSystem::DumpVisualImpl(const char *name, const Visual &visual)
 	LOG("\n\n");
 }
 
-void VisualSystem::DumpVisuals()
+void VisualSystem::DumpVisuals() const
 {
 	for (const auto& p : _visuals)
 	{
@@ -439,15 +439,15 @@ void VisualSystem::DumpVisuals()
 	}
 }
 
-void VisualSystem::DumpVisual(const char *name)
+void VisualSystem::DumpVisual(const char *name) const
 {
-	_temp = name;
-	if (_temp[_temp.size()-1] == '.' || _temp[_temp.size()-1] == '#')
+	std::string temp = name;
+	if (temp[temp.size()-1] == '.' || temp[temp.size()-1] == '#')
 	{
 		bool foundSomething = false;
 		for (const auto& p : _visuals)
 		{
-			if (strnicmp(p.first.c_str(), _temp.c_str(), _temp.size()) == 0)
+			if (strnicmp(p.first.c_str(), temp.c_str(), temp.size()) == 0)
 			{
 				foundSomething = true;
 				DumpVisualImpl(p.first.c_str(),  p.second);
@@ -458,7 +458,7 @@ void VisualSystem::DumpVisual(const char *name)
 	}
 	else
 	{
-		auto it = _visuals.find(_temp);
+		auto it = _visuals.find(temp);
 		if (it != _visuals.end())
 		{
 			DumpVisualImpl(name, it->second);

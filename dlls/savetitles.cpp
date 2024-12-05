@@ -8,13 +8,13 @@
 #include "parsetext.h"
 #include "savetitles.h"
 
-struct TitleCommet
+struct TitleComment
 {
 	const char *mapname;
 	const char *titlename;
 };
 
-TitleCommet gTitleComments[] =
+TitleComment gTitleComments[] =
 {
 	// default Half-Life map titles
 	// ordering is important
@@ -91,17 +91,16 @@ std::vector<std::pair<std::string, std::string> > g_SaveTitles;
 
 const char* GetSaveTitleForMap(const char* mapname)
 {
-	size_t i;
-	for(i = 0; i < g_SaveTitles.size(); i++)
+	for(const auto& title : g_SaveTitles)
 	{
 		// compare if strings are equal at beginning
-		size_t len = g_SaveTitles[i].first.size();
-		if( !strnicmp( mapname, g_SaveTitles[i].first.c_str(), len ))
+		size_t len = title.first.size();
+		if( !strnicmp( mapname, title.first.c_str(), len ))
 		{
-			return g_SaveTitles[i].second.c_str();
+			return title.second.c_str();
 		}
 	}
-	for(i = 0; i < ARRAYSIZE( gTitleComments ); i++)
+	for(size_t i = 0; i < ARRAYSIZE( gTitleComments ); i++)
 	{
 		// compare if strings are equal at beginning
 		size_t len = strlen( gTitleComments[i].mapname );

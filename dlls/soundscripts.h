@@ -101,13 +101,13 @@ public:
 	const SoundScript* GetSoundScript(const char* name);
 	const SoundScript* ProvideDefaultSoundScript(const char* name, const SoundScript& soundScript);
 	const SoundScript* ProvideDefaultSoundScript(const char* derivative, const char* base, const SoundScript& soundScript, const SoundScriptParamOverride paramOverride = SoundScriptParamOverride());
-	void DumpSoundScripts();
-	void DumpSoundScript(const char* name);
+	void DumpSoundScripts() const;
+	void DumpSoundScript(const char* name) const;
 protected:
 	const char* Schema() const;
 	bool ReadFromDocument(rapidjson::Document& document, const char* fileName);
 private:
-	void DumpSoundScriptImpl(const char* name, const SoundScript& soundScript, const SoundScriptMeta& meta);
+	void DumpSoundScriptImpl(const char* name, const SoundScript& soundScript, const SoundScriptMeta& meta) const;
 	void EnsureExistingScriptDefined(SoundScript& existing, SoundScriptMeta& meta, const SoundScript& soundScript);
 
 	static constexpr const char* notDefinedYet = "waiting for default";

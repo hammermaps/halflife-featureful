@@ -277,13 +277,13 @@ public:
 	const Visual* GetVisual(const char* name);
 	const Visual* ProvideDefaultVisual(const char* name, const Visual& visual, bool doPrecache);
 	const Visual* ProvideDefaultVisual(const char* name, const Visual& visual, const char* mixinName, const Visual& mixinVisual);
-	void DumpVisuals();
-	void DumpVisual(const char* name);
+	void DumpVisuals() const;
+	void DumpVisual(const char* name) const;
 protected:
 	const char* Schema() const;
 	bool ReadFromDocument(rapidjson::Document& document, const char* fileName);
 private:
-	void DumpVisualImpl(const char* name, const Visual& visual);
+	void DumpVisualImpl(const char* name, const Visual& visual) const;
 
 	std::map<std::string, Visual, CaseInsensitiveCompare> _visuals;
 	std::set<std::string> _modelStringSet;

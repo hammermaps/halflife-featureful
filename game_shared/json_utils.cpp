@@ -16,225 +16,225 @@ using namespace rapidjson;
 
 constexpr const char definitions[] = R"(
 {
-  "alpha": {
-    "type": "integer",
-    "minimum": 0,
-    "maximum": 255
-  },
-  "color": {
-    "type": ["string", "array", "null"],
-    "pattern": "^([0-9]{1,3}[ ]+[0-9]{1,3}[ ]+[0-9]{1,3})|((#|0x)[0-9a-fA-F]{6})$",
-    "items": {
-      "type": "integer",
-      "minimum": 0,
-      "maximum": 255
-    },
-    "minItems": 3,
-    "maxItems": 3
-  },
-  "range": {
-    "type": ["string", "object", "number", "array"],
-    "pattern": "^[0-9]+(\\.[0-9]+)?(,[0-9]+(\\.[0-9]+)?)?$",
-    "properties": {
-      "min": {
-        "type": "number"
-      },
-      "max": {
-        "type": "number"
-      }
-    },
-    "additionalProperties": false,
-    "items": {
-      "type": "number"
-    },
-    "minItems": 2,
-    "maxItems": 2
-  },
-  "range_int": {
-    "type": ["string", "object", "integer", "array"],
-    "pattern": "^[0-9]+(,[0-9]+)?$",
-    "properties": {
-      "min": {
-        "type": "integer"
-      },
-      "max": {
-        "type": "integer"
-      }
-    },
-    "additionalProperties": false,
-    "items": {
-      "type": "integer"
-    },
-    "minItems": 2,
-    "maxItems": 2
-  },
-  "vector": {
-    "type": ["array"],
-    "items": {
-      "type": "number"
-    },
-    "minItems": 3,
-    "maxItems": 3
-  },
-  "attenuation": {
-    "oneof": [
-      {
-        "enum": [
-          "Norm",
-          "norm",
-          "Idle",
-          "idle",
-          "Static",
-          "static",
-          "None",
-          "none"
-        ]
-      },
-      {
-        "type": "number",
-        "minimum": 0
-      }
-    ]
-  },
-  "soundscript": {
-    "type": ["object", "string"],
-    "properties": {
-      "waves": {
-        "type": "array",
-        "items": {
-          "type": "string"
-        },
-        "maxItems": 10
-      },
-      "channel": {
-        "enum": [
-          "Auto",
-          "auto",
-          "Weapon",
-          "weapon",
-          "Voice",
-          "voice",
-          "Item",
-          "item",
-          "Body",
-          "body",
-          "Static",
-          "static"
-        ]
-      },
-      "volume": {
-        "$ref": "#/range"
-      },
-      "attenuation": {
-        "$ref": "#/attenuation"
-      },
-      "pitch": {
-        "$ref": "#/range_int"
-      }
-    },
-    "additionalProperties": false
-  },
-  "visual": {
-    "type": ["object", "string"],
-    "properties": {
-      "model": {
-        "type": "string"
-      },
-      "sprite": {
-        "type": "string"
-      },
-      "rendermode": {
-        "enum": [
-          "Normal",
-          "normal",
-          "Color",
-          "color",
-          "Texture",
-          "texture",
-          "Glow",
-          "glow",
-          "Solid",
-          "solid",
-          "Additive",
-          "additive"
-        ]
-      },
-      "color": {
-        "$ref": "definitions.json#/color"
-      },
-      "alpha": {
-        "$ref": "definitions.json#/alpha"
-      },
-      "renderfx": {
-        "oneof": [
-          {
-            "enum": [
-              "Normal",
-              "normal",
-              "Constant Glow",
-              "constant glow",
-              "Constant glow",
-              "Distort",
-              "distort",
-              "Hologram",
-              "hologram",
-              "Glow Shell",
-              "glow shell",
-              "Glow shell"
-            ]
-          },
-          {
-            "type": "integer",
-            "minimum": 0,
-            "maximum": 20
-          }
-        ]
-      },
-      "scale": {
-        "$ref": "definitions.json#/range",
-        "minimum": 0.0
-      },
-      "framerate": {
-        "type": "number",
-        "minimum": 0.0
-      },
-      "width": {
-        "type": "integer",
-        "minimum": 1
-      },
-      "noise": {
-        "type": "integer"
-      },
-      "scrollrate": {
-        "type": "integer"
-      },
-      "life": {
-        "$ref": "#/range"
-      },
-      "radius": {
-        "$ref": "#/range_int"
-      },
-      "beamflags": {
-        "type": "array",
-        "items": {
-          "enum": [
-            "Sine",
-            "sine",
-            "Solid",
-            "solid",
-            "Shadein",
-            "shadein",
-            "Shadeout",
-            "shadeout"
-          ]
-        }
-      },
-      "decay": {
-        "type": "number"
-      }
-    },
-    "additionalProperties": false
-  }
+	"alpha": {
+		"type": "integer",
+		"minimum": 0,
+		"maximum": 255
+	},
+	"color": {
+		"type": ["string", "array", "null"],
+		"pattern": "^([0-9]{1,3}[ ]+[0-9]{1,3}[ ]+[0-9]{1,3})|((#|0x)[0-9a-fA-F]{6})$",
+		"items": {
+			"type": "integer",
+			"minimum": 0,
+			"maximum": 255
+		},
+		"minItems": 3,
+		"maxItems": 3
+	},
+	"range": {
+		"type": ["string", "object", "number", "array"],
+		"pattern": "^[0-9]+(\\.[0-9]+)?(,[0-9]+(\\.[0-9]+)?)?$",
+		"properties": {
+			"min": {
+				"type": "number"
+			},
+			"max": {
+				"type": "number"
+			}
+		},
+		"additionalProperties": false,
+		"items": {
+			"type": "number"
+		},
+		"minItems": 2,
+		"maxItems": 2
+	},
+	"range_int": {
+		"type": ["string", "object", "integer", "array"],
+		"pattern": "^[0-9]+(,[0-9]+)?$",
+		"properties": {
+			"min": {
+				"type": "integer"
+			},
+			"max": {
+				"type": "integer"
+			}
+		},
+		"additionalProperties": false,
+		"items": {
+			"type": "integer"
+		},
+		"minItems": 2,
+		"maxItems": 2
+	},
+	"vector": {
+		"type": ["array"],
+		"items": {
+			"type": "number"
+		},
+		"minItems": 3,
+		"maxItems": 3
+	},
+	"attenuation": {
+		"oneof": [
+			{
+				"enum": [
+					"Norm",
+					"norm",
+					"Idle",
+					"idle",
+					"Static",
+					"static",
+					"None",
+					"none"
+				]
+			},
+			{
+				"type": "number",
+				"minimum": 0
+			}
+		]
+	},
+	"soundscript": {
+		"type": ["object", "string"],
+		"properties": {
+			"waves": {
+				"type": "array",
+				"items": {
+					"type": "string"
+				},
+				"maxItems": 10
+			},
+			"channel": {
+				"enum": [
+					"Auto",
+					"auto",
+					"Weapon",
+					"weapon",
+					"Voice",
+					"voice",
+					"Item",
+					"item",
+					"Body",
+					"body",
+					"Static",
+					"static"
+				]
+			},
+			"volume": {
+				"$ref": "#/range"
+			},
+			"attenuation": {
+				"$ref": "#/attenuation"
+			},
+			"pitch": {
+				"$ref": "#/range_int"
+			}
+		},
+		"additionalProperties": false
+	},
+	"visual": {
+		"type": ["object", "string"],
+		"properties": {
+			"model": {
+				"type": "string"
+			},
+			"sprite": {
+				"type": "string"
+			},
+			"rendermode": {
+				"enum": [
+					"Normal",
+					"normal",
+					"Color",
+					"color",
+					"Texture",
+					"texture",
+					"Glow",
+					"glow",
+					"Solid",
+					"solid",
+					"Additive",
+					"additive"
+				]
+			},
+			"color": {
+				"$ref": "definitions.json#/color"
+			},
+			"alpha": {
+				"$ref": "definitions.json#/alpha"
+			},
+			"renderfx": {
+				"oneof": [
+					{
+						"enum": [
+							"Normal",
+							"normal",
+							"Constant Glow",
+							"constant glow",
+							"Constant glow",
+							"Distort",
+							"distort",
+							"Hologram",
+							"hologram",
+							"Glow Shell",
+							"glow shell",
+							"Glow shell"
+						]
+					},
+					{
+						"type": "integer",
+						"minimum": 0,
+						"maximum": 20
+					}
+				]
+			},
+			"scale": {
+				"$ref": "definitions.json#/range",
+				"minimum": 0.0
+			},
+			"framerate": {
+				"type": "number",
+				"minimum": 0.0
+			},
+			"width": {
+				"type": "integer",
+				"minimum": 1
+			},
+			"noise": {
+				"type": "integer"
+			},
+			"scrollrate": {
+				"type": "integer"
+			},
+			"life": {
+				"$ref": "#/range"
+			},
+			"radius": {
+				"$ref": "#/range_int"
+			},
+			"beamflags": {
+				"type": "array",
+				"items": {
+					"enum": [
+						"Sine",
+						"sine",
+						"Solid",
+						"solid",
+						"Shadein",
+						"shadein",
+						"Shadeout",
+						"shadeout"
+					]
+				}
+			},
+			"decay": {
+				"type": "number"
+			}
+		},
+		"additionalProperties": false
+	}
 }
 )";
 
