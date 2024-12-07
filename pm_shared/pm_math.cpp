@@ -15,9 +15,6 @@
 // pm_math.c -- math primitives
 #include <cmath>
 #include "mathlib.h"
-#if HAVE_TGMATH_H
-#include <tgmath.h>
-#endif
 #include "const.h"
 
 // up / down

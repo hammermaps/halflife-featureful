@@ -179,19 +179,6 @@ if(LTO)
 	endif()
 endif()
 
-check_include_file("tgmath.h" HAVE_TGMATH_H)
-if(HAVE_TGMATH_H)
-	if(NOT MSVC)
-		set(CMAKE_REQUIRED_LIBRARIES "m")
-	endif()
-	check_c_source_compiles("#include <tgmath.h>
-	const float val = 2, val2 = 3;
-	int main(){ return (int)(-asin(val) + cos(val2)); }" HAVE_VALID_TGMATH_H )
-	if(${HAVE_VALID_TGMATH_H})
-		add_definitions(-DHAVE_TGMATH_H)
-	endif()
-endif()
-
 if(BUILD_CLIENT)
 	message(STATUS "Building client enabled")
 	add_subdirectory(cl_dll)

@@ -12,19 +12,14 @@
 *   without written permission from Valve LLC.
 *
 ****/
-#include <math.h>
+#include <cmath>
 #include "mathlib.h"
-#if HAVE_TGMATH_H
-#include <tgmath.h>
-#endif
 
 #include "usercmd.h"
 #include "pm_defs.h"
 #include "pm_shared.h"
 #include "pm_movevars.h"
 #include "pm_debug.h"
-
-#include <string.h>
 
 #if _MSC_VER
 #pragma warning(disable : 4244)
