@@ -326,5 +326,5 @@ This list is incomplete. Look at `CMakeLists.txt` to see all available options.
 Prepend option names with `-D` when passing to cmake. Boolean options can take values **OFF** and **ON**. Example:
 
 ```
-cmake .. -DUSE_VGUI=ON -DGOLDSOURCE_SUPPORT=ON -DCROWBAR_IDLE_ANIM=ON -DCROWBAR_FIX_RAPID_CROWBAR=ON
+cmake .. -DUSE_VGUI=ON -DGOLDSOURCE_SUPPORT=ON
 ```
