@@ -20,9 +20,6 @@
 #include <cctype>  // isspace
 #include <algorithm>
 #include "mathlib.h"
-#if HAVE_TGMATH_H
-#include <tgmath.h>
-#endif
 
 #include "pm_defs.h"
 #include "pm_shared.h"
