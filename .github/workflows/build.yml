@@ -94,12 +94,6 @@ jobs:
       if:  ${{ env.include_features == 'true' }}
       run: cp -r features/ dist/${{ steps.extract_gamedir.outputs.gamedir }}/
 
-    - name: Delete .lib files from dist
-      if: startsWith(matrix.os, 'windows')
-      run: |
-        Remove-Item -Force -Path dist/${{ steps.extract_gamedir.outputs.gamedir }}/cl_dlls/client.lib
-        Remove-Item -Force -Path dist/${{ steps.extract_gamedir.outputs.gamedir }}/dlls/hl.lib
-
     - name: Install Google Test
       if: startsWith(matrix.os, 'ubuntu')
       run: sudo apt -y install libgtest-dev
