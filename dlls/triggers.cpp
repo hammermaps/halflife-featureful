@@ -6481,18 +6481,6 @@ enum
 class CTriggerCompare : public CPointEntity
 {
 public:
-	void Spawn()
-	{
-		CPointEntity::Spawn();
-		if (pev->target)
-		{
-			ALERT(at_warning, "%s: Setting 'Fire On Equal To' via 'target' entvar is deprecated. Use 'trigger_on_equal' parameter\n", STRING(pev->classname));
-			if (!m_onEqual) {
-				m_onEqual = pev->target;
-			}
-			pev->target = iStringNull;
-		}
-	}
 	int ObjectCaps( void ) { return CPointEntity::ObjectCaps() | FCAP_MASTER; }
 	void KeyValue(KeyValueData *pkvd)
 	{
