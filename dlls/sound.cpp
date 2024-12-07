@@ -28,6 +28,7 @@
 #include "locus.h"
 #include "soundreplacement.h"
 #include "bullet_types.h"
+#include "common_soundscripts.h"
 
 // ==================== GENERIC AMBIENT SOUND ======================================
 
@@ -1873,23 +1874,9 @@ float TEXTURETYPE_PlaySound( TraceResult *ptr,  Vector vecSrc, Vector vecEnd, in
 		if( ptr->flFraction != 1.0f && RANDOM_LONG( 0, 1 ) )
 		{
 			UTIL_Sparks( ptr->vecEndPos );
-
-			float flVolume = RANDOM_FLOAT( 0.7f, 1.0f );//random volume range
-			switch( RANDOM_LONG( 0, 1 ) )
-			{
-				case 0:
-					UTIL_EmitAmbientSound( ENT( 0 ), ptr->vecEndPos, "buttons/spark5.wav", flVolume, ATTN_NORM, 0, 100 );
-					break;
-				case 1:
-					UTIL_EmitAmbientSound( ENT( 0 ), ptr->vecEndPos, "buttons/spark6.wav", flVolume, ATTN_NORM, 0, 100 );
-					break;
-				/*case 0:
-					EMIT_SOUND( ENT( pev ), CHAN_VOICE, "buttons/spark5.wav", flVolume, ATTN_NORM );
-					break;
-				 case 1:
-					EMIT_SOUND( ENT( pev ), CHAN_VOICE, "buttons/spark6.wav", flVolume, ATTN_NORM );
-					break;*/
-			}
+			CBaseEntity* pWorld = CBaseEntity::Instance(0);
+			if (pWorld)
+				pWorld->EmitSoundScriptAmbient(ptr->vecEndPos, materialSparkSoundScript);
 		}
 	}
 

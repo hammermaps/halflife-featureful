@@ -10,6 +10,14 @@ const NamedSoundScript sparkBaseSoundScript = {
 	"DoSparkBase"
 };
 
+const NamedSoundScript materialSparkSoundScript = {
+	CHAN_STATIC,
+	{ "buttons/spark5.wav", "buttons/spark6.wav" },
+	FloatRange(0.7f, 1.0f),
+	ATTN_NORM,
+	"Material.Spark"
+};
+
 namespace NPC {
 
 const NamedSoundScript bodySplatSoundScript = {

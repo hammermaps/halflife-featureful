@@ -1043,6 +1043,7 @@ void ClientPrecache( void )
 
 	pWorld->RegisterAndPrecacheSoundScript(Player::trainUseSoundScript);		// use a train
 
+	pWorld->RegisterAndPrecacheSoundScript(materialSparkSoundScript);
 	PRECACHE_SOUND( "buttons/spark5.wav" );		// hit computer texture
 	PRECACHE_SOUND( "buttons/spark6.wav" );
 
