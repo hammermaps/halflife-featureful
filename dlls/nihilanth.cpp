@@ -21,6 +21,7 @@
 #include "global_models.h"
 #include "nodes.h"
 #include "effects.h"
+#include "visuals_utils.h"
 
 #define N_SCALE		15
 #define N_SPHERES	20
@@ -86,6 +87,11 @@ public:
 	static const NamedSoundScript friendBeamSoundScript;
 
 	static const char *pShootSounds[];	// grunting vocalization: play sometimes when he launches an attack // unused?
+
+	static const NamedVisual irritationBallVisual;
+	static const NamedVisual irritationLightVisual;
+	static const NamedVisual handLightVisual;
+	static const NamedVisual dyingBeamVisual;
 
 	// x_teleattack1.wav	the looping sound of the teleport attack ball.
 
@@ -223,6 +229,16 @@ public:
 	static const NamedSoundScript zapTouchSoundScript;
 	static const NamedSoundScript zapSoundScript;
 	static const NamedSoundScript teleAttackSoundScript;
+
+	static const NamedVisual zapVisual;
+	static const NamedVisual zapBeamVisual;
+	static const NamedVisual zapLightVisual;
+	static const NamedVisual teleportVisual;
+	static const NamedVisual teleportLightVisual;
+	static const NamedVisual dyingBallVisual;
+	static const NamedVisual rechargerSphereVisual;
+	static const NamedVisual absorbingBeamVisual;
+	static const NamedVisual dissipationLightVisual;
 };
 
 LINK_ENTITY_TO_CLASS( nihilanth_energy_ball, CNihilanthHVR )
@@ -269,6 +285,59 @@ const NamedSoundScript CNihilanthHVR::teleAttackSoundScript = {
 	0.2f,
 	"NihilanthHVR.TeleAttack"
 };
+
+const NamedVisual CNihilanthHVR::zapVisual = BuildVisual("NihilanthHVR.Zap")
+		.Model("sprites/nhth1.spr")
+		.RenderProps(kRenderTransAdd, Color(255, 255, 255), 255)
+		.Scale(2.0f);
+
+const NamedVisual CNihilanthHVR::zapBeamVisual = BuildVisual("NihilanthHVR.ZapBeam")
+		.Model(g_pModelNameLaser)
+		.Framerate(10.0f)
+		.Life(0.3f)
+		.BeamParams(20, 20, 10)
+		.RenderColor(64, 196, 255)
+		.Alpha(255);
+
+const NamedVisual CNihilanthHVR::zapLightVisual = BuildVisual("NihilanthHVR.ZapLight")
+		.Radius(128)
+		.RenderColor(128, 128, 255)
+		.Life(1.0f)
+		.Decay(128.0f);
+
+const NamedVisual CNihilanthHVR::teleportVisual = BuildVisual("NihilanthHVR.Teleport")
+		.Model("sprites/exit1.spr")
+		.RenderProps(kRenderTransAdd, Color(255, 255, 255), 255)
+		.Scale(3.0f);
+
+const NamedVisual CNihilanthHVR::teleportLightVisual = BuildVisual("NihilanthHVR.TeleportLight")
+		.Radius(256)
+		.RenderColor(0, 255, 0)
+		.Life(0.1f)
+		.Decay(256.0f);
+
+const NamedVisual CNihilanthHVR::dyingBallVisual = BuildVisual("NihilanthHVR.DyingBall")
+		.Model("sprites/exit1.spr")
+		.RenderProps(kRenderTransAdd, Color(255, 255, 255), 255)
+		.Scale(1.0f);
+
+const NamedVisual CNihilanthHVR::rechargerSphereVisual = BuildVisual("NihilanthHVR.RechargerSphere")
+		.Model("sprites/muzzleflash3.spr")
+		.RenderProps(kRenderTransAdd, Color(255, 224, 192), 255)
+		.Scale(2.0f);
+
+const NamedVisual CNihilanthHVR::absorbingBeamVisual = BuildVisual("NihilanthHVR.AbsorbingBeam")
+		.Model(g_pModelNameLaser)
+		.Framerate(0)
+		.Life(5)
+		.BeamParams(80, 80, 30)
+		.RenderColor(255, 128, 64)
+		.Alpha(255);
+
+const NamedVisual CNihilanthHVR::dissipationLightVisual = BuildVisual("NihilanthHVR.DissipationLight")
+		.Radius(255)
+		.RenderColor(255, 192, 64)
+		.Life(0.2f);
 
 //=========================================================
 // Nihilanth, final Boss monster
@@ -333,6 +402,31 @@ const char *CNihilanth::pShootSounds[] =
 	"X/x_shoot1.wav",
 };
 
+const NamedVisual CNihilanth::irritationBallVisual = BuildVisual("Nihilanth.IrritationBall")
+		.Model("sprites/tele1.spr")
+		.RenderProps(kRenderTransAdd, Color(255, 255, 255), 255, kRenderFxNoDissipation)
+		.Scale(4.0f)
+		.Framerate(10.0f);
+
+const NamedVisual CNihilanth::irritationLightVisual = BuildVisual("Nihilanth.IrritationLight")
+		.Radius(256)
+		.RenderColor(255, 192, 64)
+		.Life(20);
+
+const NamedVisual CNihilanth::handLightVisual = BuildVisual("Nihilanth.HandLight")
+		.Radius(256)
+		.RenderColor(128, 128, 255)
+		.Life(1.0f)
+		.Decay(128.0f);
+
+const NamedVisual CNihilanth::dyingBeamVisual = BuildVisual("Nihilanth.DyingBeam")
+		.Model(g_pModelNameLaser)
+		.Framerate(10)
+		.Life(0.5f)
+		.BeamParams(100, 120, 10)
+		.RenderColor(64, 128, 255)
+		.Alpha(255);
+
 void CNihilanth::Spawn( void )
 {
 	Precache();
@@ -340,7 +434,7 @@ void CNihilanth::Spawn( void )
 	pev->movetype = MOVETYPE_FLY;
 	pev->solid = SOLID_BBOX;
 
-	SET_MODEL( edict(), "models/nihilanth.mdl" );
+	SetMyModel( "models/nihilanth.mdl" );
 	// UTIL_SetSize(pev, Vector( -300, -300, 0), Vector(300, 300, 512));
 	UTIL_SetSize( pev, Vector( -32, -32, 0 ), Vector( 32, 32, 64 ) );
 	UTIL_SetOrigin( pev, pev->origin );
@@ -390,8 +484,7 @@ void CNihilanth::Spawn( void )
 
 void CNihilanth::Precache( void )
 {
-	PRECACHE_MODEL( "models/nihilanth.mdl" );
-	PRECACHE_MODEL( "sprites/lgtning.spr" );
+	PrecacheMyModel( "models/nihilanth.mdl" );
 
 	UTIL_PrecacheOther( "nihilanth_energy_ball", GetProjectileOverrides() );
 	UTIL_PrecacheOther( "monster_alien_controller" );
@@ -406,6 +499,11 @@ void CNihilanth::Precache( void )
 	RegisterAndPrecacheSoundScript(friendBeamSoundScript);
 
 	PRECACHE_SOUND_ARRAY( pShootSounds );
+
+	RegisterVisual(irritationBallVisual);
+	RegisterVisual(irritationLightVisual);
+	RegisterVisual(handLightVisual);
+	RegisterVisual(dyingBeamVisual);
 }
 
 void CNihilanth::UpdateOnRemove()
@@ -504,6 +602,7 @@ void CNihilanth::DyingThink( void )
 	pev->nextthink = gpGlobals->time + 0.1f;
 	DispatchAnimEvents();
 	StudioFrameAdvance();
+	GlowShellUpdate();
 
 	if( pev->deadflag == DEAD_NO )
 	{
@@ -592,22 +691,16 @@ void CNihilanth::DyingThink( void )
 
 	UTIL_TraceLine( vecSrc, vecSrc + vecDir * 4096, ignore_monsters, ENT( pev ), &tr );
 
-	MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
-		WRITE_BYTE( TE_BEAMENTPOINT );
-		WRITE_SHORT( entindex() + 0x1000 * iAttachment );
-		WRITE_VECTOR( tr.vecEndPos );
-		WRITE_SHORT( g_sModelIndexLaser );
-		WRITE_BYTE( 0 ); // frame start
-		WRITE_BYTE( 10 ); // framerate
-		WRITE_BYTE( 5 ); // life
-		WRITE_BYTE( 100 );  // width
-		WRITE_BYTE( 120 );   // noise
-		WRITE_BYTE( 64 );   // r, g, b
-		WRITE_BYTE( 128 );   // r, g, b
-		WRITE_BYTE( 255);   // r, g, b
-		WRITE_BYTE( 255 );	// brightness
-		WRITE_BYTE( 10 );		// speed
-	MESSAGE_END();
+	const Visual* pDyingBeam = GetVisual(dyingBeamVisual);
+	if (pDyingBeam)
+	{
+		MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
+			WRITE_BYTE( TE_BEAMENTPOINT );
+			WRITE_SHORT( entindex() + 0x1000 * iAttachment );
+			WRITE_VECTOR( tr.vecEndPos );
+			WriteBeamVisual(pDyingBeam);
+		MESSAGE_END();
+	}
 
 	GetAttachment( 0, vecSrc, vecAngles ); 
 	CNihilanthHVR *pEntity = (CNihilanthHVR *)Create( "nihilanth_energy_ball", vecSrc, pev->angles, edict(), GetProjectileOverrides() );
@@ -753,30 +846,17 @@ void CNihilanth::NextActivity()
 	{
 		if( m_pBall == NULL )
 		{
-			m_pBall = CSprite::SpriteCreate( "sprites/tele1.spr", pev->origin, TRUE );
+			m_pBall = CreateSpriteFromVisual(GetVisual(irritationBallVisual), pev->origin);
 			if( m_pBall )
 			{
-				m_pBall->SetTransparency( kRenderTransAdd, 255, 255, 255, 255, kRenderFxNoDissipation );
 				m_pBall->SetAttachment( edict(), 1 );
-				m_pBall->SetScale( 4.0f );
-				m_pBall->pev->framerate = 10.0f;
 				m_pBall->TurnOn();
 			}
 		}
 
 		if( m_pBall )
 		{
-			MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
-				WRITE_BYTE( TE_ELIGHT );
-				WRITE_SHORT( entindex() + 0x1000 );		// entity, attachment
-				WRITE_VECTOR( pev->origin );		// origin
-				WRITE_COORD( 256 );	// radius
-				WRITE_BYTE( 255 );	// R
-				WRITE_BYTE( 192 );	// G
-				WRITE_BYTE( 64 );	// B
-				WRITE_BYTE( 200 );	// life * 10
-				WRITE_COORD( 0 ); // decay
-			MESSAGE_END();
+			SendEntLight(entindex(), pev->origin, GetVisual(irritationLightVisual), 1);
 		}
 	}
 
@@ -909,6 +989,7 @@ void CNihilanth::HuntThink( void )
 	pev->nextthink = gpGlobals->time + 0.1f;
 	DispatchAnimEvents();
 	StudioFrameAdvance();
+	GlowShellUpdate();
 
 	ShootBalls();
 
@@ -1122,29 +1203,9 @@ void CNihilanth::HandleAnimEvent( MonsterEvent_t *pEvent )
 
 			EmitSoundScript(ballAttackSoundScript);
 
-			MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
-				WRITE_BYTE( TE_ELIGHT );
-				WRITE_SHORT( entindex() + 0x3000 );		// entity, attachment
-				WRITE_VECTOR( pev->origin );		// origin
-				WRITE_COORD( 256 );	// radius
-				WRITE_BYTE( 128 );	// R
-				WRITE_BYTE( 128 );	// G
-				WRITE_BYTE( 255 );	// B
-				WRITE_BYTE( 10 );	// life * 10
-				WRITE_COORD( 128 ); // decay
-			MESSAGE_END();
-
-			MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
-				WRITE_BYTE( TE_ELIGHT );
-				WRITE_SHORT( entindex() + 0x4000 );		// entity, attachment
-				WRITE_VECTOR( pev->origin );		// origin
-				WRITE_COORD( 256 );	// radius
-				WRITE_BYTE( 128 );	// R
-				WRITE_BYTE( 128 );	// G
-				WRITE_BYTE( 255 );	// B
-				WRITE_BYTE( 10 );	// life * 10
-				WRITE_COORD( 128 ); // decay
-			MESSAGE_END();
+			const Visual* pHandVisual = GetVisual(handLightVisual);
+			SendEntLight(entindex(), pev->origin, pHandVisual, 3);
+			SendEntLight(entindex(), pev->origin, pHandVisual, 4);
 
 			m_flShootTime = gpGlobals->time;
 			m_flShootEnd = gpGlobals->time + 1.0f;
@@ -1180,29 +1241,9 @@ void CNihilanth::HandleAnimEvent( MonsterEvent_t *pEvent )
 
 				ALERT( at_aiconsole, "nihilanth can't target %s\n", szText );
 
-				MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
-					WRITE_BYTE( TE_ELIGHT );
-					WRITE_SHORT( entindex() + 0x3000 );		// entity, attachment
-					WRITE_VECTOR( pev->origin );		// origin
-					WRITE_COORD( 256 );	// radius
-					WRITE_BYTE( 128 );	// R
-					WRITE_BYTE( 128 );	// G
-					WRITE_BYTE( 255 );	// B
-					WRITE_BYTE( 10 );	// life * 10
-					WRITE_COORD( 128 ); // decay
-				MESSAGE_END();
-
-				MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
-					WRITE_BYTE( TE_ELIGHT );
-					WRITE_SHORT( entindex() + 0x4000 );		// entity, attachment
-					WRITE_VECTOR( pev->origin );		// origin
-					WRITE_COORD( 256 );	// radius
-					WRITE_BYTE( 128 );	// R
-					WRITE_BYTE( 128 );	// G
-					WRITE_BYTE( 255 );	// B
-					WRITE_BYTE( 10 );	// life * 10
-					WRITE_COORD( 128 ); // decay
-				MESSAGE_END();
+				const Visual* pHandVisual = GetVisual(handLightVisual);
+				SendEntLight(entindex(), pev->origin, pHandVisual, 3);
+				SendEntLight(entindex(), pev->origin, pHandVisual, 4);
 
 				m_flShootTime = gpGlobals->time;
 				m_flShootEnd = gpGlobals->time + 1.0f;
@@ -1354,13 +1395,15 @@ void CNihilanthHVR::Spawn( void )
 
 void CNihilanthHVR::Precache( void )
 {
-	PRECACHE_MODEL( "sprites/flare6.spr" );
-	PRECACHE_MODEL( "sprites/nhth1.spr" );
-	PRECACHE_MODEL( "sprites/exit1.spr" );
-	PRECACHE_MODEL( "sprites/tele1.spr" );
-	PRECACHE_MODEL( "sprites/animglow01.spr" );
-	PRECACHE_MODEL( "sprites/xspark4.spr" );
-	PRECACHE_MODEL( "sprites/muzzleflash3.spr" );
+	RegisterVisual(zapVisual);
+	RegisterVisual(zapBeamVisual);
+	RegisterVisual(zapLightVisual);
+	RegisterVisual(teleportVisual);
+	RegisterVisual(teleportLightVisual);
+	RegisterVisual(dyingBallVisual);
+	RegisterVisual(rechargerSphereVisual);
+	RegisterVisual(absorbingBeamVisual);
+	RegisterVisual(dissipationLightVisual);
 
 	RegisterAndPrecacheSoundScript(electroSoundScript);
 	RegisterAndPrecacheSoundScript(zapTouchSoundScript);
@@ -1373,16 +1416,8 @@ void CNihilanthHVR::CircleInit( CBaseEntity *pTarget )
 	pev->movetype = MOVETYPE_NOCLIP;
 	pev->solid = SOLID_NOT;
 
-	// SET_MODEL( edict(), "sprites/flare6.spr" );
-	// pev->scale = 3.0;
-	// SET_MODEL( edict(), "sprites/xspark4.spr" );
-	SET_MODEL( edict(), "sprites/muzzleflash3.spr" );
-	pev->rendercolor.x = 255;
-	pev->rendercolor.y = 224;
-	pev->rendercolor.z = 192;
-	pev->scale = 2.0f;
+	ApplyVisual(GetVisual(rechargerSphereVisual));
 	m_nFrames = 1;
-	pev->renderamt = 255;
 
 	UTIL_SetSize( pev, Vector( 0, 0, 0 ), Vector( 0, 0, 0 ) );
 	UTIL_SetOrigin( pev, pev->origin );
@@ -1475,12 +1510,7 @@ void CNihilanthHVR::ZapInit( CBaseEntity *pEnemy )
 	pev->movetype = MOVETYPE_FLY;
 	pev->solid = SOLID_BBOX;
 
-	SET_MODEL( edict(), "sprites/nhth1.spr" );
-
-	pev->rendercolor.x = 255;
-	pev->rendercolor.y = 255;
-	pev->rendercolor.z = 255;
-	pev->scale = 2.0f;
+	ApplyVisual(GetVisual(zapVisual));
 
 	pev->velocity = ( pEnemy->pev->origin - pev->origin ).Normalize() * 200.0f;
 
@@ -1523,22 +1553,16 @@ void CNihilanthHVR::ZapThink( void )
 			pEntity->ApplyTraceAttack( pev, pev, gSkillData.nihilanthZap, pev->velocity, &tr, DMG_SHOCK );
 		}
 
-		MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
-			WRITE_BYTE( TE_BEAMENTPOINT );
-			WRITE_SHORT( entindex() );
-			WRITE_VECTOR( tr.vecEndPos );
-			WRITE_SHORT( g_sModelIndexLaser );
-			WRITE_BYTE( 0 ); // frame start
-			WRITE_BYTE( 10 ); // framerate
-			WRITE_BYTE( 3 ); // life
-			WRITE_BYTE( 20 );  // width
-			WRITE_BYTE( 20 );   // noise
-			WRITE_BYTE( 64 );   // r, g, b
-			WRITE_BYTE( 196 );   // r, g, b
-			WRITE_BYTE( 255);   // r, g, b
-			WRITE_BYTE( 255 );	// brightness
-			WRITE_BYTE( 10 );		// speed
-		MESSAGE_END();
+		const Visual* pBeamVisual = GetVisual(zapBeamVisual);
+		if (pBeamVisual)
+		{
+			MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
+				WRITE_BYTE( TE_BEAMENTPOINT );
+				WRITE_SHORT( entindex() );
+				WRITE_VECTOR( tr.vecEndPos );
+				WriteBeamVisual(pBeamVisual);
+			MESSAGE_END();
+		}
 
 		EmitSoundScriptAmbient(tr.vecEndPos, electroSoundScript);
 
@@ -1550,17 +1574,7 @@ void CNihilanthHVR::ZapThink( void )
 
 	pev->frame = (int)( pev->frame + 1 ) % 11;
 
-	MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
-		WRITE_BYTE( TE_ELIGHT );
-		WRITE_SHORT( entindex( ) );		// entity, attachment
-		WRITE_VECTOR( pev->origin );		// origin
-		WRITE_COORD( 128 );	// radius
-		WRITE_BYTE( 128 );	// R
-		WRITE_BYTE( 128 );	// G
-		WRITE_BYTE( 255 );	// B
-		WRITE_BYTE( 10 );	// life * 10
-		WRITE_COORD( 128 ); // decay
-	MESSAGE_END();
+	SendEntLight(entindex(), pev->origin, GetVisual(zapLightVisual));
 
 	// Crawl();
 }
@@ -1589,12 +1603,9 @@ void CNihilanthHVR::TeleportInit( CNihilanth *pOwner, CBaseEntity *pEnemy, CBase
 	pev->movetype = MOVETYPE_FLY;
 	pev->solid = SOLID_BBOX;
 
-	pev->rendercolor.x = 255;
-	pev->rendercolor.y = 255;
-	pev->rendercolor.z = 255;
-	pev->velocity.z *= 0.2f;
+	ApplyVisual(GetVisual(teleportVisual));
 
-	SET_MODEL( edict(), "sprites/exit1.spr" );
+	pev->velocity.z *= 0.2f;
 
 	m_pNihilanth = pOwner;
 	m_hEnemy = pEnemy;
@@ -1613,12 +1624,7 @@ void CNihilanthHVR::GreenBallInit()
 	pev->movetype = MOVETYPE_FLY;
 	pev->solid = SOLID_BBOX;
 
-	pev->rendercolor.x = 255;
-	pev->rendercolor.y = 255;
-	pev->rendercolor.z = 255;
-	pev->scale = 1.0f;
-
-	SET_MODEL( edict(), "sprites/exit1.spr" );
+	ApplyVisual(GetVisual(dyingBallVisual));
 
 	SetTouch( &CNihilanthHVR::RemoveTouch );
 }
@@ -1651,17 +1657,7 @@ void CNihilanthHVR::TeleportThink( void )
 		MovetoTarget( m_hEnemy->Center() );
 	}
 
-	MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
-		WRITE_BYTE( TE_ELIGHT );
-		WRITE_SHORT( entindex() );		// entity, attachment
-		WRITE_VECTOR( pev->origin );		// origin
-		WRITE_COORD( 256 );	// radius
-		WRITE_BYTE( 0 );	// R
-		WRITE_BYTE( 255 );	// G
-		WRITE_BYTE( 0 );	// B
-		WRITE_BYTE( 10 );	// life * 10
-		WRITE_COORD( 256 ); // decay
-	MESSAGE_END();
+	SendEntLight(entindex(), pev->origin, GetVisual(teleportLightVisual));
 
 	pev->frame = (int)( pev->frame + 1 ) % 20;
 }
@@ -1671,22 +1667,16 @@ void CNihilanthHVR::AbsorbInit( void )
 	SetThink( &CNihilanthHVR::DissipateThink );
 	pev->renderamt = 255;
 
-	MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
-		WRITE_BYTE( TE_BEAMENTS );
-		WRITE_SHORT( this->entindex() );
-		WRITE_SHORT( m_hTargetEnt->entindex() + 0x1000 );
-		WRITE_SHORT( g_sModelIndexLaser );
-		WRITE_BYTE( 0 ); // framestart
-		WRITE_BYTE( 0 ); // framerate
-		WRITE_BYTE( 50 ); // life
-		WRITE_BYTE( 80 );  // width
-		WRITE_BYTE( 80 );   // noise
-		WRITE_BYTE( 255 );   // r, g, b
-		WRITE_BYTE( 128 );   // r, g, b
-		WRITE_BYTE( 64 );   // r, g, b
-		WRITE_BYTE( 255 );	// brightness
-		WRITE_BYTE( 30 );		// speed
-	MESSAGE_END();
+	const Visual* pVisual = GetVisual(absorbingBeamVisual);
+	if (pVisual)
+	{
+		MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
+			WRITE_BYTE( TE_BEAMENTS );
+			WRITE_SHORT( this->entindex() );
+			WRITE_SHORT( m_hTargetEnt->entindex() + 0x1000 );
+			WriteBeamVisual(pVisual);
+		MESSAGE_END();
+	}
 }
 
 void CNihilanthHVR::TeleportTouch( CBaseEntity *pOther )
@@ -1730,17 +1720,13 @@ void CNihilanthHVR::DissipateThink( void )
 		UTIL_Remove( this );
 	}
 
-	MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
-		WRITE_BYTE( TE_ELIGHT );
-		WRITE_SHORT( entindex() );		// entity, attachment
-		WRITE_VECTOR( pev->origin );		// origin
-		WRITE_COORD( pev->renderamt );	// radius
-		WRITE_BYTE( 255 );	// R
-		WRITE_BYTE( 192 );	// G
-		WRITE_BYTE( 64 );	// B
-		WRITE_BYTE( 2 );	// life * 10
-		WRITE_COORD( 0 ); // decay
-	MESSAGE_END();
+	const Visual* pLight = GetVisual(dissipationLightVisual);
+	if (pLight)
+	{
+		Visual lightVisual = *pLight;
+		lightVisual.radius = pev->renderamt;
+		SendEntLight(entindex(), pev->origin, &lightVisual);
+	}
 }
 
 BOOL CNihilanthHVR::CircleTarget( Vector vecTarget )
