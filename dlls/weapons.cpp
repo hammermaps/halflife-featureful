@@ -422,7 +422,6 @@ TYPEDESCRIPTION	CBasePlayerWeapon::m_SaveData[] =
 {
 	DEFINE_FIELD( CBasePlayerWeapon, m_pPlayer, FIELD_CLASSPTR ),
 	//DEFINE_FIELD( CBasePlayerItem, m_fKnown, FIELD_INTEGER ),Reset to zero on load
-	DEFINE_FIELD( CBasePlayerWeapon, m_iId, FIELD_INTEGER ),
 	// DEFINE_FIELD( CBasePlayerItem, m_iIdPrimary, FIELD_INTEGER ),
 	// DEFINE_FIELD( CBasePlayerItem, m_iIdSecondary, FIELD_INTEGER ),
 #if CLIENT_WEAPONS
@@ -684,7 +683,7 @@ void CBasePlayerWeapon::DestroyItem( void )
 	if( m_pPlayer )
 	{
 		// if attached to a player, remove.
-		m_pPlayer->pev->weapons &= ~( 1 << m_iId );
+		m_pPlayer->pev->weapons &= ~( 1 << WeaponId() );
 		m_pPlayer->RemovePlayerItem( this, false );
 		//m_pPlayer = NULL;
 	}
@@ -767,7 +766,7 @@ int CBasePlayerWeapon::AddToPlayer( CBasePlayer *pPlayer )
 {
 	m_pPlayer = pPlayer;
 
-	pPlayer->pev->weapons |= ( 1 << m_iId );
+	pPlayer->pev->weapons |= ( 1 << WeaponId() );
 
 	if( !m_iPrimaryAmmoType )
 	{
@@ -785,7 +784,7 @@ int CBasePlayerWeapon::AddToPlayerDefault( CBasePlayer *pPlayer )
 	if( CBasePlayerWeapon::AddToPlayer( pPlayer ) )
 	{
 		MESSAGE_BEGIN( MSG_ONE, gmsgWeapPickup, NULL, pPlayer->pev );
-			WRITE_BYTE( m_iId );
+			WRITE_BYTE( WeaponId() );
 		MESSAGE_END();
 		return TRUE;
 	}
@@ -829,7 +828,7 @@ int CBasePlayerWeapon::UpdateClientData( CBasePlayer *pPlayer )
 	{
 		MESSAGE_BEGIN( MSG_ONE, gmsgCurWeapon, NULL, pPlayer->pev );
 			WRITE_BYTE( state );
-			WRITE_BYTE( m_iId );
+			WRITE_BYTE( WeaponId() );
 			WRITE_SHORT( m_iClip );
 		MESSAGE_END();
 
@@ -1395,7 +1394,7 @@ BOOL CWeaponBox::PackAmmo( string_t iszName, int iCount )
 //=========================================================
 BOOL CWeaponBox::HasWeapon( CBasePlayerWeapon *pCheckItem )
 {
-	return WeaponById(pCheckItem->m_iId) ? TRUE : FALSE;
+	return WeaponById(pCheckItem->WeaponId()) ? TRUE : FALSE;
 }
 
 //=========================================================
@@ -1434,7 +1433,7 @@ void CWeaponBox::SetWeaponModel(CBasePlayerWeapon *pItem)
 
 		SET_MODEL( ENT( pev ), pItem->MyWModel() );
 		pev->angles = weaponAngles;
-		if (pItem->m_iId == WEAPON_TRIPMINE) {
+		if (pItem->WeaponId() == WEAPON_TRIPMINE) {
 			pev->body = 3;
 			pev->sequence = 8;
 		}
@@ -1451,8 +1450,8 @@ void CWeaponBox::SetObjectCollisionBox( void )
 
 void CWeaponBox::InsertWeaponById(CBasePlayerWeapon *pItem)
 {
-	if (pItem && pItem->m_iId && pItem->m_iId <= MAX_WEAPONS) {
-		m_rgpPlayerWeapons[pItem->m_iId-1] = pItem;
+	if (pItem && pItem->WeaponId() && pItem->WeaponId() <= MAX_WEAPONS) {
+		m_rgpPlayerWeapons[pItem->WeaponId()-1] = pItem;
 	}
 }
 

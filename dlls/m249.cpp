@@ -35,7 +35,6 @@ void CM249::Spawn()
 {
 	Precache();
 	SET_MODEL(ENT(pev), MyWModel());
-	m_iId = WEAPON_M249;
 
 	InitDefaultAmmo(M249_DEFAULT_GIVE);
 

@@ -35,7 +35,6 @@ void CUzi::Spawn()
 {
 	Precache();
 	SET_MODEL( ENT( pev ), MyWModel() );
-	m_iId = WEAPON_UZI;
 
 	InitDefaultAmmo(UZI_DEFAULT_GIVE);
 

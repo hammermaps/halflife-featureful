@@ -32,7 +32,6 @@ LINK_ENTITY_TO_CLASS( weapon_crowbar, CCrowbar )
 void CCrowbar::Spawn()
 {
 	Precache();
-	m_iId = WEAPON_CROWBAR;
 	SET_MODEL( ENT( pev ), MyWModel() );
 	m_iClip = -1;
 

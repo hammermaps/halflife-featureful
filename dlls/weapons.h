@@ -190,6 +190,7 @@ public:
 	virtual int		Restore( CRestore &restore );
 	static	TYPEDESCRIPTION m_SaveData[];
 #endif
+	virtual int WeaponId() const { return WEAPON_NONE; }
 	virtual int AddToPlayer( CBasePlayer *pPlayer );	// return TRUE if the item you want the item added to the player inventory
 	void EXPORT DestroyItem( void );
 	void EXPORT DefaultTouch( CBaseEntity *pOther );	// default weapon touch
@@ -221,10 +222,9 @@ public:
 	static ItemInfo ItemInfoArray[ MAX_WEAPONS ];
 
 	CBasePlayer	*m_pPlayer;
-	int		m_iId;												// WEAPON_???
 
-	int			iItemPosition( void ) { return ItemInfoArray[ m_iId ].iPosition; }
-	const char	*pszAmmo1( void ) const { return ItemInfoArray[ m_iId ].pszAmmo1; }
+	int			iItemPosition( void ) { return ItemInfoArray[ WeaponId() ].iPosition; }
+	const char	*pszAmmo1( void ) const { return ItemInfoArray[ WeaponId() ].pszAmmo1; }
 	int			iMaxAmmo1( void )	{
 		if (m_iPrimaryAmmoType > 0)
 			return g_AmmoRegistry.GetMaxAmmo(m_iPrimaryAmmoType);
@@ -233,7 +233,7 @@ public:
 	bool UsesAmmo() const {
 		return m_iPrimaryAmmoType > 0 || pszAmmo1() != NULL;
 	}
-	const char	*pszAmmo2( void ) const { return ItemInfoArray[ m_iId ].pszAmmo2; }
+	const char	*pszAmmo2( void ) const { return ItemInfoArray[ WeaponId() ].pszAmmo2; }
 	int			iMaxAmmo2( void )	{
 		if (m_iSecondaryAmmoType > 0)
 			return g_AmmoRegistry.GetMaxAmmo(m_iSecondaryAmmoType);
@@ -243,12 +243,12 @@ public:
 		return m_iSecondaryAmmoType > 0 || pszAmmo2() != NULL;
 	}
 
-	const char	*pszName( void )	{ return ItemInfoArray[ m_iId ].pszName; }
+	const char	*pszName( void )	{ return ItemInfoArray[ WeaponId() ].pszName; }
 	int			iMaxClip( void );
-	int			iWeight( void )		{ return ItemInfoArray[ m_iId ].iWeight; }
-	int			iFlags( void )		{ return ItemInfoArray[ m_iId ].iFlags; }
-	const char* pszAmmoEntity( void ) { return ItemInfoArray[ m_iId ].pszAmmoEntity; }
-	int			iDropAmmo( void )	{ return ItemInfoArray[ m_iId ].iDropAmmo; }
+	int			iWeight( void )		{ return ItemInfoArray[ WeaponId() ].iWeight; }
+	int			iFlags( void )		{ return ItemInfoArray[ WeaponId() ].iFlags; }
+	const char* pszAmmoEntity( void ) { return ItemInfoArray[ WeaponId() ].pszAmmoEntity; }
+	int			iDropAmmo( void )	{ return ItemInfoArray[ WeaponId() ].iDropAmmo; }
 
 	virtual const char* MyWModel() { return 0; }
 
@@ -398,6 +398,7 @@ class CGlock : public CBasePlayerWeapon
 public:
 	void Spawn( void );
 	void Precache( void );
+	int WeaponId() const override { return WEAPON_GLOCK; }
 	int GetItemInfo( ItemInfo *p );
 	int AddToPlayer( CBasePlayer *pPlayer );
 
@@ -431,6 +432,7 @@ class CCrowbar : public CBasePlayerWeapon
 public:
 	void Spawn( void );
 	void Precache( void );
+	int WeaponId() const override { return WEAPON_CROWBAR; }
 	void EXPORT SwingAgain( void );
 	void EXPORT Smack( void );
 	int GetItemInfo( ItemInfo *p );
@@ -464,6 +466,7 @@ class CPython : public CBasePlayerWeapon
 public:
 	void Spawn( void );
 	void Precache( void );
+	int WeaponId() const override { return WEAPON_PYTHON; }
 	int GetItemInfo(ItemInfo *p);
 	int AddToPlayer( CBasePlayer *pPlayer );
 	void PrimaryAttack( void );
@@ -493,6 +496,7 @@ class CMP5 : public CBasePlayerWeapon
 public:
 	void Spawn( void );
 	void Precache( void );
+	int WeaponId() const override { return WEAPON_MP5; }
 	int GetItemInfo(ItemInfo *p);
 	int AddToPlayer( CBasePlayer *pPlayer );
 
@@ -525,6 +529,7 @@ class CCrossbow : public CBasePlayerWeapon
 public:
 	void Spawn( void );
 	void Precache( void );
+	int WeaponId() const override { return WEAPON_CROSSBOW; }
 	int GetItemInfo(ItemInfo *p);
 
 	void FireBolt( void );
@@ -563,6 +568,7 @@ public:
 #endif
 	void Spawn( void );
 	void Precache( void );
+	int WeaponId() const override { return WEAPON_SHOTGUN; }
 	int GetItemInfo(ItemInfo *p);
 	int AddToPlayer( CBasePlayer *pPlayer );
 
@@ -618,6 +624,7 @@ public:
 #endif
 	void Spawn( void );
 	void Precache( void );
+	int WeaponId() const override { return WEAPON_RPG; }
 	void Reload( void );
 	int GetItemInfo(ItemInfo *p);
 	int AddToPlayer( CBasePlayer *pPlayer );
@@ -665,6 +672,7 @@ public:
 #endif
 	void Spawn( void );
 	void Precache( void );
+	int WeaponId() const override { return WEAPON_GAUSS; }
 	int GetItemInfo(ItemInfo *p);
 	int AddToPlayer( CBasePlayer *pPlayer );
 
@@ -716,6 +724,7 @@ public:
 #endif
 	void Spawn( void );
 	void Precache( void );
+	int WeaponId() const override { return WEAPON_EGON; }
 	int GetItemInfo(ItemInfo *p);
 	int AddToPlayer( CBasePlayer *pPlayer );
 
@@ -788,6 +797,7 @@ public:
 #endif
 	void Spawn( void );
 	void Precache( void );
+	int WeaponId() const override { return WEAPON_HORNETGUN; }
 	int GetItemInfo(ItemInfo *p);
 	int AddToPlayer( CBasePlayer *pPlayer );
 
@@ -823,6 +833,7 @@ class CHandGrenade : public CBasePlayerWeapon
 public:
 	void Spawn( void );
 	void Precache( void );
+	int WeaponId() const override { return WEAPON_HANDGRENADE; }
 	int GetItemInfo(ItemInfo *p);
 
 	void PrimaryAttack( void );
@@ -857,6 +868,7 @@ public:
 #endif
 	void Spawn( void );
 	void Precache( void );
+	int WeaponId() const override { return WEAPON_SATCHEL; }
 	int GetItemInfo(ItemInfo *p);
 	int AddToPlayer( CBasePlayer *pPlayer );
 	void PrimaryAttack( void );
@@ -895,6 +907,7 @@ class CTripmine : public CBasePlayerWeapon
 public:
 	void Spawn( void );
 	void Precache( void );
+	int WeaponId() const override { return WEAPON_TRIPMINE; }
 	int GetItemInfo(ItemInfo *p);
 	void SetObjectCollisionBox( void )
 	{
@@ -927,6 +940,7 @@ class CSqueak : public CBasePlayerWeapon
 public:
 	void Spawn( void );
 	void Precache( void );
+	int WeaponId() const override { return WEAPON_SNARK; }
 	int GetItemInfo(ItemInfo *p);
 
 	void PrimaryAttack( void );
@@ -946,7 +960,6 @@ public:
 	}
 
 	virtual const char* GrenadeName() const;
-	virtual int WeaponId() const;
 	virtual const char* NestModel() const;
 	virtual const char* PModel() const;
 	virtual const char* VModel() const;
@@ -971,6 +984,7 @@ public:
 #endif
 	void Spawn( void );
 	void Precache( void );
+	int WeaponId() const override { return WEAPON_EAGLE; }
 	bool IsEnabledInMod();
 	int GetItemInfo( ItemInfo *p );
 	int AddToPlayer( CBasePlayer *pPlayer );
@@ -1018,6 +1032,7 @@ public:
 
 	void Spawn(void);
 	void Precache(void);
+	int WeaponId() const override { return WEAPON_PIPEWRENCH; }
 	bool IsEnabledInMod();
 	int GetItemInfo(ItemInfo *p);
 	int AddToPlayer(CBasePlayer *pPlayer);
@@ -1068,6 +1083,7 @@ public:
 #endif
 	void Spawn(void);
 	void Precache(void);
+	int WeaponId() const override { return WEAPON_MEDKIT; }
 	bool IsEnabledInMod();
 	int GetItemInfo(ItemInfo *p);
 	int AddToPlayer(CBasePlayer *pPlayer);
@@ -1122,6 +1138,7 @@ public:
 
 	void Precache( void );
 	void Spawn( void );
+	int WeaponId() const override { return WEAPON_GRAPPLE; }
 	bool IsEnabledInMod();
 	void EndAttack( void );
 
@@ -1176,6 +1193,7 @@ public:
 
 	void Spawn(void);
 	void Precache(void);
+	int WeaponId() const override { return WEAPON_M249; }
 	bool IsEnabledInMod();
 	int GetItemInfo(ItemInfo *p);
 	int AddToPlayer(CBasePlayer *pPlayer);
@@ -1230,6 +1248,7 @@ public:
 
 	void Spawn(void);
 	void Precache(void);
+	int WeaponId() const override { return WEAPON_SNIPERRIFLE; }
 	bool IsEnabledInMod();
 
 	int GetItemInfo(ItemInfo *p);
@@ -1269,6 +1288,7 @@ public:
 #endif
 	void Spawn( void );
 	void Precache( void );
+	int WeaponId() const override { return WEAPON_DISPLACER; }
 	bool IsEnabledInMod();
 
 	int GetItemInfo( ItemInfo *p );
@@ -1317,6 +1337,7 @@ class CShockrifle : public CHgun
 public:
 	void Spawn(void);
 	void Precache(void);
+	int WeaponId() const override { return WEAPON_SHOCKRIFLE; }
 	bool IsEnabledInMod();
 
 	int GetItemInfo(ItemInfo *p);
@@ -1360,6 +1381,7 @@ public:
 
 	void Spawn(void);
 	void Precache(void);
+	int WeaponId() const override { return WEAPON_KNIFE; }
 	bool IsEnabledInMod();
 	int GetItemInfo(ItemInfo *p);
 	int AddToPlayer( CBasePlayer *pPlayer );
@@ -1402,9 +1424,9 @@ private:
 class CPenguin : public CSqueak
 {
 public:
+	int WeaponId() const override { return WEAPON_PENGUIN; }
 	bool IsEnabledInMod();
 	virtual const char* GrenadeName() const;
-	virtual int WeaponId() const;
 	virtual const char* NestModel() const;
 	virtual const char* PModel() const;
 	virtual const char* VModel() const;
@@ -1421,6 +1443,7 @@ class CSporelauncher : public CShotgun
 public:
 	void Spawn( void );
 	void Precache( void );
+	int WeaponId() const override { return WEAPON_SPORELAUNCHER; }
 	bool IsEnabledInMod();
 
 	int GetItemInfo( ItemInfo *p );
@@ -1456,6 +1479,7 @@ class CUzi : public CBasePlayerWeapon
 public:
 	void Spawn( void );
 	void Precache( void );
+	int WeaponId() const override { return WEAPON_UZI; }
 	bool IsEnabledInMod();
 	int GetItemInfo(ItemInfo *p);
 	int AddToPlayer( CBasePlayer *pPlayer );

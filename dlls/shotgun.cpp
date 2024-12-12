@@ -33,7 +33,6 @@ LINK_ENTITY_TO_CLASS( weapon_shotgun, CShotgun )
 void CShotgun::Spawn()
 {
 	Precache();
-	m_iId = WEAPON_SHOTGUN;
 	SET_MODEL( ENT( pev ), MyWModel() );
 
 	InitDefaultAmmo(SHOTGUN_DEFAULT_GIVE);

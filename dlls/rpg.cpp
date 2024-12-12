@@ -375,7 +375,6 @@ void CRpg::Reload( void )
 void CRpg::Spawn()
 {
 	Precache();
-	m_iId = WEAPON_RPG;
 
 	SET_MODEL( ENT( pev ), MyWModel() );
 	m_fSpotActive = 1;

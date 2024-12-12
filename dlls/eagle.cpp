@@ -34,7 +34,6 @@ LINK_ENTITY_TO_CLASS( eagle_laser, CLaserSpot )
 void CEagle::Spawn( void )
 {
 	Precache( );
-	m_iId = WEAPON_EAGLE;
 	SET_MODEL(ENT(pev), MyWModel());
 
 	InitDefaultAmmo(EAGLE_DEFAULT_GIVE);

@@ -1117,7 +1117,7 @@ float CHalfLifeMultiplay::FlWeaponRespawnTime( CBasePlayerWeapon *pWeapon )
 //=========================================================
 float CHalfLifeMultiplay::FlWeaponTryRespawn( CBasePlayerWeapon *pWeapon )
 {
-	if( pWeapon && pWeapon->m_iId && ( pWeapon->iFlags() & ITEM_FLAG_LIMITINWORLD ) )
+	if( pWeapon && pWeapon->WeaponId() && ( pWeapon->iFlags() & ITEM_FLAG_LIMITINWORLD ) )
 	{
 		if( NUMBER_OF_ENTITIES() < ( gpGlobals->maxEntities - ENTITY_INTOLERANCE ) )
 			return 0;
@@ -1171,7 +1171,7 @@ BOOL CHalfLifeMultiplay::CanHavePlayerItem( CBasePlayer *pPlayer, CBasePlayerWea
 			return CGameRules::CanHavePlayerItem( pPlayer, pItem );
 
 		// check if the player already has this weapon
-		if (pPlayer->WeaponById(pItem->m_iId)) {
+		if (pPlayer->WeaponById(pItem->WeaponId())) {
 			return FALSE;
 		}
 	}
@@ -1936,7 +1936,7 @@ void CHalfLifeMultiplay::SendMOTDToClient( edict_t *client )
 
 int CMultiplayBusters::WeaponShouldRespawn( CBasePlayerWeapon *pWeapon )
 {
-	if( pWeapon->m_iId == WEAPON_EGON )
+	if( pWeapon->WeaponId() == WEAPON_EGON )
 		return GR_WEAPON_RESPAWN_NO;
 
 	return CHalfLifeMultiplay::WeaponShouldRespawn( pWeapon );
@@ -2122,7 +2122,7 @@ void CMultiplayBusters::SetPlayerModel( CBasePlayer *pPlayer, BOOL bKnownBuster 
 
 void CMultiplayBusters::PlayerGotWeapon( CBasePlayer *pPlayer, CBasePlayerWeapon *pWeapon )
 {
-	if( pWeapon->m_iId != WEAPON_EGON )
+	if( pWeapon->WeaponId() != WEAPON_EGON )
 		return;
 
 	pPlayer->RemoveAllItems( FALSE );

@@ -49,7 +49,6 @@ extern int g_irunninggausspred;
 void CGauss::Spawn()
 {
 	Precache();
-	m_iId = WEAPON_GAUSS;
 	SET_MODEL( ENT( pev ), MyWModel() );
 
 	InitDefaultAmmo(GAUSS_DEFAULT_GIVE);

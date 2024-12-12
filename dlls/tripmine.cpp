@@ -405,7 +405,6 @@ LINK_ENTITY_TO_CLASS( weapon_tripmine, CTripmine )
 void CTripmine::Spawn()
 {
 	Precache();
-	m_iId = WEAPON_TRIPMINE;
 	SET_MODEL( ENT( pev ), MyWModel() );
 	pev->frame = 0;
 

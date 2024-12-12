@@ -36,7 +36,6 @@ LINK_ENTITY_TO_CLASS(weapon_pipewrench, CPipeWrench)
 void CPipeWrench::Spawn()
 {
 	Precache();
-	m_iId = WEAPON_PIPEWRENCH;
 	SET_MODEL(ENT(pev), MyWModel());
 
 	m_iSwingMode = 0;

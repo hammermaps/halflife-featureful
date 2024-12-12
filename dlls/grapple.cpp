@@ -264,7 +264,6 @@ void CBarnacleGrapple::Precache( void )
 void CBarnacleGrapple::Spawn( void )
 {
 	Precache();
-	m_iId = WEAPON_GRAPPLE;
 	SET_MODEL( ENT(pev), MyWModel() );
 	m_pTip = NULL;
 	m_bGrappling = FALSE;

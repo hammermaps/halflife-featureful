@@ -79,7 +79,6 @@ BOOL CDisplacer::PlayEmptySound(void)
 void CDisplacer::Spawn()
 {
 	Precache();
-	m_iId = WEAPON_DISPLACER;
 	SET_MODEL(ENT(pev), MyWModel());
 
 	InitDefaultAmmo(DISPLACER_DEFAULT_GIVE);

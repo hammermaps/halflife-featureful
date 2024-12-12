@@ -39,7 +39,6 @@ LINK_ENTITY_TO_CLASS( weapon_handgrenade, CHandGrenade )
 void CHandGrenade::Spawn()
 {
 	Precache();
-	m_iId = WEAPON_HANDGRENADE;
 	SET_MODEL( ENT( pev ), MyWModel() );
 
 #if !CLIENT_DLL

@@ -511,7 +511,6 @@ LINK_ENTITY_TO_CLASS( weapon_snark, CSqueak )
 void CSqueak::Spawn()
 {
 	Precache();
-	m_iId = WeaponId();
 	SET_MODEL( ENT( pev ), NestModel() );
 
 	FallInit();//get ready to fall down.
@@ -706,11 +705,6 @@ const char* CSqueak::GrenadeName() const
 	return "monster_snark";
 }
 
-int CSqueak::WeaponId() const
-{
-	return WEAPON_SNARK;
-}
-
 const char* CSqueak::NestModel() const
 {
 	return "models/w_sqknest.mdl";
@@ -761,11 +755,6 @@ bool CPenguin::IsEnabledInMod()
 const char* CPenguin::GrenadeName() const
 {
 	return "monster_penguin";
-}
-
-int CPenguin::WeaponId() const
-{
-	return WEAPON_PENGUIN;
 }
 
 const char* CPenguin::NestModel() const

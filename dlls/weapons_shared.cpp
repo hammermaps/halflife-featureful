@@ -183,7 +183,7 @@ int CBasePlayerWeapon::iMaxClip()
 		GetItemInfo( &itemInfo );
 		maxClip = itemInfo.iMaxClip;
 #else
-	maxClip = ItemInfoArray[ m_iId ].iMaxClip;
+	maxClip = ItemInfoArray[ WeaponId() ].iMaxClip;
 #endif
 	return maxClip;
 }

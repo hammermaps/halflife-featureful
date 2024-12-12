@@ -27,7 +27,6 @@ void CGlock::Spawn()
 {
 	pev->classname = MAKE_STRING( "weapon_9mmhandgun" ); // hack to allow for old names
 	Precache();
-	m_iId = WEAPON_GLOCK;
 	SET_MODEL( ENT( pev ), MyWModel() );
 
 	InitDefaultAmmo(GLOCK_DEFAULT_GIVE);

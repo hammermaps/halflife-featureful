@@ -81,7 +81,6 @@ CBaseEntity* CMedkit::FindHealTarget(bool increasedRadius)
 void CMedkit::Spawn()
 {
 	Precache();
-	m_iId = WEAPON_MEDKIT;
 	SET_MODEL(ENT(pev), MyWModel());
 
 	InitDefaultAmmo(MEDKIT_DEFAULT_GIVE);

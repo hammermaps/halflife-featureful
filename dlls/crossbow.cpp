@@ -247,7 +247,6 @@ LINK_ENTITY_TO_CLASS( weapon_crossbow, CCrossbow )
 void CCrossbow::Spawn()
 {
 	Precache();
-	m_iId = WEAPON_CROSSBOW;
 	SET_MODEL( ENT( pev ), MyWModel() );
 
 	InitDefaultAmmo(CROSSBOW_DEFAULT_GIVE);

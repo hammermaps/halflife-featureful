@@ -159,9 +159,9 @@ void HUD_PrepEntity( CBaseEntity *pEntity, CBasePlayer *pWeaponOwner )
 		CBasePlayerWeapon* pWeapon = (CBasePlayerWeapon *)pEntity;
 		pWeapon->m_pPlayer = pWeaponOwner;
 
-		if (pWeapon->m_iId == WEAPON_NONE)
+		if (pWeapon->WeaponId() == WEAPON_NONE)
 			gEngfuncs.Con_Printf("Got 0 as weapon id!\n");
-		g_pWpns[pWeapon->m_iId] = (CBasePlayerWeapon *)pEntity;
+		g_pWpns[pWeapon->WeaponId()] = (CBasePlayerWeapon *)pEntity;
 	}
 }
 

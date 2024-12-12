@@ -30,7 +30,6 @@ LINK_ENTITY_TO_CLASS( weapon_sniperrifle, CSniperrifle )
 void CSniperrifle::Spawn( )
 {
 	Precache( );
-	m_iId = WEAPON_SNIPERRIFLE;
 	SET_MODEL(ENT(pev), MyWModel());
 
 	InitDefaultAmmo(SNIPERRIFLE_DEFAULT_GIVE);

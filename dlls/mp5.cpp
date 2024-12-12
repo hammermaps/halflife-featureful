@@ -36,7 +36,6 @@ void CMP5::Spawn()
 	pev->classname = MAKE_STRING( "weapon_9mmAR" ); // hack to allow for old names
 	Precache();
 	SET_MODEL( ENT( pev ), MyWModel() );
-	m_iId = WEAPON_MP5;
 
 	InitDefaultAmmo(MP5_DEFAULT_GIVE);
 

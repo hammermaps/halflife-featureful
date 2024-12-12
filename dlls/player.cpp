@@ -4782,7 +4782,7 @@ int CBasePlayer::AddPlayerItem( CBasePlayerWeapon *pItem )
 	if( pev->flags & FL_SPECTATOR )
 		return FALSE;
 
-	CBasePlayerWeapon *pInsert = WeaponById(pItem->m_iId);
+	CBasePlayerWeapon *pInsert = WeaponById(pItem->WeaponId());
 	if( pInsert )
 	{
 		if (pItem->AddDuplicate( pInsert ))
@@ -4848,9 +4848,9 @@ BOOL CBasePlayer::RemovePlayerItem( CBasePlayerWeapon *pItem, bool bCallHolster 
 	if( m_pLastItem == pItem )
 		m_pLastItem = NULL;
 
-	if (WeaponById(pItem->m_iId))
+	if (WeaponById(pItem->WeaponId()))
 	{
-		m_rgpPlayerWeapons[pItem->m_iId-1] = NULL;
+		m_rgpPlayerWeapons[pItem->WeaponId()-1] = NULL;
 		return TRUE;
 	}
 	return FALSE;
@@ -5926,7 +5926,7 @@ void CBasePlayer::DropPlayerItemImpl(CBasePlayerWeapon *pWeapon, int dropType, f
 
 	UTIL_MakeVectors( pev->angles );
 
-	pev->weapons &= ~( 1 << pWeapon->m_iId );// take item off hud
+	pev->weapons &= ~( 1 << pWeapon->WeaponId() );// take item off hud
 
 	CWeaponBox *pWeaponBox = (CWeaponBox *)CBaseEntity::Create( "weaponbox", pev->origin + gpGlobals->v_forward * 10, pev->angles, edict() );
 
@@ -6059,7 +6059,7 @@ void CBasePlayer::DropAmmo()
 //=========================================================
 BOOL CBasePlayer::HasPlayerItem( CBasePlayerWeapon *pCheckItem )
 {
-	return WeaponById(pCheckItem->m_iId) ? TRUE : FALSE;
+	return WeaponById(pCheckItem->WeaponId()) ? TRUE : FALSE;
 }
 
 //=========================================================
@@ -6145,8 +6145,8 @@ BOOL CBasePlayer::SwitchToBestWeapon()
 
 void CBasePlayer::InsertWeaponById(CBasePlayerWeapon *pItem)
 {
-	if (pItem && pItem->m_iId && pItem->m_iId <= MAX_WEAPONS) {
-		m_rgpPlayerWeapons[pItem->m_iId-1] = pItem;
+	if (pItem && pItem->WeaponId() && pItem->WeaponId() <= MAX_WEAPONS) {
+		m_rgpPlayerWeapons[pItem->WeaponId()-1] = pItem;
 	}
 }
 

@@ -32,7 +32,6 @@ LINK_ENTITY_TO_CLASS(weapon_sporelauncher, CSporelauncher)
 void CSporelauncher::Spawn()
 {
 	Precache();
-	m_iId = WEAPON_SPORELAUNCHER;
 	SET_MODEL(ENT(pev), MyWModel());
 
 	InitDefaultAmmo(SPORELAUNCHER_DEFAULT_GIVE);

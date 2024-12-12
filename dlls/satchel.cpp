@@ -311,7 +311,7 @@ int CSatchel::AddToPlayer( CBasePlayer *pPlayer )
 {
 	int bResult = CBasePlayerWeapon::AddToPlayer( pPlayer );
 
-	pPlayer->pev->weapons |= ( 1 << m_iId );
+	pPlayer->pev->weapons |= ( 1 << WeaponId() );
 	m_chargeReady = SATCHEL_IDLE;// this satchel charge weapon now forgets that any satchels are deployed by it.
 
 	if( bResult )
@@ -324,7 +324,6 @@ int CSatchel::AddToPlayer( CBasePlayer *pPlayer )
 void CSatchel::Spawn()
 {
 	Precache();
-	m_iId = WEAPON_SATCHEL;
 	SET_MODEL( ENT( pev ), MyWModel() );
 
 	InitDefaultAmmo(SATCHEL_DEFAULT_GIVE);

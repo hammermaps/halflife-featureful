@@ -33,7 +33,6 @@ LINK_ENTITY_TO_CLASS(weapon_shockrifle, CShockrifle)
 void CShockrifle::Spawn()
 {
 	Precache();
-	m_iId = WEAPON_SHOCKRIFLE;
 	SET_MODEL(ENT(pev), MyWModel());
 
 	int defaultAmmoGive = g_AmmoRegistry.GetMaxAmmo("shocks");
@@ -93,7 +92,7 @@ int CShockrifle::AddToPlayer(CBasePlayer *pPlayer)
 #endif
 
 		MESSAGE_BEGIN(MSG_ONE, gmsgWeapPickup, NULL, pPlayer->pev);
-		WRITE_BYTE(m_iId);
+		WRITE_BYTE(WeaponId());
 		MESSAGE_END();
 		return TRUE;
 	}

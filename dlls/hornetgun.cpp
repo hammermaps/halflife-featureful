@@ -41,7 +41,6 @@ BOOL CHgun::IsUseable( void )
 void CHgun::Spawn()
 {
 	Precache();
-	m_iId = WEAPON_HORNETGUN;
 	SET_MODEL( ENT( pev ), MyWModel() );
 
 	int defaultAmmoGive = g_AmmoRegistry.GetMaxAmmo("hornets");
@@ -80,7 +79,7 @@ int CHgun::AddToPlayer( CBasePlayer *pPlayer )
 		}
 #endif
 		MESSAGE_BEGIN( MSG_ONE, gmsgWeapPickup, NULL, pPlayer->pev );
-			WRITE_BYTE( m_iId );
+			WRITE_BYTE( WeaponId() );
 		MESSAGE_END();
 		return TRUE;
 	}

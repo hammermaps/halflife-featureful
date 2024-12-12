@@ -42,7 +42,6 @@ LINK_ENTITY_TO_CLASS( weapon_egon, CEgon )
 void CEgon::Spawn()
 {
 	Precache();
-	m_iId = WEAPON_EGON;
 	SET_MODEL( ENT( pev ), MyWModel() );
 
 	InitDefaultAmmo(EGON_DEFAULT_GIVE);

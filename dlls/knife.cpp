@@ -36,7 +36,6 @@ LINK_ENTITY_TO_CLASS(weapon_knife, CKnife)
 void CKnife::Spawn()
 {
 	Precache();
-	m_iId = WEAPON_KNIFE;
 	SET_MODEL(ENT(pev), MyWModel());
 
 	m_iSwingMode = 0;
