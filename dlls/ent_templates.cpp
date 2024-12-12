@@ -59,6 +59,30 @@ const char* entTemplatesSchema = R"(
 						"$ref": "definitions.json#/visual"
 					}
 				},
+				"sound_replacement": {
+					"type": "object",
+					"additionalProperties": {
+						"type": "string"
+					}
+				},
+				"precached_sounds": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"precached_soundscripts": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"autoprecache_sounds": {
+					"type": "boolean"
+				},
+				"autoprecache_soundscripts": {
+					"type": "boolean"
+				},
 				"size_for_grapple": {
 					"type": "string"
 				},
@@ -115,6 +139,31 @@ void EntTemplate::SetSoundScriptReplacement(const char *soundScript, const std::
 void EntTemplate::SetVisualReplacement(const char *visual, const std::string& replacement)
 {
 	_visuals[visual] = replacement;
+}
+
+const char* EntTemplate::GetSoundReplacement(const char *originalSample) const
+{
+	if (_soundReplacements.empty())
+		return nullptr;
+	auto it = _soundReplacements.find(originalSample);
+	if (it == _soundReplacements.end())
+		return nullptr;
+	return it->second.c_str();
+}
+
+void EntTemplate::SetSoundReplacement(const char *originalSample, const char *replacementSample)
+{
+	_soundReplacements[originalSample] = replacementSample;
+}
+
+void EntTemplate::SetPrecachedSounds(std::vector<std::string> &&sounds)
+{
+	_precachedSounds = sounds;
+}
+
+void EntTemplate::SetPrecachedSoundScripts(std::vector<std::string> &&soundScripts)
+{
+	_precachedSoundScripts = soundScripts;
 }
 
 const char* EntTemplate::SpeechPrefix() const
@@ -230,6 +279,64 @@ bool EntTemplateSystem::ReadFromFile(const char *fileName)
 						g_VisualSystem.AddVisualFromJsonValue(replacement.c_str(), visualIt->value);
 					}
 				}
+			}
+		}
+
+		{
+			auto it = value.FindMember("sound_replacement");
+			if (it != value.MemberEnd())
+			{
+				Value& soundReplacement = it->value;
+				for (auto sIt = soundReplacement.MemberBegin(); sIt != soundReplacement.MemberEnd(); ++sIt)
+				{
+					const char* originalSample = sIt->name.GetString();
+					const char* replacementSample = sIt->value.GetString();
+					entTemplate.SetSoundReplacement(originalSample, replacementSample);
+				}
+			}
+		}
+
+		{
+			auto it = value.FindMember("precached_sounds");
+			if (it != value.MemberEnd())
+			{
+				Value::Array arr = it->value.GetArray();
+				std::vector<std::string> sounds;
+				for (size_t i=0; i<arr.Size(); ++i)
+				{
+					sounds.push_back(arr[i].GetString());
+				}
+				entTemplate.SetPrecachedSounds(std::move(sounds));
+			}
+		}
+
+		{
+			auto it = value.FindMember("precached_soundscripts");
+			if (it != value.MemberEnd())
+			{
+				Value::Array arr = it->value.GetArray();
+				std::vector<std::string> soundsScripts;
+				for (size_t i=0; i<arr.Size(); ++i)
+				{
+					soundsScripts.push_back(arr[i].GetString());
+				}
+				entTemplate.SetPrecachedSoundScripts(std::move(soundsScripts));
+			}
+		}
+
+		{
+			bool b;
+			if (UpdatePropertyFromJson(b, value, "autoprecache_sounds"))
+			{
+				entTemplate.SetAutoPrecacheSounds(b);
+			}
+		}
+
+		{
+			bool b;
+			if (UpdatePropertyFromJson(b, value, "autoprecache_soundscripts"))
+			{
+				entTemplate.SetAutoPrecacheSoundScripts(b);
 			}
 		}
 

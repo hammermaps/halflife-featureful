@@ -23,6 +23,8 @@
 #include	"game.h"
 #include	"pm_shared.h"
 #include	"ent_templates.h"
+#include	"studio.h"
+#include	"scriptevent.h"
 
 bool g_fIsXash3D = false;
 
@@ -704,18 +706,48 @@ void CBaseEntity::KeyValue(KeyValueData* pkvd)
 
 int CBaseEntity::PRECACHE_SOUND(const char *soundName)
 {
-	return ::PRECACHE_SOUND(soundName, m_soundList);
+	return PRECACHE_SOUND(soundName, m_soundList, GetMyEntTemplate());
+}
+
+int CBaseEntity::PRECACHE_SOUND(const char *soundName, string_t soundList, const EntTemplate *entTemplate)
+{
+	if (!FStringNull(soundList)) {
+		if (g_soundReplacement.EnsureReplacementFile(STRING(soundList))) {
+			const auto& replacement = g_soundReplacement.FindReplacement(STRING(soundList), soundName);
+			if (!replacement.empty()) {
+				return ::PRECACHE_SOUND(replacement.c_str());
+			}
+		}
+	}
+	if (entTemplate)
+	{
+		const char* replacement = entTemplate->GetSoundReplacement(soundName);
+		if (replacement)
+			return ::PRECACHE_SOUND(replacement);
+	}
+	return ::PRECACHE_SOUND(soundName);
 }
 
 bool CBaseEntity::EmitSoundDyn(int channel, const char *sample, float volume, float attenuation, int flags, int pitch)
 {
+	const char* soundToPlay = nullptr;
 	if (!FStringNull(m_soundList)) {
 		const auto& replacement = g_soundReplacement.FindReplacement(STRING(m_soundList), sample);
 		if (!replacement.empty()) {
-			return EMIT_SOUND_DYN(edict(), channel, replacement.c_str(), volume, attenuation, flags, pitch);
+			soundToPlay = replacement.c_str();
 		}
 	}
-	return EMIT_SOUND_DYN(edict(), channel, sample, volume, attenuation, flags, pitch);
+	if (!soundToPlay)
+	{
+		const EntTemplate* entTemplate = GetMyEntTemplate();
+		if (entTemplate)
+		{
+			soundToPlay = entTemplate->GetSoundReplacement(sample);
+		}
+	}
+	if (!soundToPlay)
+		soundToPlay = sample;
+	return EMIT_SOUND_DYN(edict(), channel, soundToPlay, volume, attenuation, flags, pitch);
 }
 
 bool CBaseEntity::EmitSound(int channel, const char *sample, float volume, float attenuation)
@@ -1185,6 +1217,74 @@ int CBaseEntity::Restore( CRestore &restore )
 	}
 
 	return status;
+}
+
+static void PrecacheSequenceSounds(CBaseEntity* pEntity, bool precacheSounds, bool precacheSoundScripts)
+{
+	if (!precacheSounds && !precacheSoundScripts)
+		return;
+
+	void *pmodel = GET_MODEL_PTR( pEntity->edict() );
+	if (!pmodel)
+		return;
+
+	studiohdr_t *pstudiohdr = (studiohdr_t *)pmodel;
+	for( int i = 0; i < pstudiohdr->numseq; i++ )
+	{
+		mstudioseqdesc_t *pseqdesc = (mstudioseqdesc_t *)( (byte *)pstudiohdr + pstudiohdr->seqindex ) + i;
+		mstudioevent_t *pevent = (mstudioevent_t *)( (byte *)pstudiohdr + pseqdesc->eventindex );
+
+		for( int j = 0; j < pseqdesc->numevents; j++ )
+		{
+			switch (pevent[j].event) {
+			case SCRIPT_EVENT_SOUND:
+			case SCRIPT_EVENT_SOUND_VOICE:
+			case SCRIPT_EVENT_SOUND_VOICE_BODY:
+			case SCRIPT_EVENT_SOUND_VOICE_VOICE:
+			case SCRIPT_EVENT_SOUND_VOICE_WEAPON:
+			{
+				if (precacheSounds && *pevent[j].options != '\0')
+				{
+					string_t s = ALLOC_STRING(pevent[j].options);
+					PRECACHE_SOUND(STRING(s));
+				}
+			}
+				break;
+			case SCRIPT_EVENT_SOUNDSCRIPT:
+			{
+				if (precacheSoundScripts && *pevent[j].options != '\0')
+				{
+					const SoundScript* soundScript = pEntity->GetSoundScript(pevent[j].options);
+					if (soundScript)
+						pEntity->PrecacheSoundScript(*soundScript);
+				}
+			}
+				break;
+			default:
+				break;
+			}
+		}
+	}
+}
+
+void CBaseEntity::Activate()
+{
+	const EntTemplate* entTemplate = GetMyEntTemplate();
+	if (entTemplate)
+	{
+		for (auto soundIt = entTemplate->PrecachedSoundsBegin(); soundIt != entTemplate->PrecachedSoundsEnd(); ++soundIt)
+		{
+			PRECACHE_SOUND(soundIt->c_str());
+		}
+		for (auto soundIt = entTemplate->PrecachedSoundScriptsBegin(); soundIt != entTemplate->PrecachedSoundScriptsEnd(); ++soundIt)
+		{
+			const SoundScript* soundScript = GetSoundScript(soundIt->c_str());
+			if (soundScript)
+				PrecacheSoundScript(*soundScript);
+		}
+
+		PrecacheSequenceSounds(this, entTemplate->AutoPrecacheSounds(), entTemplate->AutoPrecacheSoundScripts());
+	}
 }
 
 // Initialize absmin & absmax to the appropriate box

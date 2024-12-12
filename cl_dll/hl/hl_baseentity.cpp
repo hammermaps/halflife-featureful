@@ -50,6 +50,7 @@ CBaseEntity *CBaseEntity::GetNextTarget( void ) { return NULL; }
 void CBaseEntity::KeyValue( KeyValueData* pkvd ) { pkvd->fHandled = FALSE; }
 int CBaseEntity::Save( CSave &save ) { return 1; }
 int CBaseEntity::Restore( CRestore &restore ) { return 1; }
+void CBaseEntity::Activate() {}
 void CBaseEntity::SetObjectCollisionBox( void ) { }
 BOOL CBaseEntity::IsInWorld( void ) { return TRUE; }
 int CBaseEntity::DamageDecal( int bitsDamageType ) { return -1; }

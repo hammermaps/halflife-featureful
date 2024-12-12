@@ -8,6 +8,8 @@
 
 #include <map>
 #include <string>
+#include <utility>
+#include <vector>
 
 struct EntTemplate
 {
@@ -27,6 +29,38 @@ public:
 
 	const char* GetVisualNameOverride(const char* name) const;
 	void SetVisualReplacement(const char* visual, const std::string& replacement);
+
+	const char* GetSoundReplacement(const char* originalSample) const;
+	void SetSoundReplacement(const char* originalSample, const char* replacementSample);
+
+	inline std::vector<std::string>::const_iterator PrecachedSoundsBegin() const {
+		return _precachedSounds.begin();
+	}
+	inline std::vector<std::string>::const_iterator PrecachedSoundsEnd() const {
+		return _precachedSounds.end();
+	}
+	void SetPrecachedSounds(std::vector<std::string>&& sounds);
+
+	inline std::vector<std::string>::const_iterator PrecachedSoundScriptsBegin() const {
+		return _precachedSoundScripts.begin();
+	}
+	inline std::vector<std::string>::const_iterator PrecachedSoundScriptsEnd() const {
+		return _precachedSoundScripts.end();
+	}
+	void SetPrecachedSoundScripts(std::vector<std::string>&& soundScripts);
+
+	inline bool AutoPrecacheSounds() const {
+		return _autoprecachedSounds;
+	}
+	inline void SetAutoPrecacheSounds(bool b) {
+		_autoprecachedSounds = b;
+	}
+	inline bool AutoPrecacheSoundScripts() const {
+		return _autoprecachedSoundScripts;
+	}
+	inline void SetAutoPrecacheSoundScripts(bool b) {
+		_autoprecachedSoundScripts = b;
+	}
 
 	bool IsClassifyDefined() const {
 		return (_defined & CLASSIFY_DEFINED) != 0;
@@ -92,7 +126,7 @@ public:
 		return (_defined & SIZEFORGRAPPLE_DEFINED) != 0;
 	}
 	int SizeForGrapple() const {
-		return _sizeForGrapple;
+		return _sizeForGrapple;const char* SoundReplacementFor(const char* sound);
 	}
 	void SetSizeForGrapple(int sizeForGrapple)
 	{
@@ -109,6 +143,12 @@ private:
 	std::map<std::string, std::string> _visuals;
 	std::string _ownVisual;
 	std::string _gibVisual;
+
+	std::map<std::string, std::string> _soundReplacements;
+	std::vector<std::string> _precachedSounds;
+	std::vector<std::string> _precachedSoundScripts;
+	bool _autoprecachedSounds = false;
+	bool _autoprecachedSoundScripts = false;
 
 	enum
 	{

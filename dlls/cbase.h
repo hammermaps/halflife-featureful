@@ -191,7 +191,7 @@ public:
 	virtual int Save( CSave &save );
 	virtual int Restore( CRestore &restore );
 	virtual int ObjectCaps( void ) { return FCAP_ACROSS_TRANSITION; }
-	virtual void Activate( void ) {}
+	virtual void Activate( void );
 
 	// Setup the object->object collision box (pev->mins / pev->maxs is the object->world collision box)
 	virtual void SetObjectCollisionBox( void );
@@ -266,6 +266,7 @@ public:
 	bool m_entTemplateChecked;
 
 	int PRECACHE_SOUND(const char* soundName);
+	static int PRECACHE_SOUND(const char* soundName, string_t soundList, const EntTemplate* entTemplate);
 
 	bool EmitSoundDyn( int channel, const char *sample, float volume, float attenuation, int flags, int pitch );
 	bool EmitSound( int channel, const char *sample, float volume, float attenuation );

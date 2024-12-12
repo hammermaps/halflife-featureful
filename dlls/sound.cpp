@@ -1764,19 +1764,6 @@ void EMIT_GROUPNAME_SUIT( edict_t *entity, const char *groupname )
 		SENTENCEG_PlayRndSz( entity, groupname, fvol, ATTN_NORM, 0, pitch );
 }
 
-int PRECACHE_SOUND(const char *soundName, string_t soundList)
-{
-	if (!FStringNull(soundList)) {
-		if (g_soundReplacement.EnsureReplacementFile(STRING(soundList))) {
-			const auto& replacement = g_soundReplacement.FindReplacement(STRING(soundList), soundName);
-			if (!replacement.empty()) {
-				return ::PRECACHE_SOUND(replacement.c_str());
-			}
-		}
-	}
-	return ::PRECACHE_SOUND(soundName);
-}
-
 // ===================== MATERIAL TYPE DETECTION, MAIN ROUTINES ========================
 // 
 // Used to detect the texture the player is standing on, map the
