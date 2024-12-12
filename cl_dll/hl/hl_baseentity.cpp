@@ -229,6 +229,7 @@ void CBasePlayerWeapon::FallInit( void ) { }
 CBaseEntity *CBasePlayerWeapon::Respawn( void ) { return NULL; }
 void CBasePlayerWeapon::DefaultTouch( CBaseEntity *pOther ) { }
 void CBasePlayerWeapon::DestroyItem( void ) { }
+bool CBasePlayerWeapon::IsEnabledInMod() { return true; }
 int CBasePlayerWeapon::AddToPlayer( CBasePlayer *pPlayer ) { return TRUE; }
 void CBasePlayerWeapon::Drop( void ) { }
 void CBasePlayerWeapon::Kill( void ) { }

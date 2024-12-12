@@ -191,6 +191,7 @@ public:
 	static	TYPEDESCRIPTION m_SaveData[];
 #endif
 	virtual int WeaponId() const { return WEAPON_NONE; }
+	bool IsEnabledInMod();
 	virtual int AddToPlayer( CBasePlayer *pPlayer );	// return TRUE if the item you want the item added to the player inventory
 	void EXPORT DestroyItem( void );
 	void EXPORT DefaultTouch( CBaseEntity *pOther );	// default weapon touch
@@ -985,7 +986,6 @@ public:
 	void Spawn( void );
 	void Precache( void );
 	int WeaponId() const override { return WEAPON_EAGLE; }
-	bool IsEnabledInMod();
 	int GetItemInfo( ItemInfo *p );
 	int AddToPlayer( CBasePlayer *pPlayer );
 
@@ -1033,7 +1033,6 @@ public:
 	void Spawn(void);
 	void Precache(void);
 	int WeaponId() const override { return WEAPON_PIPEWRENCH; }
-	bool IsEnabledInMod();
 	int GetItemInfo(ItemInfo *p);
 	int AddToPlayer(CBasePlayer *pPlayer);
 
@@ -1084,7 +1083,6 @@ public:
 	void Spawn(void);
 	void Precache(void);
 	int WeaponId() const override { return WEAPON_MEDKIT; }
-	bool IsEnabledInMod();
 	int GetItemInfo(ItemInfo *p);
 	int AddToPlayer(CBasePlayer *pPlayer);
 
@@ -1139,7 +1137,6 @@ public:
 	void Precache( void );
 	void Spawn( void );
 	int WeaponId() const override { return WEAPON_GRAPPLE; }
-	bool IsEnabledInMod();
 	void EndAttack( void );
 
 	int GetItemInfo(ItemInfo *p);
@@ -1194,7 +1191,6 @@ public:
 	void Spawn(void);
 	void Precache(void);
 	int WeaponId() const override { return WEAPON_M249; }
-	bool IsEnabledInMod();
 	int GetItemInfo(ItemInfo *p);
 	int AddToPlayer(CBasePlayer *pPlayer);
 
@@ -1249,7 +1245,6 @@ public:
 	void Spawn(void);
 	void Precache(void);
 	int WeaponId() const override { return WEAPON_SNIPERRIFLE; }
-	bool IsEnabledInMod();
 
 	int GetItemInfo(ItemInfo *p);
 	int AddToPlayer(CBasePlayer *pPlayer);
@@ -1289,7 +1284,6 @@ public:
 	void Spawn( void );
 	void Precache( void );
 	int WeaponId() const override { return WEAPON_DISPLACER; }
-	bool IsEnabledInMod();
 
 	int GetItemInfo( ItemInfo *p );
 	int AddToPlayer( CBasePlayer *pPlayer );
@@ -1338,7 +1332,6 @@ public:
 	void Spawn(void);
 	void Precache(void);
 	int WeaponId() const override { return WEAPON_SHOCKRIFLE; }
-	bool IsEnabledInMod();
 
 	int GetItemInfo(ItemInfo *p);
 	int AddToPlayer(CBasePlayer *pPlayer);
@@ -1382,7 +1375,6 @@ public:
 	void Spawn(void);
 	void Precache(void);
 	int WeaponId() const override { return WEAPON_KNIFE; }
-	bool IsEnabledInMod();
 	int GetItemInfo(ItemInfo *p);
 	int AddToPlayer( CBasePlayer *pPlayer );
 
@@ -1425,7 +1417,6 @@ class CPenguin : public CSqueak
 {
 public:
 	int WeaponId() const override { return WEAPON_PENGUIN; }
-	bool IsEnabledInMod();
 	virtual const char* GrenadeName() const;
 	virtual const char* NestModel() const;
 	virtual const char* PModel() const;
@@ -1444,7 +1435,6 @@ public:
 	void Spawn( void );
 	void Precache( void );
 	int WeaponId() const override { return WEAPON_SPORELAUNCHER; }
-	bool IsEnabledInMod();
 
 	int GetItemInfo( ItemInfo *p );
 	int AddToPlayer( CBasePlayer *pPlayer );
@@ -1480,7 +1470,6 @@ public:
 	void Spawn( void );
 	void Precache( void );
 	int WeaponId() const override { return WEAPON_UZI; }
-	bool IsEnabledInMod();
 	int GetItemInfo(ItemInfo *p);
 	int AddToPlayer( CBasePlayer *pPlayer );
 

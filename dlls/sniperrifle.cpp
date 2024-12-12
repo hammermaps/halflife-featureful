@@ -55,15 +55,6 @@ void CSniperrifle::Precache( void )
 	m_usSniper = PRECACHE_EVENT( 1, "events/sniper.sc" );
 }
 
-bool CSniperrifle::IsEnabledInMod()
-{
-#if !CLIENT_DLL
-	return g_modFeatures.IsWeaponEnabled(WEAPON_SNIPERRIFLE);
-#else
-	return true;
-#endif
-}
-
 int CSniperrifle::GetItemInfo(ItemInfo *p)
 {
 	p->pszName = STRING(pev->classname);

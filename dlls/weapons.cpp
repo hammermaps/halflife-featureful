@@ -762,6 +762,11 @@ int CBasePlayerWeapon::AddDuplicate( CBasePlayerWeapon *pOriginal )
 	}
 }
 
+bool CBasePlayerWeapon::IsEnabledInMod()
+{
+	return g_modFeatures.IsWeaponEnabled(WeaponId());
+}
+
 int CBasePlayerWeapon::AddToPlayer( CBasePlayer *pPlayer )
 {
 	m_pPlayer = pPlayer;

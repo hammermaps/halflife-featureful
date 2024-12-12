@@ -69,15 +69,6 @@ void CPipeWrench::Precache(void)
 	m_usPWrench = PRECACHE_EVENT(1, "events/pipewrench.sc");
 }
 
-bool CPipeWrench::IsEnabledInMod()
-{
-#if !CLIENT_DLL
-	return g_modFeatures.IsWeaponEnabled(WEAPON_PIPEWRENCH);
-#else
-	return true;
-#endif
-}
-
 int CPipeWrench::GetItemInfo(ItemInfo *p)
 {
 	p->pszName = STRING(pev->classname);

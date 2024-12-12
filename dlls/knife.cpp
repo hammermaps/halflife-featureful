@@ -60,15 +60,6 @@ void CKnife::Precache(void)
 	m_usKnife = PRECACHE_EVENT(1, "events/knife.sc");
 }
 
-bool CKnife::IsEnabledInMod()
-{
-#if !CLIENT_DLL
-	return g_modFeatures.IsWeaponEnabled(WEAPON_KNIFE);
-#else
-	return true;
-#endif
-}
-
 int CKnife::GetItemInfo(ItemInfo *p)
 {
 	p->pszName = STRING(pev->classname);

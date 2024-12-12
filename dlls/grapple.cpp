@@ -272,15 +272,6 @@ void CBarnacleGrapple::Spawn( void )
 	FallInit();
 }
 
-bool CBarnacleGrapple::IsEnabledInMod()
-{
-#if !CLIENT_DLL
-	return g_modFeatures.IsWeaponEnabled(WEAPON_GRAPPLE);
-#else
-	return true;
-#endif
-}
-
 int CBarnacleGrapple::GetItemInfo(ItemInfo *p)
 {
 	p->pszName = STRING(pev->classname);

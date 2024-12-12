@@ -743,15 +743,6 @@ const char* CSqueak::EventsFile() const
 #if FEATURE_PENGUIN
 LINK_ENTITY_TO_CLASS( weapon_penguin, CPenguin )
 
-bool CPenguin::IsEnabledInMod()
-{
-#if !CLIENT_DLL
-	return g_modFeatures.IsWeaponEnabled(WeaponId());
-#else
-	return true;
-#endif
-}
-
 const char* CPenguin::GrenadeName() const
 {
 	return "monster_penguin";

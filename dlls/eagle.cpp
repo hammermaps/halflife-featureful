@@ -60,15 +60,6 @@ void CEagle::Precache( void )
 	m_usEagle = PRECACHE_EVENT( 1, "events/eagle.sc" );
 }
 
-bool CEagle::IsEnabledInMod()
-{
-#if !CLIENT_DLL
-	return g_modFeatures.IsWeaponEnabled(WEAPON_EAGLE);
-#else
-	return true;
-#endif
-}
-
 int CEagle::AddToPlayer(CBasePlayer *pPlayer)
 {
 	return AddToPlayerDefault(pPlayer);

@@ -104,15 +104,6 @@ void CMedkit::Precache(void)
 	m_usMedkitFire = PRECACHE_EVENT(1, "events/medkit.sc");
 }
 
-bool CMedkit::IsEnabledInMod()
-{
-#if !CLIENT_DLL
-	return g_modFeatures.IsWeaponEnabled(WEAPON_MEDKIT);
-#else
-	return true;
-#endif
-}
-
 int CMedkit::GetItemInfo(ItemInfo *p)
 {
 	p->pszName = STRING(pev->classname);

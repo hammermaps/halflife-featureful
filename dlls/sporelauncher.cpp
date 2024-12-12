@@ -63,15 +63,6 @@ void CSporelauncher::Precache(void)
 	m_usSporeFire = PRECACHE_EVENT(1, "events/spore.sc");
 }
 
-bool CSporelauncher::IsEnabledInMod()
-{
-#ifndef CLIENT_DLL
-	return g_modFeatures.IsWeaponEnabled(WEAPON_SPORELAUNCHER);
-#else
-	return true;
-#endif
-}
-
 int CSporelauncher::AddToPlayer(CBasePlayer *pPlayer)
 {
 	return AddToPlayerDefault(pPlayer);

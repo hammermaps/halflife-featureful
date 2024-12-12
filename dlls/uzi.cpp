@@ -66,15 +66,6 @@ void CUzi::Precache( void )
 	m_usUzi = PRECACHE_EVENT( 1, "events/uzi.sc" );
 }
 
-bool CUzi::IsEnabledInMod()
-{
-#if !CLIENT_DLL
-	return g_modFeatures.IsWeaponEnabled(WEAPON_UZI);
-#else
-	return true;
-#endif
-}
-
 int CUzi::GetItemInfo( ItemInfo *p )
 {
 	p->pszName = STRING( pev->classname );

@@ -50,6 +50,8 @@ ModFeatures::ModFeatures()
 	monstersCount = 0;
 	maxAmmoCount = 0;
 
+	EnableDefaultWeapons();
+
 	memset(nvg_sound_on, 0, sizeof(StringBuf));
 	memset(nvg_sound_off, 0, sizeof(StringBuf));
 
@@ -290,9 +292,26 @@ bool ModFeatures::UpdateFloat(const char *value, float &result, const char *key)
 	return success;
 }
 
-bool ModFeatures::EnableWeapon(const char *name)
+bool ModFeatures::EnableWeapon(const char *name, bool enable)
 {
 	static const WeaponNameAndId knownWeapons[] = {
+		WeaponNameAndId("crowbar", WEAPON_CROWBAR),
+		WeaponNameAndId("9mmhandgun", WEAPON_GLOCK),
+		WeaponNameAndId("glock", WEAPON_GLOCK),
+		WeaponNameAndId("357", WEAPON_PYTHON),
+		WeaponNameAndId("python", WEAPON_PYTHON),
+		WeaponNameAndId("9mmAR", WEAPON_MP5),
+		WeaponNameAndId("mp5", WEAPON_MP5),
+		WeaponNameAndId("shotgun", WEAPON_SHOTGUN),
+		WeaponNameAndId("crossbow", WEAPON_CROSSBOW),
+		WeaponNameAndId("rpg", WEAPON_RPG),
+		WeaponNameAndId("gauss", WEAPON_GAUSS),
+		WeaponNameAndId("egon", WEAPON_EGON),
+		WeaponNameAndId("hornetgun", WEAPON_HORNETGUN),
+		WeaponNameAndId("handgrenade", WEAPON_HANDGRENADE),
+		WeaponNameAndId("satchel", WEAPON_SATCHEL),
+		WeaponNameAndId("tripmine", WEAPON_TRIPMINE),
+		WeaponNameAndId("snark", WEAPON_SNARK),
 		WeaponNameAndId("pipewrench", WEAPON_PIPEWRENCH),
 		WeaponNameAndId("knife", WEAPON_KNIFE),
 		WeaponNameAndId("medkit", WEAPON_MEDKIT),
@@ -311,11 +330,34 @@ bool ModFeatures::EnableWeapon(const char *name)
 	{
 		if (stricmp(name, knownWeapons[i].name) == 0)
 		{
-			weapons[knownWeapons[i].id] = true;
+			weapons[knownWeapons[i].id] = enable;
 			return true;
 		}
 	}
 	return false;
+}
+
+bool ModFeatures::DisableWeapon(const char *name)
+{
+	return EnableWeapon(name, false);
+}
+
+void ModFeatures::EnableDefaultWeapons()
+{
+	weapons[WEAPON_CROWBAR] = true;
+	weapons[WEAPON_GLOCK] = true;
+	weapons[WEAPON_PYTHON] = true;
+	weapons[WEAPON_MP5] = true;
+	weapons[WEAPON_SHOTGUN] = true;
+	weapons[WEAPON_CROSSBOW] = true;
+	weapons[WEAPON_RPG] = true;
+	weapons[WEAPON_GAUSS] = true;
+	weapons[WEAPON_EGON] = true;
+	weapons[WEAPON_HORNETGUN] = true;
+	weapons[WEAPON_HANDGRENADE] = true;
+	weapons[WEAPON_SATCHEL] = true;
+	weapons[WEAPON_TRIPMINE] = true;
+	weapons[WEAPON_SNARK] = true;
 }
 
 void ModFeatures::EnableAllWeapons()
@@ -435,9 +477,13 @@ byte* LoadFileForMeWithBackup(const char* fileName, const char* fileNameBackup, 
 	return pMemFile;
 }
 
-bool IsNonSignificantLine(const char* line)
+bool IsNonSignificantLine(const char* line, bool allowMinus = false)
 {
-	return !*line || *line == '/' || !IsValidIdentifierCharacter(*line);
+	if (!*line || *line == '/')
+		return true;
+	if (allowMinus)
+		return !(IsValidIdentifierCharacter(*line) || *line == '-');
+	return IsValidIdentifierCharacter(*line);
 }
 
 char* TryConsumeToken(char* buffer, const int length)
@@ -445,7 +491,7 @@ char* TryConsumeToken(char* buffer, const int length)
 	int i = 0;
 	SkipSpaces(buffer, i, length);
 
-	if (IsNonSignificantLine(buffer + i))
+	if (IsNonSignificantLine(buffer + i, true))
 		return NULL;
 
 	int tokenStart = i;
@@ -520,8 +566,9 @@ void ReadEnabledWeapons()
 		char* weaponName = TryConsumeToken(buffer, sizeof(buffer));
 		if (weaponName)
 		{
-			if (g_modFeatures.EnableWeapon(weaponName))
-				ALERT(at_console, "Enabled weapon '%s'\n", weaponName);
+			bool enable = *weaponName == '-' ? false : true;
+			if (g_modFeatures.EnableWeapon(enable ? weaponName : weaponName+1, enable))
+				ALERT(at_console, "%s weapon '%s'\n", enable ? "Enabled" : "Disabled", weaponName);
 			else
 				ALERT(at_warning, "Unknown weapon '%s' in %s\n", weaponName, fileName);
 		}

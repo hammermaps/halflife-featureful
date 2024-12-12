@@ -69,15 +69,6 @@ void CShockrifle::Precache(void)
 	UTIL_PrecacheOther("shock_beam");
 }
 
-bool CShockrifle::IsEnabledInMod()
-{
-#if !CLIENT_DLL
-	return g_modFeatures.IsWeaponEnabled(WEAPON_SHOCKRIFLE);
-#else
-	return true;
-#endif
-}
-
 int CShockrifle::AddToPlayer(CBasePlayer *pPlayer)
 {
 	if (CBasePlayerWeapon::AddToPlayer(pPlayer))

@@ -37,7 +37,9 @@ struct ModFeatures
 
 	ModFeatures();
 	bool SetValue(const char* key, const char* value);
-	bool EnableWeapon(const char* name);
+	bool EnableWeapon(const char* name, bool enable = true);
+	bool DisableWeapon(const char* name);
+	void EnableDefaultWeapons();
 	void EnableAllWeapons();
 
 	bool IsWeaponEnabled(int weaponId) const;

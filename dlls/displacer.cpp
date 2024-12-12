@@ -106,15 +106,6 @@ void CDisplacer::Precache(void)
 	m_usDisplacer = PRECACHE_EVENT(1, "events/displacer.sc");
 }
 
-bool CDisplacer::IsEnabledInMod()
-{
-#if !CLIENT_DLL
-	return g_modFeatures.IsWeaponEnabled(WEAPON_DISPLACER);
-#else
-	return true;
-#endif
-}
-
 BOOL CDisplacer::Deploy()
 {
 	return DefaultDeploy("models/v_displacer.mdl", "models/p_displacer.mdl", DISPLACER_DRAW, "egon");

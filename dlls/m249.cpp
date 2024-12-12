@@ -65,15 +65,6 @@ void CM249::Precache(void)
 	m_usM249 = PRECACHE_EVENT(1, "events/m249.sc");
 }
 
-bool CM249::IsEnabledInMod()
-{
-#if !CLIENT_DLL
-	return g_modFeatures.IsWeaponEnabled(WEAPON_M249);
-#else
-	return true;
-#endif
-}
-
 int CM249::GetItemInfo(ItemInfo *p)
 {
 	p->pszName = STRING(pev->classname);
