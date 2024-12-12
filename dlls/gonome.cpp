@@ -219,13 +219,13 @@ const NamedSoundScript CGonome::biteSoundScript = {
 };
 
 const NamedSoundScript CGonome::melee1SoundScript = {
-	CHAN_WEAPON,
+	CHAN_BODY,
 	{"gonome/gonome_melee1.wav"},
 	"Gonome.Melee1"
 };
 
 const NamedSoundScript CGonome::melee2SoundScript = {
-	CHAN_WEAPON,
+	CHAN_BODY,
 	{"gonome/gonome_melee2.wav"},
 	"Gonome.Melee2"
 };
