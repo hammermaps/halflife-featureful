@@ -24,6 +24,7 @@
 class CRope;
 #endif
 #include "com_model.h"
+#include <cstdint>
 
 #include <vector>
 
@@ -233,6 +234,11 @@ public:
 	CBasePlayerWeapon *m_pClientActiveItem;  // client version of the active item
 	CBasePlayerWeapon *m_pLastItem;
 
+	std::uint64_t m_WeaponBits;
+
+	//Not saved, used to update client.
+	std::uint64_t m_ClientWeaponBits;
+
 	// shared ammo slots
 	int	m_rgAmmo[MAX_AMMO_TYPES];
 	int	m_rgAmmoLast[MAX_AMMO_TYPES];
@@ -287,6 +293,16 @@ public:
 	void RemoveAllItems( int stripFlags );
 	BOOL SwitchWeapon( CBasePlayerWeapon *pWeapon );
 	BOOL SwitchToBestWeapon();
+
+	void SetWeaponBit(int id) {
+		m_WeaponBits |= 1ULL << id;
+	}
+	void ClearWeaponBit(int id) {
+		m_WeaponBits &= ~(1ULL << id);
+	}
+	bool HasWeaponBit(int id) {
+		return (m_WeaponBits & (1ULL << id)) != 0;
+	}
 
 	bool HasSuit() const
 	{

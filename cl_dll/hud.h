@@ -961,6 +961,14 @@ public:
 	{
 		return (m_iItemBits & PLAYER_ITEM_NIGHTVISION) != 0;
 	}
+	bool HasWeapon(int id) const
+	{
+		return (m_iWeaponBits & (1ULL << id)) != 0;
+	}
+	bool HasAnyWeapons() const
+	{
+		return m_iWeaponBits != 0;
+	}
 	bool ViewBobEnabled();
 	int CalcMinHUDAlpha();
 	bool DrawArmorNearHealth();
@@ -1055,6 +1063,7 @@ public:
 	int _cdecl MsgFunc_SetFOV( const char *pszName,  int iSize, void *pbuf );
 	int  _cdecl MsgFunc_Concuss( const char *pszName, int iSize, void *pbuf );
 
+	int _cdecl MsgFunc_Weapons( const char *pszName, int iSize, void *pbuf );
 	int _cdecl MsgFunc_Items(const char* pszName, int iSize, void* pbuf);
 	int _cdecl MsgFunc_SetFog( const char *pszName, int iSize, void *pbuf );
 	int _cdecl MsgFunc_KeyedDLight( const char *pszName, int iSize, void *pbuf );
@@ -1063,7 +1072,7 @@ public:
 	// Screen information
 	SCREENINFO	m_scrinfo;
 
-	int	m_iWeaponBits;
+	std::uint64_t m_iWeaponBits;
 	int m_iItemBits;
 	bool m_fPlayerDead;
 	int m_iIntermission;

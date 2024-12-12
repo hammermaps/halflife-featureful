@@ -21,7 +21,7 @@
 #define CDLL_DLL_H
 #include "player_items.h"
 
-#define MAX_WEAPONS		32
+#define MAX_WEAPONS		64
 
 #define MAX_ITEMS				5	// hard coded item types
 

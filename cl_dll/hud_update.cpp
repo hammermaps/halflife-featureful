@@ -32,7 +32,8 @@ int CHud::UpdateClientData( client_data_t *cdata, float time )
 	memcpy( m_vecAngles, cdata->viewangles, sizeof(Vector) );
 
 	m_iKeyBits = CL_ButtonBits( 0 );
-	m_iWeaponBits = cdata->iWeaponBits;
+	//Handled in MsgFunc_Weapons now.
+	//m_iWeaponBits = cdata->iWeaponBits;
 
 	in_fov = cdata->fov;
 

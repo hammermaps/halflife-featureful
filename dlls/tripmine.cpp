@@ -467,6 +467,7 @@ void CTripmine::Holster()
 	if( !m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] )
 	{
 		// out of mines
+		m_pPlayer->ClearWeaponBit(WeaponId());
 		DestroyItem();
 	}
 

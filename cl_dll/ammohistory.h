@@ -21,6 +21,8 @@
 
 #include "ammo.h"
 
+#include <cstdint>
+
 // this is the max number of items in each bucket
 #define MAX_WEAPON_POSITIONS		8
 
@@ -49,7 +51,7 @@ public:
 	void Reset( void );
 
 ///// WEAPON /////
-	int			iOldWeaponBits;
+	std::uint64_t iOldWeaponBits;
 
 	WEAPON *GetWeapon( int iId ) { return &rgWeapons[iId]; }
 	void AddWeapon( WEAPON *wp );

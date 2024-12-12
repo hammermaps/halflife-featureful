@@ -683,7 +683,7 @@ void CBasePlayerWeapon::DestroyItem( void )
 	if( m_pPlayer )
 	{
 		// if attached to a player, remove.
-		m_pPlayer->pev->weapons &= ~( 1 << WeaponId() );
+		m_pPlayer->ClearWeaponBit(WeaponId());
 		m_pPlayer->RemovePlayerItem( this, false );
 		//m_pPlayer = NULL;
 	}
@@ -771,7 +771,7 @@ int CBasePlayerWeapon::AddToPlayer( CBasePlayer *pPlayer )
 {
 	m_pPlayer = pPlayer;
 
-	pPlayer->pev->weapons |= ( 1 << WeaponId() );
+	pPlayer->SetWeaponBit(WeaponId());
 
 	if( !m_iPrimaryAmmoType )
 	{

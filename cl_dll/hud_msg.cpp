@@ -51,6 +51,7 @@ int CHud::MsgFunc_ResetHUD( const char *pszName, int iSize, void *pbuf )
 	}
 	m_Nightvision.Reset();
 
+	m_iWeaponBits = 0ULL;
 	m_iItemBits = 0;
 
 	// reset sensitivity
@@ -217,6 +218,18 @@ int CHud::MsgFunc_ObjectHint(const char *pszName, int iSize, void *pbuf)
 	{
 		objectHintManager.RemoveInteractable();
 	}
+
+	return 1;
+}
+
+int CHud::MsgFunc_Weapons( const char* pszName, int iSize, void* pbuf )
+{
+	BEGIN_READ(pbuf, iSize);
+
+	const std::uint64_t lowerBits = READ_LONG();
+	const std::uint64_t upperBits = READ_LONG();
+
+	m_iWeaponBits = lowerBits | (upperBits << 32ULL);
 
 	return 1;
 }

@@ -1,4 +1,4 @@
-/***
+﻿/***
 *
 *	Copyright (c) 1996-2001, Valve LLC. All rights reserved.
 *	
@@ -199,6 +199,8 @@ void WRITE_CIRCLE(const Vector& vecSrc, float radius)
 	WRITE_COORD( vecSrc.y );
 	WRITE_COORD( vecSrc.z + radius );
 }
+
+#include <cstdint>
 
 void UTIL_DynamicLight( const Vector &vecSrc, float flRadius, byte r, byte g, byte b, float flTime, float flDecay )
 {
@@ -1771,6 +1773,7 @@ static int gSizes[FIELD_TYPECOUNT] =
 	sizeof(float),		// FIELD_TIME
 	sizeof(int),		// FIELD_MODELNAME
 	sizeof(int),		// FIELD_SOUNDNAME
+	sizeof(std::uint64_t), //FIELD_INT64
 };
 
 // entities has different store size
@@ -2258,6 +2261,9 @@ int CSave::WriteFields( const char *pname, void *pBaseData, TYPEDESCRIPTION *pFi
 		case FIELD_FUNCTION:
 			WriteFunction( pTest->fieldName, (void **)pOutputData, pTest->fieldSize );
 			break;
+		case FIELD_INT64:
+			WriteData( pTest->fieldName, sizeof(std::uint64_t) * pTest->fieldSize, ((char*)pOutputData) );
+			break;
 		default:
 			ALERT( at_error, "Bad field type\n" );
 		}
@@ -2482,6 +2488,9 @@ int CRestore::ReadField( void *pBaseData, TYPEDESCRIPTION *pFields, int fieldCou
 							*( (void**)pOutputData ) = 0;
 						else
 							*( (void**)pOutputData ) = (void*)FUNCTION_FROM_NAME( (char *)pInputData );
+						break;
+					case FIELD_INT64:
+						*((std::uint64_t*)pOutputData) = *(std::uint64_t*)pInputData;
 						break;
 					default:
 						ALERT( at_error, "Bad field type\n" );

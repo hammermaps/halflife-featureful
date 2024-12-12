@@ -577,6 +577,7 @@ void CSqueak::Holster()
 
 	if( !m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] )
 	{
+		m_pPlayer->ClearWeaponBit(WeaponId());
 		DestroyItem();
 		return;
 	}

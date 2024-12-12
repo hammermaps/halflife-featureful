@@ -874,11 +874,13 @@ bool CShockRoach::TryGiveAsWeapon(CBaseEntity *pOther)
 {
 #if FEATURE_SHOCKRIFLE
 	// Give the shockrifle weapon to the player, if not already in possession.
-	if (g_modFeatures.IsWeaponEnabled(WEAPON_SHOCKRIFLE) && pOther->IsPlayer() && pOther->IsAlive() && !(pOther->pev->weapons & (1 << WEAPON_SHOCKRIFLE))) {
+	if (g_modFeatures.IsWeaponEnabled(WEAPON_SHOCKRIFLE) && pOther->IsPlayer() && pOther->IsAlive()) {
 		CBasePlayer* pPlayer = (CBasePlayer*)(pOther);
-		pPlayer->GiveNamedItem("weapon_shockrifle");
-		UTIL_Remove(this);
-		return true;
+		if (!pPlayer->HasWeaponBit(WEAPON_SHOCKRIFLE)) {
+			pPlayer->GiveNamedItem("weapon_shockrifle");
+			UTIL_Remove(this);
+			return true;
+		}
 	}
 #endif
 	return false;

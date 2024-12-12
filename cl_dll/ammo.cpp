@@ -527,7 +527,7 @@ void CHudAmmo::Think( void )
 
 			if( p && p->iId )
 			{
-				if( gHUD.m_iWeaponBits & ( 1 << p->iId ) )
+				if( gHUD.HasWeapon(p->iId) )
 					gWR.PickupWeapon( p );
 				else
 					gWR.DropWeapon( p );
@@ -597,7 +597,7 @@ void WeaponsResource::SelectSlot( int iSlot, int fAdvance, int iDirection )
 	if ( !gHUD.HasSuit() && !gHUD.clientFeatures.hud_draw_nosuit )
 		return;
 
-	if( !gHUD.m_iWeaponBits )
+	if( !gHUD.HasAnyWeapons() )
 		return;
 
 	WEAPON *p = NULL;

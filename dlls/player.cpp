@@ -101,6 +101,7 @@ TYPEDESCRIPTION	CBasePlayer::m_playerSaveData[] =
 	DEFINE_ARRAY( CBasePlayer, m_rgpPlayerWeapons, FIELD_CLASSPTR, MAX_WEAPONS ),
 	DEFINE_FIELD( CBasePlayer, m_pActiveItem, FIELD_CLASSPTR ),
 	DEFINE_FIELD( CBasePlayer, m_pLastItem, FIELD_CLASSPTR ),
+	DEFINE_FIELD( CBasePlayer, m_WeaponBits, FIELD_INT64 ),
 
 	DEFINE_ARRAY( CBasePlayer, m_rgAmmo, FIELD_INTEGER, MAX_AMMO_TYPES ),
 	DEFINE_FIELD( CBasePlayer, m_idrowndmg, FIELD_INTEGER ),
@@ -217,6 +218,7 @@ int gmsgShowMenu = 0;
 int gmsgGeigerRange = 0;
 int gmsgTeamNames = 0;
 int gmsgPlayMP3 = 0;
+int gmsgWeapons = 0;
 int gmsgItems = 0;
 
 int gmsgStatusText = 0;
@@ -319,6 +321,7 @@ void LinkUserMessages( void )
 	gmsgAmmoX = REG_USER_MSG( "AmmoX", 3 );
 	gmsgTeamNames = REG_USER_MSG( "TeamNames", -1 );
 	gmsgPlayMP3 = REG_USER_MSG( "PlayMP3", -1 );
+	gmsgWeapons = REG_USER_MSG( "Weapons", 8 );
 	gmsgItems = REG_USER_MSG( "Items", 4 );
 
 	gmsgStatusText = REG_USER_MSG( "StatusText", -1 );
@@ -1147,7 +1150,7 @@ void CBasePlayer::RemoveAllItems( int stripFlags )
 		SuitLightTurnOff(false);
 	}
 
-	pev->weapons = 0;
+	m_WeaponBits = 0ULL;
 	if( FBitSet(stripFlags, STRIP_SUIT) )
 		m_iItemsBits &= ~PLAYER_ITEM_SUIT;
 	if ( FBitSet(stripFlags, STRIP_SUITLIGHT) )
@@ -4886,10 +4889,10 @@ int CBasePlayer::GiveAmmo(int iCount, const char *szName)
 			if ((II.iFlags & ITEM_FLAG_EXHAUSTIBLE) && II.pszAmmo1 && FStrEq(szName, II.pszAmmo1)) {
 				// we found a weapon that uses this ammo type
 
-				int weaponId = II.iId;
+				const int weaponId = II.iId;
 				const char* weaponName = II.pszName;
 
-				if ((pev->weapons & (1 << weaponId)) == 0) {
+				if (!HasWeaponBit(weaponId)) {
 					// player does not have this weapon
 					CBaseEntity* pCreated = Create(weaponName, pev->origin, pev->angles);
 					if (pCreated)
@@ -5215,6 +5218,19 @@ void CBasePlayer::UpdateClientData( void )
 		MESSAGE_END();
 	}
 
+	if (m_WeaponBits != m_ClientWeaponBits)
+	{
+		m_ClientWeaponBits = m_WeaponBits;
+
+		const int lowerBits = m_WeaponBits & 0xFFFFFFFF;
+		const int upperBits = (m_WeaponBits >> 32) & 0xFFFFFFFF;
+
+		MESSAGE_BEGIN(MSG_ONE, gmsgWeapons, nullptr, pev);
+		WRITE_LONG(lowerBits);
+		WRITE_LONG(upperBits);
+		MESSAGE_END();
+	}
+
 	if (m_iItemsBits != m_iClientItemsBits)
 	{
 		m_iClientItemsBits = m_iItemsBits;
@@ -5352,7 +5368,7 @@ void CBasePlayer::UpdateClientData( void )
 				WRITE_BYTE( GetAmmoIndex( II.pszAmmo2 ) );	// byte		Ammo2 Type
 				WRITE_BYTE( II.iSlot );					// byte		bucket
 				WRITE_BYTE( II.iPosition );				// byte		bucket pos
-				WRITE_BYTE( II.iId );						// byte		id (bit index into pev->weapons)
+				WRITE_BYTE( II.iId );						// byte		id (bit index into m_WeaponBits)
 				WRITE_BYTE( II.iFlags );					// byte		Flags
 			MESSAGE_END();
 		}
@@ -5926,7 +5942,7 @@ void CBasePlayer::DropPlayerItemImpl(CBasePlayerWeapon *pWeapon, int dropType, f
 
 	UTIL_MakeVectors( pev->angles );
 
-	pev->weapons &= ~( 1 << pWeapon->WeaponId() );// take item off hud
+	ClearWeaponBit(pWeapon->WeaponId());// take item off hud
 
 	CWeaponBox *pWeaponBox = (CWeaponBox *)CBaseEntity::Create( "weaponbox", pev->origin + gpGlobals->v_forward * 10, pev->angles, edict() );
 

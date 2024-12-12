@@ -96,6 +96,7 @@ void CHandGrenade::Holster()
 	else
 	{
 		// no more grenades!
+		m_pPlayer->ClearWeaponBit(WEAPON_HANDGRENADE);
 		DestroyItem();
 	}
 
