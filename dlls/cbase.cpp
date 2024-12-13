@@ -779,30 +779,37 @@ void CBaseEntity::StopSound(int channel, const char *sample)
 	STOP_SOUND(edict(), channel, sample);
 }
 
-const char* CBaseEntity::GetSoundScriptNameForTemplate(const char *name, string_t templateName)
+const char* CBaseEntity::GetSoundScriptNameForTemplate(const char *name, const EntTemplate* entTemplate)
 {
-	if (FStringNull(!templateName))
-	{
-		const EntTemplate* entTemplate = GetEntTemplate(STRING(templateName));
-		if (entTemplate)
-		{
-			return entTemplate->GetSoundScriptNameOverride(name);
-		}
-	}
-	return nullptr;
+	return entTemplate ? entTemplate->GetSoundScriptNameOverride(name) : nullptr;
 }
 
-const char* CBaseEntity::GetSoundScriptNameForMyTemplate(const char *name)
+const char* CBaseEntity::GetSoundScriptNameForMyTemplate(const char *name, string_t* usedTemplate)
 {
 	const char* nameOverride = nullptr;
+	if (usedTemplate)
+		*usedTemplate = iStringNull;
 
-	nameOverride = GetSoundScriptNameForTemplate(name, m_entTemplate);
+	nameOverride = GetSoundScriptNameForTemplate(name, GetMyEntTemplate());
 	if (nameOverride)
+	{
+		if (usedTemplate)
+		{
+			if (m_entTemplate)
+				*usedTemplate = m_entTemplate;
+			else
+				*usedTemplate = pev->classname;
+		}
 		return nameOverride;
+	}
 
-	nameOverride = GetSoundScriptNameForTemplate(name, m_ownerEntTemplate);
+	nameOverride = GetSoundScriptNameForTemplate(name, GetOwnerEntTemplate());
 	if (nameOverride)
+	{
+		if (usedTemplate)
+			*usedTemplate = m_ownerEntTemplate;
 		return nameOverride;
+	}
 
 	return name;
 }
@@ -968,7 +975,12 @@ void CBaseEntity::RegisterAndPrecacheSoundScript(const NamedSoundScript &default
 
 void CBaseEntity::RegisterAndPrecacheSoundScript(const char* derivative, const char* base, const SoundScript& defaultSoundScript, const SoundScriptParamOverride paramsOverride)
 {
-	const SoundScript* soundScript = g_SoundScriptSystem.ProvideDefaultSoundScript(GetSoundScriptNameForMyTemplate(derivative), GetSoundScriptNameForMyTemplate(base), defaultSoundScript, paramsOverride);
+	string_t baseTemplate = iStringNull;
+	const char* baseName = GetSoundScriptNameForMyTemplate(base, &baseTemplate);
+	if (baseTemplate)
+		EnsureSoundScriptReplacementForTemplate(STRING(baseTemplate), derivative);
+
+	const SoundScript* soundScript = g_SoundScriptSystem.ProvideDefaultSoundScript(GetSoundScriptNameForMyTemplate(derivative), baseName, defaultSoundScript, paramsOverride);
 	if (soundScript)
 	{
 		PrecacheSoundScript(*soundScript);
@@ -980,32 +992,31 @@ void  CBaseEntity::RegisterAndPrecacheSoundScript(const char* derivative, const 
 	RegisterAndPrecacheSoundScript(derivative, defaultSoundScript.name, defaultSoundScript, paramsOverride);
 }
 
-const char* CBaseEntity::GetVisualNameForTemplate(const char *name, string_t templateName)
+const char* CBaseEntity::GetVisualNameForTemplate(const char *name, const EntTemplate* entTemplate)
 {
-	if (FStringNull(!templateName))
-	{
-		const EntTemplate* entTemplate = GetEntTemplate(STRING(templateName));
-		if (entTemplate)
-		{
-			return entTemplate->GetVisualNameOverride(name);
-		}
-	}
-	return nullptr;
+	return entTemplate ? entTemplate->GetVisualNameOverride(name) : nullptr;
 }
 
 const char* CBaseEntity::GetVisualNameForMyTemplate(const char *name, string_t* usedTemplate)
 {
 	const char* nameOverride = nullptr;
+	if (usedTemplate)
+		*usedTemplate = iStringNull;
 
-	nameOverride = GetVisualNameForTemplate(name, m_entTemplate);
+	nameOverride = GetVisualNameForTemplate(name, GetMyEntTemplate());
 	if (nameOverride)
 	{
 		if (usedTemplate)
-			*usedTemplate = m_entTemplate;
+		{
+			if (m_entTemplate)
+				*usedTemplate = m_entTemplate;
+			else
+				*usedTemplate = pev->classname;
+		}
 		return nameOverride;
 	}
 
-	nameOverride = GetVisualNameForTemplate(name, m_ownerEntTemplate);
+	nameOverride = GetVisualNameForTemplate(name, GetOwnerEntTemplate());
 	if (nameOverride)
 	{
 		if (usedTemplate)
@@ -1047,10 +1058,10 @@ void CBaseEntity::AssignEntityOverrides(EntityOverrides entityOverrides)
 	m_soundList = entityOverrides.soundList;
 }
 
-EntityOverrides CBaseEntity::GetProjectileOverrides() const
+EntityOverrides CBaseEntity::GetProjectileOverrides()
 {
 	EntityOverrides entityOverrides;
-	entityOverrides.ownerEntTemplate = m_entTemplate;
+	entityOverrides.ownerEntTemplate = GetMyTemplateName();
 	entityOverrides.soundList = m_soundList;
 	return entityOverrides;
 }
@@ -1112,24 +1123,50 @@ void CBaseEntity::ApplyVisual(const Visual *visual, const char* modelOverride)
 		pev->framerate = RandomizeNumberFromRange(visual->framerate);
 }
 
-const EntTemplate* CBaseEntity::GetMyEntTemplate()
+const EntTemplate* CBaseEntity::GetCacheableEntTemplate(entvars_t* pev, string_t templateName, const EntTemplate*& entTemplate, bool& templateChecked, bool checkByClassname)
 {
-	if (m_entTemplateChecked)
+	if (templateChecked)
 	{
-		return m_cachedEntTemplate;
+		return entTemplate;
 	}
-	if (!FStringNull(m_entTemplate))
+	if (!FStringNull(templateName))
 	{
-		m_cachedEntTemplate = GetEntTemplate(STRING(m_entTemplate));
-		m_entTemplateChecked = true;
-		return m_cachedEntTemplate;
+		entTemplate = GetEntTemplate(STRING(templateName));
+		templateChecked = true;
+		return entTemplate;
+	}
+	else if (checkByClassname)
+	{
+		entTemplate = GetEntTemplate(STRING(pev->classname));
+		templateChecked = true;
+		return entTemplate;
 	}
 	else
 	{
-		m_cachedEntTemplate = GetEntTemplate(STRING(pev->classname));
-		m_entTemplateChecked = true;
-		return m_cachedEntTemplate;
+		entTemplate = nullptr;
+		templateChecked = true;
+		return entTemplate;
 	}
+}
+
+const EntTemplate* CBaseEntity::GetMyEntTemplate()
+{
+	return GetCacheableEntTemplate(pev, m_entTemplate, m_cachedEntTemplate, m_entTemplateChecked, true);
+}
+
+string_t CBaseEntity::GetMyTemplateName()
+{
+	if (FStringNull(m_entTemplate))
+	{
+		if (GetMyEntTemplate())
+			return pev->classname;
+	}
+	return m_entTemplate;
+}
+
+const EntTemplate* CBaseEntity::GetOwnerEntTemplate()
+{
+	return GetCacheableEntTemplate(pev, m_ownerEntTemplate, m_cachedOwnerEntTemplate, m_ownerEntTemplateChecked, false);
 }
 
 void CBaseEntity::SetMyHealth(const float defaultHealth)

@@ -262,8 +262,11 @@ public:
 	string_t m_soundList; // sound replacement list file name
 	string_t m_objectHint; // the name of the spritehint template
 
+	// Don't save those:
 	const EntTemplate* m_cachedEntTemplate;
+	const EntTemplate* m_cachedOwnerEntTemplate;
 	bool m_entTemplateChecked;
+	bool m_ownerEntTemplateChecked;
 
 	int PRECACHE_SOUND(const char* soundName);
 	static int PRECACHE_SOUND(const char* soundName, string_t soundList, const EntTemplate* entTemplate);
@@ -273,8 +276,8 @@ public:
 	void EmitAmbientSound( const Vector &vecOrigin, const char *sample, float vol, float attenuation, int iFlags, int pitch );
 	void StopSound( int channel, const char* sample );
 
-	static const char* GetSoundScriptNameForTemplate(const char* name, string_t templateName);
-	const char* GetSoundScriptNameForMyTemplate(const char* name);
+	static const char* GetSoundScriptNameForTemplate(const char* name, const EntTemplate* entTemplate);
+	const char* GetSoundScriptNameForMyTemplate(const char* name, string_t* usedTemplate = nullptr);
 	const SoundScript* GetSoundScript(const char* name);
 	bool EmitSoundScript(const SoundScript* soundScript, const SoundScriptParamOverride paramsOverride = SoundScriptParamOverride(), int flags = 0);
 	bool EmitSoundScript(const char* name, const SoundScriptParamOverride paramsOverride = SoundScriptParamOverride(), int flags = 0);
@@ -296,18 +299,21 @@ public:
 	void RegisterAndPrecacheSoundScript(const char* derivative, const char* base, const SoundScript& defaultSoundScript, const SoundScriptParamOverride paramsOverride = SoundScriptParamOverride());
 	void RegisterAndPrecacheSoundScript(const char* derivative, const NamedSoundScript& defaultSoundScript, const SoundScriptParamOverride paramsOverride = SoundScriptParamOverride());
 
-	static const char* GetVisualNameForTemplate(const char* name, string_t templateName);
+	static const char* GetVisualNameForTemplate(const char* name, const EntTemplate* entTemplate);
 	const char* GetVisualNameForMyTemplate(const char* name, string_t* usedTemplate = nullptr);
 	const Visual* GetVisual(const char* name);
 	const Visual* RegisterVisual(const NamedVisual& defaultVisual, bool precache = true, string_t* usedTemplate = nullptr);
 	void AssignEntityOverrides(EntityOverrides entityOverrides);
-	EntityOverrides GetProjectileOverrides() const;
+	EntityOverrides GetProjectileOverrides();
 
 	int OverridenRenderProps();
 	virtual void ApplyDefaultRenderProps(int overridenRenderProps) {}
 	void ApplyVisual(const Visual* visual, const char* modelOverride = nullptr);
 
+	static const EntTemplate* GetCacheableEntTemplate(entvars_t* pev, string_t templateName, const EntTemplate*& entTemplate, bool& templateChecked, bool checkByClassname);
 	const EntTemplate* GetMyEntTemplate();
+	string_t GetMyTemplateName();
+	const EntTemplate* GetOwnerEntTemplate();
 	void SetMyHealth(const float defaultHealth);
 	const Visual* MyOwnVisual();
 	const char* MyOwnModel(const char* defaultModel);

@@ -244,6 +244,13 @@ void SoundScriptSystem::AddSoundScriptFromJsonValue(const char *name, Value &val
 	_soundScripts[name] = std::make_pair(soundScript, soundScriptMeta);
 }
 
+void SoundScriptSystem::EnsureSoundScriptExists(const std::string& name)
+{
+	auto it = _soundScripts.find(name);
+	if (it == _soundScripts.end())
+		_soundScripts[name] = std::make_pair(SoundScript(), SoundScriptMeta());
+}
+
 const SoundScript* SoundScriptSystem::GetSoundScript(const char *name)
 {
 	if (!name || *name == '\0')

@@ -177,6 +177,7 @@ public:
 	bool ReadFromFile(const char* fileName);
 	const EntTemplate* GetTemplate(const char* name);
 	void EnsureVisualReplacementForTemplate(const char* templateName, const char* visualName);
+	void EnsureSoundScriptReplacementForTemplate(const char* templateName, const char* soundScriptName);
 
 private:
 	std::map<std::string, EntTemplate, CaseInsensitiveCompare> _entTemplates;
@@ -251,7 +252,7 @@ bool EntTemplateSystem::ReadFromFile(const char *fileName)
 					}
 					else if (scriptIt->value.IsObject())
 					{
-						std::string replacement = GenerateResourceName(templateName, + soundScriptName);
+						std::string replacement = GenerateResourceName(templateName, soundScriptName);
 						entTemplate.SetSoundScriptReplacement(soundScriptName, replacement);
 						g_SoundScriptSystem.AddSoundScriptFromJsonValue(replacement.c_str(), scriptIt->value);
 					}
@@ -540,6 +541,24 @@ void EntTemplateSystem::EnsureVisualReplacementForTemplate(const char* templateN
 	}
 }
 
+void EntTemplateSystem::EnsureSoundScriptReplacementForTemplate(const char* templateName, const char* soundScriptName)
+{
+	if (!templateName || *templateName == '\0')
+		return;
+	_temp = templateName;
+	auto it = _entTemplates.find(_temp);
+	if (it != _entTemplates.end())
+	{
+		EntTemplate* entTemplate = &it->second;
+		if (!entTemplate->GetSoundScriptNameOverride(soundScriptName))
+		{
+			std::string replacement = GenerateResourceName(it->first, soundScriptName);
+			entTemplate->SetSoundScriptReplacement(soundScriptName, replacement);
+			g_SoundScriptSystem.EnsureSoundScriptExists(replacement);
+		}
+	}
+}
+
 EntTemplateSystem g_EntTemplateSystem;
 
 void ReadEntTemplates()
@@ -555,4 +574,9 @@ const EntTemplate* GetEntTemplate(const char* name)
 void EnsureVisualReplacementForTemplate(const char* templateName, const char* visualName)
 {
 	g_EntTemplateSystem.EnsureVisualReplacementForTemplate(templateName, visualName);
+}
+
+void EnsureSoundScriptReplacementForTemplate(const char* templateName, const char* soundScriptName)
+{
+	g_EntTemplateSystem.EnsureSoundScriptReplacementForTemplate(templateName, soundScriptName);
 }

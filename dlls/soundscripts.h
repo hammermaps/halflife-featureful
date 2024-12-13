@@ -98,6 +98,7 @@ class SoundScriptSystem : public JSONConfig
 {
 public:
 	void AddSoundScriptFromJsonValue(const char* name, rapidjson::Value& value);
+	void EnsureSoundScriptExists(const std::string& name);
 	const SoundScript* GetSoundScript(const char* name);
 	const SoundScript* ProvideDefaultSoundScript(const char* name, const SoundScript& soundScript);
 	const SoundScript* ProvideDefaultSoundScript(const char* derivative, const char* base, const SoundScript& soundScript, const SoundScriptParamOverride paramOverride = SoundScriptParamOverride());
