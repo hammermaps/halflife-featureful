@@ -36,7 +36,8 @@ enum
 	RADIUSDAMAGE_DONT_TRAVEL_THROUGH_WATER = (1<<1),
 	RADIUSDAMAGE_CHECK_VISIBLE = (1<<2),
 	RADIUSDAMAGE_SPOT_IS_TARGET_CENTER = (1<<3),
-	RADIUSDAMAGE_APPLY_FALLOFF = (1<<4)
+	RADIUSDAMAGE_APPLY_FALLOFF = (1<<4),
+	RADIUSDAMAGE_CHECK_ATTACKER_TRACE = (1<<5)
 };
 
 template<typename Filter>
@@ -116,7 +117,17 @@ void RadiusDamage(CBaseEntity* pLooker, Vector vecSrc, entvars_t *pevInflictor, 
 			}
 			else
 			{
-				UTIL_TraceLine( vecSrc, vecSpot, dont_ignore_monsters, ENT( pevInflictor ), &tr );
+				edict_t* pentIgnore = nullptr;
+				if (flags & RADIUSDAMAGE_CHECK_ATTACKER_TRACE)
+				{
+					if (pevAttacker)
+						pentIgnore = ENT(pevAttacker);
+				}
+				else
+				{
+					pentIgnore = ENT(pevInflictor);
+				}
+				UTIL_TraceLine( vecSrc, vecSpot, dont_ignore_monsters, pentIgnore, &tr );
 
 				if( tr.flFraction == 1.0f || tr.pHit == pEntity->edict() )
 				{
