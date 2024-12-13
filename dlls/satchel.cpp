@@ -159,14 +159,14 @@ void CSatchelCharge::SatchelThink( void )
 		return;
 	}
 
-	if( pev->waterlevel == 3 )
+	if( pev->waterlevel == WL_Eyes )
 	{
 		pev->movetype = MOVETYPE_FLY;
 		pev->velocity = pev->velocity * 0.8f;
 		pev->avelocity = pev->avelocity * 0.9f;
 		pev->velocity.z += 8;
 	}
-	else if( pev->waterlevel == 0 )
+	else if( pev->waterlevel == WL_NotInWater )
 	{
 		pev->movetype = MOVETYPE_BOUNCE;
 	}

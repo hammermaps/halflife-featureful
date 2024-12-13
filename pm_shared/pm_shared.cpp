@@ -889,7 +889,7 @@ void PM_WalkMove( void )
 	}
 
 	// Don't walk up stairs if not on ground.
-	if( oldonground == -1 && pmove->waterlevel  == 0 )
+	if( oldonground == -1 && pmove->waterlevel  == WL_NotInWater )
 		return;
 
 	if( pmove->waterjumptime )	// If we are jumping out of water, don't do anything more.
@@ -1234,7 +1234,7 @@ void PM_AirMove( void )
 
 qboolean PM_InWater( void )
 {
-	return ( pmove->waterlevel > 1 );
+	return ( pmove->waterlevel > WL_Feet );
 }
 
 /*
@@ -1258,7 +1258,7 @@ qboolean PM_CheckWater( void )
 	point[2] = pmove->origin[2] + pmove->player_mins[pmove->usehull][2] + 1;
 
 	// Assume that we are not in water at all.
-	pmove->waterlevel = 0;
+	pmove->waterlevel = WL_NotInWater;
 	pmove->watertype = CONTENTS_EMPTY;
 
 	// Grab point contents.
@@ -1270,7 +1270,7 @@ qboolean PM_CheckWater( void )
 		pmove->watertype = cont;
 
 		// We are at least at level one
-		pmove->waterlevel = 1;
+		pmove->waterlevel = WL_Feet;
 
 		height = ( pmove->player_mins[pmove->usehull][2] + pmove->player_maxs[pmove->usehull][2] );
 		heightover2 = height * 0.5f;
@@ -1282,14 +1282,14 @@ qboolean PM_CheckWater( void )
 		if( cont <= CONTENTS_WATER && cont > CONTENTS_TRANSLUCENT )
 		{
 			// Set a higher water level.
-			pmove->waterlevel = 2;
+			pmove->waterlevel = WL_Waist;
 
 			// Now check the eye position.  (view_ofs is relative to the origin)
 			point[2] = pmove->origin[2] + pmove->view_ofs[2];
 
 			cont = pmove->PM_PointContents( point, NULL );
 			if( cont <= CONTENTS_WATER && cont > CONTENTS_TRANSLUCENT ) 
-				pmove->waterlevel = 3;  // In over our eyes
+				pmove->waterlevel = WL_Eyes;  // In over our eyes
 		}
 
 		// Adjust velocity based on water current, if any.
@@ -1310,7 +1310,7 @@ qboolean PM_CheckWater( void )
 		}
 	}
 
-	return pmove->waterlevel > 1;
+	return pmove->waterlevel > WL_Feet;
 }
 
 /*
@@ -1359,7 +1359,7 @@ void PM_CatagorizePosition( void )
 			// Then we are not in water jump sequence
 			pmove->waterjumptime = 0;
 			// If we could make the move, drop us down that 1 pixel
-			if( pmove->waterlevel < 2 && !tr.startsolid && !tr.allsolid )
+			if( pmove->waterlevel < WL_Waist && !tr.startsolid && !tr.allsolid )
 				VectorCopy( tr.endpos, pmove->origin );
 		}
 
@@ -2251,7 +2251,7 @@ void PM_Jump( void )
 	}
 
 	// If we are in the water most of the way...
-	if( pmove->waterlevel >= 2 )
+	if( pmove->waterlevel >= WL_Waist )
 	{
 		// swimming, not jumping
 		pmove->onground = -1;
@@ -2436,7 +2436,7 @@ void PM_CheckFalling( void )
 	{
 		float fvol = 0.5f;
 
-		if( pmove->waterlevel > 0 )
+		if( pmove->waterlevel > WL_NotInWater )
 		{
 		}
 		else if( pmove->flFallVelocity > PLAYER_MAX_SAFE_FALL_SPEED )
@@ -2506,7 +2506,7 @@ PM_PlayWaterSounds
 void PM_PlayWaterSounds( void )
 {
 	// Did we enter or leave water?
-	if( ( pmove->oldwaterlevel == 0 && pmove->waterlevel != 0 ) || ( pmove->oldwaterlevel != 0 && pmove->waterlevel == 0 ) )
+	if( ( pmove->oldwaterlevel == WL_NotInWater && pmove->waterlevel != WL_NotInWater ) || ( pmove->oldwaterlevel != WL_NotInWater && pmove->waterlevel == WL_NotInWater ) )
 	{
 		switch( pmove->RandomLong( 0, 3 ) )
 		{
@@ -2835,9 +2835,9 @@ void PM_PlayerMove( qboolean server )
 
 		// If we are swimming in the water, see if we are nudging against a place we can jump up out
 		//  of, and, if so, start out jump.  Otherwise, if we are not moving up, then reset jump timer to 0
-		if( pmove->waterlevel >= 2 ) 
+		if( pmove->waterlevel >= WL_Waist )
 		{
-			if( pmove->waterlevel == 2 )
+			if( pmove->waterlevel == WL_Waist )
 			{
 				PM_CheckWaterJump();
 			}

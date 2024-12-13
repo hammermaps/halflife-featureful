@@ -197,7 +197,7 @@ void CCrossbowBolt::BubbleThink( void )
 {
 	pev->nextthink = gpGlobals->time + 0.1f;
 
-	if( pev->waterlevel == 0 )
+	if( pev->waterlevel == WL_NotInWater )
 		return;
 
 	UTIL_BubbleTrail( pev->origin - pev->velocity * 0.1f, pev->origin, 1 );
@@ -409,7 +409,7 @@ void CCrossbow::FireBolt()
 	pBolt->pev->angles = anglesAim;
 	pBolt->pev->owner = m_pPlayer->edict();
 
-	if( m_pPlayer->pev->waterlevel == 3 )
+	if( m_pPlayer->pev->waterlevel == WL_Eyes )
 	{
 		pBolt->pev->velocity = vecDir * BOLT_WATER_VELOCITY;
 		pBolt->pev->speed = BOLT_WATER_VELOCITY;

@@ -283,7 +283,7 @@ void CRpgRocket::FollowThink( void )
 	if( gpGlobals->time - m_flIgniteTime < 1.0f )
 	{
 		pev->velocity = pev->velocity * 0.2f + vecTarget * ( flSpeed * 0.8f + 400.0f );
-		if( pev->waterlevel == 3 )
+		if( pev->waterlevel == WL_Eyes )
 		{
 			// go slow underwater
 			if( pev->velocity.Length() > 300.0f )
@@ -308,7 +308,7 @@ void CRpgRocket::FollowThink( void )
 			StopSoundScript(rocketIgniteSoundScript);
 		}
 		pev->velocity = pev->velocity * 0.2f + vecTarget * flSpeed * 0.798f;
-		if( pev->waterlevel == 0 && pev->velocity.Length() < 1500.0f )
+		if( pev->waterlevel == WL_NotInWater && pev->velocity.Length() < 1500.0f )
 			Detonate();
 	}
 	// ALERT( at_console, "%.0f\n", flSpeed );
