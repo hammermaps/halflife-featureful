@@ -31,21 +31,11 @@
 #include	"mod_features.h"
 #include	"game.h"
 #include	"common_soundscripts.h"
+#include	"visuals_utils.h"
 
 #if FEATURE_VOLTIFORE
-#define		VOLTIGORE_SPRINT_DIST	256 // how close the voltigore has to get before starting to sprint and refusing to swerve
 
-#define		VOLTIGORE_BEAM_COUNT		8
-
-#define VOLTIGORE_ZAP_RED 180
-#define VOLTIGORE_ZAP_GREEN 16
-#define VOLTIGORE_ZAP_BLUE 255
-#define VOLTIGORE_ZAP_BEAM "sprites/lgtning.spr"
-#define VOLTIGORE_ZAP_NOISE 80
-#define VOLTIGORE_ZAP_WIDTH 30
-#define VOLTIGORE_ZAP_BRIGHTNESS 255
-#define VOLTIGORE_ZAP_DISTANCE 512
-#define VOLTIGORE_GLOW_SCALE 0.75f
+#define VOLTIGORE_BEAM_COUNT 8
 #define VOLTIGORE_GIB_COUNT 10
 
 class CChargedBolt : public CBaseEntity
@@ -59,7 +49,7 @@ public:
 
 	void EXPORT ShutdownChargedBolt();
 
-	static CChargedBolt* ChargedBoltCreate();
+	static CChargedBolt* ChargedBoltCreate(EntityOverrides entityOverrides = EntityOverrides());
 
 	void LaunchChargedBolt(const Vector& vecAim, edict_t* pOwner, int nSpeed);
 
@@ -85,6 +75,10 @@ public:
 	int m_iAttachIdx;
 	float m_shutdownTime;
 	float m_radiusCheckTime;
+
+	static const NamedVisual spriteVisual;
+	static const NamedVisual beamVisual;
+	static const NamedVisual hitBeamVisual;
 };
 
 LINK_ENTITY_TO_CLASS(charged_bolt, CChargedBolt);
@@ -100,10 +94,29 @@ TYPEDESCRIPTION CChargedBolt::m_SaveData[] =
 
 IMPLEMENT_SAVERESTORE(CChargedBolt, CBaseEntity);
 
+const NamedVisual CChargedBolt::spriteVisual = BuildVisual("ChargedBolt.Sprite")
+		.Model("sprites/blueflare2.spr")
+		.RenderMode(kRenderTransAdd)
+		.Alpha(255)
+		.Scale(0.75f);
+
+const NamedVisual CChargedBolt::beamVisual = BuildVisual("ChargedBolt.Beam")
+		.Model("sprites/lgtning.spr")
+		.RenderColor(180, 16, 255)
+		.Alpha(255)
+		.BeamWidth(30)
+		.BeamNoise(80);
+
+const NamedVisual CChargedBolt::hitBeamVisual = BuildVisual("ChargedBolt.HitBeam")
+		.RenderColor(255, 16, 255)
+		.BeamNoise(20)
+		.Mixin(&beamVisual);
+
 void CChargedBolt::Precache()
 {
-	PRECACHE_MODEL("sprites/blueflare2.spr");
-	PRECACHE_MODEL("sprites/lgtning.spr");
+	RegisterVisual(spriteVisual);
+	RegisterVisual(beamVisual);
+	RegisterVisual(hitBeamVisual);
 }
 
 void CChargedBolt::Spawn()
@@ -115,15 +128,10 @@ void CChargedBolt::Spawn()
 
 	pev->gravity = 0.5f;
 
-	SET_MODEL(edict(), "sprites/blueflare2.spr");
+	ApplyVisual(GetVisual(spriteVisual));
 
 	UTIL_SetOrigin(pev, pev->origin);
-
 	UTIL_SetSize(pev, g_vecZero, g_vecZero);
-
-	pev->rendermode = kRenderTransAdd;
-	pev->renderamt = 255;
-	pev->scale = 0.75f;
 
 	InitBeams();
 }
@@ -158,12 +166,12 @@ void CChargedBolt::ShutdownChargedBolt()
 	UTIL_Remove(this);
 }
 
-CChargedBolt* CChargedBolt::ChargedBoltCreate()
+CChargedBolt* CChargedBolt::ChargedBoltCreate(EntityOverrides entityOverrides)
 {
 	auto pBolt = GetClassPtr<CChargedBolt>(nullptr);
 
 	pBolt->pev->classname = MAKE_STRING("charged_bolt");
-
+	pBolt->AssignEntityOverrides(entityOverrides);
 	pBolt->Spawn();
 
 	return pBolt;
@@ -227,11 +235,14 @@ void CChargedBolt::ArmBeam(int side)
 	if (flDist == 1.0)
 		return;
 
-	auto pBeam = m_pBeam[m_iBeams].Entity<CBeam>();
+	const Visual* pBeamVisual = GetVisual(beamVisual);
+	if (!pBeamVisual)
+		return;
 
+	auto pBeam = m_pBeam[m_iBeams].Entity<CBeam>();
 	if (!pBeam)
 	{
-		m_pBeam[m_iBeams] = pBeam = CBeam::BeamCreate("sprites/lgtning.spr", 30);
+		m_pBeam[m_iBeams] = pBeam = CreateBeamFromVisual(pBeamVisual);
 	}
 
 	if (!pBeam)
@@ -239,20 +250,25 @@ void CChargedBolt::ArmBeam(int side)
 
 	auto pHit = Instance(tr.pHit);
 
+	const Visual* pVisualToApply = pBeamVisual;
 	if (pHit && pHit->pev->takedamage != DAMAGE_NO)
 	{
 		pBeam->EntsInit(entindex(), pHit->entindex());
-		pBeam->SetColor(255, 16, 255);
-		pBeam->SetBrightness(255);
-		pBeam->SetNoise(20);
+		const Visual* pHitBeamVisual = GetVisual(hitBeamVisual);
+		if (pHitBeamVisual)
+		{
+			pVisualToApply = pHitBeamVisual;
+		}
 	}
 	else
 	{
 		pBeam->PointEntInit(tr.vecEndPos, entindex());
-		pBeam->SetColor(180, 16, 255);
-		pBeam->SetBrightness(255);
-		pBeam->SetNoise(80);
 	}
+	pBeam->SetColor(pVisualToApply->rendercolor.r, pVisualToApply->rendercolor.g, pVisualToApply->rendercolor.b);
+	pBeam->SetBrightness(pVisualToApply->renderamt);
+	pBeam->SetWidth(pVisualToApply->beamWidth);
+	pBeam->SetNoise(pVisualToApply->beamNoise);
+	pBeam->SetScrollRate(pVisualToApply->beamScrollRate);
 
 	++m_iBeams;
 }
@@ -420,6 +436,10 @@ public:
 	static const char* pComSounds[];
 	static const char* pGruntSounds[];
 
+	static const NamedVisual beamVisual;
+	static const NamedVisual chargeBeamVisual;
+	static const NamedVisual deathBeamVisual;
+
 	void UpdateBeamAndBoltPositions();
 	void ClearBeams();
 	Vector BoltPosition();
@@ -491,6 +511,19 @@ const char* CVoltigore::pGruntSounds[] =
 	"voltigore/voltigore_run_grunt1.wav",
 	"voltigore/voltigore_run_grunt2.wav",
 };
+
+const NamedVisual CVoltigore::beamVisual = BuildVisual("Voltigore.Beam")
+		.Model("sprites/lgtning.spr")
+		.RenderColor(180, 16, 255)
+		.Alpha(255);
+
+const NamedVisual CVoltigore::chargeBeamVisual = BuildVisual("Voltigore.ChargeBeam")
+		.BeamParams(50, 20)
+		.Mixin(&beamVisual);
+
+const NamedVisual CVoltigore::deathBeamVisual = BuildVisual("Voltigore.DeathBeam")
+		.BeamParams(30, 128)
+		.Mixin(&beamVisual);
 
 BOOL CVoltigore::CheckRangeAttack1(float flDot, float flDist)
 {
@@ -591,8 +624,7 @@ void CVoltigore::DeathGibThink()
 				return;
 			}
 
-			auto pBeam = CBeam::BeamCreate("sprites/lgtning.spr", 30);
-
+			auto pBeam = CreateBeamFromVisual(GetVisual(deathBeamVisual));
 			if (!pBeam)
 				return;
 
@@ -601,18 +633,14 @@ void CVoltigore::DeathGibThink()
 			if (pHit && pHit->pev->takedamage != DAMAGE_NO)
 			{
 				pBeam->PointEntInit(pev->origin + Vector(0, 0, 32), pHit->entindex());
-
-				pBeam->SetColor(180, 16, 255);
-				pBeam->SetBrightness(255);
-				pBeam->SetNoise(128);
 			}
 			else
 			{
 				pBeam->PointsInit(tr.vecEndPos, pev->origin + Vector(0, 0, 32));
-
-				pBeam->SetColor(180, 16, 255);
-				pBeam->SetBrightness(255);
-				pBeam->SetNoise(192);
+				int noise = pBeam->GetNoise() * 1.5;
+				if (noise > 255)
+					noise = 255;
+				pBeam->SetNoise(noise);
 			}
 
 			pBeam->SetThink(&CBaseEntity::SUB_Remove);
@@ -855,7 +883,8 @@ void CVoltigore::PrecacheImpl(const char *modelName)
 	PRECACHE_SOUND("voltigore/voltigore_attack_shock.wav");
 	PRECACHE_SOUND("voltigore/voltigore_eat.wav");
 
-	PRECACHE_MODEL(VOLTIGORE_ZAP_BEAM);
+	RegisterVisual(chargeBeamVisual);
+	RegisterVisual(deathBeamVisual);
 
 	UTIL_PrecacheOther("charged_bolt", GetProjectileOverrides());
 }
@@ -1013,7 +1042,7 @@ void CVoltigore::StartTask(Task_t *pTask)
 
 			for (auto i = 0; i < 3; ++i)
 			{
-				CBeam* pBeam = CBeam::BeamCreate(VOLTIGORE_ZAP_BEAM, VOLTIGORE_ZAP_WIDTH);
+				CBeam* pBeam = CreateBeamFromVisual(GetVisual(chargeBeamVisual));
 				m_pBeam[i] = pBeam;
 
 				if (!pBeam)
@@ -1021,12 +1050,9 @@ void CVoltigore::StartTask(Task_t *pTask)
 
 				pBeam->PointEntInit(vecConverge, entindex());
 				pBeam->SetEndAttachment(i + 1);
-				pBeam->SetColor(VOLTIGORE_ZAP_RED, VOLTIGORE_ZAP_GREEN, VOLTIGORE_ZAP_BLUE);
-				pBeam->SetBrightness(VOLTIGORE_ZAP_BRIGHTNESS);
-				pBeam->SetNoise(20);
 			}
 
-			m_pChargedBolt = CChargedBolt::ChargedBoltCreate();
+			m_pChargedBolt = CChargedBolt::ChargedBoltCreate(GetProjectileOverrides());
 
 			UTIL_SetOrigin(m_pChargedBolt->pev, vecConverge);
 
