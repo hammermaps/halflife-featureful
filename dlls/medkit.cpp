@@ -112,7 +112,7 @@ int CMedkit::GetItemInfo(ItemInfo *p)
 	p->iMaxClip = WEAPON_NOCLIP;
 	p->iSlot = 0;
 	p->iPosition = 4;
-	p->iId = WEAPON_MEDKIT;
+	p->iId = WeaponId();
 	p->iWeight = MEDKIT_WEIGHT;
 
 	if (CanRecharge()) {

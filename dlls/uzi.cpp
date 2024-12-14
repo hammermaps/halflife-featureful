@@ -75,7 +75,7 @@ int CUzi::GetItemInfo( ItemInfo *p )
 	p->iSlot = 1;
 	p->iPosition = 3;
 	p->iFlags = 0;
-	p->iId = WEAPON_UZI;
+	p->iId = WeaponId();
 	p->iWeight = UZI_WEIGHT;
 	p->pszAmmoEntity = "ammo_9mmclip";
 	p->iDropAmmo = AMMO_GLOCKCLIP_GIVE;
