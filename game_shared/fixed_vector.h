@@ -44,6 +44,7 @@ public:
 	fixed_vector<T, N>& operator=(const fixed_vector<T, M>& o)
 	{
 		setVector(o);
+		return *this;
 	}
 	bool operator==(const fixed_vector<T, N>& o) const
 	{
