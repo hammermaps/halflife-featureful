@@ -1031,7 +1031,7 @@ void ClientPrecache( void )
 	}
 
 	// Need for water sounds in pm_shared
-	// TODO: make into soundscript?
+	// TODO: make into soundscript? But soundscripts are server-only currently
 	PRECACHE_SOUND("player/pl_wade1.wav");
 	PRECACHE_SOUND("player/pl_wade2.wav");
 	PRECACHE_SOUND("player/pl_wade3.wav");
@@ -1043,12 +1043,12 @@ void ClientPrecache( void )
 
 	pWorld->RegisterAndPrecacheSoundScript(Player::trainUseSoundScript);		// use a train
 
-	pWorld->RegisterAndPrecacheSoundScript(materialSparkSoundScript);
-	PRECACHE_SOUND( "buttons/spark5.wav" );		// hit computer texture
-	PRECACHE_SOUND( "buttons/spark6.wav" );
+	pWorld->RegisterAndPrecacheSoundScript(materialSparkSoundScript); // hit computer texture
 
-	PRECACHE_SOUND( SOUND_FLASHLIGHT_ON );
-	PRECACHE_SOUND( SOUND_FLASHLIGHT_OFF );
+	pWorld->RegisterAndPrecacheSoundScript(Player::flashlightOnSoundScript);
+	pWorld->RegisterAndPrecacheSoundScript(Player::flashlightOffSoundScript);
+	pWorld->RegisterAndPrecacheSoundScript(Player::nvgOnSoundScript);
+	pWorld->RegisterAndPrecacheSoundScript(Player::nvgOffSoundScript);
 
 	if (*g_modFeatures.nvg_sound_on)
 		PRECACHE_SOUND( g_modFeatures.nvg_sound_on );

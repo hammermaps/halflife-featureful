@@ -58,6 +58,10 @@ extern const NamedSoundScript vehicleIgnitionSoundScript;
 extern const NamedSoundScript underwaterExhaleSoundScript;
 extern const NamedSoundScript undrownSoundScript;
 extern const NamedSoundScript emergeInhaleSoundScript;
+extern const NamedSoundScript flashlightOnSoundScript;
+extern const NamedSoundScript flashlightOffSoundScript;
+extern const NamedSoundScript nvgOnSoundScript;
+extern const NamedSoundScript nvgOffSoundScript;
 }
 
 #endif

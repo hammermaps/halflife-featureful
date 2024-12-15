@@ -4358,7 +4358,7 @@ void CBasePlayer::FlashlightTurnOn()
 
 	if (!FlashlightIsOn())
 	{
-		EMIT_SOUND_DYN( ENT( pev ), CHAN_WEAPON, SOUND_FLASHLIGHT_ON, 1.0, ATTN_NORM, 0, PITCH_NORM );
+		EmitSoundScript(Player::flashlightOnSoundScript);
 		SetBits( pev->effects, EF_DIMLIGHT );
 
 		NVGTurnOff(false);
@@ -4371,7 +4371,7 @@ void CBasePlayer::FlashlightTurnOff( bool playOffSound )
 	if (FlashlightIsOn())
 	{
 		if (playOffSound)
-			EMIT_SOUND_DYN( ENT( pev ), CHAN_WEAPON, SOUND_FLASHLIGHT_OFF, 1.0, ATTN_NORM, 0, PITCH_NORM );
+			EmitSoundScript(Player::flashlightOffSoundScript);
 
 		ClearBits( pev->effects, EF_DIMLIGHT );
 		UpdateSuitLightBattery(false);
@@ -4399,7 +4399,10 @@ void CBasePlayer::NVGTurnOn()
 
 	if (!m_fNVGisON)
 	{
-		if (*g_modFeatures.nvg_sound_on)
+		const SoundScript* nvgOn = GetSoundScript(Player::nvgOnSoundScript);
+		if (nvgOn && !nvgOn->waves.empty())
+			EmitSoundScript(nvgOn);
+		else if (*g_modFeatures.nvg_sound_on)
 			EMIT_SOUND_DYN( ENT( pev ), CHAN_WEAPON, g_modFeatures.nvg_sound_on, 1.0, ATTN_NORM, 0, PITCH_NORM );
 
 		m_fNVGisON = TRUE;
@@ -4418,7 +4421,10 @@ void CBasePlayer::NVGTurnOff(bool playOffSound)
 	{
 		if (playOffSound)
 		{
-			if (*g_modFeatures.nvg_sound_off)
+			const SoundScript* nvgOff = GetSoundScript(Player::nvgOffSoundScript);
+			if (nvgOff && !nvgOff->waves.empty())
+				EmitSoundScript(nvgOff);
+			else if (*g_modFeatures.nvg_sound_off)
 				EMIT_SOUND_DYN( ENT( pev ), CHAN_WEAPON, g_modFeatures.nvg_sound_off, 1.0, ATTN_NORM, 0, PITCH_NORM );
 		}
 

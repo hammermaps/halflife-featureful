@@ -89,9 +89,6 @@ enum
 
 #define CSUITNOREPEAT		32
 
-#define	SOUND_FLASHLIGHT_ON		"items/flashlight1.wav"
-#define	SOUND_FLASHLIGHT_OFF	"items/flashlight1.wav"
-
 #define TEAM_NAME_LENGTH	16
 
 typedef enum

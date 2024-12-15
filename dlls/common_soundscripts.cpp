@@ -246,4 +246,28 @@ const NamedSoundScript emergeInhaleSoundScript = {
 	"Player.EmergeInhale"
 };
 
+const NamedSoundScript flashlightOnSoundScript = {
+	CHAN_WEAPON,
+	{"items/flashlight1.wav"},
+	"Player.FlashlightOn"
+};
+
+const NamedSoundScript flashlightOffSoundScript = {
+	CHAN_WEAPON,
+	{"items/flashlight1.wav"},
+	"Player.FlashLightOff"
+};
+
+const NamedSoundScript nvgOnSoundScript = {
+	CHAN_WEAPON,
+	{},
+	"Player.NVGOn"
+};
+
+const NamedSoundScript nvgOffSoundScript = {
+	CHAN_WEAPON,
+	{},
+	"Player.NVGOff"
+};
+
 }
