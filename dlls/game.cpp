@@ -483,7 +483,7 @@ bool IsNonSignificantLine(const char* line, bool allowMinus = false)
 		return true;
 	if (allowMinus)
 		return !(IsValidIdentifierCharacter(*line) || *line == '-');
-	return IsValidIdentifierCharacter(*line);
+	return !IsValidIdentifierCharacter(*line);
 }
 
 char* TryConsumeToken(char* buffer, const int length)
