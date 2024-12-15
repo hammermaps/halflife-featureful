@@ -98,6 +98,11 @@ std::set<std::string> g_precachedSounds;
 
 int PRECACHE_MODEL(const char* name)
 {
+	if (!name)
+	{
+		ALERT(at_warning, "Tried to precache model by the null string!\n");
+		return -1;
+	}
 	if (g_psv_developer && g_psv_developer->value > 0)
 		g_precachedModels.insert(name);
 	return g_engfuncs.pfnPrecacheModel(name);
@@ -105,6 +110,11 @@ int PRECACHE_MODEL(const char* name)
 
 int PRECACHE_SOUND(const char* name)
 {
+	if (!name)
+	{
+		ALERT(at_warning, "Tried to precache sound by the null string!\n");
+		return -1;
+	}
 	if (name && *name == '!')
 	{
 		// no need to precache since it's a sentence
@@ -132,36 +142,62 @@ void ClearPrecachedSounds()
 	g_precachedSounds.clear();
 }
 
-void ReportPrecachedModels()
+static void ReportPrecachedResources(const std::set<std::string>& precachedResources, const char* resourceName)
 {
-	ALERT(at_console, "Number of precached models: %d\nList of precached models:\n", g_precachedModels.size());
-	int i = 0;
-	for (auto it = g_precachedModels.cbegin(); it != g_precachedModels.cend(); ++it)
+	if (precachedResources.empty())
 	{
-		ALERT(at_console, "%s; ", it->c_str());
-		i++;
-		if (i == 4)
+		ALERT(at_console, "No precached %s registered! You need to restart or reload the map\n", resourceName);
+		return;
+	}
+	const int argc = CMD_ARGC();
+	if (argc > 1)
+		ALERT(at_console, "List of precached %s according to the list of prefixes:\n", resourceName);
+	else
+		ALERT(at_console, "List of precached %s:\n", resourceName);
+	int i = 0;
+	int countShown = 0;
+	for (const auto& entry : precachedResources)
+	{
+		bool show = false;
+		if (argc > 1)
 		{
-			ALERT(at_console, "\n");
-			i = 0;
+			for (int j=1; j<argc; ++j)
+			{
+				const char* prefix = CMD_ARGV(j);
+				if (entry.compare(0, strlen(prefix), prefix) == 0)
+				{
+					show = true;
+					break;
+				}
+			}
+		}
+		else
+			show = true;
+
+		if (show)
+		{
+			ALERT(at_console, "%s; ", entry.c_str());
+			countShown++;
+			i++;
+			if (i == 4)
+			{
+				ALERT(at_console, "\n");
+				i = 0;
+			}
 		}
 	}
+	const char* adj = argc > 1 ? "shown" : "precached";
+	ALERT(at_console, "\nNumber of %s %s: %d\n", adj, resourceName, countShown);
+}
+
+void ReportPrecachedModels()
+{
+	ReportPrecachedResources(g_precachedModels, "models");
 }
 
 void ReportPrecachedSounds()
 {
-	ALERT(at_console, "Number of precached sounds: %d\nList of precached sounds:\n", g_precachedSounds.size());
-	int i = 0;
-	for (auto it = g_precachedSounds.cbegin(); it != g_precachedSounds.cend(); ++it)
-	{
-		ALERT(at_console, "%s; ", it->c_str());
-		i++;
-		if (i == 4)
-		{
-			ALERT(at_console, "\n");
-			i = 0;
-		}
-	}
+	ReportPrecachedResources(g_precachedSounds, "sounds");
 }
 
 void AddMapBSPAsPrecachedModel()
