@@ -15,6 +15,7 @@ endif()
 include_directories (. ../common ../engine ../pm_shared ../game_shared ../dlls)
 
 add_executable(test
+	ent_templates_test.cpp
 	fixed_string_test.cpp
 	fixed_vector_test.cpp
 	followers_test.cpp
@@ -32,6 +33,8 @@ add_executable(test
 	../game_shared/random_utils.cpp
 	../game_shared/tex_materials.cpp
 	../game_shared/util_shared.cpp
+	../dlls/classify.cpp
+	../dlls/ent_templates.cpp
 	../dlls/followers.cpp
 	../dlls/objecthint_spec.cpp
 	../dlls/soundscripts.cpp

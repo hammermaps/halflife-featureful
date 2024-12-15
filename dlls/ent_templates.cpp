@@ -1,13 +1,16 @@
 #include "ent_templates.h"
-#include "util.h"
-#include "grapple_target.h"
 #include "icase_compare.h"
+
+#include "blood_types.h"
 #include "classify.h"
+#include "grapple_target.h"
+#include "hull_sizes.h"
 
 #include <set>
 #include <utility>
 
 #include "json_utils.h"
+#include "logger.h"
 
 using namespace rapidjson;
 
@@ -171,30 +174,18 @@ const char* EntTemplate::SpeechPrefix() const
 	return _speechPrefix.empty() ? nullptr : _speechPrefix.c_str();
 }
 
-class EntTemplateSystem
-{
-public:
-	bool ReadFromFile(const char* fileName);
-	const EntTemplate* GetTemplate(const char* name);
-	void EnsureVisualReplacementForTemplate(const char* templateName, const char* visualName);
-	void EnsureSoundScriptReplacementForTemplate(const char* templateName, const char* soundScriptName);
-
-private:
-	std::map<std::string, EntTemplate, CaseInsensitiveCompare> _entTemplates;
-	std::string _temp;
-};
-
 static std::string GenerateResourceName(const std::string& templateName, const char* resourceName)
 {
 	return templateName + '#' + resourceName;
 }
 
-bool EntTemplateSystem::ReadFromFile(const char *fileName)
+const char* EntTemplateSystem::Schema() const
 {
-	Document document;
-	if (!ReadJsonDocumentWithSchemaFromFile(document, fileName, entTemplatesSchema))
-		return false;
+	return entTemplatesSchema;
+}
 
+bool EntTemplateSystem::ReadFromDocument(rapidjson::Document& document, const char* fileName)
+{
 	for (auto templateIt = document.MemberBegin(); templateIt != document.MemberEnd(); ++templateIt)
 	{
 		const std::string templateName = templateIt->name.GetString();
@@ -215,7 +206,7 @@ bool EntTemplateSystem::ReadFromFile(const char *fileName)
 				{
 					std::string ownVisualName = templateName + "##own_visual";
 					entTemplate.SetOwnVisualName(ownVisualName);
-					g_VisualSystem.AddVisualFromJsonValue(ownVisualName.c_str(), it->value);
+					_visualSystem->AddVisualFromJsonValue(ownVisualName.c_str(), it->value);
 				}
 			}
 		}
@@ -232,7 +223,7 @@ bool EntTemplateSystem::ReadFromFile(const char *fileName)
 				{
 					std::string gibVisualName = templateName + "##gib_visual";
 					entTemplate.SetGibVisualName(gibVisualName);
-					g_VisualSystem.AddVisualFromJsonValue(gibVisualName.c_str(), it->value);
+					_visualSystem->AddVisualFromJsonValue(gibVisualName.c_str(), it->value);
 				}
 			}
 		}
@@ -254,7 +245,7 @@ bool EntTemplateSystem::ReadFromFile(const char *fileName)
 					{
 						std::string replacement = GenerateResourceName(templateName, soundScriptName);
 						entTemplate.SetSoundScriptReplacement(soundScriptName, replacement);
-						g_SoundScriptSystem.AddSoundScriptFromJsonValue(replacement.c_str(), scriptIt->value);
+						_soundScriptSystem->AddSoundScriptFromJsonValue(replacement.c_str(), scriptIt->value);
 					}
 				}
 			}
@@ -277,7 +268,7 @@ bool EntTemplateSystem::ReadFromFile(const char *fileName)
 					{
 						std::string replacement = GenerateResourceName(templateName, visualName);
 						entTemplate.SetVisualReplacement(visualName, replacement);
-						g_VisualSystem.AddVisualFromJsonValue(replacement.c_str(), visualIt->value);
+						_visualSystem->AddVisualFromJsonValue(replacement.c_str(), visualIt->value);
 					}
 				}
 			}
@@ -349,7 +340,7 @@ bool EntTemplateSystem::ReadFromFile(const char *fileName)
 				int classify = ClassifyFromName(classifyName);
 				if (classify < 0)
 				{
-					ALERT(at_console, "Unknown classification '%s'\n", classifyName);
+					LOG("Unknown classification '%s'\n", classifyName);
 				}
 				else
 				{
@@ -377,7 +368,7 @@ bool EntTemplateSystem::ReadFromFile(const char *fileName)
 				}
 				else
 				{
-					ALERT(at_warning, "Unknown blood type '%s'\n", bloodType);
+					LOG_WARNING("Unknown blood type '%s'\n", bloodType);
 				}
 			}
 		}
@@ -421,7 +412,7 @@ bool EntTemplateSystem::ReadFromFile(const char *fileName)
 					}
 
 					if (!foundFov)
-						ALERT(at_warning, "Unknown FOV type '%s'\n", fovType);
+						LOG_WARNING("Unknown FOV type '%s'\n", fovType);
 				}
 			}
 		}
@@ -455,7 +446,7 @@ bool EntTemplateSystem::ReadFromFile(const char *fileName)
 					}
 					else
 					{
-						ALERT(at_warning, "Unknown size preset '%s'\n", sizePreset);
+						LOG_WARNING("Unknown size preset '%s'\n", sizePreset);
 					}
 				}
 				else if (it->value.IsObject())
@@ -494,7 +485,7 @@ bool EntTemplateSystem::ReadFromFile(const char *fileName)
 				}
 
 				if (!found)
-					ALERT(at_warning, "Unknown grapple target type '%s'\n", targetType);
+					LOG_WARNING("Unknown grapple target type '%s'\n", targetType);
 			}
 		}
 
@@ -536,7 +527,7 @@ void EntTemplateSystem::EnsureVisualReplacementForTemplate(const char* templateN
 		{
 			std::string replacement = GenerateResourceName(it->first, visualName);
 			entTemplate->SetVisualReplacement(visualName, replacement);
-			g_VisualSystem.EnsureVisualExists(replacement);
+			_visualSystem->EnsureVisualExists(replacement);
 		}
 	}
 }
@@ -554,29 +545,9 @@ void EntTemplateSystem::EnsureSoundScriptReplacementForTemplate(const char* temp
 		{
 			std::string replacement = GenerateResourceName(it->first, soundScriptName);
 			entTemplate->SetSoundScriptReplacement(soundScriptName, replacement);
-			g_SoundScriptSystem.EnsureSoundScriptExists(replacement);
+			_soundScriptSystem->EnsureSoundScriptExists(replacement);
 		}
 	}
 }
 
 EntTemplateSystem g_EntTemplateSystem;
-
-void ReadEntTemplates()
-{
-	g_EntTemplateSystem.ReadFromFile("templates/entities.json");
-}
-
-const EntTemplate* GetEntTemplate(const char* name)
-{
-	return g_EntTemplateSystem.GetTemplate(name);
-}
-
-void EnsureVisualReplacementForTemplate(const char* templateName, const char* visualName)
-{
-	g_EntTemplateSystem.EnsureVisualReplacementForTemplate(templateName, visualName);
-}
-
-void EnsureSoundScriptReplacementForTemplate(const char* templateName, const char* soundScriptName)
-{
-	g_EntTemplateSystem.EnsureSoundScriptReplacementForTemplate(templateName, soundScriptName);
-}

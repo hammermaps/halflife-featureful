@@ -1506,7 +1506,9 @@ void GameDLLInit( void )
 	ReadInventorySpec();
 	g_SoundScriptSystem.ReadFromFile("sound/soundscripts.json");
 	g_VisualSystem.ReadFromFile("templates/visuals.json");
-	ReadEntTemplates();
+	g_EntTemplateSystem.SetSoundScriptSystem(&g_SoundScriptSystem);
+	g_EntTemplateSystem.SetVisualSystem(&g_VisualSystem);
+	g_EntTemplateSystem.ReadFromFile("templates/entities.json");
 	g_FollowersDescription.ReadFromFile("features/followers.json");
 	ReadSaveTitles();
 	g_objectHintCatalog.ReadFromFile("templates/objecthint.json");

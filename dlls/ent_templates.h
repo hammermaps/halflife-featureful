@@ -5,6 +5,7 @@
 #include "vector.h"
 #include "visuals.h"
 #include "soundscripts.h"
+#include "json_config.h"
 
 #include <map>
 #include <string>
@@ -172,11 +173,29 @@ private:
 	std::string _speechPrefix;
 };
 
-void ReadEntTemplates();
+class EntTemplateSystem : public JSONConfig
+{
+public:
+	void SetSoundScriptSystem(SoundScriptSystem* soundScriptSystem) {
+		_soundScriptSystem = soundScriptSystem;
+	}
+	void SetVisualSystem(VisualSystem* visualSystem) {
+		_visualSystem = visualSystem;
+	}
+	const EntTemplate* GetTemplate(const char* name);
+	void EnsureVisualReplacementForTemplate(const char* templateName, const char* visualName);
+	void EnsureSoundScriptReplacementForTemplate(const char* templateName, const char* soundScriptName);
+protected:
+	const char* Schema() const;
+	bool ReadFromDocument(rapidjson::Document& document, const char* fileName);
+private:
+	std::map<std::string, EntTemplate, CaseInsensitiveCompare> _entTemplates;
+	std::string _temp;
 
-const EntTemplate* GetEntTemplate(const char* name);
+	SoundScriptSystem* _soundScriptSystem;
+	VisualSystem* _visualSystem;
+};
 
-void EnsureVisualReplacementForTemplate(const char* templateName, const char* visualName);
-void EnsureSoundScriptReplacementForTemplate(const char* templateName, const char* soundScriptName);
+extern EntTemplateSystem g_EntTemplateSystem;
 
 #endif

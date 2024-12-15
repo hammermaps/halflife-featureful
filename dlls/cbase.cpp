@@ -978,7 +978,7 @@ void CBaseEntity::RegisterAndPrecacheSoundScript(const char* derivative, const c
 	string_t baseTemplate = iStringNull;
 	const char* baseName = GetSoundScriptNameForMyTemplate(base, &baseTemplate);
 	if (baseTemplate)
-		EnsureSoundScriptReplacementForTemplate(STRING(baseTemplate), derivative);
+		g_EntTemplateSystem.EnsureSoundScriptReplacementForTemplate(STRING(baseTemplate), derivative);
 
 	const SoundScript* soundScript = g_SoundScriptSystem.ProvideDefaultSoundScript(GetSoundScriptNameForMyTemplate(derivative), baseName, defaultSoundScript, paramsOverride);
 	if (soundScript)
@@ -1042,7 +1042,7 @@ const Visual* CBaseEntity::RegisterVisual(const NamedVisual &defaultVisual, bool
 		Visual changedVisual = defaultVisual;
 		changedVisual.CompleteFrom(*visual);
 		if (mixinTemplate)
-			EnsureVisualReplacementForTemplate(STRING(mixinTemplate), defaultVisual.name);
+			g_EntTemplateSystem.EnsureVisualReplacementForTemplate(STRING(mixinTemplate), defaultVisual.name);
 		return g_VisualSystem.ProvideDefaultVisual(GetVisualNameForMyTemplate(defaultVisual.name, usedTemplate), changedVisual, precache);
 	}
 	else
@@ -1131,13 +1131,13 @@ const EntTemplate* CBaseEntity::GetCacheableEntTemplate(entvars_t* pev, string_t
 	}
 	if (!FStringNull(templateName))
 	{
-		entTemplate = GetEntTemplate(STRING(templateName));
+		entTemplate = g_EntTemplateSystem.GetTemplate(STRING(templateName));
 		templateChecked = true;
 		return entTemplate;
 	}
 	else if (checkByClassname)
 	{
-		entTemplate = GetEntTemplate(STRING(pev->classname));
+		entTemplate = g_EntTemplateSystem.GetTemplate(STRING(pev->classname));
 		templateChecked = true;
 		return entTemplate;
 	}

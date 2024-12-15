@@ -24,7 +24,9 @@
 #include "activity.h"
 #include "enginecallback.h"
 
+#include "blood_types.h"
 #include "fx_types.h"
+#include "hull_sizes.h"
 #include "template_property_types.h"
 #include "util_shared.h"
 
@@ -178,12 +180,6 @@ inline BOOL FStringNull(string_t iString)			{ return iString == iStringNull; }
 #define	VIEW_FIELD_WIDE		-0.7f // +-135 degrees 0.1 // +-85 degrees, used for full FOV checks
 #define	VIEW_FIELD_NARROW	0.7f // +-45 degrees, more narrow check used to set up ranged attacks
 #define	VIEW_FIELD_ULTRA_NARROW	0.9f // +-25 degrees, more narrow check used to set up ranged attacks
-
-// All monsters need this data
-#define		DONT_BLEED			-1
-#define		BLOOD_COLOR_RED		(BYTE)247
-#define		BLOOD_COLOR_YELLOW	(BYTE)195
-#define		BLOOD_COLOR_GREEN	BLOOD_COLOR_YELLOW
 
 typedef enum 
 {
@@ -458,17 +454,7 @@ extern DLL_GLOBAL const Vector g_vecZero;
 #define PUSH_BLOCK_ONLY_X	1
 #define PUSH_BLOCK_ONLY_Y	2
 
-#define VEC_HULL_MIN		Vector(-16, -16, -36)
-#define VEC_HULL_MAX		Vector( 16,  16,  36)
-#define VEC_HUMAN_HULL_MIN	Vector( -16, -16, 0 )
-#define VEC_HUMAN_HULL_MAX	Vector( 16, 16, 72 )
-#define VEC_HUMAN_HULL_DUCK	Vector( 16, 16, 36 )
-
 #define VEC_VIEW			Vector( 0, 0, 28 )
-
-#define VEC_DUCK_HULL_MIN	Vector(-16, -16, -18 )
-#define VEC_DUCK_HULL_MAX	Vector( 16,  16,  18)
-#define VEC_DUCK_VIEW		Vector( 0, 0, 12 )
 
 #define SVC_TEMPENTITY		23
 #define SVC_INTERMISSION	30
