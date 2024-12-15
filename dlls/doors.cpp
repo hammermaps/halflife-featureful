@@ -480,7 +480,7 @@ void CBaseDoor::SetToggleState( int state )
 void CBaseDoor::Precache( void )
 {
 	const char *pszSound;
-	BOOL NullSound = FALSE;
+	bool NullSound = false;
 
 	if ( FStringNull( pev->noiseMoving ) )
 	{
@@ -520,7 +520,7 @@ void CBaseDoor::Precache( void )
 			case 0:
 			default:
 				pszSound = "common/null.wav";
-				NullSound = TRUE;
+				NullSound = true;
 				break;
 		}
 		pev->noiseMoving = MAKE_STRING( pszSound );
@@ -532,7 +532,7 @@ void CBaseDoor::Precache( void )
 
 	if( !NullSound )
 		PRECACHE_SOUND( pszSound );
-	NullSound = FALSE;
+	NullSound = false;
 
 	if ( FStringNull( pev->noiseArrived ) )
 	{
@@ -566,7 +566,7 @@ void CBaseDoor::Precache( void )
 			case 0:
 			default:
 				pszSound = "common/null.wav";
-				NullSound = TRUE;
+				NullSound = true;
 				break;
 		}
 		pev->noiseArrived = MAKE_STRING( pszSound );
@@ -1315,7 +1315,7 @@ void CMomentaryDoor::Spawn( void )
 void CMomentaryDoor::Precache( void )
 {
 	const char *pszSound;
-	BOOL NullSound = FALSE;
+	bool NullSound = false;
 
 	// set the door's "in-motion" sound
 	switch( m_bMoveSnd )
@@ -1347,14 +1347,14 @@ void CMomentaryDoor::Precache( void )
 	case 0:
 	default:
 		pszSound = "common/null.wav";
-		NullSound = TRUE;
+		NullSound = true;
 		break;
 	}
 
 	if( !NullSound )
 		PRECACHE_SOUND( pszSound );
 	pev->noiseMoving = MAKE_STRING( pszSound );
-	NullSound = FALSE;
+	NullSound = false;
 
 	// set the door's 'reached destination' stop sound
 	switch( m_bStopSnd )
@@ -1386,7 +1386,7 @@ void CMomentaryDoor::Precache( void )
 	case 0:
 	default:
 		pszSound = "common/null.wav";
-		NullSound = TRUE;
+		NullSound = true;
 		break;
 	}
 

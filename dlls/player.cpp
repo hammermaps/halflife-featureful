@@ -2431,7 +2431,7 @@ void CBasePlayer::UpdateStatusBar()
 		ClearMonsterInfoChannel(this);
 	}
 
-	BOOL bForceResend = FALSE;
+	bool bForceResend = false;
 
 	if( strcmp( sbuf0, m_SbarString0 ) )
 	{
@@ -2443,7 +2443,7 @@ void CBasePlayer::UpdateStatusBar()
 		strcpy( m_SbarString0, sbuf0 );
 
 		// make sure everything's resent
-		bForceResend = TRUE;
+		bForceResend = true;
 	}
 
 	if( strcmp( sbuf1, m_SbarString1 ) )
@@ -2456,7 +2456,7 @@ void CBasePlayer::UpdateStatusBar()
 		strcpy( m_SbarString1, sbuf1 );
 
 		// make sure everything's resent
-		bForceResend = TRUE;
+		bForceResend = true;
 	}
 
 	// Check values and send if they don't match

@@ -798,7 +798,7 @@ int CBasePlayerWeapon::AddToPlayerDefault( CBasePlayer *pPlayer )
 
 int CBasePlayerWeapon::UpdateClientData( CBasePlayer *pPlayer )
 {
-	BOOL bSend = FALSE;
+	bool bSend = false;
 	int state = 0;
 	if( pPlayer->m_pActiveItem == this )
 	{
@@ -811,7 +811,7 @@ int CBasePlayerWeapon::UpdateClientData( CBasePlayer *pPlayer )
 	// Forcing send of all data!
 	if( !pPlayer->m_fWeapon )
 	{
-		bSend = TRUE;
+		bSend = true;
 	}
 
 	// This is the current or last weapon, so the state will need to be updated
@@ -819,14 +819,14 @@ int CBasePlayerWeapon::UpdateClientData( CBasePlayer *pPlayer )
 	{
 		if( pPlayer->m_pActiveItem != pPlayer->m_pClientActiveItem )
 		{
-			bSend = TRUE;
+			bSend = true;
 		}
 	}
 
 	// If the ammo, state, or fov has changed, update the weapon
 	if( m_iClip != m_iClientClip || state != m_iClientWeaponState || pPlayer->m_iFOV != pPlayer->m_iClientFOV )
 	{
-		bSend = TRUE;
+		bSend = true;
 	}
 
 	if( bSend )

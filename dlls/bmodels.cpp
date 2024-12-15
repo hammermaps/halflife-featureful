@@ -485,7 +485,7 @@ void CFuncRotating::Spawn()
 void CFuncRotating::Precache( void )
 {
 	const char* szSoundFile = STRING( pev->message );
-	BOOL NullSound = FALSE;
+	bool NullSound = false;
 
 	// set up fan sounds
 	if( !FStringNull( pev->message ) && szSoundFile[0] != '\0' )
@@ -515,7 +515,7 @@ void CFuncRotating::Precache( void )
 		case 0:
 		default:
 			szSoundFile = "common/null.wav";
-			NullSound = TRUE;
+			NullSound = true;
 			break;
 		}
 	}

@@ -866,7 +866,7 @@ void CGargantua::FlameUpdate( void )
 	int		i;
 	TraceResult	trace;
 	Vector		vecStart, angleGun;
-	BOOL		streaks = FALSE;
+	bool		streaks = false;
 
 	for( i = 0; i < 2; i++ )
 	{
@@ -889,7 +889,7 @@ void CGargantua::FlameUpdate( void )
 			if( trace.flFraction != 1.0f && gpGlobals->time > m_streakTime )
 			{
 				StreakSplash( trace.vecEndPos, trace.vecPlaneNormal, 6, 20, 50, 400 );
-				streaks = TRUE;
+				streaks = true;
 				UTIL_DecalTrace( &trace, DECAL_SMALLSCORCH1 + RANDOM_LONG( 0, 2 ) );
 			}
 

@@ -429,7 +429,7 @@ void CBaseMonster::FadeMonster( void )
 //=========================================================
 void CBaseMonster::GibMonster( void )
 {
-	BOOL		gibbed = FALSE;
+	bool gibbed = false;
 
 	EmitSoundScript(NPC::bodySplatSoundScript);
 
@@ -451,7 +451,7 @@ void CBaseMonster::GibMonster( void )
 					CGib::SpawnRandomGibs( pev, GibCount(), gibModel, gibVisual );
 				}
 			}
-			gibbed = TRUE;
+			gibbed = true;
 		}
 		else if (HasAlienGibs())
 		{
@@ -459,12 +459,12 @@ void CBaseMonster::GibMonster( void )
 			{
 				CGib::SpawnRandomGibs( pev, GibCount(), gibModel, gibVisual );
 			}
-			gibbed = TRUE;
+			gibbed = true;
 		}
 		else
 		{
 			CGib::SpawnRandomGibs( pev, GibCount(), gibModel, gibVisual );
-			gibbed = TRUE;
+			gibbed = true;
 		}
 	}
 
@@ -688,17 +688,17 @@ BOOL CBaseMonster::ShouldGibMonster( int iGib )
 
 void CBaseMonster::CallGibMonster( void )
 {
-	BOOL fade = FALSE;
+	bool fade = false;
 
 	if( HasHumanGibs() )
 	{
 		if( violence_hgibs->value == 0.0f )
-			fade = TRUE;
+			fade = true;
 	}
 	else if( HasAlienGibs() )
 	{
 		if( violence_agibs->value == 0.0f )
-			fade = TRUE;
+			fade = true;
 	}
 
 	pev->takedamage = DAMAGE_NO;
@@ -735,9 +735,6 @@ Killed
 */
 void CBaseMonster::Killed( entvars_t *pevInflictor, entvars_t *pevAttacker, int iGib )
 {
-	//unsigned int	cCount = 0;
-	//BOOL		fDone = FALSE;
-
 	if( HasMemory( bits_MEMORY_KILLED ) )
 	{
 		if( ShouldGibMonster( iGib ) )
@@ -769,8 +766,6 @@ void CBaseMonster::Killed( entvars_t *pevInflictor, entvars_t *pevAttacker, int 
 	{
 		pev->health = 0;
 	}
-
-	//pev->enemy = ENT( pevAttacker );//why? (sjb)
 
 	m_IdealMonsterState = MONSTERSTATE_DEAD;
 }

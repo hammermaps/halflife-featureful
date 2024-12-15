@@ -683,7 +683,7 @@ void CFuncTank::Think( void )
 void CFuncTank::TrackTarget( void )
 {
 	TraceResult tr;
-	BOOL updateTime = FALSE;
+	bool updateTime = false;
 	Vector angles, direction, targetPosition, barrelEnd;
 	CBaseEntity *pTarget = NULL;
 
@@ -731,7 +731,7 @@ void CFuncTank::TrackTarget( void )
 		{
 			if( InRange( range ) && pTarget && pTarget->IsAlive() )
 			{
-				updateTime = TRUE;
+				updateTime = true;
 				m_sightOrigin = UpdateTargetPosition( pTarget );
 			}
 		}
@@ -756,12 +756,12 @@ void CFuncTank::TrackTarget( void )
 	if( angles.y > m_yawCenter + m_yawRange )
 	{
 		angles.y = m_yawCenter + m_yawRange;
-		updateTime = FALSE;	// Don't update if you saw the player, but out of range
+		updateTime = false;	// Don't update if you saw the player, but out of range
 	}
 	else if( angles.y < ( m_yawCenter - m_yawRange ) )
 	{
 		angles.y = ( m_yawCenter - m_yawRange );
-		updateTime = FALSE; // Don't update if you saw the player, but out of range
+		updateTime = false; // Don't update if you saw the player, but out of range
 	}
 
 	if( updateTime )
@@ -795,7 +795,7 @@ void CFuncTank::TrackTarget( void )
 
 	if( CanFire() && ( ( fabs( distX ) < m_pitchTolerance && fabs( distY ) < m_yawTolerance ) || ( pev->spawnflags & SF_TANK_LINEOFSIGHT ) ) )
 	{
-		BOOL fire = FALSE;
+		bool fire = false;
 		Vector forward;
 		UTIL_MakeVectorsPrivate( pev->angles, forward, NULL, NULL );
 
@@ -804,10 +804,10 @@ void CFuncTank::TrackTarget( void )
 			float length = direction.Length();
 			UTIL_TraceLine( barrelEnd, barrelEnd + forward * length, dont_ignore_monsters, edict(), &tr );
 			if( tr.pHit == pTarget->edict() )
-				fire = TRUE;
+				fire = true;
 		}
 		else
-			fire = TRUE;
+			fire = true;
 
 		if( fire )
 		{

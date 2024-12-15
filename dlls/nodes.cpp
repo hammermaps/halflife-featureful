@@ -1375,7 +1375,7 @@ int CGraph::RejectInlineLinks( CLink *pLinkPool, FILE *file )
 	int i, j, k;
 	int cRejectedLinks;
 
-	BOOL fRestartLoop;// have to restart the J loop if we eliminate a link.
+	bool fRestartLoop;// have to restart the J loop if we eliminate a link.
 
 	CNode *pSrcNode;
 	CNode *pCheckNode;// the node we are testing for (one of pSrcNode's connections)
@@ -1413,7 +1413,7 @@ int CGraph::RejectInlineLinks( CLink *pLinkPool, FILE *file )
 
 			pLinkPool[pSrcNode->m_iFirstLink + j].m_flWeight = flDistToCheckNode;
 
-			fRestartLoop = FALSE;
+			fRestartLoop = false;
 			for( k = 0; k < pSrcNode->m_cNumLinks && !fRestartLoop; k++ )
 			{
 				if( k == j )
@@ -1445,7 +1445,7 @@ int CGraph::RejectInlineLinks( CLink *pLinkPool, FILE *file )
 
 						cRejectedLinks++;// keeping track of how many links are cut, so that we can return that value.
 
-						fRestartLoop = TRUE;
+						fRestartLoop = true;
 					}
 				}
 			}
@@ -1653,8 +1653,8 @@ void CTestHull::BuildNodeGraph( void )
 	CNode *pSrcNode;// node we're currently working with
 	CNode *pDestNode;// the other node in comparison operations
 
-	BOOL fSkipRemainingHulls;//if smallest hull can't fit, don't check any others
-	BOOL fPairsValid;// are all links in the graph evenly paired?
+	bool fSkipRemainingHulls;//if smallest hull can't fit, don't check any others
+	bool fPairsValid;// are all links in the graph evenly paired?
 
 	int i, j, hull;
 
@@ -1838,7 +1838,7 @@ void CTestHull::BuildNodeGraph( void )
 
 			// if we can't fit a tiny hull through a connection, no other hulls with fit either, so we 
 			// should just fall out of the loop. Do so by setting the SkipRemainingHulls flag.
-			fSkipRemainingHulls = FALSE;
+			fSkipRemainingHulls = false;
 			for( hull = 0; hull < MAX_NODE_HULLS; hull++ )
 			{
 				if( fSkipRemainingHulls && ( hull == NODE_HUMAN_HULL || hull == NODE_LARGE_HULL ) ) // skip the remaining walk hulls
@@ -1942,12 +1942,12 @@ void CTestHull::BuildNodeGraph( void )
 						case NODE_SMALL_HULL:	// if this hull can't fit, nothing can, so drop the connection
 							fprintf( file, "NODE_SMALL_HULL step %d\n", step );
 							pTempPool[pSrcNode->m_iFirstLink + j].m_afLinkInfo &= ~( bits_LINK_SMALL_HULL | bits_LINK_HUMAN_HULL | bits_LINK_LARGE_HULL );
-							fSkipRemainingHulls = TRUE;// don't bother checking larger hulls
+							fSkipRemainingHulls = true;// don't bother checking larger hulls
 							break;
 						case NODE_HUMAN_HULL:
 							fprintf( file, "NODE_HUMAN_HULL step %d\n", step );
 							pTempPool[pSrcNode->m_iFirstLink + j].m_afLinkInfo &= ~( bits_LINK_HUMAN_HULL | bits_LINK_LARGE_HULL );
-							fSkipRemainingHulls = TRUE;// don't bother checking larger hulls
+							fSkipRemainingHulls = true;// don't bother checking larger hulls
 							break;
 						case NODE_LARGE_HULL:
 							fprintf( file, "NODE_LARGE_HULL step %d\n", step );
@@ -2033,7 +2033,7 @@ void CTestHull::BuildNodeGraph( void )
 	//
 	WorldGraph.BuildLinkLookups();
 
-	fPairsValid = TRUE; // assume that the connection pairs are all valid to start
+	fPairsValid = true; // assume that the connection pairs are all valid to start
 
 	fprintf( file, "\n\n-------------------------------------------------------------------------------\n" );
 	fprintf( file, "Link Pairings:\n" );
@@ -2049,7 +2049,7 @@ void CTestHull::BuildNodeGraph( void )
 			WorldGraph.HashSearch( WorldGraph.INodeLink( i, j ), i, iLink );
 			if( iLink < 0 )
 			{
-				fPairsValid = FALSE;// unmatched link pair.
+				fPairsValid = false;// unmatched link pair.
 				fprintf( file, "WARNING: Node %3d does not connect back to Node %3d\n", WorldGraph.INodeLink( i, j ), i );
 			}
 		}
@@ -3237,8 +3237,8 @@ void CGraph::ComputeStaticRoutingTables( void )
 					signed char *p = pRoute;
 					for( int i = 0; i < m_cNodes; i++ )
 					{
-						BOOL CanRepeat = ( ( BestNextNodes[i] == iLastNode ) && cRepeats < 127 );
-						BOOL CanSequence = ( BestNextNodes[i] == i && cSequence < 128 );
+						bool CanRepeat = ( ( BestNextNodes[i] == iLastNode ) && cRepeats < 127 );
+						bool CanSequence = ( BestNextNodes[i] == i && cSequence < 128 );
 
 						if( cRepeats )
 						{
@@ -3487,14 +3487,14 @@ void CGraph::TestRoutingTables( void )
 							if( pMyPath[i] == pMyPath[i + 1] )
 								continue;
 							int iVisitNode;
-							BOOL bFound = FALSE;
+							bool bFound = false;
 							for( int iLink = 0; iLink < m_pNodes[pMyPath[i]].m_cNumLinks; iLink++ )
 							{
 								iVisitNode = INodeLink( pMyPath[i], iLink );
 								if( iVisitNode == pMyPath[i + 1] )
 								{
 									flDistance1 += m_pLinkPool[m_pNodes[pMyPath[i]].m_iFirstLink + iLink].m_flWeight;
-									bFound = TRUE;
+									bFound = true;
 									break;
 								}
 							}
@@ -3512,14 +3512,14 @@ void CGraph::TestRoutingTables( void )
 							if( pMyPath2[i] == pMyPath2[i + 1] )
 								continue;
 							int iVisitNode;
-							BOOL bFound = FALSE;
+							bool bFound = false;
 							for( int iLink = 0; iLink < m_pNodes[pMyPath2[i]].m_cNumLinks; iLink++ )
 							{
 								iVisitNode = INodeLink( pMyPath2[i], iLink );
 								if( iVisitNode == pMyPath2[i + 1] )
 								{
 									flDistance2 += m_pLinkPool[m_pNodes[pMyPath2[i]].m_iFirstLink + iLink].m_flWeight;
-									bFound = TRUE;
+									bFound = true;
 									break;
 								}
 							}

@@ -148,7 +148,7 @@ void CBasePlatTrain::KeyValue( KeyValueData *pkvd )
 void CBasePlatTrain::Precache( void )
 {
 	const char *pszSound;
-	BOOL NullSound = FALSE;
+	bool NullSound = false;
 
 	if (FStringNull(pev->noiseMoving))
 	{
@@ -197,14 +197,14 @@ void CBasePlatTrain::Precache( void )
 		case 0:
 		default:
 			pszSound = "common/null.wav";
-			NullSound = TRUE;
+			NullSound = true;
 			break;
 		}
 
 		if( !NullSound )
 			PRECACHE_SOUND( pszSound );
 		pev->noiseMoving = MAKE_STRING( pszSound );
-		NullSound = FALSE;
+		NullSound = false;
 	}
 	else
 	{
@@ -243,7 +243,7 @@ void CBasePlatTrain::Precache( void )
 		case 0:
 		default:
 			pszSound = "common/null.wav";
-			NullSound = TRUE;
+			NullSound = false;
 			break;
 		}
 
@@ -447,7 +447,7 @@ void CFuncPlat::PlatUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE
 	if( IsTogglePlat() )
 	{
 		// Top is off, bottom is on
-		BOOL on = ( m_toggle_state == TS_AT_BOTTOM ) ? TRUE : FALSE;
+		bool on = ( m_toggle_state == TS_AT_BOTTOM );
 
 		if( !ShouldToggle( useType, on ) )
 			return;
