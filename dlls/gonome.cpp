@@ -50,8 +50,6 @@
 #define GONOME_AE_BITE3			( 21 )
 #define GONOME_AE_BITE4			( 22 )
 
-#define GONOME_SCRIPT_EVENT_SOUND ( 1011 )
-
 //=========================================================
 // Gonome's guts projectile
 //=========================================================
@@ -470,11 +468,6 @@ void CGonome::HandleAnimEvent(MonsterEvent_t *pEvent)
 {
 	switch (pEvent->event)
 	{
-	case GONOME_SCRIPT_EVENT_SOUND:
-		// HACK: prevent playing the sound twice
-		if (m_Activity != ACT_MELEE_ATTACK1)
-			EmitSound( CHAN_BODY, pEvent->options, 1, ATTN_NORM);
-		break;
 	case GONOME_AE_SPIT:
 	{
 		Vector vecArmPos, vecArmAng;

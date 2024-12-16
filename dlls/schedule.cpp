@@ -357,6 +357,8 @@ void CBaseMonster::MaintainSchedule( void )
 	}
 }
 
+extern cvar_t anim_attack_reset_fix;
+
 //=========================================================
 // RunTask 
 //=========================================================
@@ -566,6 +568,8 @@ void CBaseMonster::RunTask( Task_t *pTask )
 			if( m_fSequenceFinished )
 			{
 				m_Activity = ACT_RESET;
+				if (anim_attack_reset_fix.value)
+					m_IdealActivity = ACT_RESET;
 				TaskComplete();
 			}
 			break;
@@ -584,6 +588,8 @@ void CBaseMonster::RunTask( Task_t *pTask )
 			if( m_fSequenceFinished )
 			{
 				m_Activity = ACT_RESET;
+				if (anim_attack_reset_fix.value)
+					m_IdealActivity = ACT_RESET;
 				TaskComplete();
 			}
 			break;

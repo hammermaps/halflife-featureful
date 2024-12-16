@@ -742,6 +742,7 @@ cvar_t satchelfix	= { "satchelfix", "1", FCVAR_SERVER };
 cvar_t explosionfix	= { "explosionfix", "1", FCVAR_SERVER };
 cvar_t monsteryawspeedfix	= { "monsteryawspeedfix", "1", FCVAR_SERVER };
 cvar_t animeventfix = {"animeventfix", "0", FCVAR_SERVER };
+cvar_t anim_attack_reset_fix = {"anim_attack_reset_fix", "1", FCVAR_SERVER };
 cvar_t corpsephysics = { "corpsephysics", "0", FCVAR_SERVER };
 cvar_t pushablemode = { "pushablemode", "0", FCVAR_SERVER };
 cvar_t forcerespawn	= { "mp_forcerespawn","1", FCVAR_SERVER };
@@ -1578,6 +1579,7 @@ void GameDLLInit( void )
 	CVAR_REGISTER( &explosionfix );
 	CVAR_REGISTER( &monsteryawspeedfix );
 	CVAR_REGISTER( &animeventfix );
+	CVAR_REGISTER( &anim_attack_reset_fix );
 	CVAR_REGISTER( &corpsephysics );
 	CVAR_REGISTER( &pushablemode );
 	CVAR_REGISTER( &forcerespawn );
