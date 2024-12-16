@@ -34,11 +34,6 @@
 
 #if FEATURE_GONOME
 
-/* Gonome's model references step sounds but there're none in files.
- * If your mod has suitable sounds for gonome's foot steps, enable this feature to precache step sounds.
- */
-#define FEATURE_GONOME_STEP_SOUNDS 0
-
 #define		GONOME_MELEE_ATTACK_RADIUS		70
 
 //=========================================================
@@ -476,6 +471,7 @@ void CGonome::HandleAnimEvent(MonsterEvent_t *pEvent)
 	switch (pEvent->event)
 	{
 	case GONOME_SCRIPT_EVENT_SOUND:
+		// HACK: prevent playing the sound twice
 		if (m_Activity != ACT_MELEE_ATTACK1)
 			EmitSound( CHAN_BODY, pEvent->options, 1, ATTN_NORM);
 		break;
@@ -674,13 +670,6 @@ void CGonome::Precache()
 
 	RegisterAndPrecacheSoundScript(NPC::swishSoundScript);// because we use the basemonster SWIPE animation event
 
-	PRECACHE_SOUND("gonome/gonome_eat.wav");
-	PRECACHE_SOUND("gonome/gonome_jumpattack.wav");
-#if FEATURE_GONOME_STEP_SOUNDS
-	PRECACHE_SOUND("gonome/gonome_step1.wav");
-	PRECACHE_SOUND("gonome/gonome_step2.wav");
-#endif
-
 	RegisterAndPrecacheSoundScript(idleSoundScript);
 	RegisterAndPrecacheSoundScript(alertSoundScript);
 	RegisterAndPrecacheSoundScript(painSoundScript);
@@ -691,7 +680,19 @@ void CGonome::Precache()
 	RegisterAndPrecacheSoundScript(melee1SoundScript);
 	RegisterAndPrecacheSoundScript(melee2SoundScript);
 
-	PRECACHE_SOUND("gonome/gonome_run.wav");
+	if (!ShouldAutoPrecacheSounds())
+	{
+		// Used in model from Opposing Force
+		PRECACHE_SOUND("gonome/gonome_idle1.wav");
+		PRECACHE_SOUND("gonome/gonome_melee1.wav");
+		PRECACHE_SOUND("gonome/gonome_melee2.wav");
+		PRECACHE_SOUND("gonome/gonome_death2.wav");
+		PRECACHE_SOUND("gonome/gonome_death3.wav");
+		PRECACHE_SOUND("gonome/gonome_death4.wav");
+		PRECACHE_SOUND("gonome/gonome_run.wav");
+		PRECACHE_SOUND("gonome/gonome_eat.wav");
+		PRECACHE_SOUND("gonome/gonome_jumpattack.wav");
+	}
 }
 
 //=========================================================

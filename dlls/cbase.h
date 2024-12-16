@@ -314,6 +314,8 @@ public:
 	const EntTemplate* GetMyEntTemplate();
 	string_t GetMyTemplateName();
 	const EntTemplate* GetOwnerEntTemplate();
+	bool ShouldAutoPrecacheSounds();
+
 	void SetMyHealth(const float defaultHealth);
 	const Visual* MyOwnVisual();
 	const char* MyOwnModel(const char* defaultModel);

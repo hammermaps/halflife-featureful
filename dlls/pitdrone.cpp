@@ -648,21 +648,29 @@ void CPitdrone::Precache()
 	RegisterAndPrecacheSoundScript(attackMissSoundScript, NPC::attackMissSoundScript);
 	RegisterAndPrecacheSoundScript(attackHitSoundScript);
 
-	PRECACHE_SOUND("pitdrone/pit_drone_melee_attack1.wav");
-	PRECACHE_SOUND("pitdrone/pit_drone_melee_attack2.wav");
+	if (!ShouldAutoPrecacheSounds())
+	{
+		// Used in model from Opposing Force
+		PRECACHE_SOUND("pitdrone/pit_drone_melee_attack1.wav");
+		PRECACHE_SOUND("pitdrone/pit_drone_melee_attack2.wav");
 
-	PRECACHE_SOUND("pitdrone/pit_drone_attack_spike1.wav");
-	PRECACHE_SOUND("pitdrone/pit_drone_attack_spike2.wav");
+		PRECACHE_SOUND("pitdrone/pit_drone_attack_spike1.wav");
+		//PRECACHE_SOUND("pitdrone/pit_drone_attack_spike2.wav");
 
-	PRECACHE_SOUND("pitdrone/pit_drone_communicate1.wav");
-	PRECACHE_SOUND("pitdrone/pit_drone_communicate2.wav");
-	PRECACHE_SOUND("pitdrone/pit_drone_communicate3.wav");
-	PRECACHE_SOUND("pitdrone/pit_drone_communicate4.wav");
+		PRECACHE_SOUND("pitdrone/pit_drone_die1.wav");
+		PRECACHE_SOUND("pitdrone/pit_drone_die2.wav");
+		PRECACHE_SOUND("pitdrone/pit_drone_die3.wav");
 
-	PRECACHE_SOUND("pitdrone/pit_drone_eat.wav");
-	PRECACHE_SOUND("pitdrone/pit_drone_hunt1.wav");
-	PRECACHE_SOUND("pitdrone/pit_drone_hunt2.wav");
-	PRECACHE_SOUND("pitdrone/pit_drone_hunt3.wav");
+		//PRECACHE_SOUND("pitdrone/pit_drone_communicate1.wav");
+		//PRECACHE_SOUND("pitdrone/pit_drone_communicate2.wav");
+		//PRECACHE_SOUND("pitdrone/pit_drone_communicate3.wav");
+		//PRECACHE_SOUND("pitdrone/pit_drone_communicate4.wav");
+
+		PRECACHE_SOUND("pitdrone/pit_drone_eat.wav");
+		//PRECACHE_SOUND("pitdrone/pit_drone_hunt1.wav");
+		//PRECACHE_SOUND("pitdrone/pit_drone_hunt2.wav");
+		PRECACHE_SOUND("pitdrone/pit_drone_hunt3.wav");
+	}
 
 	UTIL_PrecacheOther("pitdronespike", GetProjectileOverrides());
 }

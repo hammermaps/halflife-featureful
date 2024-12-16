@@ -1169,6 +1169,14 @@ const EntTemplate* CBaseEntity::GetOwnerEntTemplate()
 	return GetCacheableEntTemplate(pev, m_ownerEntTemplate, m_cachedOwnerEntTemplate, m_ownerEntTemplateChecked, false);
 }
 
+bool CBaseEntity::ShouldAutoPrecacheSounds()
+{
+	const EntTemplate* entTemplate = GetMyEntTemplate();
+	if (entTemplate)
+		return entTemplate->AutoPrecacheSounds();
+	return false;
+}
+
 void CBaseEntity::SetMyHealth(const float defaultHealth)
 {
 	if (!pev->health) {

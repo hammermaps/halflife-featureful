@@ -433,9 +433,6 @@ public:
 	static const NamedSoundScript footstepSoundScript;
 	static const NamedSoundScript beamAttackSoundScript;
 
-	static const char* pComSounds[];
-	static const char* pGruntSounds[];
-
 	static const NamedVisual beamVisual;
 	static const NamedVisual chargeBeamVisual;
 	static const NamedVisual deathBeamVisual;
@@ -443,8 +440,6 @@ public:
 	void UpdateBeamAndBoltPositions();
 	void ClearBeams();
 	Vector BoltPosition();
-protected:
-	void PrecacheImpl(const char* modelName);
 };
 
 LINK_ENTITY_TO_CLASS(monster_alien_voltigore, CVoltigore)
@@ -497,19 +492,6 @@ const NamedSoundScript CVoltigore::beamAttackSoundScript = {
 	ATTN_NORM,
 	IntRange(140, 160),
 	"Voltigore.BeamAttack"
-};
-
-const char* CVoltigore::pComSounds[] =
-{
-	"voltigore/voltigore_communicate1.wav",
-	"voltigore/voltigore_communicate2.wav",
-	"voltigore/voltigore_communicate3.wav",
-};
-
-const char* CVoltigore::pGruntSounds[] =
-{
-	"voltigore/voltigore_run_grunt1.wav",
-	"voltigore/voltigore_run_grunt2.wav",
 };
 
 const NamedVisual CVoltigore::beamVisual = BuildVisual("Voltigore.Beam")
@@ -857,7 +839,7 @@ void CVoltigore::Spawn()
 //=========================================================
 void CVoltigore::Precache()
 {
-	PrecacheImpl("models/voltigore.mdl");
+	PrecacheMyModel("models/voltigore.mdl");
 	PrecacheMyGibModel("models/vgibs.mdl");
 
 	RegisterAndPrecacheSoundScript(idleSoundScript);
@@ -868,20 +850,25 @@ void CVoltigore::Precache()
 	RegisterAndPrecacheSoundScript(attackMissSoundScript, NPC::attackMissSoundScript);
 	RegisterAndPrecacheSoundScript(footstepSoundScript);
 	RegisterAndPrecacheSoundScript(beamAttackSoundScript);
-}
 
-void CVoltigore::PrecacheImpl(const char *modelName)
-{
-	PrecacheMyModel(modelName);
+	if (!ShouldAutoPrecacheSounds())
+	{
+		// Used in model from Opposing Force
+		PRECACHE_SOUND("voltigore/voltigore_footstep1.wav");
+		PRECACHE_SOUND("voltigore/voltigore_footstep2.wav");
+		PRECACHE_SOUND("voltigore/voltigore_footstep3.wav");
 
-	PRECACHE_SOUND_ARRAY(pComSounds);
-	PRECACHE_SOUND_ARRAY(pGruntSounds);
+		PRECACHE_SOUND("voltigore/voltigore_run_grunt1.wav");
+		PRECACHE_SOUND("voltigore/voltigore_run_grunt2.wav");
+		PRECACHE_SOUND("voltigore/voltigore_attack_melee1.wav");
+		PRECACHE_SOUND("voltigore/voltigore_attack_melee2.wav");
+		PRECACHE_SOUND("voltigore/voltigore_eat.wav");
+		PRECACHE_SOUND("voltigore/voltigore_attack_shock.wav");
+		PRECACHE_SOUND("voltigore/voltigore_communicate3.wav");
 
-	PRECACHE_SOUND("voltigore/voltigore_attack_melee1.wav");
-	PRECACHE_SOUND("voltigore/voltigore_attack_melee2.wav");
-
-	PRECACHE_SOUND("voltigore/voltigore_attack_shock.wav");
-	PRECACHE_SOUND("voltigore/voltigore_eat.wav");
+		PRECACHE_SOUND("voltigore/voltigore_pain1.wav");
+		PRECACHE_SOUND("voltigore/voltigore_pain2.wav");
+	}
 
 	RegisterVisual(chargeBeamVisual);
 	RegisterVisual(deathBeamVisual);
@@ -1215,7 +1202,7 @@ void CBabyVoltigore::Spawn()
 //=========================================================
 void CBabyVoltigore::Precache(void)
 {
-	PrecacheImpl("models/baby_voltigore.mdl");
+	PrecacheMyModel("models/baby_voltigore.mdl");
 
 	SoundScriptParamOverride voiceParamOverride;
 	voiceParamOverride.OverridePitchRelative(180);

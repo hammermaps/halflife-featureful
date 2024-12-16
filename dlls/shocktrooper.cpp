@@ -492,7 +492,10 @@ void CShockTrooper::Precache()
 	PrecacheMyModel("models/strooper.mdl");
 	PrecacheMyGibModel(DefaultGibModel());
 	RegisterVisual(muzzleFlashVisual);
-	PRECACHE_SOUND("shocktrooper/shock_trooper_attack.wav");
+	if (!ShouldAutoPrecacheSounds())
+	{
+		PRECACHE_SOUND("shocktrooper/shock_trooper_attack.wav");
+	}
 
 	RegisterAndPrecacheSoundScript(painSoundScript);
 	RegisterAndPrecacheSoundScript(dieSoundScript);
