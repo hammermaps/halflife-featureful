@@ -39,6 +39,7 @@
 #include "common_soundscripts.h"
 #include "visuals_utils.h"
 #include "classify.h"
+#include "studio.h"
 
 #define MONSTER_CUT_CORNER_DIST		8 // 8 means the monster's bounding box is contained without the box of the node in WC
 
@@ -3436,7 +3437,7 @@ void CBaseMonster::ReportAIState( ALERT_TYPE level )
 	if ( HasMemory( bits_MEMORY_PROVOKED ) )
 		ALERT(level, "Has MEMORY_PROVOKED, ");
 	else if ( HasMemory( bits_MEMORY_SUSPICIOUS ) )
-		ALERT(level, "Has MEMORY_SUSPICIOUS");
+		ALERT(level, "Has MEMORY_SUSPICIOUS, ");
 
 	int i = 0;
 	while( activity_map[i].type != 0 )
@@ -3447,6 +3448,13 @@ void CBaseMonster::ReportAIState( ALERT_TYPE level )
 			break;
 		}
 		i++;
+	}
+	void *pmodel = GET_MODEL_PTR( ENT( pev ) );
+	studiohdr_t *pstudiohdr = (studiohdr_t *)pmodel;
+	if (pev->sequence >= 0 && pev->sequence < pstudiohdr->numseq)
+	{
+		mstudioseqdesc_t *pseqdesc = (mstudioseqdesc_t *)( (byte *)pstudiohdr + pstudiohdr->seqindex );
+		ALERT(at_console, "Playing sequence %s (index %d, frame %g), ", pseqdesc[pev->sequence].label, pev->sequence, pev->frame);
 	}
 
 	if( m_pSchedule )
@@ -3514,6 +3522,8 @@ void CBaseMonster::ReportAIState( ALERT_TYPE level )
 
 	if (pev->scale)
 		ALERT(level, "Scale: %g. ", pev->scale);
+
+	ALERT(level, "Illumination: %d. ", GETENTITYILLUM(edict()));
 
 	const char* targetForGrapple = nullptr;
 	switch (SizeForGrapple()) {
