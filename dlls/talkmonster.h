@@ -131,7 +131,7 @@ class CTalkMonster : public CFollowingMonster
 {
 public:
 	void			TalkInit( void );				
-	CBaseEntity		*FindNearestFriend(BOOL fPlayer);
+	CBaseEntity		*FindNearestFriend(bool fPlayer);
 	float			TargetDistance( void );
 	void			StopTalking( void ) { SentenceStop(); }
 	
@@ -170,16 +170,16 @@ public:
 	virtual void	MakeIdleStatement( void );
 	float			RandomSentenceDuraion( void );
 	bool			GotIdleSpeakChance();
-	int				FIdleSpeak( void );
-	int				FIdleStare( void );
-	int				FIdleHello( void );
-	int				FOkToSpeak( int speakFlags = SPEAK_NORMAL_CHECK );
+	bool			FIdleSpeak( void );
+	bool			FIdleStare( void );
+	bool			FIdleHello( void );
+	bool			FOkToSpeak( int speakFlags = SPEAK_NORMAL_CHECK );
 	void			TrySmellTalk( void );
-	CBaseEntity		*EnumFriends( CBaseEntity *pentPrevious, int listNumber, BOOL bTrace );
-	CBaseEntity		*EnumFriends(CBaseEntity *pentPrevious, const char* pszFriend, BOOL bTrace );
+	CBaseEntity		*EnumFriends( CBaseEntity *pentPrevious, int listNumber, bool bTrace );
+	CBaseEntity		*EnumFriends(CBaseEntity *pentPrevious, const char* pszFriend, bool bTrace );
 	void			AlertFriends( void );
 	void			ShutUpFriends( void );
-	BOOL			IsTalking( void );
+	bool			IsTalking( void );
 	void			Talk( float flDuration );
 	virtual const char* DefaultSentenceGroup(int group) { return NULL; }
 	virtual const char* SentenceGroup(int group);

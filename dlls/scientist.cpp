@@ -1273,7 +1273,7 @@ public:
 	Vector DefaultMinHullSize() { return Vector(-14.0f, -14.0f, 0.0f); }
 	Vector DefaultMaxHullSize() { return Vector(14.0f, 14.0f, 36.0f); }
 
-	int FIdleSpeak( void );
+	bool FIdleSpeak( void );
 	int m_baseSequence;	
 	int m_headTurn;
 	float m_flResponseDelay;
@@ -1388,7 +1388,7 @@ void CSittingScientist::SittingThink( void )
 	// try to greet player
 	if( FIdleHello() )
 	{
-		pent = FindNearestFriend( TRUE );
+		pent = FindNearestFriend( true );
 		if( pent )
 		{
 			float yaw = VecToYaw( pent->pev->origin - pev->origin ) - pev->angles.y;
@@ -1427,9 +1427,9 @@ void CSittingScientist::SittingThink( void )
 			// turn towards player or nearest friend and speak
 
 			if( !FBitSet( m_bitsSaid, bit_saidHelloPlayer ) )
-				pent = FindNearestFriend( TRUE );
+				pent = FindNearestFriend( true );
 			else
-				pent = FindNearestFriend( FALSE );
+				pent = FindNearestFriend( false );
 
 			if( !FIdleSpeak() || !pent )
 			{
@@ -1492,16 +1492,16 @@ bool CSittingScientist::SetAnswerQuestion( CTalkMonster *pSpeaker )
 // FIdleSpeak
 // ask question of nearby friend, or make statement
 //=========================================================
-int CSittingScientist::FIdleSpeak( void )
+bool CSittingScientist::FIdleSpeak( void )
 { 
 	// try to start a conversation, or make statement
 	if( !FOkToSpeak() )
-		return FALSE;
+		return false;
 
 	// if there is a friend nearby to speak to, play sentence, set friend's response time, return
 
 	// try to talk to any standing or sitting scientists nearby
-	CBaseEntity *pFriend = FindNearestFriend( FALSE );
+	CBaseEntity *pFriend = FindNearestFriend( false );
 
 	if( pFriend && RANDOM_LONG( 0, 1 ) )
 	{
@@ -1515,19 +1515,19 @@ int CSittingScientist::FIdleSpeak( void )
 				pTalkMonster->m_flStopTalkTime = m_flStopTalkTime;
 		}
 		IdleHeadTurn( pFriend->pev->origin );
-		return TRUE;
+		return true;
 	}
 
 	// otherwise, play an idle statement
 	if( RANDOM_LONG( 0, 1 ) )
 	{
 		PlaySentence( SentenceGroup(TLK_PIDLE), RANDOM_FLOAT( 4.8, 5.2 ), VOL_NORM, ATTN_IDLE);
-		return TRUE;
+		return true;
 	}
 
 	// never spoke
 	CTalkMonster::g_talkWaitTime = 0;
-	return FALSE;
+	return false;
 }
 
 #if FEATURE_CLEANSUIT_SCIENTIST

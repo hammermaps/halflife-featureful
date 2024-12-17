@@ -80,10 +80,10 @@ public:
 	void IdleHeadTurn( Vector &vecFriend );
 
 	// Following related
-	BOOL	CanFollow( void );
-	BOOL	AbleToFollow();
-	BOOL	IsFollowingPlayer( CBaseEntity* pLeader );
-	BOOL	IsFollowingPlayer( void );
+	bool	CanFollow( void );
+	bool	AbleToFollow();
+	bool	IsFollowingPlayer( CBaseEntity* pLeader );
+	bool	IsFollowingPlayer( void );
 	virtual	CBaseEntity* FollowedPlayer();
 	virtual void ClearFollowedPlayer();
 	virtual void StopFollowing(BOOL clearSchedule, bool saySentence = true );

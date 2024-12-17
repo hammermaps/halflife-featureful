@@ -614,32 +614,32 @@ void CFollowingMonster::LimitFollowers( CBaseEntity *pPlayer, int maxFollowers )
 	return;
 }
 
-BOOL CFollowingMonster::CanFollow( void )
+bool CFollowingMonster::CanFollow( void )
 {
 	return AbleToFollow() && !IsFollowingPlayer();
 }
 
-BOOL CFollowingMonster::AbleToFollow()
+bool CFollowingMonster::AbleToFollow()
 {
 	if( m_MonsterState == MONSTERSTATE_SCRIPT || m_IdealMonsterState == MONSTERSTATE_SCRIPT )
 	{
 		if( !m_pCine )
-			return FALSE;
+			return false;
 		if( !m_pCine->CanInterruptByPlayerCall() )
-			return FALSE;
+			return false;
 	}
 
 	if( !IsFullyAlive() )
-		return FALSE;
-	return TRUE;
+		return false;
+	return true;
 }
 
-BOOL CFollowingMonster::IsFollowingPlayer(CBaseEntity *pLeader)
+bool CFollowingMonster::IsFollowingPlayer(CBaseEntity *pLeader)
 {
 	return FollowedPlayer() == pLeader;
 }
 
-BOOL CFollowingMonster::IsFollowingPlayer()
+bool CFollowingMonster::IsFollowingPlayer()
 {
 	return FollowedPlayer() != 0;
 }

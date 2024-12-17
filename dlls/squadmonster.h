@@ -79,8 +79,8 @@ public:
 	void VacateSlot( void );
 	void ScheduleChange( void );
 	void OnDying();
-	BOOL OccupySlot( int iDesiredSlot );
-	BOOL NoFriendlyFire( void );
+	bool OccupySlot( int iDesiredSlot );
+	bool NoFriendlyFire( void );
 
 	// squad functions still left in base class
 	CSquadMonster *MySquadLeader()
@@ -97,21 +97,21 @@ public:
 		else
 			return m_hSquadMember[i].Entity<CSquadMonster>();
 	}
-	int InSquad( void ) { return m_hSquadLeader != 0; }
-	int IsLeader( void ) { return m_hSquadLeader == this; }
+	bool InSquad( void ) { return m_hSquadLeader != 0; }
+	bool IsLeader( void ) { return m_hSquadLeader == this; }
 	int SquadJoin( int searchRadius );
 	int SquadRecruit( int searchRadius, int maxMembers );
 	int SquadCount( void );
 	void SquadRemove( CSquadMonster *pRemove );
 	void SquadUnlink( void );
-	BOOL SquadAdd( CSquadMonster *pAdd );
+	bool SquadAdd( CSquadMonster *pAdd );
 	void SquadDisband( void );
 	void SquadAddConditions( int iConditions );
 	void SquadMakeEnemy( CBaseEntity *pEnemy );
 	void SquadPasteEnemyInfo( void );
 	void SquadCopyEnemyInfo( void );
-	BOOL SquadEnemySplit( void );
-	BOOL AllyMonsterInRange( const Vector &vecLocation, float flDist );
+	bool SquadEnemySplit( void );
+	bool AllyMonsterInRange( const Vector &vecLocation, float flDist );
 
 	virtual CSquadMonster *MySquadMonsterPointer( void ) { return this; }
 
