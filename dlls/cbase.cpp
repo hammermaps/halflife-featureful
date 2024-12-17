@@ -1442,14 +1442,14 @@ bool CBaseEntity::IsInWorld( void )
 	return true;
 }
 
-int CBaseEntity::ShouldToggle( USE_TYPE useType, BOOL currentState )
+bool CBaseEntity::ShouldToggle( USE_TYPE useType, bool currentState )
 {
 	if( useType != USE_TOGGLE && useType != USE_SET )
 	{
 		if( ( currentState && useType == USE_ON ) || ( !currentState && useType == USE_OFF ) )
-			return 0;
+			return false;
 	}
-	return 1;
+	return true;
 }
 
 int CBaseEntity::DamageDecal( int bitsDamageType )

@@ -1419,7 +1419,7 @@ void CSprite::AttachToEntity()
 
 void CSprite::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 {
-	int on = pev->effects != EF_NODRAW;
+	bool on = pev->effects != EF_NODRAW;
 	if( ShouldToggle( useType, on ) )
 	{
 		if( on )

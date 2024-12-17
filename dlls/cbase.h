@@ -345,7 +345,7 @@ public:
 	void EXPORT SUB_StartFadeOut ( void );
 	void EXPORT SUB_FadeOut( void );
 	void EXPORT SUB_CallUseToggle( void ) { this->Use( this, this, USE_TOGGLE, 0 ); }
-	int ShouldToggle( USE_TYPE useType, BOOL currentState );
+	bool ShouldToggle( USE_TYPE useType, bool currentState );
 	void FireBullets( ULONG cShots, Vector  vecSrc, Vector	vecDirShooting,	Vector	vecSpread, float flDistance, int iBulletType, int iTracerFreq = 4, int iDamage = 0, entvars_t *pevAttacker = NULL  );
 	Vector FireBulletsPlayer( ULONG cShots, Vector  vecSrc, Vector	vecDirShooting,	Vector	vecSpread, float flDistance, int iBulletType, int iTracerFreq = 4, int iDamage = 0, entvars_t *pevAttacker = NULL, int shared_rand = 0 );
 

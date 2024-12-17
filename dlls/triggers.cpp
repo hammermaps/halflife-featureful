@@ -4133,7 +4133,7 @@ public:
 
 void CDisplacerTarget::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
 {
-	const BOOL enabled = !FBitSet(pev->spawnflags, SF_DISPLACER_TARGET_DISABLED);
+	const bool enabled = !FBitSet(pev->spawnflags, SF_DISPLACER_TARGET_DISABLED);
 	if (!ShouldToggle(useType, enabled))
 		return;
 	if (enabled)
