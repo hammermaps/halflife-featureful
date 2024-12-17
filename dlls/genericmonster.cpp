@@ -38,7 +38,7 @@ public:
 	int DefaultClassify( void );
 	void HandleAnimEvent( MonsterEvent_t *pEvent );
 	int DefaultISoundMask( void );
-	void PlayScriptedSentence( const char *pszSentence, float duration, float volume, float attenuation, BOOL bConcurrent, CBaseEntity *pListener );
+	void PlayScriptedSentence( const char *pszSentence, float duration, float volume, float attenuation, bool bConcurrent, CBaseEntity *pListener ) override;
 	void IdleHeadTurn( Vector &vecFriend );
 	void MonsterThink();
 	void Killed( entvars_t *pevInflictor, entvars_t *pevAttacker, int iGib );
@@ -174,7 +174,7 @@ void CGenericMonster::Precache()
 	PrecacheMyGibModel();
 }
 
-void CGenericMonster::PlayScriptedSentence( const char *pszSentence, float duration, float volume, float attenuation, BOOL bConcurrent, CBaseEntity *pListener )
+void CGenericMonster::PlayScriptedSentence(const char *pszSentence, float duration, float volume, float attenuation, bool bConcurrent, CBaseEntity *pListener )
 {
 	m_talkTime = gpGlobals->time + duration;
 	PlaySentence( pszSentence, duration, volume, attenuation, true );

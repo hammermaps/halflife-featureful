@@ -146,7 +146,7 @@ public:
 	bool			IsFriendWithPlayerBeforeProvoked();
 	virtual bool	CanPlaySentence( bool fDisregardState ) override;
 	virtual bool PlaySentence( const char *pszSentence, float duration, float volume, float attenuation, bool subtitle = false );
-	void			PlayScriptedSentence( const char *pszSentence, float duration, float volume, float attenuation, BOOL bConcurrent, CBaseEntity *pListener );
+	void			PlayScriptedSentence(const char *pszSentence, float duration, float volume, float attenuation, bool bConcurrent, CBaseEntity *pListener ) override;
 	void			PainSound();
 	void			KeyValue( KeyValueData *pkvd );
 

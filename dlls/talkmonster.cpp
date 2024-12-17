@@ -1145,7 +1145,7 @@ bool CTalkMonster::FIdleSpeak( void )
 	return false;
 }
 
-void CTalkMonster::PlayScriptedSentence( const char *pszSentence, float duration, float volume, float attenuation, BOOL bConcurrent, CBaseEntity *pListener )
+void CTalkMonster::PlayScriptedSentence( const char *pszSentence, float duration, float volume, float attenuation, bool bConcurrent, CBaseEntity *pListener )
 {
 	if( !bConcurrent )
 		ShutUpFriends();

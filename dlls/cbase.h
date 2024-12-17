@@ -613,7 +613,7 @@ public:
 	virtual float	GetDelay( void ) { return m_flWait; }
 
 	virtual bool PlaySentence( const char *pszSentence, float duration, float volume, float attenuation, bool subtitle );
-	virtual void PlayScriptedSentence( const char *pszSentence, float duration, float volume, float attenuation, BOOL bConcurrent, CBaseEntity *pListener );
+	virtual void PlayScriptedSentence( const char *pszSentence, float duration, float volume, float attenuation, bool bConcurrent, CBaseEntity *pListener );
 	virtual void SentenceStop( void );
 	virtual bool IsAllowedToSpeak( void ) { return false; }
 
