@@ -120,10 +120,10 @@ void CBaseMonster::StartMonster( void ) { }
 int CBaseMonster::IRelationship( CBaseEntity *pTarget ) { return 0; }
 bool CBaseMonster::BuildNearestRoute( Vector vecThreat, Vector vecViewOffset, float flMinDist, float flMaxDist ) { return false; }
 CBaseEntity *CBaseMonster::BestVisibleEnemy( void ) { return NULL; }
-BOOL CBaseMonster::FInViewCone( CBaseEntity *pEntity ) { return FALSE; }
-BOOL CBaseMonster::FInViewCone( Vector *pOrigin ) { return FALSE; }
-BOOL CBaseEntity::FVisible( CBaseEntity *pEntity ) { return FALSE; }
-BOOL CBaseEntity::FVisible( const Vector &vecOrigin ) { return FALSE; }
+bool CBaseMonster::FInViewCone( CBaseEntity *pEntity ) { return false; }
+bool CBaseMonster::FInViewCone( Vector *pOrigin ) { return false; }
+bool CBaseEntity::FVisible( CBaseEntity *pEntity ) { return false; }
+bool CBaseEntity::FVisible( const Vector &vecOrigin ) { return false; }
 float CBaseMonster::ChangeYaw( int yawSpeed ) { return 0; }
 int CBaseAnimating::LookupActivity( int activity ) { return 0; }
 void CBaseMonster::HandleAnimEvent( MonsterEvent_t *pEvent ) { }

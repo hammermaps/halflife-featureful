@@ -45,8 +45,8 @@ public:
 		pev->absmin = pev->origin + Vector( -400, -400, 0 );
 		pev->absmax = pev->origin + Vector( 400, 400, 850 );
 	}
-	BOOL FVisible(CBaseEntity* pEntity);
-	BOOL FVisible(const Vector& vecOrigin);
+	bool FVisible(CBaseEntity* pEntity) override;
+	bool FVisible(const Vector& vecOrigin) override;
 
 	void IdleSound(void);
 	void AlertSound(void);
@@ -389,13 +389,13 @@ void CPitWorm::Precache()
 	PRECACHE_MODEL("sprites/tele1.spr");
 }
 
-BOOL CPitWorm::FVisible(CBaseEntity *pEntity)
+bool CPitWorm::FVisible(CBaseEntity *pEntity)
 {
 	if( FBitSet( pEntity->pev->flags, FL_NOTARGET ) )
-		return FALSE;
+		return false;
 
 	if( LineOfSightSeparatedByWaterSurface(pev->waterlevel, pEntity->pev->waterlevel) )
-		return FALSE;
+		return false;
 
 	TraceResult tr;
 	Vector vecLookerOrigin;
@@ -407,7 +407,7 @@ BOOL CPitWorm::FVisible(CBaseEntity *pEntity)
 	return tr.flFraction == 1.0;
 }
 
-BOOL CPitWorm::FVisible(const Vector& vecOrigin)
+bool CPitWorm::FVisible(const Vector& vecOrigin)
 {
 	TraceResult tr;
 	Vector vecLookerOrigin;

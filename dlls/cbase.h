@@ -440,8 +440,8 @@ public:
 
 	virtual int Illumination() { return GETENTITYILLUM( ENT( pev ) ); };
 
-	virtual	BOOL FVisible( CBaseEntity *pEntity );
-	virtual	BOOL FVisible( const Vector &vecOrigin );
+	virtual	bool FVisible( CBaseEntity *pEntity );
+	virtual	bool FVisible( const Vector &vecOrigin );
 
 	virtual void AddFloatPoints( float score, bool bAllowNegativeScore ) {}
 	virtual int DefaultSizeForGrapple() { return GRAPPLE_NOT_A_TARGET; }

@@ -131,7 +131,7 @@ public:
 	int IgnoreConditions();
 	int DefaultISoundMask();
 	float HearingSensitivity();
-	BOOL FInViewCone( CBaseEntity *pEntity );
+	bool FInViewCone( CBaseEntity *pEntity ) override;
 	void EXPORT TouchSleeping( CBaseEntity* pToucher );
 	void EXPORT UseSleeping( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 
@@ -1432,10 +1432,10 @@ float CHoundeye::HearingSensitivity()
 	return CSquadMonster::HearingSensitivity();
 }
 
-BOOL CHoundeye::FInViewCone(CBaseEntity *pEntity)
+bool CHoundeye::FInViewCone(CBaseEntity *pEntity)
 {
 	if (m_iAsleep == HOUNDEYE_DEEP_SLEEPING)
-		return FALSE;
+		return false;
 	return CSquadMonster::FInViewCone(pEntity);
 }
 

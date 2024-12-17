@@ -1319,7 +1319,7 @@ CBaseEntity* CBaseMonster::CheckTraceHullAttack( float flDist, int iDamage, int 
 // the caller's forward view cone. The dot product is performed
 // in 2d, making the view cone infinitely tall. 
 //=========================================================
-BOOL CBaseMonster::FInViewCone( CBaseEntity *pEntity )
+bool CBaseMonster::FInViewCone( CBaseEntity *pEntity )
 {
 	Vector2D	vec2LOS;
 	float	flDot;
@@ -1333,11 +1333,11 @@ BOOL CBaseMonster::FInViewCone( CBaseEntity *pEntity )
 
 	if( flDot > m_flFieldOfView )
 	{
-		return TRUE;
+		return true;
 	}
 	else
 	{
-		return FALSE;
+		return false;
 	}
 }
 
@@ -1346,7 +1346,7 @@ BOOL CBaseMonster::FInViewCone( CBaseEntity *pEntity )
 // the caller's forward view cone. The dot product is performed
 // in 2d, making the view cone infinitely tall. 
 //=========================================================
-BOOL CBaseMonster::FInViewCone( Vector *pOrigin )
+bool CBaseMonster::FInViewCone( Vector *pOrigin )
 {
 	Vector2D	vec2LOS;
 	float		flDot;
@@ -1360,11 +1360,11 @@ BOOL CBaseMonster::FInViewCone( Vector *pOrigin )
 
 	if( flDot > m_flFieldOfView )
 	{
-		return TRUE;
+		return true;
 	}
 	else
 	{
-		return FALSE;
+		return false;
 	}
 }
 
@@ -1372,23 +1372,23 @@ BOOL CBaseMonster::FInViewCone( Vector *pOrigin )
 // FVisible - returns true if a line can be traced from
 // the caller's eyes to the target
 //=========================================================
-BOOL CBaseEntity::FVisible( CBaseEntity *pEntity )
+bool CBaseEntity::FVisible( CBaseEntity *pEntity )
 {
 	TraceResult tr;
 	Vector		vecLookerOrigin;
 	Vector		vecTargetOrigin;
 
 	if( !pEntity )
-		return FALSE;
+		return false;
 	if( !pEntity->pev )
-		return FALSE;
+		return false;
 
 	if( FBitSet( pEntity->pev->flags, FL_NOTARGET ) )
-		return FALSE;
+		return false;
 
 	// don't look through water
 	if( LineOfSightSeparatedByWaterSurface(pev->waterlevel, pEntity->pev->waterlevel) )
-		return FALSE;
+		return false;
 
 	vecLookerOrigin = pev->origin + pev->view_ofs;//look through the caller's 'eyes'
 	vecTargetOrigin = pEntity->EyePosition();
@@ -1397,11 +1397,11 @@ BOOL CBaseEntity::FVisible( CBaseEntity *pEntity )
 
 	if( tr.flFraction != 1.0f )
 	{
-		return FALSE;// Line of sight is not established
+		return false;// Line of sight is not established
 	}
 	else
 	{
-		return TRUE;// line of sight is valid.
+		return true;// line of sight is valid.
 	}
 }
 
@@ -1409,7 +1409,7 @@ BOOL CBaseEntity::FVisible( CBaseEntity *pEntity )
 // FVisible - returns true if a line can be traced from
 // the caller's eyes to the target vector
 //=========================================================
-BOOL CBaseEntity::FVisible( const Vector &vecOrigin )
+bool CBaseEntity::FVisible( const Vector &vecOrigin )
 {
 	TraceResult tr;
 	Vector		vecLookerOrigin;
@@ -1420,11 +1420,11 @@ BOOL CBaseEntity::FVisible( const Vector &vecOrigin )
 
 	if( tr.flFraction != 1.0f )
 	{
-		return FALSE;// Line of sight is not established
+		return false;// Line of sight is not established
 	}
 	else
 	{
-		return TRUE;// line of sight is valid.
+		return true;// line of sight is valid.
 	}
 }
 
