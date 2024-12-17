@@ -276,9 +276,9 @@ public:
 	virtual Vector BodyTarget( const Vector &posSrc ) { return Center( ) + pev->view_ofs * RANDOM_FLOAT( 0.5, 1.1 ); };		// position to shoot at
 	virtual BOOL IsAlive( void ) { return IsFullyAlive(); }
 	virtual BOOL ShouldFadeOnDeath( void ) { return FALSE; }
-	virtual	BOOL IsPlayer( void ) { return TRUE; }			// Spectators should return FALSE for this, they aren't "players" as far as game logic is concerned
+	virtual	bool IsPlayer( void ) override { return true; }			// Spectators should return FALSE for this, they aren't "players" as far as game logic is concerned
 
-	virtual BOOL IsNetClient( void ) { return TRUE; }		// Bots should return FALSE for this, they can't receive NET messages
+	virtual bool IsNetClient( void ) override { return true; }		// Bots should return FALSE for this, they can't receive NET messages
 															// Spectators should return TRUE for this
 	virtual const char *TeamID( void );
 

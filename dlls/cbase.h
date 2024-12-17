@@ -235,9 +235,9 @@ public:
 	virtual BOOL IsBSPModel( void ) { return pev->solid == SOLID_BSP || pev->movetype == MOVETYPE_PUSHSTEP; }
 	virtual BOOL ReflectGauss( void ) { return ( IsBSPModel() && !pev->takedamage ); }
 	virtual BOOL HasTarget( string_t targetname ) { return FStrEq(STRING(targetname), STRING(pev->target) ); }
-	virtual BOOL IsInWorld( void );
-	virtual	BOOL IsPlayer( void ) { return FALSE; }
-	virtual BOOL IsNetClient( void ) { return FALSE; }
+	virtual bool IsInWorld( void );
+	virtual	bool IsPlayer( void ) { return false; }
+	virtual bool IsNetClient( void ) { return false; }
 	virtual const char *TeamID( void ) { return ""; }
 
 	//virtual void SetActivator( CBaseEntity *pActivator ) {}

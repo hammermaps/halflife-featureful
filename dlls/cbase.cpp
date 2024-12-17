@@ -1410,36 +1410,36 @@ int CBaseEntity::IsDormant( void )
 	return FBitSet( pev->flags, FL_DORMANT );
 }
 
-BOOL CBaseEntity::IsInWorld( void )
+bool CBaseEntity::IsInWorld( void )
 {
 	// position 
 	if( pev->origin.x >= 4096.0f )
-		return FALSE;
+		return false;
 	if( pev->origin.y >= 4096.0f )
-		return FALSE;
+		return false;
 	if( pev->origin.z >= 4096.0f )
-		return FALSE;
+		return false;
 	if( pev->origin.x <= -4096.0f )
-		return FALSE;
+		return false;
 	if( pev->origin.y <= -4096.0f )
-		return FALSE;
+		return false;
 	if( pev->origin.z <= -4096.0f )
-		return FALSE;
+		return false;
 	// speed
 	if( pev->velocity.x >= 2000.0f )
-		return FALSE;
+		return false;
 	if( pev->velocity.y >= 2000.0f )
-		return FALSE;
+		return false;
 	if( pev->velocity.z >= 2000.0f )
-		return FALSE;
+		return false;
 	if( pev->velocity.x <= -2000.0f )
-		return FALSE;
+		return false;
 	if( pev->velocity.y <= -2000.0f )
-		return FALSE;
+		return false;
 	if( pev->velocity.z <= -2000.0f )
-		return FALSE;
+		return false;
 
-	return TRUE;
+	return true;
 }
 
 int CBaseEntity::ShouldToggle( USE_TYPE useType, BOOL currentState )

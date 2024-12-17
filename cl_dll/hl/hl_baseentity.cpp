@@ -52,7 +52,7 @@ int CBaseEntity::Save( CSave &save ) { return 1; }
 int CBaseEntity::Restore( CRestore &restore ) { return 1; }
 void CBaseEntity::Activate() {}
 void CBaseEntity::SetObjectCollisionBox( void ) { }
-BOOL CBaseEntity::IsInWorld( void ) { return TRUE; }
+bool CBaseEntity::IsInWorld( void ) { return true; }
 int CBaseEntity::DamageDecal( int bitsDamageType ) { return -1; }
 void CBaseEntity::UpdateOnRemove( void ) { }
 int CBaseEntity::PRECACHE_SOUND(const char *soundName) { return 0; }
