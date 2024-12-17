@@ -93,7 +93,7 @@ public:
 	NODE_LINKENT HandleLinkEnt(int afCapMask, bool nodeQueryStatic);
 	void TurnOff( void );
 	void TurnOn( void );
-	BOOL IsOn( void );
+	bool IsOn( void );
 };
 
 LINK_ENTITY_TO_CLASS( func_wall_toggle, CFuncWallToggle )
@@ -119,16 +119,16 @@ void CFuncWallToggle::TurnOn( void )
 	UTIL_SetOrigin( pev, pev->origin );
 }
 
-BOOL CFuncWallToggle::IsOn( void )
+bool CFuncWallToggle::IsOn( void )
 {
 	if( pev->solid == SOLID_NOT )
-		return FALSE;
-	return TRUE;
+		return false;
+	return true;
 }
 
 void CFuncWallToggle::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 {
-	int status = IsOn();
+	bool status = IsOn();
 
 	if( ShouldToggle( useType, status ) )
 	{
@@ -269,7 +269,7 @@ public:
 	}
 	void TurnOff( void ) {  pev->effects |= EF_NODRAW; }
 	void TurnOn( void ) { pev->effects &= ~EF_NODRAW; }
-	BOOL IsOn( void ) { return !(pev->effects & EF_NODRAW); }
+	bool IsOn( void ) { return !(pev->effects & EF_NODRAW); }
 };
 
 LINK_ENTITY_TO_CLASS( func_illusionary_toggle, CFuncIllusionaryToggle )

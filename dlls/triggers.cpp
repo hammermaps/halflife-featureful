@@ -387,13 +387,13 @@ public:
 	short m_iTargetUseType[MAX_MULTI_TARGETS];
 	int m_inputUseType;
 private:
-	inline BOOL IsClone( void ) { return ( pev->spawnflags & SF_MULTIMAN_CLONE ) ? TRUE : FALSE; }
-	inline BOOL ShouldClone( void )
+	inline bool IsClone( void ) { return ( pev->spawnflags & SF_MULTIMAN_CLONE ); }
+	inline bool ShouldClone( void )
 	{
 		if( IsClone() )
-			return FALSE;
+			return false;
 
-		return ( pev->spawnflags & SF_MULTIMAN_THREAD ) ? TRUE : FALSE;
+		return ( pev->spawnflags & SF_MULTIMAN_THREAD ) != 0;
 	}
 
 	CMultiManager *Clone( void );

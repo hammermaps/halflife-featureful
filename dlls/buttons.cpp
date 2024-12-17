@@ -1926,11 +1926,11 @@ void CMomentaryRotButton::UpdateAllButtons( float value, int start )
 
 void CMomentaryRotButton::UpdateSelf( float value )
 {
-	BOOL fplaysound = FALSE;
+	bool fplaysound = false;
 
 	if( !m_lastUsed )
 	{
-		fplaysound = TRUE;
+		fplaysound = true;
 		m_direction = -m_direction;
 	}
 	m_lastUsed = 1;

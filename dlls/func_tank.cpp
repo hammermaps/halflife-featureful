@@ -77,11 +77,11 @@ public:
 	// Bmodels don't go across transitions
 	virtual int ObjectCaps( void ) { return CBaseEntity :: ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
 
-	inline BOOL IsActive( void ) { return (pev->spawnflags & SF_TANK_ACTIVE)?TRUE:FALSE; }
+	inline bool IsActive( void ) { return (pev->spawnflags & SF_TANK_ACTIVE); }
 	inline void TankActivate( void ) { pev->spawnflags |= SF_TANK_ACTIVE; pev->nextthink = pev->ltime + 0.1f; m_fireLast = 0; }
 	inline void TankDeactivate( void ) { pev->spawnflags &= ~SF_TANK_ACTIVE; m_fireLast = 0; StopRotSound(); }
-	inline BOOL CanFire( void ) { return (gpGlobals->time - m_lastSightTime) < m_persist; }
-	BOOL InRange( float range );
+	inline bool CanFire( void ) { return (gpGlobals->time - m_lastSightTime) < m_persist; }
+	bool InRange( float range );
 
 	// Acquire a target.  pPlayer is a player in the PVS
 	edict_t		*FindTarget( edict_t *pPlayer );
@@ -659,14 +659,14 @@ int	CFuncTank::IRelationship( CBaseEntity* pTarget )
 	return CBaseMonster::IDefaultRelationship(Classify(), pTarget->Classify());
 }
 
-BOOL CFuncTank::InRange( float range )
+bool CFuncTank::InRange( float range )
 {
 	if( range < m_minRange )
-		return FALSE;
+		return false;
 	if( m_maxRange > 0 && range > m_maxRange )
-		return FALSE;
+		return false;
 
-	return TRUE;
+	return true;
 }
 
 void CFuncTank::Think( void )
