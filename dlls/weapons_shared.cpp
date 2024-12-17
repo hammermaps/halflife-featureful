@@ -64,7 +64,7 @@ void CBasePlayerWeapon::ResetEmptySound( void )
 	m_iPlayEmptySound = 1;
 }
 
-BOOL CanAttack( float attack_time, float curtime, BOOL isPredicted )
+bool CanAttack( float attack_time, float curtime, bool isPredicted )
 {
 #ifdef CLIENT_DLL
 	return attack_time <= 0.0f;
@@ -75,11 +75,11 @@ BOOL CanAttack( float attack_time, float curtime, BOOL isPredicted )
 	if( 1 )
 #endif
 	{
-		return ( attack_time <= curtime ) ? TRUE : FALSE;
+		return ( attack_time <= curtime );
 	}
 	else
 	{
-		return ( (static_cast<int>(::floor(attack_time * 1000.0f)) * 1000.0f) <= 0.0f) ? TRUE : FALSE;
+		return ( (static_cast<int>(::floor(attack_time * 1000.0f)) * 1000.0f) <= 0.0f);
 	}
 #endif
 }
