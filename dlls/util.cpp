@@ -1220,7 +1220,7 @@ bool UTIL_TargetnameIsActivator(string_t targetName)
 	return UTIL_TargetnameIsActivator(STRING(targetName));
 }
 
-BOOL UTIL_ShouldShowBlood( int color )
+bool UTIL_ShouldShowBlood( int color )
 {
 	extern cvar_t* violence_hblood;
 	extern cvar_t* violence_ablood;
@@ -1229,15 +1229,15 @@ BOOL UTIL_ShouldShowBlood( int color )
 		if( color == BLOOD_COLOR_RED )
 		{
 			if( violence_hblood->value != 0 )
-				return TRUE;
+				return true;
 		}
 		else
 		{
 			if( violence_ablood->value != 0 )
-				return TRUE;
+				return true;
 		}
 	}
-	return FALSE;
+	return false;
 }
 
 int UTIL_PointContents(	const Vector &vec )
@@ -1373,7 +1373,7 @@ Tell connected clients to display it, or use the default spray can decal
 if the custom can't be loaded.
 ==============
 */
-void UTIL_PlayerDecalTrace( TraceResult *pTrace, int playernum, int decalNumber, BOOL bIsCustom )
+void UTIL_PlayerDecalTrace( TraceResult *pTrace, int playernum, int decalNumber, bool bIsCustom )
 {
 	int index;
 
@@ -1665,11 +1665,11 @@ void UTIL_Remove( CBaseEntity *pEntity )
 	pEntity->pev->targetname = 0;
 }
 
-BOOL UTIL_IsValidEntity( edict_t *pent )
+bool UTIL_IsValidEntity( edict_t *pent )
 {
 	if( !pent || pent->free || ( pent->v.flags & FL_KILLME ) )
-		return FALSE;
-	return TRUE;
+		return false;
+	return true;
 }
 
 static void UTIL_PrecacheOtherWithOverride(CBaseEntity* pEntity, EntityOverrides entityOverrides)
@@ -2827,11 +2827,11 @@ void ReportAIStateByClassname(const char* name)
 // LRC- change the origin to the given position, and bring any movewiths along too.
 void UTIL_AssignOrigin( CBaseEntity *pEntity, const Vector vecOrigin )
 {
-	UTIL_AssignOrigin( pEntity, vecOrigin, TRUE);
+	UTIL_AssignOrigin( pEntity, vecOrigin, true);
 }
 
 // LRC- bInitiator is true if this is being called directly, rather than because pEntity is moving with something else.
-void UTIL_AssignOrigin( CBaseEntity *pEntity, const Vector vecOrigin, BOOL bInitiator)
+void UTIL_AssignOrigin( CBaseEntity *pEntity, const Vector vecOrigin, bool bInitiator)
 {
 //	ALERT(at_console, "AssignOrigin before %f, after %f\n", pEntity->pev->origin.x, vecOrigin.x);
 #if 0
@@ -2890,10 +2890,10 @@ void UTIL_AssignOrigin( CBaseEntity *pEntity, const Vector vecOrigin, BOOL bInit
 
 void UTIL_SetAngles( CBaseEntity *pEntity, const Vector vecAngles )
 {
-	UTIL_SetAngles( pEntity, vecAngles, TRUE );
+	UTIL_SetAngles( pEntity, vecAngles, true );
 }
 
-void UTIL_SetAngles( CBaseEntity *pEntity, const Vector vecAngles, BOOL bInitiator)
+void UTIL_SetAngles( CBaseEntity *pEntity, const Vector vecAngles, bool bInitiator)
 {
 	Vector vecDiff = vecAngles - pEntity->pev->angles;
 #if 0

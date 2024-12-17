@@ -4222,7 +4222,7 @@ void CSprayCan::Think( void )
 	}
 	else
 	{
-		UTIL_PlayerDecalTrace( &tr, playernum, (int)pev->frame, TRUE );
+		UTIL_PlayerDecalTrace( &tr, playernum, (int)pev->frame, true );
 		// Just painted last custom frame.
 		if( pev->frame++ >= ( nFrames - 1 ) )
 			UTIL_Remove( this );

@@ -165,13 +165,13 @@ inline void MESSAGE_BEGIN( int msg_dest, int msg_type, const float *pOrigin, ent
 
 // Testing the three types of "entity" for nullity
 #define eoNullEntity 0
-inline BOOL FNullEnt(EOFFSET eoffset)			{ return eoffset == 0; }
-inline BOOL FNullEnt(const edict_t* pent)	{ return pent == NULL || FNullEnt(OFFSET(pent)); }
-inline BOOL FNullEnt(entvars_t* pev)				{ return pev == NULL || FNullEnt(OFFSET(pev)); }
+inline bool FNullEnt(EOFFSET eoffset)			{ return eoffset == 0; }
+inline bool FNullEnt(const edict_t* pent)	{ return pent == NULL || FNullEnt(OFFSET(pent)); }
+inline bool FNullEnt(entvars_t* pev)				{ return pev == NULL || FNullEnt(OFFSET(pev)); }
 
 // Testing strings for nullity
 #define iStringNull 0
-inline BOOL FStringNull(string_t iString)			{ return iString == iStringNull; }
+inline bool FStringNull(string_t iString)			{ return iString == iStringNull; }
 
 #define cchMapNameMost 32
 
@@ -212,17 +212,17 @@ typedef enum {
 } NODE_LINKENT;
 
 // Misc useful
-inline BOOL FStrEq(const char*sz1, const char*sz2)
+inline bool FStrEq(const char*sz1, const char*sz2)
 {
 	return (strcmp(sz1, sz2) == 0);
 }
 
-inline BOOL FClassnameIs(edict_t* pent, const char* szClassname)
+inline bool FClassnameIs(edict_t* pent, const char* szClassname)
 {
 	return FStrEq(STRING(VARS(pent)->classname), szClassname);
 }
 
-inline BOOL FClassnameIs(entvars_t* pev, const char* szClassname)
+inline bool FClassnameIs(entvars_t* pev, const char* szClassname)
 {
 	return FStrEq(STRING(pev->classname), szClassname);
 }
@@ -303,10 +303,10 @@ extern bool			UTIL_TargetnameIsActivator( string_t targetName );
 extern void			UTIL_BloodStream( const Vector &origin, const Vector &direction, int color, int amount );
 extern void			UTIL_BloodDrips( const Vector &origin, const Vector &direction, int color, int amount );
 extern Vector		UTIL_RandomBloodVector( void );
-extern BOOL			UTIL_ShouldShowBlood( int bloodColor );
+extern bool			UTIL_ShouldShowBlood( int bloodColor );
 extern void			UTIL_BloodDecalTrace( TraceResult *pTrace, int bloodColor );
 extern void			UTIL_DecalTrace( TraceResult *pTrace, int decalNumber );
-extern void			UTIL_PlayerDecalTrace( TraceResult *pTrace, int playernum, int decalNumber, BOOL bIsCustom );
+extern void			UTIL_PlayerDecalTrace( TraceResult *pTrace, int playernum, int decalNumber, bool bIsCustom );
 extern void			UTIL_GunshotDecalTrace( TraceResult *pTrace, int decalNumber );
 extern void			UTIL_Sparks( const Vector &position );
 extern void			UTIL_SparkShower( const Vector &position, const SparkEffectParams& params );
@@ -318,7 +318,7 @@ extern Vector		UTIL_ClampVectorToBox( const Vector &input, const Vector &clampSi
 
 extern char			*UTIL_VarArgs( const char *format, ... );
 extern void			UTIL_Remove( CBaseEntity *pEntity );
-extern BOOL			UTIL_IsValidEntity( edict_t *pent );
+extern bool			UTIL_IsValidEntity( edict_t *pent );
 extern bool			UTIL_TeamsMatch( const char *pTeamName1, const char *pTeamName2 );
 
 // Use for ease-in, ease-out style interpolation (accel/decel)
@@ -591,10 +591,10 @@ inline Vector VectorFromColor(const Color& color) {
 
 //TODO: move this to movewith.h later
 extern void			UTIL_AssignOrigin		( CBaseEntity* pEntity, const Vector vecOrigin );
-extern void			UTIL_AssignOrigin		( CBaseEntity* pEntity, const Vector vecOrigin, BOOL bInitiator );
+extern void			UTIL_AssignOrigin		( CBaseEntity* pEntity, const Vector vecOrigin, bool bInitiator );
 extern void			UTIL_SetVelocity		( CBaseEntity *pEnt,	const Vector vecSet );
 extern void			UTIL_SetAngles			( CBaseEntity* pEntity, const Vector vecAngles );
-extern void			UTIL_SetAngles			( CBaseEntity* pEntity, const Vector vecAngles, BOOL bInitiator );
+extern void			UTIL_SetAngles			( CBaseEntity* pEntity, const Vector vecAngles, bool bInitiator );
 extern void			UTIL_SetAvelocity		( CBaseEntity *pEnt, const Vector vecSet );
 
 #endif // UTIL_H

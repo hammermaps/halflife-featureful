@@ -76,7 +76,6 @@ void UTIL_BloodDrips( const Vector &origin, const Vector &direction, int color, 
 void UTIL_DecalTrace( TraceResult *pTrace, int decalNumber ) { }
 void UTIL_GunshotDecalTrace( TraceResult *pTrace, int decalNumber ) { }
 void UTIL_MakeVectors( const Vector &vecAngles ) { }
-BOOL UTIL_IsValidEntity( edict_t *pent ) { return TRUE; }
 void UTIL_SetOrigin( entvars_t *, const Vector &org ) { }
 void UTIL_LogPrintf(char *,...) { }
 void UTIL_ClientPrintAll( int,char const *,char const *,char const *,char const *,char const *) { }
