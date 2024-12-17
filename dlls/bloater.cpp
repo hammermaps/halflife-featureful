@@ -213,7 +213,7 @@ public:
 	void MoveExecute( CBaseEntity *pTargetEnt, const Vector &vecDir, float flInterval );
 	void SetActivity( Activity NewActivity );
 	int LookupActivity(int activity);
-	BOOL ShouldAdvanceRoute( float flWaypointDist );
+	bool ShouldAdvanceRoute( float flWaypointDist ) override;
 
 	void StartBloating();
 	void ChangeGlowVisual(CSprite* pGlow, const Visual& newGlow);
@@ -847,14 +847,9 @@ void CFloater::Move( float flInterval )
 	} while( flMoveDist > 0 && flCheckDist > 0 );
 }
 
-BOOL CFloater::ShouldAdvanceRoute( float flWaypointDist )
+bool CFloater::ShouldAdvanceRoute( float flWaypointDist )
 {
-	if( flWaypointDist <= 32 )
-	{
-		return TRUE;
-	}
-
-	return FALSE;
+	return flWaypointDist <= 32;
 }
 
 int CFloater::CheckLocalMove( const Vector &vecStart, const Vector &vecEnd, CBaseEntity *pTarget, float *pflDist )

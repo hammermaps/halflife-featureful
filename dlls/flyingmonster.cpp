@@ -147,16 +147,16 @@ void CFlyingMonster::Move( float flInterval )
 	CBaseMonster::Move( flInterval );
 }
 
-BOOL CFlyingMonster::ShouldAdvanceRoute( float flWaypointDist )
+bool CFlyingMonster::ShouldAdvanceRoute( float flWaypointDist )
 {
 	// Get true 3D distance to the goal so we actually reach the correct height
 	if( m_Route[m_iRouteIndex].iType & bits_MF_IS_GOAL )
 		flWaypointDist = ( m_Route[m_iRouteIndex].vecLocation - pev->origin ).Length();
 
 	if( flWaypointDist <= 64.0f + ( m_flGroundSpeed * gpGlobals->frametime ) )
-		return TRUE;
+		return true;
 
-	return FALSE;
+	return false;
 }
 
 void CFlyingMonster::MoveExecute( CBaseEntity *pTargetEnt, const Vector &vecDir, float flInterval )

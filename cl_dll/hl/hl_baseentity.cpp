@@ -112,7 +112,7 @@ int CBaseMonster::CheckEnemy( CBaseEntity *pEnemy ) { return 0; }
 void CBaseMonster::SetActivity( Activity NewActivity ) { }
 int CBaseMonster::CheckLocalMove( const Vector &vecStart, const Vector &vecEnd, CBaseEntity *pTarget, float *pflDist ) { return 0; }
 void CBaseMonster::Move( float flInterval ) { }
-BOOL CBaseMonster::ShouldAdvanceRoute( float flWaypointDist ) { return FALSE; }
+bool CBaseMonster::ShouldAdvanceRoute( float flWaypointDist ) { return false; }
 void CBaseMonster::MoveExecute( CBaseEntity *pTargetEnt, const Vector &vecDir, float flInterval ) { }
 void CBaseMonster::MonsterInit( void ) { }
 void CBaseMonster::MonsterInitThink( void ) { }

@@ -2373,15 +2373,15 @@ void CBaseMonster::Move( float flInterval )
 	}
 }
 
-BOOL CBaseMonster::ShouldAdvanceRoute( float flWaypointDist )
+bool CBaseMonster::ShouldAdvanceRoute( float flWaypointDist )
 {
 	if( flWaypointDist <= MONSTER_CUT_CORNER_DIST )
 	{
 		// ALERT( at_console, "cut %f\n", flWaypointDist );
-		return TRUE;
+		return true;
 	}
 
-	return FALSE;
+	return false;
 }
 
 void CBaseMonster::MoveExecute( CBaseEntity *pTargetEnt, const Vector &vecDir, float flInterval )

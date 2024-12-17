@@ -175,7 +175,7 @@ public:
 	virtual int CheckLocalMove ( const Vector &vecStart, const Vector &vecEnd, CBaseEntity *pTarget, float *pflDist );// check validity of a straight move through space
 	virtual void Move( float flInterval = 0.1 );
 	virtual void MoveExecute( CBaseEntity *pTargetEnt, const Vector &vecDir, float flInterval );
-	virtual BOOL ShouldAdvanceRoute( float flWaypointDist );
+	virtual bool ShouldAdvanceRoute( float flWaypointDist );
 
 	virtual Activity GetStoppedActivity( void ) { return ACT_IDLE; }
 	virtual void Stop( void ) { m_IdealActivity = GetStoppedActivity(); }
