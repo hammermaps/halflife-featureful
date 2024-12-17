@@ -142,7 +142,7 @@ public:
 
 	virtual BOOL IsAlive( void ) { return ( pev->deadflag != DEAD_DEAD ); }
 	virtual bool IsFullyAlive( void );
-	virtual BOOL ShouldFadeOnDeath( void );
+	virtual bool ShouldFadeOnDeath( void );
 
 	// Basic Monster AI functions
 	virtual float ChangeYaw( int yawSpeed );

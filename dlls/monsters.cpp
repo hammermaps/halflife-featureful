@@ -4280,13 +4280,13 @@ bool CBaseMonster::IsFullyAlive()
 	return !HasMemory(bits_MEMORY_KILLED) && CBaseToggle::IsFullyAlive();
 }
 
-BOOL CBaseMonster::ShouldFadeOnDeath( void )
+bool CBaseMonster::ShouldFadeOnDeath( void )
 {
 	// if flagged to fade out or I have an owner (I came from a monster spawner)
 	if( ( pev->spawnflags & SF_MONSTER_FADECORPSE ) || !FNullEnt( pev->owner ) )
-		return TRUE;
+		return true;
 
-	return FALSE;
+	return false;
 }
 
 const char* CBaseMonster::MyNonDefaultGibModel()

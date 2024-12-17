@@ -697,7 +697,7 @@ public:
 	void AlertSound(void);
 	void MonsterThink(void);
 	void StartTask(Task_t* pTask);
-	BOOL ShouldFadeOnDeath();
+	bool ShouldFadeOnDeath() override;
 	int TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType );
 	void OnDying();
 
@@ -965,11 +965,11 @@ void CShockRoach::StartTask(Task_t *pTask)
 	}
 }
 
-BOOL CShockRoach::ShouldFadeOnDeath()
+bool CShockRoach::ShouldFadeOnDeath()
 {
 	if( ( pev->spawnflags & SF_MONSTER_FADECORPSE ) || (!FNullEnt( pev->owner ) && !HasMemory(bits_MEMORY_SHOCKTROOPER_IS_OWNER)) )
-		return TRUE;
-	return FALSE;
+		return true;
+	return false;
 }
 
 void CShockRoach::AttackSound()
