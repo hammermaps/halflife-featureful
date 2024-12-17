@@ -56,9 +56,9 @@ class CItem : public CPickup
 public:
 	void Spawn( void );
 	void EXPORT ItemTouch( CBaseEntity *pOther );
-	virtual BOOL MyTouch( CBasePlayer *pPlayer )
+	virtual bool MyTouch( CBasePlayer *pPlayer )
 	{
-		return FALSE;
+		return false;
 	}
 	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 	void TouchOrUse( CBaseEntity* pOther );

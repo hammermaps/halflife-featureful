@@ -558,10 +558,10 @@ public:
 	{
 		PrecacheMyModel( "models/w_suit.mdl" );
 	}
-	BOOL MyTouch( CBasePlayer *pPlayer )
+	bool MyTouch( CBasePlayer *pPlayer ) override
 	{
 		if( pPlayer->HasSuit() )
-			return FALSE;
+			return false;
 
 		if ( pev->spawnflags & SF_SUIT_NOLOGON )
 		{
@@ -580,7 +580,7 @@ public:
 		if (FBitSet(pev->spawnflags, SF_SUIT_FLASHLIGHT))
 			pPlayer->SetFlashlight();
 
-		return TRUE;
+		return true;
 	}
 };
 
@@ -602,11 +602,11 @@ public:
 		PrecacheMyModel( DefaultModel() );
 		RegisterAndPrecacheSoundScript(pickupSoundScript, Items::pickupSoundScript);
 	}
-	BOOL MyTouch( CBasePlayer *pPlayer )
+	bool MyTouch( CBasePlayer *pPlayer ) override
 	{
 		if( pPlayer->pev->deadflag != DEAD_NO )
 		{
-			return FALSE;
+			return false;
 		}
 
 		if( ( pPlayer->pev->armorvalue < pPlayer->MaxArmor() ) && pPlayer->HasSuit() )
@@ -636,9 +636,9 @@ public:
 				pPlayer->SetSuitUpdate( szcharge, FALSE, SUIT_NEXT_IN_30SEC);
 			}
 
-			return TRUE;
+			return true;
 		}
-		return FALSE;
+		return false;
 	}
 protected:
 	virtual const char* DefaultModel() { return "models/w_battery.mdl"; }
@@ -682,11 +682,11 @@ class CItemAntidote : public CItem
 		if (!FStringNull(pev->noise))
 			PRECACHE_SOUND( STRING(pev->noise) );
 	}
-	BOOL MyTouch( CBasePlayer *pPlayer )
+	bool MyTouch( CBasePlayer *pPlayer ) override
 	{
 		if( pPlayer->pev->deadflag != DEAD_NO )
 		{
-			return FALSE;
+			return false;
 		}
 		pPlayer->SetSuitUpdate( "!HEV_DET4", FALSE, SUIT_NEXT_IN_1MIN );
 
@@ -698,7 +698,7 @@ class CItemAntidote : public CItem
 			WRITE_STRING( STRING( pev->classname ) );
 		MESSAGE_END();
 
-		return TRUE;
+		return true;
 	}
 };
 
@@ -729,11 +729,11 @@ class CItemSecurity : public CItem
 			CItem::KeyValue(pkvd);
 	}
 
-	BOOL MyTouch( CBasePlayer *pPlayer )
+	bool MyTouch( CBasePlayer *pPlayer ) override
 	{
 		if( pPlayer->pev->deadflag != DEAD_NO )
 		{
-			return FALSE;
+			return false;
 		}
 		pPlayer->m_rgItems[ITEM_SECURITY] += 1;
 
@@ -790,18 +790,18 @@ class CItemPickup : public CItem
 			CItem::KeyValue(pkvd);
 	}
 
-	BOOL MyTouch( CBasePlayer *pPlayer )
+	bool MyTouch( CBasePlayer *pPlayer ) override
 	{
 		if( pPlayer->pev->deadflag != DEAD_NO )
 		{
-			return FALSE;
+			return false;
 		}
 
 		if (!FStringNull(pev->netname))
 		{
 			const int result = pPlayer->GiveInventoryItem(pev->netname, pev->impulse > 0 ? pev->impulse : 1);
 			if (result < INVENTORY_ITEM_GIVEN)
-				return FALSE;
+				return false;
 		}
 
 		if (!FStringNull(pev->noise))
@@ -810,7 +810,7 @@ class CItemPickup : public CItem
 		if (!FStringNull(pev->message))
 			UTIL_ShowMessage( STRING( pev->message ), pPlayer );
 
-		return TRUE;
+		return true;
 	}
 
 	bool IsUsefulToDisplayHint(CBaseEntity* pPlayer)
@@ -838,11 +838,11 @@ class CItemLongJump : public CItem
 	{
 		PrecacheMyModel( "models/w_longjump.mdl" );
 	}
-	BOOL MyTouch( CBasePlayer *pPlayer )
+	bool MyTouch( CBasePlayer *pPlayer ) override
 	{
 		if( pPlayer->m_fLongJump )
 		{
-			return FALSE;
+			return false;
 		}
 
 		if( pPlayer->HasSuit() )
@@ -854,9 +854,9 @@ class CItemLongJump : public CItem
 			MESSAGE_END();
 
 			EMIT_SOUND_SUIT( pPlayer->edict(), "!HEV_A1" );	// Play the longjump sound UNDONE: Kelly? correct sound?
-			return TRUE;		
+			return true;
 		}
-		return FALSE;
+		return false;
 	}
 };
 
@@ -901,21 +901,21 @@ public:
 		else
 			return "sprites/iunknown.spr";
 	}
-	BOOL MyTouch( CBasePlayer *pPlayer )
+	bool MyTouch( CBasePlayer *pPlayer ) override
 	{
 		if (g_modFeatures.suit_light_allow_both)
 		{
 			if (pPlayer->HasFlashlight())
-				return FALSE;
+				return false;
 		}
 		else if ( pPlayer->HasSuitLight() )
-			return FALSE;
+			return false;
 		pPlayer->SetFlashlight();
 		MESSAGE_BEGIN( MSG_ONE, gmsgItemPickup, NULL, pPlayer->pev );
 			WRITE_STRING( STRING(pev->classname) );
 		MESSAGE_END();
 		pPlayer->EmitSoundScript(GetSoundScript(pickupSoundScript));
-		return TRUE;
+		return true;
 	}
 };
 LINK_ENTITY_TO_CLASS(item_flashlight, CItemFlashlight)
@@ -936,20 +936,20 @@ public:
 	{
 		PrecacheMyModel("sprites/iunknown.spr");
 	}
-	BOOL MyTouch( CBasePlayer *pPlayer )
+	bool MyTouch( CBasePlayer *pPlayer ) override
 	{
 		if (g_modFeatures.suit_light_allow_both)
 		{
 			if (pPlayer->HasNVG())
-				return FALSE;
+				return false;
 		}
 		else if ( pPlayer->HasSuitLight() )
-			return FALSE;
+			return false;
 		pPlayer->SetNVG();
 		MESSAGE_BEGIN( MSG_ONE, gmsgItemPickup, NULL, pPlayer->pev );
 			WRITE_STRING( STRING(pev->classname) );
 		MESSAGE_END();
-		return TRUE;
+		return true;
 	}
 };
 LINK_ENTITY_TO_CLASS(item_nvgs, CItemNVG)

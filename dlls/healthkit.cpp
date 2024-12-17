@@ -30,7 +30,7 @@ class CHealthKit : public CItem
 public:
 	void Spawn( void );
 	void Precache( void );
-	BOOL MyTouch( CBasePlayer *pPlayer );
+	bool MyTouch( CBasePlayer *pPlayer ) override;
 /*
 	virtual int Save( CSave &save );
 	virtual int Restore( CRestore &restore );
@@ -72,11 +72,11 @@ void CHealthKit::Precache( void )
 	RegisterAndPrecacheSoundScript(pickupSoundScript);
 }
 
-BOOL CHealthKit::MyTouch( CBasePlayer *pPlayer )
+bool CHealthKit::MyTouch( CBasePlayer *pPlayer )
 {
 	if( pPlayer->pev->deadflag != DEAD_NO )
 	{
-		return FALSE;
+		return false;
 	}
 
 	const bool healed = pPlayer->pev->health < pPlayer->pev->max_health;
@@ -90,10 +90,10 @@ BOOL CHealthKit::MyTouch( CBasePlayer *pPlayer )
 			pPlayer->EmitSoundScript(GetSoundScript(pickupSoundScript));
 		}
 
-		return TRUE;
+		return true;
 	}
 
-	return FALSE;
+	return false;
 }
 
 //-------------------------------------------------------------
