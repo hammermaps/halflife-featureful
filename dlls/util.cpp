@@ -455,7 +455,7 @@ edict_t *DBG_EntOfVars( const entvars_t *pev )
 	return pent;
 }
 
-void DBG_AssertFunction( BOOL fExpr, const char* szExpr, const char* szFile, int szLine, const char* szMessage )
+void DBG_AssertFunction( bool fExpr, const char* szExpr, const char* szFile, int szLine, const char* szMessage )
 {
 	if( fExpr )
 		return;
