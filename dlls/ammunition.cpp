@@ -96,7 +96,7 @@ void CBasePlayerAmmo::DefaultUse( CBaseEntity *pActivator, CBaseEntity *pCaller,
 	}
 }
 
-extern int gEvilImpulse101;
+extern bool gEvilImpulse101;
 
 void CBasePlayerAmmo::TouchOrUse( CBaseEntity *pOther )
 {

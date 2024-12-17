@@ -556,7 +556,7 @@ public:
 #define AUTOAIM_10DEGREES 0.1736481776669
 
 extern int gmsgHudText;
-extern BOOL gInitHUD;
+extern bool gInitHUD;
 
 extern bool g_PlayerFullyInitialized[MAX_CLIENTS];
 

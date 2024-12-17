@@ -501,7 +501,7 @@ void RestoreGlobalState( SAVERESTOREDATA *pSaveData )
 void ResetGlobalState( void )
 {
 	gGlobalState.ClearStates();
-	gInitHUD = TRUE;	// Init the HUD on a new game / load game
+	gInitHUD = true;	// Init the HUD on a new game / load game
 }
 
 // moved CWorld class definition to cbase.h
@@ -513,11 +513,11 @@ void ResetGlobalState( void )
 
 LINK_ENTITY_TO_CLASS( worldspawn, CWorld )
 
-extern DLL_GLOBAL BOOL		g_fGameOver;
+extern DLL_GLOBAL bool		g_fGameOver;
 
 void CWorld::Spawn( void )
 {
-	g_fGameOver = FALSE;
+	g_fGameOver = false;
 	Precache();
 	AddMapBSPAsPrecachedModel();
 }
@@ -704,9 +704,9 @@ void CWorld::Precache( void )
 	pev->spawnflags &= ~SF_WORLD_DARK;		// g-cont. don't apply fade after save\restore
 
 	if( pev->spawnflags & SF_WORLD_TITLE )
-		gDisplayTitle = TRUE;		// display the game title if this key is set
+		gDisplayTitle = true;		// display the game title if this key is set
 	else
-		gDisplayTitle = FALSE;
+		gDisplayTitle = false;
 
 	pev->spawnflags &= ~SF_WORLD_TITLE;		// g-cont. don't show logo after save\restore
 

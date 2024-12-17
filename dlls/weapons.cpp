@@ -35,7 +35,7 @@
 #include "ammo_amounts.h"
 #include "common_soundscripts.h"
 
-extern int gEvilImpulse101;
+extern bool gEvilImpulse101;
 
 DLL_GLOBAL	short g_sModelIndexLaser;// holds the index for the laser beam
 DLL_GLOBAL	const char *g_pModelNameLaser = "sprites/laserbeam.spr";

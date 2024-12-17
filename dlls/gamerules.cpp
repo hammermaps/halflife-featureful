@@ -30,7 +30,6 @@
 extern edict_t *EntSelectSpawnPoint( CBaseEntity *pPlayer );
 
 DLL_GLOBAL CGameRules *g_pGameRules = NULL;
-extern DLL_GLOBAL BOOL g_fGameOver;
 extern int gmsgDeathMsg;	// client dll messages
 extern int gmsgMOTD;
 
@@ -612,11 +611,11 @@ CBasePlayer *CGameRules::EffectivePlayer(CBaseEntity *pActivator)
 
 bool CGameRules::EquipPlayerFromMapConfig(CBasePlayer *pPlayer, const MapConfig &mapConfig)
 {
-	extern int gEvilImpulse101;
+	extern bool gEvilImpulse101;
 
 	if (mapConfig.valid)
 	{
-		gEvilImpulse101 = TRUE;
+		gEvilImpulse101 = true;
 
 		bool giveSuit = !mapConfig.nosuit;
 		if (giveSuit)
@@ -657,7 +656,7 @@ bool CGameRules::EquipPlayerFromMapConfig(CBasePlayer *pPlayer, const MapConfig 
 				pPlayer->GiveNamedItem(entName);
 			}
 		}
-		gEvilImpulse101 = FALSE;
+		gEvilImpulse101 = false;
 
 		for (i=0; i<mapConfig.ammoCount; ++i)
 		{

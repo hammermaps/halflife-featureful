@@ -403,7 +403,7 @@ TYPEDESCRIPTION CPickup::m_SaveData[] =
 };
 IMPLEMENT_SAVERESTORE(CPickup, CBaseDelay)
 
-extern int gEvilImpulse101;
+extern bool gEvilImpulse101;
 
 void CItem::Spawn( void )
 {

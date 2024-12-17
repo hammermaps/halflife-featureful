@@ -52,12 +52,12 @@
 // #define DUCKFIX
 
 extern DLL_GLOBAL ULONG g_ulModelIndexPlayer;
-extern DLL_GLOBAL BOOL g_fGameOver;
-extern DLL_GLOBAL BOOL g_fDrawLines;
-int gEvilImpulse101;
-extern DLL_GLOBAL int g_iSkillLevel, gDisplayTitle;
+extern DLL_GLOBAL bool g_fGameOver;
+bool gEvilImpulse101;
+extern DLL_GLOBAL int g_iSkillLevel;
+extern DLL_GLOBAL bool gDisplayTitle;
 
-BOOL gInitHUD = TRUE;
+bool gInitHUD = true;
 
 extern void CopyToBodyQue( entvars_t *pev);
 extern void respawn( entvars_t *pev, bool fCopyCorpse );
@@ -4579,7 +4579,7 @@ void CBasePlayer::CheatImpulseCommands( int iImpulse )
 		}
 		break;
 	case 101:
-		gEvilImpulse101 = TRUE;
+		gEvilImpulse101 = true;
 		GiveNamedItem( "item_suit", SF_ITEM_NOFALL );
 		SetDefaultLight();
 		GiveNamedItem( "item_battery", SF_ITEM_NOFALL );
@@ -4662,7 +4662,7 @@ void CBasePlayer::CheatImpulseCommands( int iImpulse )
 		if (g_modFeatures.IsWeaponEnabled(WEAPON_UZI))
 			GiveNamedItem( "weapon_uzi" );
 #endif
-		gEvilImpulse101 = FALSE;
+		gEvilImpulse101 = false;
 		break;
 	case 102:
 		// Gibbage!!!
@@ -5096,7 +5096,7 @@ void CBasePlayer::UpdateClientData( void )
 	if( m_fInitHUD )
 	{
 		m_fInitHUD = FALSE;
-		gInitHUD = FALSE;
+		gInitHUD = false;
 
 		MESSAGE_BEGIN( MSG_ONE, gmsgResetHUD, NULL, pev );
 			WRITE_BYTE( 0 );
@@ -5189,7 +5189,7 @@ void CBasePlayer::UpdateClientData( void )
 		MESSAGE_BEGIN( MSG_ONE, gmsgShowGameTitle, NULL, pev );
 		WRITE_BYTE( 0 );
 		MESSAGE_END();
-		gDisplayTitle = 0;
+		gDisplayTitle = false;
 	}
 
 	if( pev->health != m_iClientHealth || (int)pev->max_health != m_iClientMaxHealth )

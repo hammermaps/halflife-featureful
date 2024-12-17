@@ -59,7 +59,7 @@
 #define SF_TRIGGER_HURT_IGNORE_ARMOR 256
 #define SF_TRIGGER_HURT_NO_PUNCH 512
 
-extern DLL_GLOBAL BOOL		g_fGameOver;
+extern DLL_GLOBAL bool		g_fGameOver;
 
 class CFrictionModifier : public CBaseEntity
 {
@@ -2423,7 +2423,7 @@ void NextLevel( void )
 		pChange = GetClassPtr( (CChangeLevel *)VARS( pent ) );
 
 	strcpy( st_szNextMap, pChange->m_szMapName );
-	g_fGameOver = TRUE;
+	g_fGameOver = true;
 
 	if( pChange->pev->nextthink < gpGlobals->time )
 	{
