@@ -738,10 +738,10 @@ void CFuncVehicle::SetControls(entvars_t *pevControls)
 	m_controlMaxs = pevControls->maxs + offset;
 }
 
-BOOL CFuncVehicle::OnControls(entvars_t *pevTest)
+bool CFuncVehicle::OnControls(entvars_t *pevTest)
 {
 	if( pev->spawnflags & SF_TRACKTRAIN_NOCONTROL )
-		return FALSE;
+		return false;
 
 	Vector offset = pevTest->origin - pev->origin;
 

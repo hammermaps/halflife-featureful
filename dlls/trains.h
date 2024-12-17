@@ -90,7 +90,7 @@ public:
 
 	void SetTrack( CPathTrack *track ) { m_ppath = track->Nearest( pev->origin ); }
 	void SetControls( entvars_t *pevControls );
-	BOOL OnControls( entvars_t *pev );
+	bool OnControls( entvars_t *pev ) override;
 
 	void StopSound( void );
 	void UpdateSound( void );
@@ -138,7 +138,7 @@ public:
 	virtual int ObjectCaps() { return ( CBaseEntity::ObjectCaps() & ~FCAP_ACROSS_TRANSITION ) | FCAP_DIRECTIONAL_USE; }
 	virtual int Classify();
 	virtual void OverrideReset();
-	virtual BOOL OnControls( entvars_t *pev );
+	virtual bool OnControls( entvars_t *pev ) override;
 	virtual void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 	virtual void Blocked( CBaseEntity *pOther );
 

@@ -1408,12 +1408,12 @@ void CFuncTrackTrain::SetControls( entvars_t *pevControls )
 	m_controlMaxs = pevControls->maxs + offset;
 }
 
-BOOL CFuncTrackTrain::OnControls( entvars_t *pevTest )
+bool CFuncTrackTrain::OnControls( entvars_t *pevTest )
 {
 	Vector offset = pevTest->origin - pev->origin;
 
 	if( pev->spawnflags & SF_TRACKTRAIN_NOCONTROL )
-		return FALSE;
+		return false;
 
 	// Transform offset into local coordinates
 	UTIL_MakeVectors( pev->angles );
@@ -1424,9 +1424,9 @@ BOOL CFuncTrackTrain::OnControls( entvars_t *pevTest )
 
 	if( local.x >= m_controlMins.x && local.y >= m_controlMins.y && local.z >= m_controlMins.z &&
 		 local.x <= m_controlMaxs.x && local.y <= m_controlMaxs.y && local.z <= m_controlMaxs.z )
-		 return TRUE;
+		 return true;
 
-	return FALSE;
+	return false;
 }
 
 void CFuncTrackTrain::Find( void )
