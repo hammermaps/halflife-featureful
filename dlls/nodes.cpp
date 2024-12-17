@@ -61,9 +61,9 @@ void CGraph::InitGraph( void )
 {
 	// Make the graph unavailable
 	//
-	m_fGraphPresent = FALSE;
-	m_fGraphPointersSet = FALSE;
-	m_fRoutingComplete = FALSE;
+	m_fGraphPresent = 0;
+	m_fGraphPointersSet = 0;
+	m_fRoutingComplete = 0;
 
 	// Free the link pool
 	//
@@ -116,7 +116,7 @@ void CGraph::InitGraph( void )
 // reasonable number of nodes so we can build the path which
 // will be saved to disk.
 //=========================================================
-int CGraph::AllocNodes( void )
+bool CGraph::AllocNodes( void )
 {
 	//  malloc all of the nodes
 	WorldGraph.m_pNodes = (CNode *)calloc( sizeof(CNode), MAX_NODES );
@@ -125,10 +125,10 @@ int CGraph::AllocNodes( void )
 	if( !WorldGraph.m_pNodes )
 	{
 		ALERT( at_aiconsole, "**ERROR**\nCouldn't malloc %d nodes!\n", WorldGraph.m_cNodes );
-		return FALSE;
+		return false;
 	}
 
-	return TRUE;
+	return true;
 }
 
 //=========================================================
@@ -1906,7 +1906,7 @@ void CTestHull::BuildNodeGraph( void )
 
 					flDist = ( vecSpot - pev->origin ).Length2D();
 
-					int fWalkFailed = FALSE;
+					bool fWalkFailed = false;
 
 					// in this loop we take tiny steps from the current node to the nodes that it links to, one at a time.
 					// pev->angles.y = flYaw;
@@ -1920,7 +1920,7 @@ void CTestHull::BuildNodeGraph( void )
 						if( !WALK_MOVE( ENT( pev ), flYaw, stepSize, MoveMode ) )
 						{
 							// can't take the next step
-							fWalkFailed = TRUE;
+							fWalkFailed = true;
 							break;
 						}
 					}
@@ -1929,7 +1929,7 @@ void CTestHull::BuildNodeGraph( void )
 					{
 						// ALERT( at_console, "bogus walk\n" );
 						// we thought we 
-						fWalkFailed = TRUE;
+						fWalkFailed = true;
 					}
 
 					if( fWalkFailed )
@@ -2103,9 +2103,9 @@ void CTestHull::BuildNodeGraph( void )
 
 	// We now have some graphing capabilities.
 	//
-	WorldGraph.m_fGraphPresent = TRUE;//graph is in memory.
-	WorldGraph.m_fGraphPointersSet = TRUE;// since the graph was generated, the pointers are ready
-	WorldGraph.m_fRoutingComplete = FALSE; // Optimal routes aren't computed, yet.
+	WorldGraph.m_fGraphPresent = 1;//graph is in memory.
+	WorldGraph.m_fGraphPointersSet = 1;// since the graph was generated, the pointers are ready
+	WorldGraph.m_fRoutingComplete = 0; // Optimal routes aren't computed, yet.
 
 	// Compute and compress the routing information.
 	//
@@ -2367,7 +2367,7 @@ void CQueuePriority::Heap_SiftUp( void )
 // will be loaded. If file cannot be loaded, the node tree
 // will be created and saved to disk.
 //=========================================================
-int CGraph::FLoadGraph( const char *szMapName )
+bool CGraph::FLoadGraph( const char *szMapName )
 {
 	char szFilename[MAX_PATH];
 	int iVersion;
@@ -2390,7 +2390,7 @@ int CGraph::FLoadGraph( const char *szMapName )
 	pMemFile = aMemFile = LOAD_FILE_FOR_ME( szFilename, &length );
 
 	if( !aMemFile )
-		return FALSE;
+		return false;
 
 	// Read the graph version number
 	//
@@ -2501,7 +2501,7 @@ int CGraph::FLoadGraph( const char *szMapName )
 
 		// Malloc for the routing info.
 		//
-		m_fRoutingComplete = FALSE;
+		m_fRoutingComplete = 0;
 		m_pRouteInfo = (signed char *)calloc( sizeof(signed char), m_nRouteInfo );
 		if( !m_pRouteInfo )
 		{
@@ -2521,7 +2521,7 @@ int CGraph::FLoadGraph( const char *szMapName )
 			goto ShortFile;
 		memcpy( m_pRouteInfo, pMemFile, sizeof(char) * m_nRouteInfo );
 		pMemFile += sizeof(char) * m_nRouteInfo;
-		m_fRoutingComplete = TRUE;
+		m_fRoutingComplete = 1;
 
 		// malloc for the hash links
 		//
@@ -2542,8 +2542,8 @@ int CGraph::FLoadGraph( const char *szMapName )
 
 		// Set the graph present flag, clear the pointers set flag
 		//
-		m_fGraphPresent = TRUE;
-		m_fGraphPointersSet = FALSE;
+		m_fGraphPresent = 1;
+		m_fGraphPointersSet = 0;
 
 		FREE_FILE( aMemFile );
 
@@ -2553,7 +2553,7 @@ int CGraph::FLoadGraph( const char *szMapName )
 		}
 
 		ALERT(at_aiconsole, "Built graph successfully\n");
-		return TRUE;
+		return true;
 	}
 	else
 	{
@@ -2566,14 +2566,14 @@ int CGraph::FLoadGraph( const char *szMapName )
 ShortFile:
 NoMemory:
 	FREE_FILE( aMemFile );
-	return FALSE;
+	return false;
 }
 
 //=========================================================
 // CGraph - FSaveGraph - It's not rocket science.
 // this WILL overwrite existing files.
 //=========================================================
-int CGraph::FSaveGraph( const char *szMapName )
+bool CGraph::FSaveGraph( const char *szMapName )
 {
 	int iVersion = GRAPH_VERSION;
 	char szFilename[MAX_PATH];
@@ -2583,7 +2583,7 @@ int CGraph::FSaveGraph( const char *szMapName )
 	{
 		// protect us in the case that the node graph isn't available or built
 		ALERT( at_aiconsole, "FSaveGraph: Graph not ready!\n" );
-		return FALSE;
+		return false;
 	}
 
 	// make sure directories have been made
@@ -2605,7 +2605,7 @@ int CGraph::FSaveGraph( const char *szMapName )
 	{
 		// couldn't create
 		ALERT( at_aiconsole, "Couldn't Create: %s\n", szFilename );
-		return FALSE;
+		return false;
 	}
 	else
 	{
@@ -2635,7 +2635,7 @@ int CGraph::FSaveGraph( const char *szMapName )
 			fwrite( m_pHashLinks, sizeof(short), m_nHashLinks, file );
 		}
 		fclose( file );
-		return TRUE;
+		return true;
 	}
 }
 
@@ -2646,7 +2646,7 @@ int CGraph::FSaveGraph( const char *szMapName )
 // this is done after loading the graph from disk, whereupon
 // the pointers are not valid.
 //=========================================================
-int CGraph::FSetGraphPointers( void )
+bool CGraph::FSetGraphPointers( void )
 {
 	int i;
 	edict_t	*pentLinkEnt;
@@ -2686,8 +2686,8 @@ int CGraph::FSetGraphPointers( void )
 	}
 
 	// the pointers are now set.
-	m_fGraphPointersSet = TRUE;
-	return TRUE;
+	m_fGraphPointersSet = 1;
+	return true;
 }
 
 //=========================================================
@@ -2705,9 +2705,9 @@ int CGraph::FSetGraphPointers( void )
 // though. ( I now suspect that we are getting GMT back from
 // these functions and must compensate for local time ) (sjb)
 //=========================================================
-int CGraph::CheckNODFile( const char *szMapName )
+bool CGraph::CheckNODFile( const char *szMapName )
 {
-	int retValue;
+	bool retValue;
 
 	char szBspFilename[MAX_PATH];
 	char szGraphFilename[MAX_PATH];
@@ -2720,7 +2720,7 @@ int CGraph::CheckNODFile( const char *szMapName )
 	strcat( szGraphFilename, szMapName );
 	strcat( szGraphFilename, ".nod" );
 
-	retValue = TRUE;
+	retValue = true;
 
 	int iCompare;
 	if( COMPARE_FILE_TIME( szBspFilename, szGraphFilename, &iCompare ) )
@@ -2729,12 +2729,12 @@ int CGraph::CheckNODFile( const char *szMapName )
 		{
 			// BSP file is newer.
 			ALERT( at_aiconsole, ".NOD File will be updated\n\n" );
-			retValue = FALSE;
+			retValue = false;
 		}
 	}
 	else
 	{
-		retValue = FALSE;
+		retValue = false;
 	}
 
 	return retValue;
@@ -3435,7 +3435,7 @@ void CGraph::ComputeStaticRoutingTables( void )
 #if 0
 	TestRoutingTables();
 #endif
-	m_fRoutingComplete = TRUE;
+	m_fRoutingComplete = 1;
 }
 
 // Test those routing tables. Doesn't really work, yet.
@@ -3466,9 +3466,9 @@ void CGraph::TestRoutingTables( void )
 				{
 					for( int iTo = 0; iTo < m_cNodes; iTo++ )
 					{
-						m_fRoutingComplete = FALSE;
+						m_fRoutingComplete = 0;
 						int cPathSize1 = FindShortestPath( pMyPath, m_cNodes, iFrom, iTo, iHull, iCapMask );
-						m_fRoutingComplete = TRUE;
+						m_fRoutingComplete = 1;
 						int cPathSize2 = FindShortestPath( pMyPath2, m_cNodes, iFrom, iTo, iHull, iCapMask );
 
 						// Unless we can look at the entire path, we can verify that it's correct.
@@ -3546,9 +3546,9 @@ void CGraph::TestRoutingTables( void )
 								ALERT( at_aiconsole, "%d ", pMyPath2[i] );
 							}
 							ALERT( at_aiconsole, "\n" );
-							m_fRoutingComplete = FALSE;
+							m_fRoutingComplete = 0;
 							cPathSize1 = FindShortestPath( pMyPath, m_cNodes, iFrom, iTo, iHull, iCapMask );
-							m_fRoutingComplete = TRUE;
+							m_fRoutingComplete = 1;
 							cPathSize2 = FindShortestPath( pMyPath2, m_cNodes, iFrom, iTo, iHull, iCapMask );
 							goto EnoughSaid;
 						}
