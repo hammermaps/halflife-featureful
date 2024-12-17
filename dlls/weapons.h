@@ -279,7 +279,7 @@ public:
 	int m_iPlayEmptySound;
 	int m_fFireOnEmpty;		// True when the gun is empty and the player is still holding down the
 							// attack key(s)
-	virtual BOOL PlayEmptySound( void );
+	virtual bool PlayEmptySound( void );
 	virtual void ResetEmptySound( void );
 
 	virtual void SendWeaponAnim( int iAnim, int body = 0 );  // skiplocal is 1 if client is predicting weapon animations
@@ -1092,7 +1092,7 @@ public:
 	void Holster();
 	void Reload( void );
 	void WeaponIdle(void);
-	BOOL PlayEmptySound(void);
+	bool PlayEmptySound() override;
 	BOOL ShouldWeaponIdle(void) { return TRUE; }
 	CBaseEntity* FindHealTarget(bool increasedRadius = false);
 
@@ -1293,7 +1293,7 @@ public:
 	void Holster();
 	void WeaponIdle( void );
 
-	BOOL PlayEmptySound( void );
+	bool PlayEmptySound( void ) override;
 
 	virtual BOOL UseDecrement( void )
 	{

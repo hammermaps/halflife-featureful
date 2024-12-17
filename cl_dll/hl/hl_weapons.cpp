@@ -206,15 +206,15 @@ CBasePlayerWeapon::PlayEmptySound
 
 =====================
 */
-BOOL CBasePlayerWeapon::PlayEmptySound( void )
+bool CBasePlayerWeapon::PlayEmptySound( void )
 {
 	if( m_iPlayEmptySound )
 	{
 		//HUD_PlaySound( "weapons/357_cock1.wav", 0.8f ); // TODO: this is disabled as empty sound is now defined via server-side soundscript
 		m_iPlayEmptySound = 0;
-		return 0;
+		return false;
 	}
-	return 0;
+	return false;
 }
 
 

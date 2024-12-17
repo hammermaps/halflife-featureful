@@ -250,7 +250,7 @@ void CMedkit::WeaponIdle(void)
 	SendWeaponAnim(iAnim);
 }
 
-BOOL CMedkit::PlayEmptySound(void)
+bool CMedkit::PlayEmptySound()
 {
 	if (m_iPlayEmptySound)
 	{

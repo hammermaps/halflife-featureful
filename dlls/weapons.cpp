@@ -980,7 +980,7 @@ void CBasePlayerWeapon::PrecachePModel(const char *name)
 		PRECACHE_MODEL(name);
 }
 
-BOOL CBasePlayerWeapon::PlayEmptySound( void )
+bool CBasePlayerWeapon::PlayEmptySound( void )
 {
 	if( m_iPlayEmptySound )
 	{
