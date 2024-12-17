@@ -132,10 +132,7 @@ public:
 	virtual void Activate( void );
 	virtual void UpdateOnRemove();
 	bool IsLockedByMaster() {
-		if( m_sMaster && !UTIL_IsMasterTriggered( m_sMaster, m_hActivator ) )
-			return TRUE;
-		else
-			return FALSE;
+		return m_sMaster && !UTIL_IsMasterTriggered( m_sMaster, m_hActivator );
 	}
 
 	virtual int		Save( CSave &save );
@@ -172,15 +169,15 @@ public:
 
 	void ReleaseEntity( CBaseMonster *pEntity );
 	void CancelScript( int cancellationReason = SCRIPT_CANCELLATION_REASON_GENERIC );
-	virtual BOOL StartSequence( CBaseMonster *pTarget, string_t iszSeq, BOOL completeOnEmpty );
-	virtual BOOL FCanOverrideState ( void );
+	virtual bool StartSequence( CBaseMonster *pTarget, string_t iszSeq, bool completeOnEmpty );
+	virtual bool FCanOverrideState ( void );
 	void SequenceDone ( CBaseMonster *pMonster );
 	virtual void FixScriptMonsterSchedule( CBaseMonster *pMonster );
 	bool ForcedNoInterruptions();
-	BOOL	CanInterrupt( void );
+	bool	CanInterrupt( void );
 	bool	CanInterruptByPlayerCall();
 	bool	CanInterruptByBarnacle();
-	void	AllowInterrupt( BOOL fAllow );
+	void	AllowInterrupt( bool fAllow );
 	int		IgnoreConditions( void );
 	virtual bool	ShouldResetOnGroundFlag();
 	void OnMoveFail();
@@ -238,7 +235,7 @@ public:
 
 class CCineAI : public CCineMonster
 {
-	BOOL FCanOverrideState ( void );
+	bool FCanOverrideState ( void ) override;
 	bool ShouldResetOnGroundFlag();
 };
 #endif //SCRIPTED_H

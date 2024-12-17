@@ -3180,11 +3180,11 @@ void CBaseMonster::HandleAnimEvent( MonsterEvent_t *pEvent )
 		break;
 	case SCRIPT_EVENT_NOINTERRUPT:		// Can't be interrupted from now on
 		if( m_pCine )
-			m_pCine->AllowInterrupt( FALSE );
+			m_pCine->AllowInterrupt( false );
 		break;
 	case SCRIPT_EVENT_CANINTERRUPT:		// OK to interrupt now
 		if( m_pCine )
-			m_pCine->AllowInterrupt( TRUE );
+			m_pCine->AllowInterrupt( true );
 		break;
 #if 0
 	case SCRIPT_EVENT_INAIR:			// Don't DROP_TO_FLOOR()

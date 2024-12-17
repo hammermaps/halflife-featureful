@@ -333,20 +333,20 @@ void CCineMonster::Spawn( void )
 // FCanOverrideState - returns FALSE, scripted sequences
 // cannot possess entities regardless of state.
 //=========================================================
-BOOL CCineMonster::FCanOverrideState( void )
+bool CCineMonster::FCanOverrideState( void )
 {
 	if( pev->spawnflags & SF_SCRIPT_OVERRIDESTATE )
-		return TRUE;
-	return FALSE;
+		return true;
+	return false;
 }
 
 //=========================================================
 // FCanOverrideState - returns true because scripted AI can
 // possess entities regardless of their state.
 //=========================================================
-BOOL CCineAI::FCanOverrideState( void )
+bool CCineAI::FCanOverrideState( void )
 {
-	return TRUE;
+	return true;
 }
 
 bool CCineMonster::ShouldResetOnGroundFlag()
@@ -741,7 +741,7 @@ typedef enum
 } SCRIPT_TARGET_ACTIVATOR;
 
 // lookup a sequence name and setup the target monster to play it
-BOOL CCineMonster::StartSequence( CBaseMonster *pTarget, string_t iszSeq, BOOL completeOnEmpty )
+bool CCineMonster::StartSequence(CBaseMonster *pTarget, string_t iszSeq, bool completeOnEmpty )
 {
 	if( !iszSeq && completeOnEmpty )
 	{
@@ -750,7 +750,7 @@ BOOL CCineMonster::StartSequence( CBaseMonster *pTarget, string_t iszSeq, BOOL c
 		// not until the animation sequence is finished. We have to manually take care of these things where there is no sequence.
 
 		SequenceDone( pTarget );
-		return FALSE;
+		return false;
 	}
 
 	if ( m_iszPlay != 0 && iszSeq == m_iszPlay )
@@ -781,7 +781,7 @@ BOOL CCineMonster::StartSequence( CBaseMonster *pTarget, string_t iszSeq, BOOL c
 #endif
 	pTarget->pev->frame = 0;
 	pTarget->ResetSequenceInfo( );
-	return TRUE;
+	return true;
 }
 
 //=========================================================
@@ -848,14 +848,14 @@ void CCineMonster::FixScriptMonsterSchedule( CBaseMonster *pMonster )
 	}
 }
 
-BOOL CBaseMonster::ExitScriptedSequence()
+bool CBaseMonster::ExitScriptedSequence()
 {
 	if( pev->deadflag == DEAD_DYING )
 	{
 		// is this legal?
 		// BUGBUG -- This doesn't call Killed()
 		m_IdealMonsterState = MONSTERSTATE_DEAD;
-		return FALSE;
+		return false;
 	}
 
 	if( m_pCine )
@@ -863,7 +863,7 @@ BOOL CBaseMonster::ExitScriptedSequence()
 		m_pCine->CancelScript(SCRIPT_CANCELLATION_REASON_INTERRUPTED);
 	}
 
-	return TRUE;
+	return true;
 }
 
 bool CCineMonster::ForcedNoInterruptions()
@@ -871,24 +871,24 @@ bool CCineMonster::ForcedNoInterruptions()
 	return (pev->spawnflags & SF_SCRIPT_NOINTERRUPT) || m_interruptionPolicy == SCRIPT_INTERRUPTION_POLICY_NO_INTERRUPTIONS;
 }
 
-void CCineMonster::AllowInterrupt( BOOL fAllow )
+void CCineMonster::AllowInterrupt( bool fAllow )
 {
 	if( ForcedNoInterruptions() )
 		return;
 	m_interruptable = fAllow;
 }
 
-BOOL CCineMonster::CanInterrupt( void )
+bool CCineMonster::CanInterrupt( void )
 {
 	if( !m_interruptable )
-		return FALSE;
+		return false;
 
 	CBaseEntity *pTarget = m_hTargetEnt;
 
 	if( pTarget != NULL && pTarget->pev->deadflag == DEAD_NO )
-		return TRUE;
+		return true;
 
-	return FALSE;
+	return false;
 }
 
 bool CCineMonster::CanInterruptByPlayerCall()
@@ -1071,7 +1071,7 @@ void CCineMonster::UpdateOnRemove()
 	}
 }
 
-BOOL CBaseMonster::CineCleanup()
+bool CBaseMonster::CineCleanup()
 {
 	CCineMonster *pOldCine = m_pCine;
 
@@ -1118,7 +1118,7 @@ BOOL CBaseMonster::CineCleanup()
 		StopAnimation();
 		pev->movetype = MOVETYPE_NONE;
 		pev->effects |= EF_NOINTERP;	// Don't interpolate either, assume the corpse is positioned in its final resting place
-		return FALSE;
+		return false;
 	}
 
 	// If we actually played a sequence
@@ -1201,7 +1201,7 @@ BOOL CBaseMonster::CineCleanup()
 	//	SetAnimation( m_MonsterState );
 	ClearBits( pev->spawnflags, SF_MONSTER_WAIT_FOR_SCRIPT );
 
-	return TRUE;
+	return true;
 }
 
 void CBaseMonster::SetScriptedMoveGoal(CBaseEntity *pEntity)
@@ -1263,8 +1263,8 @@ public:
 	static TYPEDESCRIPTION m_SaveData[];
 
 	CBaseToggle *FindEntity( void );
-	BOOL AcceptableSpeaker( CBaseToggle *pTarget );
-	BOOL StartSentence( CBaseToggle *pTarget );
+	bool AcceptableSpeaker( CBaseToggle *pTarget );
+	bool StartSentence( CBaseToggle *pTarget );
 
 	float SpeakerSearchRadius() const {
 		return m_flRadius;
@@ -1484,7 +1484,7 @@ void CScriptedSentence::DelayThink( void )
 	SetThink( &CScriptedSentence::FindThink );
 }
 
-BOOL CScriptedSentence::AcceptableSpeaker( CBaseToggle *pTarget )
+bool CScriptedSentence::AcceptableSpeaker( CBaseToggle *pTarget )
 {
 	if( pTarget )
 	{
@@ -1492,27 +1492,26 @@ BOOL CScriptedSentence::AcceptableSpeaker( CBaseToggle *pTarget )
 		if( pMonster )
 		{
 			if (!MatchingMonsterState(pMonster->m_MonsterState, m_requiredState))
-				return FALSE;
+				return false;
 			if( pev->spawnflags & SF_SENTENCE_FOLLOWERS )
 			{
 				if( pMonster->m_hTargetEnt == 0 || !pMonster->m_hTargetEnt->IsPlayer() )
-					return FALSE;
+					return false;
 			}
 
-			BOOL override;
-
+			bool override;
 			if( pev->spawnflags & SF_SENTENCE_INTERRUPT )
-				override = TRUE;
+				override = true;
 			else
-				override = FALSE;
+				override = false;
 
 			if( pMonster->CanPlaySentence( override ) )
-				return TRUE;
+				return true;
 		}
 		else
 			return pTarget->IsAllowedToSpeak();
 	}
-	return FALSE;
+	return false;
 }
 
 CBaseToggle *CScriptedSentence::FindEntity( void )
@@ -1568,17 +1567,17 @@ CBaseToggle *CScriptedSentence::FindEntity( void )
 	return NULL;
 }
 
-BOOL CScriptedSentence::StartSentence( CBaseToggle *pTarget )
+bool CScriptedSentence::StartSentence( CBaseToggle *pTarget )
 {
 	if( !pTarget )
 	{
 		ALERT( at_aiconsole, "Not Playing sentence %s\n", STRING( m_iszSentence ) );
-		return FALSE;
+		return false;
 	}
 
-	BOOL bConcurrent = FALSE;
+	bool bConcurrent = false;
 	if( !( pev->spawnflags & SF_SENTENCE_CONCURRENT ) )
-		bConcurrent = TRUE;
+		bConcurrent = true;
 
 	CBaseEntity *pListener = NULL;
 	if( !FStringNull( m_iszListener ) )
@@ -1592,7 +1591,7 @@ BOOL CScriptedSentence::StartSentence( CBaseToggle *pTarget )
 
 		if (!pListener && FBitSet(pev->spawnflags, SF_SENTENCE_REQUIRE_LISTENER))
 		{
-			return FALSE;
+			return false;
 		}
 	}
 
@@ -1654,7 +1653,7 @@ BOOL CScriptedSentence::StartSentence( CBaseToggle *pTarget )
 			}
 		}
 	}
-	return TRUE;
+	return true;
 }
 
 //=========================================================

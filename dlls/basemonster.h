@@ -370,8 +370,8 @@ public:
 	inline BOOL HasMemory( int iMemory ) { if ( m_afMemory & iMemory ) return TRUE; return FALSE; }
 	inline BOOL HasAllMemories( int iMemory ) { if ( (m_afMemory & iMemory) == iMemory ) return TRUE; return FALSE; }
 
-	BOOL ExitScriptedSequence();
-	BOOL CineCleanup();
+	bool ExitScriptedSequence();
+	bool CineCleanup();
 	void SetScriptedMoveGoal(CBaseEntity* pEntity);
 	CBaseEntity* ScriptedMoveGoal();
 

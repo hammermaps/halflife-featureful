@@ -641,7 +641,7 @@ void CBaseMonster::RunTask( Task_t *pTask )
 					}
 					else
 					{
-						m_pCine->StartSequence( (CBaseMonster *)this, m_pCine->m_iszPlay, TRUE );
+						m_pCine->StartSequence( (CBaseMonster *)this, m_pCine->m_iszPlay, true );
 						if( m_fSequenceFinished )
 							ClearSchedule();
 					}
@@ -651,7 +651,7 @@ void CBaseMonster::RunTask( Task_t *pTask )
 				else if ( FBitSet(m_pCine->pev->spawnflags, SF_SCRIPT_FORCE_IDLE_LOOPING) && !FStringNull( m_pCine->m_iszIdle) && !m_pCine->IsAction() )
 				{
 					if ( m_fSequenceFinished )
-						m_pCine->StartSequence( this, m_pCine->m_iszIdle, FALSE );
+						m_pCine->StartSequence( this, m_pCine->m_iszIdle, false );
 				}
 			}
 			break;
@@ -1586,7 +1586,7 @@ void CBaseMonster::StartTask( Task_t *pTask )
 		{
 			if( m_pCine && m_pCine->m_iszIdle && !m_pCine->IsAction() )
 			{
-				m_pCine->StartSequence( (CBaseMonster *)this, m_pCine->m_iszIdle, FALSE );
+				m_pCine->StartSequence( (CBaseMonster *)this, m_pCine->m_iszIdle, false );
 				if( FStrEq( STRING( m_pCine->m_iszIdle ), STRING( m_pCine->m_iszPlay ) ) )
 				{
 					pev->framerate = 0;
