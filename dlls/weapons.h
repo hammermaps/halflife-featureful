@@ -286,7 +286,7 @@ public:
 
 	virtual BOOL IsUseable( void );
 	bool DefaultDeploy( const char *szViewModel, const char *szWeaponModel, int iAnim, const char *szAnimExt, int body = 0 );
-	BOOL DefaultReload( int iClipSize, int iAnim, float fDelay, int body = 0 );
+	bool DefaultReload( int iClipSize, int iAnim, float fDelay, int body = 0 );
 	void PrecachePModel(const char* name);
 
 	virtual void ItemPostFrame( void );	// called each frame by the player PostThink
