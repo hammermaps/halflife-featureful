@@ -983,9 +983,7 @@ void CAGrunt::StartTask( Task_t *pTask )
 		{
 			Vector vecCenter;
 			TraceResult tr;
-			BOOL fSkip;
-
-			fSkip = FALSE;
+			bool fSkip = false;
 			vecCenter = Center();
 
 			UTIL_VecToAngles( m_vecEnemyLKP - pev->origin );
@@ -994,7 +992,7 @@ void CAGrunt::StartTask( Task_t *pTask )
 			if( tr.flFraction == 1.0f )
 			{
 				MakeIdealYaw( pev->origin + gpGlobals->v_right * 128.0f );
-				fSkip = TRUE;
+				fSkip = true;
 				TaskComplete();
 			}
 
@@ -1004,7 +1002,7 @@ void CAGrunt::StartTask( Task_t *pTask )
 				if( tr.flFraction == 1.0f )
 				{
 					MakeIdealYaw( pev->origin - gpGlobals->v_right * 128.0f );
-					fSkip = TRUE;
+					fSkip = true;
 					TaskComplete();
 				}
 			}
@@ -1015,7 +1013,7 @@ void CAGrunt::StartTask( Task_t *pTask )
 				if( tr.flFraction == 1.0f )
 				{
 					MakeIdealYaw( pev->origin + gpGlobals->v_right * 256.0f );
-					fSkip = TRUE;
+					fSkip = true;
 					TaskComplete();
 				}
 			}
@@ -1026,7 +1024,7 @@ void CAGrunt::StartTask( Task_t *pTask )
 				if( tr.flFraction == 1.0f )
 				{
 					MakeIdealYaw( pev->origin - gpGlobals->v_right * 256.0f );
-					fSkip = TRUE;
+					fSkip = true;
 					TaskComplete();
 				}
 			}

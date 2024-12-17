@@ -34,8 +34,8 @@ extern DLL_GLOBAL BOOL		g_fGameOver;
 
 CHalfLifeTeamplay::CHalfLifeTeamplay()
 {
-	m_DisableDeathMessages = FALSE;
-	m_DisableDeathPenalty = FALSE;
+	m_DisableDeathMessages = false;
+	m_DisableDeathPenalty = false;
 
 	memset( team_names, 0, sizeof(team_names) );
 	memset( team_scores, 0, sizeof(team_scores) );
@@ -63,9 +63,9 @@ CHalfLifeTeamplay::CHalfLifeTeamplay()
 	}
 	// Has the server set teams
 	if( m_szTeamList[0] != '\0' )
-		m_teamLimit = TRUE;
+		m_teamLimit = true;
 	else
-		m_teamLimit = FALSE;
+		m_teamLimit = false;
 
 	RecountTeams();
 }
@@ -280,14 +280,14 @@ void CHalfLifeTeamplay::ChangePlayerTeam( CBasePlayer *pPlayer, const char *pTea
 	if( bKill )
 	{
 		// kill the player,  remove a death,  and let them start on the new team
-		m_DisableDeathMessages = TRUE;
-		m_DisableDeathPenalty = TRUE;
+		m_DisableDeathMessages = true;
+		m_DisableDeathPenalty = true;
 
 		entvars_t *pevWorld = VARS( INDEXENT( 0 ) );
 		pPlayer->TakeDamage( pevWorld, pevWorld, 900, damageFlags );
 
-		m_DisableDeathMessages = FALSE;
-		m_DisableDeathPenalty = FALSE;
+		m_DisableDeathMessages = false;
+		m_DisableDeathPenalty = false;
 	}
 
 	// copy out the team name from the model
@@ -574,7 +574,7 @@ void CHalfLifeTeamplay::RecountTeams( bool bResendInfo )
 	if( num_teams < 2 )
 	{
 		num_teams = 0;
-		m_teamLimit = FALSE;
+		m_teamLimit = false;
 	}
 
 	// Sanity check

@@ -688,7 +688,7 @@ int CBasePlayer::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, fl
 {
 	// have suit diagnose the problem - ie: report damage type
 	int bitsDamage = bitsDamageType;
-	int ffound = TRUE;
+	bool ffound = true;
 	int fmajor;
 	int fcritical;
 	int fTookDamage;
@@ -792,14 +792,14 @@ int CBasePlayer::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, fl
 
 	while( fTookDamage && ( !ftrivial || ( bitsDamage & DMG_TIMEBASED ) ) && ffound && bitsDamage )
 	{
-		ffound = FALSE;
+		ffound = false;
 
 		if( bitsDamage & DMG_CLUB )
 		{
 			if( fmajor )
 				SetSuitUpdate( "!HEV_DMG4", FALSE, SUIT_NEXT_IN_30SEC );	// minor fracture
 			bitsDamage &= ~DMG_CLUB;
-			ffound = TRUE;
+			ffound = true;
 		}
 		if( bitsDamage & ( DMG_FALL | DMG_CRUSH ) )
 		{
@@ -809,7 +809,7 @@ int CBasePlayer::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, fl
 				SetSuitUpdate( "!HEV_DMG4", FALSE, SUIT_NEXT_IN_30SEC );	// minor fracture
 
 			bitsDamage &= ~( DMG_FALL | DMG_CRUSH );
-			ffound = TRUE;
+			ffound = true;
 		}
 
 		if( bitsDamage & DMG_BULLET )
@@ -820,7 +820,7 @@ int CBasePlayer::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, fl
 			//	SetSuitUpdate( "!HEV_DMG0", FALSE, SUIT_NEXT_IN_30SEC );	// minor laceration
 
 			bitsDamage &= ~DMG_BULLET;
-			ffound = TRUE;
+			ffound = true;
 		}
 
 		if( bitsDamage & DMG_SLASH )
@@ -831,7 +831,7 @@ int CBasePlayer::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, fl
 				SetSuitUpdate( "!HEV_DMG0", FALSE, SUIT_NEXT_IN_30SEC );	// minor laceration
 
 			bitsDamage &= ~DMG_SLASH;
-			ffound = TRUE;
+			ffound = true;
 		}
 
 		if( bitsDamage & DMG_SONIC )
@@ -839,40 +839,40 @@ int CBasePlayer::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, fl
 			if( fmajor )
 				SetSuitUpdate( "!HEV_DMG2", FALSE, SUIT_NEXT_IN_1MIN );	// internal bleeding
 			bitsDamage &= ~DMG_SONIC;
-			ffound = TRUE;
+			ffound = true;
 		}
 
 		if( bitsDamage & ( DMG_POISON | DMG_PARALYZE ) )
 		{
 			SetSuitUpdate( "!HEV_DMG3", FALSE, SUIT_NEXT_IN_1MIN );	// blood toxins detected
 			bitsDamage &= ~( DMG_POISON | DMG_PARALYZE );
-			ffound = TRUE;
+			ffound = true;
 		}
 
 		if( bitsDamage & DMG_ACID )
 		{
 			SetSuitUpdate( "!HEV_DET1", FALSE, SUIT_NEXT_IN_1MIN );	// hazardous chemicals detected
 			bitsDamage &= ~DMG_ACID;
-			ffound = TRUE;
+			ffound = true;
 		}
 
 		if( bitsDamage & DMG_NERVEGAS )
 		{
 			SetSuitUpdate( "!HEV_DET0", FALSE, SUIT_NEXT_IN_1MIN );	// biohazard detected
 			bitsDamage &= ~DMG_NERVEGAS;
-			ffound = TRUE;
+			ffound = true;
 		}
 
 		if( bitsDamage & DMG_RADIATION )
 		{
 			SetSuitUpdate( "!HEV_DET2", FALSE, SUIT_NEXT_IN_1MIN );	// radiation detected
 			bitsDamage &= ~DMG_RADIATION;
-			ffound = TRUE;
+			ffound = true;
 		}
 		if( bitsDamage & DMG_SHOCK )
 		{
 			bitsDamage &= ~DMG_SHOCK;
-			ffound = TRUE;
+			ffound = true;
 		}
 	}
 

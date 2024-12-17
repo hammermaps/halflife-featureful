@@ -725,7 +725,7 @@ extern int gEvilImpulse101;
 //=========================================================
 void CHalfLifeMultiplay::PlayerSpawn( CBasePlayer *pPlayer )
 {
-	BOOL		addDefault = TRUE;
+	bool		addDefault = true;
 	CBaseEntity	*pWeaponEntity = NULL;
 	int 		iOldAutoWepSwitch;
 
@@ -738,7 +738,7 @@ void CHalfLifeMultiplay::PlayerSpawn( CBasePlayer *pPlayer )
 	if (IsCoOp() && mapConfig.valid)
 	{
 		EquipPlayerFromMapConfig(pPlayer, mapConfig);
-		addDefault = FALSE;
+		addDefault = false;
 	}
 	else
 	{
@@ -747,7 +747,7 @@ void CHalfLifeMultiplay::PlayerSpawn( CBasePlayer *pPlayer )
 		while( ( pWeaponEntity = UTIL_FindEntityByClassname( pWeaponEntity, "game_player_equip" ) ) )
 		{
 			pWeaponEntity->Touch( pPlayer );
-			addDefault = FALSE;
+			addDefault = false;
 		}
 	}
 
@@ -1771,7 +1771,7 @@ void CHalfLifeMultiplay::ChangeLevel( void )
 	strcpy( szFirstMapInList, "hldm1" );  // the absolute default level is hldm1
 
 	int curplayers;
-	BOOL do_cycle = TRUE;
+	bool do_cycle = true;
 
 	// find the map to change to
 	const char *mapcfile = CVAR_GET_STRING( "mapcyclefile" );
@@ -1792,14 +1792,14 @@ void CHalfLifeMultiplay::ChangeLevel( void )
 		if( !ReloadMapCycleFile( mapcfile, &mapcycle ) || ( !mapcycle.items ) )
 		{
 			ALERT( at_console, "Unable to load map cycle file %s\n", mapcfile );
-			do_cycle = FALSE;
+			do_cycle = false;
 		}
 	}
 
 	if( do_cycle && mapcycle.items )
 	{
-		BOOL keeplooking = FALSE;
-		BOOL found = FALSE;
+		bool keeplooking = false;
+		bool found = false;
 		mapcycle_item_s *item;
 
 		// Assume current map
@@ -1809,7 +1809,7 @@ void CHalfLifeMultiplay::ChangeLevel( void )
 		// Traverse list
 		for( item = mapcycle.next_item; item->next != mapcycle.next_item; item = item->next )
 		{
-			keeplooking = FALSE;
+			keeplooking = false;
 
 			ASSERT( item != NULL );
 
@@ -1817,12 +1817,12 @@ void CHalfLifeMultiplay::ChangeLevel( void )
 			{
 				if( curplayers >= item->minplayers )
 				{
-					found = TRUE;
+					found = true;
 					minplayers = item->minplayers;
 				}
 				else
 				{
-					keeplooking = TRUE;
+					keeplooking = true;
 				}
 			}
 
@@ -1830,19 +1830,19 @@ void CHalfLifeMultiplay::ChangeLevel( void )
 			{
 				if( curplayers <= item->maxplayers )
 				{
-					found = TRUE;
+					found = true;
 					maxplayers = item->maxplayers;
 				}
 				else
 				{
-					keeplooking = TRUE;
+					keeplooking = true;
 				}
 			}
 
 			if( keeplooking )
 				continue;
 
-			found = TRUE;
+			found = true;
 			break;
 		}
 
