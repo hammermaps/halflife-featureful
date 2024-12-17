@@ -221,7 +221,7 @@ public:
 	virtual void AddPoints( int score, bool bAllowNegativeScore ) { AddFloatPoints((float)score, bAllowNegativeScore); }
 	virtual void AddPointsToTeam( int score, bool bAllowNegativeScore ) {}
 	virtual int AddPlayerItem( CBasePlayerWeapon *pItem ) { return DID_NOT_GET_ITEM; }
-	virtual BOOL RemovePlayerItem( CBasePlayerWeapon *pItem ) { return 0; }
+	virtual bool RemovePlayerItem( CBasePlayerWeapon *pItem ) { return false; }
 	virtual int GiveAmmo( int iAmount, const char *szName ) { return -1; }
 	virtual float GetDelay( void ) { return 0; }
 	virtual int IsMoving( void ) { return pev->velocity != g_vecZero; }

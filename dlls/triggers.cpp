@@ -3567,7 +3567,7 @@ void CTriggerCamera::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYP
 
 	if( FBitSet( pev->spawnflags, SF_CAMERA_PLAYER_TAKECONTROL ) )
 	{
-		pPlayer->EnableControl( FALSE );
+		pPlayer->EnableControl( false );
 	}
 
 	if( m_sPath )
@@ -3752,7 +3752,7 @@ void CTriggerCamera::ReleasePlayer()
 	{
 		SET_VIEW( player->edict(), player->edict() );
 		if (FBitSet( pev->spawnflags, SF_CAMERA_PLAYER_TAKECONTROL ))
-			player->EnableControl( TRUE );
+			player->EnableControl( true );
 	}
 }
 
@@ -4287,16 +4287,16 @@ void CTriggerPlayerFreeze::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, U
 
 		switch (freezeType) {
 		case USE_FREEZE_OFF:
-			pPlayer->EnableControl(TRUE);
+			pPlayer->EnableControl(true);
 			break;
 		case USE_FREEZE_ON:
-			pPlayer->EnableControl(FALSE);
+			pPlayer->EnableControl(false);
 			break;
 		case USE_FREEZE_TOGGLE:
 			if( pPlayer->pev->flags & FL_FROZEN )
-				pPlayer->EnableControl( TRUE );
+				pPlayer->EnableControl( true );
 			else
-				pPlayer->EnableControl( FALSE );
+				pPlayer->EnableControl( false );
 			break;
 		default:
 			ALERT(at_console, "%s: Unknown bad use type: %d\n", STRING(pev->classname), (int)freezeType);

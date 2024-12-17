@@ -259,7 +259,7 @@ void CGonome::UnlockPlayer()
 				player = (CBasePlayer*)UTIL_FindEntityByClassname(0, "player");
 
 			if (player)
-				player->EnableControl(TRUE);
+				player->EnableControl(true);
 
 			m_lockedPlayer = 0;
 			m_fPlayerLocked = FALSE;
@@ -585,7 +585,7 @@ void CGonome::HandleAnimEvent(MonsterEvent_t *pEvent)
 						if (!m_fPlayerLocked)
 						{
 							CBasePlayer* player = (CBasePlayer*)pHurt;
-							player->EnableControl(FALSE);
+							player->EnableControl(false);
 							m_lockedPlayer = player;
 							m_fPlayerLocked = TRUE;
 						}

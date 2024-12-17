@@ -184,7 +184,7 @@ void CBasePlayer::TraceAttack( entvars_t *pevInflictor, entvars_t *pevAttacker, 
 int CBasePlayer::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType ) { return 0; }
 void CBasePlayer::SetAnimation( PLAYER_ANIM playerAnim ) { }
 void CBasePlayer::WaterMove() { }
-BOOL CBasePlayer::IsOnLadder( void ) { return FALSE; }
+bool CBasePlayer::IsOnLadder( void ) { return false; }
 void CBasePlayer::PlayerDeathThink(void) { }
 void CBasePlayer::StartDeathCam( void ) { }
 void CBasePlayer::StartObserver( Vector vecPosition, Vector vecViewAngle ) { }

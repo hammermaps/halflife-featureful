@@ -288,8 +288,8 @@ public:
 	void RenewItems(void);
 	void PackDeadPlayerItems( void );
 	void RemoveAllItems( int stripFlags );
-	BOOL SwitchWeapon( CBasePlayerWeapon *pWeapon );
-	BOOL SwitchToBestWeapon();
+	bool SwitchWeapon( CBasePlayerWeapon *pWeapon );
+	bool SwitchToBestWeapon();
 
 	void SetWeaponBit(int id) {
 		m_WeaponBits |= 1ULL << id;
@@ -345,7 +345,7 @@ public:
 	// Player is moved across the transition by other means
 	virtual int		ObjectCaps( void ) { return CBaseMonster :: ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
 	virtual void	Precache( void );
-	BOOL			IsOnLadder( void );
+	bool			IsOnLadder( void );
 	bool FlashlightIsOn() { return FBitSet(pev->effects, EF_DIMLIGHT); }
 	bool NVGIsOn() { return m_fNVGisON; }
 	bool SuitLightIsOn( void ) { return FlashlightIsOn() || NVGIsOn(); }
@@ -380,14 +380,14 @@ public:
 	void AddPointsToTeam( int score, bool bAllowNegativeScore ) override;
 	void AddFloatPoints( float score, bool bAllowNegativeScore ) override;
 	int AddPlayerItem( CBasePlayerWeapon *pItem ) override;
-	BOOL RemovePlayerItem( CBasePlayerWeapon *pItem, bool bCallHoster );
+	bool RemovePlayerItem( CBasePlayerWeapon *pItem, bool bCallHoster );
 	void DropPlayerItem ( const char *pszItemName );
 	void DropPlayerItemById( int iId );
 	void DropAmmo();
-	BOOL HasPlayerItem( CBasePlayerWeapon *pCheckItem );
-	BOOL HasNamedPlayerItem( const char *pszItemName );
+	bool HasPlayerItem( CBasePlayerWeapon *pCheckItem );
+	bool HasNamedPlayerItem( const char *pszItemName );
 	CBasePlayerWeapon* GetWeaponByName( const char *pszItemName );
-	BOOL HasWeapons( void );// do I have ANY weapons?
+	bool HasWeapons( void );// do I have ANY weapons?
 	void SendCurWeaponClear();
 	void SendCurWeaponDead();
 	void SelectPrevItem( int iItem );
@@ -396,7 +396,7 @@ public:
 	void ItemPreFrame( void );
 	void ItemPostFrame( void );
 	void GiveNamedItem( const char *szName, int spawnFlags = 0 );
-	void EnableControl(BOOL fControl);
+	void EnableControl(bool fControl);
 
 	int  GiveAmmo( int iAmount, const char *szName );
 	void RemoveAmmo( int iAmount, const char *szName );
@@ -493,7 +493,7 @@ public:
 	bool m_bIsClimbing;
 	float m_flLastClimbTime;
 	CRope *m_pRope;
-	BOOL IsOnRope()
+	bool IsOnRope()
 	{
 		return ( m_afPhysicsFlags & PFLAG_ONROPE ) != 0;
 	}

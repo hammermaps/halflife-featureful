@@ -1573,7 +1573,7 @@ void CBasePlayer::WaterMove()
 }
 
 // TRUE if the player is attached to a ladder
-BOOL CBasePlayer::IsOnLadder( void )
+bool CBasePlayer::IsOnLadder( void )
 { 
 	return ( pev->movetype == MOVETYPE_FLY );
 }
@@ -4123,7 +4123,7 @@ void CBasePlayer::SelectLastItem( void )
 //==============================================
 // HasWeapons - do I have any weapons at all?
 //==============================================
-BOOL CBasePlayer::HasWeapons( void )
+bool CBasePlayer::HasWeapons( void )
 {
 	int i;
 
@@ -4131,11 +4131,11 @@ BOOL CBasePlayer::HasWeapons( void )
 	{
 		if( m_rgpPlayerWeapons[i] )
 		{
-			return TRUE;
+			return true;
 		}
 	}
 
-	return FALSE;
+	return false;
 }
 
 void CBasePlayer::SendCurWeaponClear()
@@ -4838,7 +4838,7 @@ int CBasePlayer::AddPlayerItem( CBasePlayerWeapon *pItem )
 	return DID_NOT_GET_ITEM;
 }
 
-BOOL CBasePlayer::RemovePlayerItem( CBasePlayerWeapon *pItem, bool bCallHolster )
+bool CBasePlayer::RemovePlayerItem( CBasePlayerWeapon *pItem, bool bCallHolster )
 {
 	pItem->pev->nextthink = 0;// crowbar may be trying to swing again, etc.
 	pItem->SetThink( NULL );
@@ -4860,9 +4860,9 @@ BOOL CBasePlayer::RemovePlayerItem( CBasePlayerWeapon *pItem, bool bCallHolster 
 	if (WeaponById(pItem->WeaponId()))
 	{
 		m_rgpPlayerWeapons[pItem->WeaponId()-1] = NULL;
-		return TRUE;
+		return true;
 	}
-	return FALSE;
+	return false;
 }
 
 //
@@ -5623,7 +5623,7 @@ void CBasePlayer::SetPrefsFromUserinfo( char *infobuffer )
 		m_iPreferNewGrenadePhysics = 0;
 }
 
-void CBasePlayer::EnableControl( BOOL fControl )
+void CBasePlayer::EnableControl( bool fControl )
 {
 	if( !fControl )
 		pev->flags |= FL_FROZEN;
@@ -6079,15 +6079,15 @@ void CBasePlayer::DropAmmo()
 //=========================================================
 // HasPlayerItem Does the player already have this item?
 //=========================================================
-BOOL CBasePlayer::HasPlayerItem( CBasePlayerWeapon *pCheckItem )
+bool CBasePlayer::HasPlayerItem( CBasePlayerWeapon *pCheckItem )
 {
-	return WeaponById(pCheckItem->WeaponId()) ? TRUE : FALSE;
+	return WeaponById(pCheckItem->WeaponId()) ? true : false;
 }
 
 //=========================================================
 // HasNamedPlayerItem Does the player already have this item?
 //=========================================================
-BOOL CBasePlayer::HasNamedPlayerItem( const char *pszItemName )
+bool CBasePlayer::HasNamedPlayerItem( const char *pszItemName )
 {
 	return GetWeaponByName(pszItemName) != NULL;
 }
@@ -6112,11 +6112,11 @@ CBasePlayerWeapon* CBasePlayer::GetWeaponByName(const char *pszItemName)
 //=========================================================
 // 
 //=========================================================
-BOOL CBasePlayer::SwitchWeapon(CBasePlayerWeapon *pWeapon )
+bool CBasePlayer::SwitchWeapon(CBasePlayerWeapon *pWeapon )
 {
 	if( !pWeapon->CanDeploy() )
 	{
-		return FALSE;
+		return false;
 	}
 	
 	ResetAutoaim();
@@ -6132,10 +6132,10 @@ BOOL CBasePlayer::SwitchWeapon(CBasePlayerWeapon *pWeapon )
 	pWeapon->Deploy();
 	pWeapon->m_ForceSendAnimations = false;
 
-	return TRUE;
+	return true;
 }
 
-BOOL CBasePlayer::SwitchToBestWeapon()
+bool CBasePlayer::SwitchToBestWeapon()
 {
 	CBasePlayerWeapon *pBest = m_pActiveItem;
 
@@ -6160,9 +6160,9 @@ BOOL CBasePlayer::SwitchToBestWeapon()
 	{
 		if (pBest != m_pActiveItem)
 			SwitchWeapon(pBest);
-		return TRUE;
+		return true;
 	}
-	return FALSE;
+	return false;
 }
 
 void CBasePlayer::InsertWeaponById(CBasePlayerWeapon *pItem)
@@ -7335,7 +7335,7 @@ void CRevertSaved::LoadSavedUse( CBaseEntity *pActivator, CBaseEntity *pCaller, 
 			}
 
 			if (FBitSet(pev->spawnflags, SF_PLAYER_LOAD_SAVED_FREEZE)) {
-				pPlayer->EnableControl(FALSE);
+				pPlayer->EnableControl(false);
 			}
 		}
 	}
