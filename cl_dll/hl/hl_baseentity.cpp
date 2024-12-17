@@ -149,8 +149,8 @@ void CBaseMonster::RadiusDamage( entvars_t *pevInflictor, entvars_t *pevAttacker
 void CBaseMonster::RadiusDamage( Vector vecSrc, entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int iClassIgnore, int bitsDamageType ) { }
 void CBaseMonster::FadeMonster( void ) { }
 void CBaseMonster::GibMonster( void ) { }
-BOOL CBaseMonster::HasHumanGibs( void ) { return FALSE; }
-BOOL CBaseMonster::HasAlienGibs( void ) { return FALSE; }
+bool CBaseMonster::HasHumanGibs( void ) { return false; }
+bool CBaseMonster::HasAlienGibs( void ) { return false; }
 Activity CBaseMonster::GetDeathActivity( void ) { return ACT_DIE_HEADSHOT; }
 MONSTERSTATE CBaseMonster::GetIdealState( void ) { return MONSTERSTATE_ALERT; }
 Schedule_t* CBaseMonster::GetScheduleOfType( int Type ) { return NULL; }

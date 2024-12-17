@@ -336,8 +336,8 @@ public:
 	virtual void UpdateOnRemove( void );
 	bool ShouldGibMonster( int iGib );
 	void CallGibMonster( void );
-	virtual BOOL HasHumanGibs( void );
-	virtual BOOL HasAlienGibs( void );
+	virtual bool HasHumanGibs( void );
+	virtual bool HasAlienGibs( void );
 	virtual void FadeMonster( void );	// Called instead of GibMonster() when gibs are disabled
 
 	Vector ShootAtEnemy( const Vector &shootOrigin );

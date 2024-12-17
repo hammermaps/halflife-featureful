@@ -356,12 +356,12 @@ int GibType(CBaseMonster* monster)
 	}
 }
 
-BOOL CBaseMonster::HasHumanGibs( void )
+bool CBaseMonster::HasHumanGibs( void )
 {
 	return GibType(this) == GIBTYPE_HUMAN;
 }
 
-BOOL CBaseMonster::HasAlienGibs( void )
+bool CBaseMonster::HasAlienGibs( void )
 {
 	return GibType(this) == GIBTYPE_ALIEN;
 }
