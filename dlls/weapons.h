@@ -284,7 +284,7 @@ public:
 
 	virtual void SendWeaponAnim( int iAnim, int body = 0 );  // skiplocal is 1 if client is predicting weapon animations
 
-	virtual BOOL IsUseable( void );
+	virtual bool IsUseable( void );
 	bool DefaultDeploy( const char *szViewModel, const char *szWeaponModel, int iAnim, const char *szAnimExt, int body = 0 );
 	bool DefaultReload( int iClipSize, int iAnim, float fDelay, int body = 0 );
 	void PrecachePModel(const char* name);
@@ -300,9 +300,9 @@ public:
 	virtual void SetWeaponData(const weapon_data_t& data) {}
 
 	virtual void RetireWeapon( void );
-	virtual BOOL ShouldWeaponIdle( void ) {return FALSE; }
+	virtual bool ShouldWeaponIdle( void ) { return false; }
 	virtual void Holster();
-	virtual BOOL UseDecrement( void ) { return FALSE; }
+	virtual bool UseDecrement() { return false; }
 
 	int	PrimaryAmmoIndex();
 	int	SecondaryAmmoIndex();
@@ -410,12 +410,12 @@ public:
 	void Reload( void );
 	void WeaponIdle( void );
 
-	virtual BOOL UseDecrement( void )
+	bool UseDecrement() override
 	{
 #if CLIENT_WEAPONS
-		return TRUE;
+		return true;
 #else
-		return FALSE;
+		return false;
 #endif
 	}
 
@@ -447,12 +447,12 @@ public:
 	int m_iSwing;
 	TraceResult m_trHit;
 
-	virtual BOOL UseDecrement( void )
+	bool UseDecrement() override
 	{
 #if CLIENT_WEAPONS
-		return TRUE;
+		return true;
 #else
-		return FALSE;
+		return false;
 #endif
 	}
 
@@ -478,12 +478,12 @@ public:
 	void WeaponIdle( void );
 	float m_flSoundDelay;
 
-	virtual BOOL UseDecrement( void )
+	bool UseDecrement() override
 	{
 #if CLIENT_WEAPONS
-		return TRUE;
+		return true;
 #else
-		return FALSE;
+		return false;
 #endif
 	}
 
@@ -509,12 +509,12 @@ public:
 	float m_flNextAnimTime;
 	int m_iShell;
 
-	virtual BOOL UseDecrement( void )
+	bool UseDecrement() override
 	{
 #if CLIENT_WEAPONS
-		return TRUE;
+		return true;
 #else
-		return FALSE;
+		return false;
 #endif
 	}
 
@@ -543,12 +543,12 @@ public:
 	void Reload( void );
 	void WeaponIdle( void );
 
-	virtual BOOL UseDecrement( void )
+	bool UseDecrement() override
 	{
 #if CLIENT_WEAPONS
-		return TRUE;
+		return true;
 #else
-		return FALSE;
+		return false;
 #endif
 	}
 
@@ -584,12 +584,12 @@ public:
 	float m_flNextReload;
 	int m_iShell;
 
-	virtual BOOL UseDecrement( void )
+	bool UseDecrement() override
 	{
 #if CLIENT_WEAPONS
-		return TRUE;
+		return true;
 #else
-		return FALSE;
+		return false;
 #endif
 	}
 
@@ -639,18 +639,18 @@ public:
 	void WeaponIdle( void );
 
 	void UpdateSpot( void );
-	BOOL ShouldWeaponIdle( void ) { return TRUE; };
+	bool ShouldWeaponIdle() override { return true; }
 
 	CLaserSpot *m_pSpot;
 	int m_fSpotActive;
 	int m_cActiveRockets;// how many missiles in flight from this launcher right now?
 
-	virtual BOOL UseDecrement( void )
+	bool UseDecrement() override
 	{
 #if CLIENT_WEAPONS
-		return TRUE;
+		return true;
 #else
-		return FALSE;
+		return false;
 #endif
 	}
 
@@ -696,12 +696,12 @@ public:
 	// we need to know so we can pick the right set of effects.
 	BOOL m_fPrimaryFire;
 
-	virtual BOOL UseDecrement( void )
+	bool UseDecrement() override
 	{
 #if CLIENT_WEAPONS
-		return TRUE;
+		return true;
 #else
-		return FALSE;
+		return false;
 #endif
 	}
 
@@ -761,12 +761,12 @@ public:
 	CSprite				*m_pSprite;
 #endif
 
-	virtual BOOL UseDecrement( void )
+	bool UseDecrement() override
 	{
 #if CLIENT_WEAPONS
-		return TRUE;
+		return true;
 #else
-		return FALSE;
+		return false;
 #endif
 	}
 
@@ -805,7 +805,7 @@ public:
 	void PrimaryAttack( void );
 	void SecondaryAttack( void );
 	bool Deploy() override;
-	BOOL IsUseable( void );
+	bool IsUseable( void ) override;
 	void Holster();
 	void Reload( void );
 	void WeaponIdle( void );
@@ -815,12 +815,12 @@ public:
 
 	int m_iFirePhase;
 
-	virtual BOOL UseDecrement( void )
+	bool UseDecrement() override
 	{
 #if CLIENT_WEAPONS
-		return TRUE;
+		return true;
 #else
-		return FALSE;
+		return false;
 #endif
 	}
 
@@ -844,12 +844,12 @@ public:
 	void WeaponIdle( void );
 	bool PreferNewPhysics();
 
-	virtual BOOL UseDecrement( void )
+	bool UseDecrement() override
 	{
 #if CLIENT_WEAPONS
-		return TRUE;
+		return true;
 #else
-		return FALSE;
+		return false;
 #endif
 	}
 
@@ -877,7 +877,7 @@ public:
 	int AddDuplicate(CBasePlayerWeapon *pOriginal );
 	bool CanDeploy( void ) override;
 	bool Deploy() override;
-	BOOL IsUseable( void );
+	bool IsUseable( void ) override;
 	bool CanBeDropped();
 
 	void Holster();
@@ -888,12 +888,12 @@ public:
 	void DrawSatchel( void );
 	void DrawRadio();
 
-	virtual BOOL UseDecrement( void )
+	bool UseDecrement() override
 	{
 #if CLIENT_WEAPONS
-		return TRUE;
+		return true;
 #else
-		return FALSE;
+		return false;
 #endif
 	}
 
@@ -922,12 +922,12 @@ public:
 	void Holster();
 	void WeaponIdle( void );
 
-	virtual BOOL UseDecrement( void )
-	{ 
+	bool UseDecrement() override
+	{
 #if CLIENT_WEAPONS
-		return TRUE;
+		return true;
 #else
-		return FALSE;
+		return false;
 #endif
 	}
 
@@ -951,12 +951,12 @@ public:
 	void WeaponIdle( void );
 	int m_fJustThrown;
 
-	virtual BOOL UseDecrement( void )
+	bool UseDecrement() override
 	{
 #if CLIENT_WEAPONS
-		return TRUE;
+		return true;
 #else
-		return FALSE;
+		return false;
 #endif
 	}
 
@@ -1000,12 +1000,12 @@ public:
 	void UpdateSpot( void );
 	CLaserSpot *m_pEagleLaser;
 	int m_fEagleLaserActive;
-	virtual BOOL UseDecrement( void )
+	bool UseDecrement() override
 	{
 #if CLIENT_WEAPONS
-		return TRUE;
+		return true;
 #else
-		return FALSE;
+		return false;
 #endif
 	}
 
@@ -1052,12 +1052,12 @@ public:
 	int m_iSwingMode;
 	float m_flBigSwingStart;
 
-	virtual BOOL UseDecrement(void)
+	bool UseDecrement() override
 	{
 #if CLIENT_WEAPONS
-		return TRUE;
+		return true;
 #else
-		return FALSE;
+		return false;
 #endif
 	}
 
@@ -1093,15 +1093,15 @@ public:
 	void Reload( void );
 	void WeaponIdle(void);
 	bool PlayEmptySound() override;
-	BOOL ShouldWeaponIdle(void) { return TRUE; }
+	bool ShouldWeaponIdle() override { return true; }
 	CBaseEntity* FindHealTarget(bool increasedRadius = false);
 
-	virtual BOOL UseDecrement( void )
+	bool UseDecrement() override
 	{
 #if CLIENT_WEAPONS
-		return TRUE;
+		return true;
 #else
-		return FALSE;
+		return false;
 #endif
 	}
 	const char* MyWModel() { return "models/w_medkit.mdl"; }
@@ -1151,12 +1151,12 @@ public:
 	void CreateEffect( void );
 	void UpdateEffect( void );
 	void DestroyEffect( void );
-	virtual BOOL UseDecrement(void)
+	bool UseDecrement() override
 	{
 #if CLIENT_WEAPONS
-		return TRUE;
+		return true;
 #else
-		return FALSE;
+		return false;
 #endif
 	}
 
@@ -1205,12 +1205,12 @@ public:
 	int m_iLink;
 	bool m_bAlternatingEject;
 
-	virtual BOOL UseDecrement(void)
+	bool UseDecrement() override
 	{
-#if defined( CLIENT_WEAPONS )
-		return TRUE;
+#if CLIENT_WEAPONS
+		return true;
 #else
-		return FALSE;
+		return false;
 #endif
 	}
 
@@ -1256,12 +1256,12 @@ public:
 	void WeaponIdle(void);
 	//void ItemPostFrame(void);
 
-	virtual BOOL UseDecrement(void)
+	bool UseDecrement() override
 	{
 #if CLIENT_WEAPONS
-		return TRUE;
+		return true;
 #else
-		return FALSE;
+		return false;
 #endif
 	}
 
@@ -1295,12 +1295,12 @@ public:
 
 	bool PlayEmptySound( void ) override;
 
-	virtual BOOL UseDecrement( void )
+	bool UseDecrement() override
 	{
 #if CLIENT_WEAPONS
-		return TRUE;
+		return true;
 #else
-		return FALSE;
+		return false;
 #endif
 	}
 
@@ -1344,12 +1344,12 @@ public:
 	void WeaponIdle(void);
 	void CreateChargeEffect(void);
 	void EXPORT ClearBeams(void);
-	virtual BOOL UseDecrement(void)
+	bool UseDecrement() override
 	{
 #if CLIENT_WEAPONS
-		return TRUE;
+		return true;
 #else
-		return FALSE;
+		return false;
 #endif
 	}
 
@@ -1394,12 +1394,12 @@ public:
 	int m_iSwingMode;
 	float m_flStabStart;
 
-	virtual BOOL UseDecrement(void)
+	bool UseDecrement() override
 	{
 #if CLIENT_WEAPONS
-		return TRUE;
+		return true;
 #else
-		return FALSE;
+		return false;
 #endif
 	}
 
@@ -1445,12 +1445,12 @@ public:
 	void Reload( void );
 	void WeaponIdle( void );
 
-	virtual BOOL UseDecrement( void )
+	bool UseDecrement() override
 	{
 #if CLIENT_WEAPONS
-		return TRUE;
+		return true;
 #else
-		return FALSE;
+		return false;
 #endif
 	}
 
@@ -1479,12 +1479,12 @@ public:
 	void WeaponIdle( void );
 	int m_iShell;
 
-	virtual BOOL UseDecrement( void )
+	bool UseDecrement() override
 	{
 #if CLIENT_WEAPONS
-		return TRUE;
+		return true;
 #else
-		return FALSE;
+		return false;
 #endif
 	}
 

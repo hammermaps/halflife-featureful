@@ -920,22 +920,22 @@ bool CBasePlayerWeapon::AddSecondaryAmmo(int iCount)
 // (does it have ammo loaded? do I have any ammo for the 
 // weapon?, etc)
 //=========================================================
-BOOL CBasePlayerWeapon::IsUseable( void )
+bool CBasePlayerWeapon::IsUseable( void )
 {
 	if( m_iClip > 0 )
 	{
-		return TRUE;
+		return true;
 	}
 
 	// Player has unlimited ammo for this weapon or does not use magazines
 	if( iMaxAmmo1() == WEAPON_NOCLIP )
 	{
-		return TRUE;
+		return true;
 	}
 
 	if( m_pPlayer->m_rgAmmo[PrimaryAmmoIndex()] > 0 )
 	{
-		return TRUE;
+		return true;
 	}
 
 	if( UsesSecondaryAmmo() )
@@ -943,17 +943,17 @@ BOOL CBasePlayerWeapon::IsUseable( void )
 		// Player has unlimited ammo for this weapon or does not use magazines
 		if( iMaxAmmo2() == WEAPON_NOCLIP )
 		{
-			return TRUE;
+			return true;
 		}
 
 		if( m_pPlayer->m_rgAmmo[SecondaryAmmoIndex()] > 0 )
 		{
-			return TRUE;
+			return true;
 		}
 	}
 
 	// clip is empty (or nonexistant) and the player has no more ammo of this type. 
-	return FALSE;
+	return false;
 }
 
 bool CBasePlayerWeapon::DefaultDeploy( const char *szViewModel, const char *szWeaponModel, int iAnim, const char *szAnimExt, int body )

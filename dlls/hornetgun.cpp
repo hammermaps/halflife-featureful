@@ -33,9 +33,9 @@ enum firemode_e
 
 LINK_ENTITY_TO_CLASS( weapon_hornetgun, CHgun )
 
-BOOL CHgun::IsUseable( void )
+bool CHgun::IsUseable( void )
 {
-	return TRUE;
+	return true;
 }
 
 void CHgun::Spawn()

@@ -361,7 +361,7 @@ int CSatchel::GetItemInfo( ItemInfo *p )
 
 //=========================================================
 //=========================================================
-BOOL CSatchel::IsUseable( void )
+bool CSatchel::IsUseable( void )
 {
 	return CanDeploy();
 }
