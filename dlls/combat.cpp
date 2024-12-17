@@ -490,7 +490,7 @@ void CBaseMonster::GibMonster( void )
 Activity CBaseMonster::GetDeathActivity( void )
 {
 	Activity	deathActivity;
-	BOOL		fTriedDirection;
+	bool		fTriedDirection;
 	float		flDot;
 	TraceResult	tr;
 	Vector		vecSrc;
@@ -503,7 +503,7 @@ Activity CBaseMonster::GetDeathActivity( void )
 
 	vecSrc = Center();
 
-	fTriedDirection = FALSE;
+	fTriedDirection = false;
 	deathActivity = ACT_DIESIMPLE;// in case we can't find any special deaths to do.
 
 	UTIL_MakeVectors( pev->angles );
@@ -520,7 +520,7 @@ Activity CBaseMonster::GetDeathActivity( void )
 		break;
 	case HITGROUP_GENERIC:
 		// try to pick a death based on attack direction
-		fTriedDirection = TRUE;
+		fTriedDirection = true;
 		if( flDot > 0.3f )
 		{
 			deathActivity = ACT_DIEFORWARD;
@@ -532,7 +532,7 @@ Activity CBaseMonster::GetDeathActivity( void )
 		break;
 	default:
 		// try to pick a death based on attack direction
-		fTriedDirection = TRUE;
+		fTriedDirection = true;
 
 		if( flDot > 0.3f )
 		{
@@ -673,17 +673,17 @@ void CBaseMonster::BecomeDead( void )
 
 }
 
-BOOL CBaseMonster::ShouldGibMonster( int iGib )
+bool CBaseMonster::ShouldGibMonster( int iGib )
 {
 	if ( iGib != GIB_NEVER && m_gibPolicy == GIBBING_POLICY_PREFER_GIB )
-		return TRUE;
+		return true;
 	if ( iGib != GIB_ALWAYS && m_gibPolicy == GIBBING_POLICY_PREFER_NOGIB )
-		return FALSE;
+		return false;
 
 	if( ( iGib == GIB_NORMAL && pev->health < GIB_HEALTH_VALUE ) || ( iGib == GIB_ALWAYS ) )
-		return TRUE;
+		return true;
 
-	return FALSE;
+	return false;
 }
 
 void CBaseMonster::CallGibMonster( void )

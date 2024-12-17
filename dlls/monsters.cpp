@@ -187,14 +187,13 @@ void CBaseMonster::Eat( float flFullDuration )
 //=========================================================
 // FShouldEat - returns true if a monster is hungry.
 //=========================================================
-BOOL CBaseMonster::FShouldEat( void )
+bool CBaseMonster::FShouldEat( void )
 {
 	if( m_flHungryTime > gpGlobals->time )
 	{
-		return FALSE;
+		return false;
 	}
-
-	return TRUE;
+	return true;
 }
 
 //=========================================================
@@ -686,12 +685,12 @@ void CBaseMonster::RouteNew( void )
 // FRouteClear - returns TRUE is the Route is cleared out
 // ( invalid )
 //=========================================================
-BOOL CBaseMonster::FRouteClear( void )
+bool CBaseMonster::FRouteClear( void )
 {
 	if( m_Route[m_iRouteIndex].iType == 0 || m_movementGoal == MOVEGOAL_NONE )
-		return TRUE;
+		return true;
 
-	return FALSE;
+	return false;
 }
 
 //=========================================================
@@ -701,15 +700,13 @@ BOOL CBaseMonster::FRouteClear( void )
 //=========================================================
 extern cvar_t npc_patrol;
 
-BOOL CBaseMonster::FRefreshRoute( int buildRouteFlags )
+bool CBaseMonster::FRefreshRoute( int buildRouteFlags )
 {
 	CBaseEntity	*pPathCorner;
 	int		i;
-	BOOL		returnCode;
+	bool returnCode = false;
 
 	RouteNew();
-
-	returnCode = FALSE;
 
 	switch( m_movementGoal )
 	{
@@ -740,7 +737,7 @@ BOOL CBaseMonster::FRefreshRoute( int buildRouteFlags )
 							m_Route[i].iType |= bits_MF_IS_GOAL;
 						i++;
 					}
-					returnCode = TRUE;
+					returnCode = true;
 				}
 			}
 			break;
@@ -768,7 +765,7 @@ BOOL CBaseMonster::FRefreshRoute( int buildRouteFlags )
 	return returnCode;
 }
 
-BOOL CBaseMonster::MoveToEnemy( Activity movementAct, float waitTime )
+bool CBaseMonster::MoveToEnemy( Activity movementAct, float waitTime )
 {
 	m_movementActivity = movementAct;
 	m_moveWaitTime = waitTime;
@@ -777,7 +774,7 @@ BOOL CBaseMonster::MoveToEnemy( Activity movementAct, float waitTime )
 	return FRefreshRoute();
 }
 
-BOOL CBaseMonster::MoveToLocation( Activity movementAct, float waitTime, const Vector &goal, int buildRouteFlags )
+bool CBaseMonster::MoveToLocation( Activity movementAct, float waitTime, const Vector &goal, int buildRouteFlags )
 {
 	m_movementActivity = movementAct;
 	m_moveWaitTime = waitTime;
@@ -787,7 +784,7 @@ BOOL CBaseMonster::MoveToLocation( Activity movementAct, float waitTime, const V
 	return FRefreshRoute(buildRouteFlags);
 }
 
-BOOL CBaseMonster::MoveToLocationClosest( Activity movementAct, float waitTime, const Vector &goal, int buildRouteFlags )
+bool CBaseMonster::MoveToLocationClosest( Activity movementAct, float waitTime, const Vector &goal, int buildRouteFlags )
 {
 	m_movementActivity = movementAct;
 	m_moveWaitTime = waitTime;
@@ -797,7 +794,7 @@ BOOL CBaseMonster::MoveToLocationClosest( Activity movementAct, float waitTime, 
 	return FRefreshRoute(buildRouteFlags);
 }
 
-BOOL CBaseMonster::MoveToTarget( Activity movementAct, float waitTime, bool closest )
+bool CBaseMonster::MoveToTarget( Activity movementAct, float waitTime, bool closest )
 {
 	m_movementActivity = movementAct;
 	m_moveWaitTime = waitTime;
@@ -806,7 +803,7 @@ BOOL CBaseMonster::MoveToTarget( Activity movementAct, float waitTime, bool clos
 	return FRefreshRoute();
 }
 
-BOOL CBaseMonster::MoveToNode( Activity movementAct, float waitTime, const Vector &goal )
+bool CBaseMonster::MoveToNode( Activity movementAct, float waitTime, const Vector &goal )
 {
 	m_movementActivity = movementAct;
 	m_moveWaitTime = waitTime;
@@ -878,13 +875,13 @@ void DrawRoute(CBaseMonster* pMonster, int iMoveFlag)
 	DrawRoute(pMonster->pev, pMonster->m_Route, pMonster->m_iRouteIndex, r, g, b, 25);
 }
 
-int ShouldSimplify( int routeType )
+bool ShouldSimplify( int routeType )
 {
 	routeType &= ~bits_MF_IS_GOAL;
 
 	if( ( routeType == bits_MF_TO_PATHCORNER ) || ( routeType & bits_MF_DONT_SIMPLIFY ) )
-		return FALSE;
-	return TRUE;
+		return false;
+	return true;
 }
 
 //=========================================================
@@ -1363,7 +1360,7 @@ void CBaseMonster::PushEnemy( CBaseEntity *pEnemy, const Vector &vecLastKnownPos
 //=========================================================
 // PopEnemy - try remembering the last few enemies
 //=========================================================
-BOOL CBaseMonster::PopEnemy()
+bool CBaseMonster::PopEnemy()
 {
 	// UNDONE: blah, this is bad, we should use a stack but I'm too lazy to code one.
 	for( int i = MAX_OLD_ENEMIES - 1; i >= 0; i-- )
@@ -1377,7 +1374,7 @@ BOOL CBaseMonster::PopEnemy()
 				m_flLastTimeObservedEnemy = gpGlobals->time;
 				ALERT( at_aiconsole, "%s remembering old enemy %s\n", STRING(pev->classname), STRING(m_hEnemy->pev->classname) );
 				m_hOldEnemy[i] = NULL;
-				return TRUE;
+				return true;
 			}
 			else
 			{
@@ -1385,7 +1382,7 @@ BOOL CBaseMonster::PopEnemy()
 			}
 		}
 	}
-	return FALSE;
+	return false;
 }
 
 //=========================================================
@@ -1710,7 +1707,7 @@ int CBaseMonster::RouteClassify( int iMoveFlag )
 //=========================================================
 // BuildRoute
 //=========================================================
-BOOL CBaseMonster::BuildRoute( const Vector &vecGoal, int iMoveFlag, CBaseEntity *pTarget, int buildRouteFlags )
+bool CBaseMonster::BuildRoute( const Vector &vecGoal, int iMoveFlag, CBaseEntity *pTarget, int buildRouteFlags )
 {
 	float flDist;
 	Vector vecApexes[3];
@@ -1754,7 +1751,7 @@ BOOL CBaseMonster::BuildRoute( const Vector &vecGoal, int iMoveFlag, CBaseEntity
 		if( iLocalMove == LOCALMOVE_VALID )
 		{
 			// monster can walk straight there!
-			return TRUE;
+			return true;
 		}
 
 		// try to triangulate around any obstacles.
@@ -1774,7 +1771,7 @@ BOOL CBaseMonster::BuildRoute( const Vector &vecGoal, int iMoveFlag, CBaseEntity
 				m_Route[result].iType = iMoveFlag | bits_MF_IS_GOAL;
 
 				RouteSimplify( pTarget );
-				return TRUE;
+				return true;
 			}
 		}
 	}
@@ -1785,7 +1782,7 @@ BOOL CBaseMonster::BuildRoute( const Vector &vecGoal, int iMoveFlag, CBaseEntity
 		//ALERT( at_console, "Can get there on nodes\n" );
 		m_vecMoveGoal = vecGoal;
 		RouteSimplify( pTarget );
-		return TRUE;
+		return true;
 	}
 
 	if (nearest && !FBitSet(buildRouteFlags, BUILDROUTE_NODEROUTE_ONLY))
@@ -1821,11 +1818,11 @@ BOOL CBaseMonster::BuildRoute( const Vector &vecGoal, int iMoveFlag, CBaseEntity
 			}
 			m_vecMoveGoal = triangulatedNearest;
 		}
-		return TRUE;
+		return true;
 	}
 
 	// b0rk
-	return FALSE;
+	return false;
 }
 
 //=========================================================
@@ -2712,7 +2709,7 @@ int CBaseMonster::IDefaultRelationship(int classify1, int classify2)
 
 //float CGraph::PathLength( int iStart, int iDest, int iHull, int afCapMask )
 
-BOOL CBaseMonster::FindSpotAway(Vector vecThreat, Vector vecViewOffset, float flMinDist, float flMaxDist, int flags , const char *displayName)
+bool CBaseMonster::FindSpotAway(Vector vecThreat, Vector vecViewOffset, float flMinDist, float flMaxDist, int flags , const char *displayName)
 {
 	int i;
 	int iMyHullIndex;
@@ -2739,7 +2736,7 @@ BOOL CBaseMonster::FindSpotAway(Vector vecThreat, Vector vecViewOffset, float fl
 	if( !WorldGraph.m_fGraphPresent || !WorldGraph.m_fGraphPointersSet )
 	{
 		ALERT( at_aiconsole, "Graph not ready for %s!\n", displayName );
-		return FALSE;
+		return false;
 	}
 
 	iMyNode = WorldGraph.FindNearestNode( pev->origin, this );
@@ -2749,7 +2746,7 @@ BOOL CBaseMonster::FindSpotAway(Vector vecThreat, Vector vecViewOffset, float fl
 	if( iMyNode == NO_NODE )
 	{
 		ALERT( at_aiconsole, "%s - %s has no nearest node!\n", displayName, STRING( pev->classname ) );
-		return FALSE;
+		return false;
 	}
 	if( iThreatNode == NO_NODE )
 	{
@@ -2806,26 +2803,26 @@ BOOL CBaseMonster::FindSpotAway(Vector vecThreat, Vector vecViewOffset, float fl
 						*/
 
 						WorldGraph.m_iLastCoverSearch = nodeNumber + 1; // next monster that searches for cover node will start where we left off here.
-						return TRUE;
+						return true;
 					}
 				}
 			}
 		}
 	}
-	return FALSE;
+	return false;
 }
 
-BOOL CBaseMonster::FindCover( Vector vecThreat, Vector vecViewOffset, float flMinDist, float flMaxDist, int flags )
+bool CBaseMonster::FindCover( Vector vecThreat, Vector vecViewOffset, float flMinDist, float flMaxDist, int flags )
 {
 	return FindSpotAway(vecThreat, vecViewOffset, flMinDist, flMaxDist, flags|FINDSPOTAWAY_TRACE_LOOKER, "FindCover()");
 }
 
-BOOL CBaseMonster::FindCover(Vector vecThreat, Vector vecViewOffset, float flMinDist, float flMaxDist)
+bool CBaseMonster::FindCover(Vector vecThreat, Vector vecViewOffset, float flMinDist, float flMaxDist)
 {
 	return FindCover( vecThreat, vecViewOffset, flMinDist, flMaxDist, FINDSPOTAWAY_RUN|FINDSPOTAWAY_CHECK_SPOT );
 }
 
-BOOL CBaseMonster::FindSpotAway( Vector vecThreat, float flMinDist, float flMaxDist, int flags )
+bool CBaseMonster::FindSpotAway( Vector vecThreat, float flMinDist, float flMaxDist, int flags )
 {
 	return FindSpotAway(vecThreat, g_vecZero, flMinDist, flMaxDist, flags, "FindSpotAway()");
 }
@@ -3243,7 +3240,7 @@ Vector CBaseMonster::GetGunPosition()
 // succeeds (path is valid) or FALSE if failed (no path 
 // exists )
 //=========================================================
-BOOL CBaseMonster::FGetNodeRoute( Vector vecDest )
+bool CBaseMonster::FGetNodeRoute( Vector vecDest )
 {
 	int iPath[ MAX_PATH_SIZE ];
 	int iSrcNode, iDestNode;
@@ -3254,7 +3251,7 @@ BOOL CBaseMonster::FGetNodeRoute( Vector vecDest )
 	if( !WorldGraph.m_fGraphPresent || !WorldGraph.m_fGraphPointersSet )
 	{
 		ALERT( at_aiconsole, "FGetNodeRoute: Graph not ready!\n" );
-		return FALSE;
+		return false;
 	}
 
 	iSrcNode = WorldGraph.FindNearestNode( pev->origin, this );
@@ -3264,13 +3261,13 @@ BOOL CBaseMonster::FGetNodeRoute( Vector vecDest )
 	{
 		// no node nearest self
 		//ALERT( at_aiconsole, "FGetNodeRoute: No valid node near self!\n" );
-		return FALSE;
+		return false;
 	}
 	else if( iDestNode == -1 )
 	{
 		// no node nearest target
 		//ALERT( at_aiconsole, "FGetNodeRoute: No valid node near target!\n" );
-		return FALSE;
+		return false;
 	}
 
 	// valid src and dest nodes were found, so it's safe to proceed with
@@ -3284,7 +3281,7 @@ BOOL CBaseMonster::FGetNodeRoute( Vector vecDest )
 	{
 #if 1
 		ALERT( at_aiconsole, "No Path from %d to %d!\n", iSrcNode, iDestNode );
-		return FALSE;
+		return false;
 #else
 		BOOL bRoutingSave = WorldGraph.m_fRoutingComplete;
 		WorldGraph.m_fRoutingComplete = FALSE;
@@ -3328,7 +3325,7 @@ BOOL CBaseMonster::FGetNodeRoute( Vector vecDest )
 		m_Route[iNumToCopy].iType |= bits_MF_IS_GOAL;
 	}
 
-	return TRUE;
+	return true;
 }
 
 //=========================================================
@@ -3725,30 +3722,28 @@ void CBaseMonster::SetMySize(const Vector &vecMin, const Vector &vecMax)
 //
 // Returns TRUE if the target is fired.
 //=========================================================
-BOOL CBaseMonster::FCheckAITrigger( short condition )
+bool CBaseMonster::FCheckAITrigger( short condition )
 {
-	BOOL fFireTarget;
-
 	if( condition == AITRIGGER_NONE )
 	{
 		// no conditions, so this trigger is never fired.
-		return FALSE;
+		return false;
 	}
 
-	fFireTarget = FALSE;
+	bool fFireTarget = false;
 
 	switch( condition )
 	{
 	case AITRIGGER_SEEPLAYER_ANGRY_AT_PLAYER:
 		if( m_hEnemy != 0 && m_hEnemy->IsPlayer() && HasConditions( bits_COND_SEE_ENEMY ) )
 		{
-			fFireTarget = TRUE;
+			fFireTarget = true;
 		}
 		break;
 	case AITRIGGER_SEEPLAYER_UNCONDITIONAL:
 		if( HasConditions( bits_COND_SEE_CLIENT ) )
 		{
-			fFireTarget = TRUE;
+			fFireTarget = true;
 		}
 		break;
 	case AITRIGGER_SEEPLAYER_NOT_IN_COMBAT:
@@ -3757,25 +3752,25 @@ BOOL CBaseMonster::FCheckAITrigger( short condition )
 			 m_MonsterState != MONSTERSTATE_PRONE	&&
 			 m_MonsterState != MONSTERSTATE_SCRIPT)
 		{
-			fFireTarget = TRUE;
+			fFireTarget = true;
 		}
 		break;
 	case AITRIGGER_TAKEDAMAGE:
 		if( m_afConditions & ( bits_COND_LIGHT_DAMAGE | bits_COND_HEAVY_DAMAGE ) )
 		{
-			fFireTarget = TRUE;
+			fFireTarget = true;
 		}
 		break;
 	case AITRIGGER_DEATH:
 		if( pev->deadflag != DEAD_NO )
 		{
-			fFireTarget = TRUE;
+			fFireTarget = true;
 		}
 		break;
 	case AITRIGGER_HALFHEALTH:
 		if( IsAlive() && pev->health <= ( pev->max_health / 2 ) )
 		{
-			fFireTarget = TRUE;
+			fFireTarget = true;
 		}
 		break;
 /*
@@ -3790,19 +3785,19 @@ BOOL CBaseMonster::FCheckAITrigger( short condition )
 	case AITRIGGER_HEARWORLD:
 		if( m_afConditions & bits_COND_HEAR_SOUND && m_afSoundTypes & bits_SOUND_WORLD )
 		{
-			fFireTarget = TRUE;
+			fFireTarget = true;
 		}
 		break;
 	case AITRIGGER_HEARPLAYER:
 		if( m_afConditions & bits_COND_HEAR_SOUND && m_afSoundTypes & bits_SOUND_PLAYER )
 		{
-			fFireTarget = TRUE;
+			fFireTarget = true;
 		}
 		break;
 	case AITRIGGER_HEARCOMBAT:
 		if( m_afConditions & bits_COND_HEAR_SOUND && m_afSoundTypes & bits_SOUND_COMBAT )
 		{
-			fFireTarget = TRUE;
+			fFireTarget = true;
 		}
 		break;
 	}
@@ -3815,15 +3810,15 @@ BOOL CBaseMonster::FCheckAITrigger( short condition )
 		FireTargets( STRING( m_iszTriggerTarget ), this, this );
 		m_iTriggerCondition = AITRIGGER_NONE;
 		m_iTriggerAltCondition = AITRIGGER_NONE;
-		return TRUE;
+		return true;
 	}
 
-	return FALSE;
+	return false;
 }
 
-BOOL CBaseMonster::FCheckAITrigger( void )
+bool CBaseMonster::FCheckAITrigger( void )
 {
-	BOOL ret = FCheckAITrigger( m_iTriggerCondition );
+	bool ret = FCheckAITrigger( m_iTriggerCondition );
 	if (!ret)
 		return FCheckAITrigger( m_iTriggerAltCondition );
 	return ret;
@@ -3880,7 +3875,7 @@ int CBaseMonster::CanPlaySequence( int interruptFlags )
 // conceal them from view of pSightEnt
 //=========================================================
 
-BOOL CBaseMonster::FindLateralSpotAway( const Vector& vecThreat, float minDist, float maxDist, int flags )
+bool CBaseMonster::FindLateralSpotAway( const Vector& vecThreat, float minDist, float maxDist, int flags )
 {
 	UTIL_MakeVectors( pev->angles );
 	Vector vecRight = gpGlobals->v_right;
@@ -3908,7 +3903,7 @@ BOOL CBaseMonster::FindLateralSpotAway( const Vector& vecThreat, float minDist, 
 			{
 				if( MoveToLocation( movementActivity, 0, vecLeftTest, BUILDROUTE_NO_NODEROUTE|BUILDROUTE_NO_TRIANGULATION ) )
 				{
-					return TRUE;
+					return true;
 				}
 			}
 		}
@@ -3919,16 +3914,16 @@ BOOL CBaseMonster::FindLateralSpotAway( const Vector& vecThreat, float minDist, 
 			{
 				if( MoveToLocation( movementActivity, 0, vecRightTest, BUILDROUTE_NO_NODEROUTE|BUILDROUTE_NO_TRIANGULATION ) )
 				{
-					return TRUE;
+					return true;
 				}
 			}
 		}
 	}
 
-	return FALSE;
+	return false;
 }
 
-BOOL CBaseMonster::FindStraightSpotAway( const Vector& vecThreat, float minDist, float maxDist, int flags )
+bool CBaseMonster::FindStraightSpotAway( const Vector& vecThreat, float minDist, float maxDist, int flags )
 {
 	const Vector vecStart = pev->origin;
 
@@ -3936,7 +3931,7 @@ BOOL CBaseMonster::FindStraightSpotAway( const Vector& vecThreat, float minDist,
 	vecDiff.z = 0;
 
 	if (vecDiff == g_vecZero)
-		return FALSE;
+		return false;
 
 	const Vector vecDirection = vecDiff.Normalize();
 	const Vector vecStep = vecDirection * COVER_DELTA;
@@ -3957,15 +3952,15 @@ BOOL CBaseMonster::FindStraightSpotAway( const Vector& vecThreat, float minDist,
 		{
 			if( MoveToLocation( movementActivity, 0, vecTest, BUILDROUTE_NO_NODEROUTE|BUILDROUTE_NO_TRIANGULATION ) )
 			{
-				return TRUE;
+				return true;
 			}
 		}
 	}
 
-	return FALSE;
+	return false;
 }
 
-BOOL CBaseMonster::FindLateralCover( const Vector &vecThreat, const Vector &vecViewOffset, float minDist, float maxDist, int flags )
+bool CBaseMonster::FindLateralCover( const Vector &vecThreat, const Vector &vecViewOffset, float minDist, float maxDist, int flags )
 {
 	TraceResult tr;
 	UTIL_MakeVectors( pev->angles );
@@ -3995,7 +3990,7 @@ BOOL CBaseMonster::FindLateralCover( const Vector &vecThreat, const Vector &vecV
 			{
 				if( MoveToLocation( movementActivity, 0, vecLeftTest, BUILDROUTE_NO_NODEROUTE|BUILDROUTE_NO_TRIANGULATION ) )
 				{
-					return TRUE;
+					return true;
 				}
 			}
 		}
@@ -4009,16 +4004,16 @@ BOOL CBaseMonster::FindLateralCover( const Vector &vecThreat, const Vector &vecV
 			{
 				if( MoveToLocation( movementActivity, 0, vecRightTest, BUILDROUTE_NO_NODEROUTE|BUILDROUTE_NO_TRIANGULATION ) )
 				{
-					return TRUE;
+					return true;
 				}
 			}
 		}
 	}
 
-	return FALSE;
+	return false;
 }
 
-BOOL CBaseMonster::FindLateralCover( const Vector &vecThreat, const Vector &vecViewOffset )
+bool CBaseMonster::FindLateralCover( const Vector &vecThreat, const Vector &vecViewOffset )
 {
 	return FindLateralCover( vecThreat, vecViewOffset, COVER_DELTA, COVER_DELTA * COVER_CHECKS, FINDSPOTAWAY_RUN|FINDSPOTAWAY_CHECK_SPOT );
 }
@@ -4070,14 +4065,9 @@ Vector CBaseMonster::SpitAtEnemy(const Vector& vecSpitOrigin, float dirRandomDev
 // number. Nicer to have it in one place if we're gonna
 // be stuck with it.
 //=========================================================
-BOOL CBaseMonster::FacingIdeal( void )
+bool CBaseMonster::FacingIdeal( void )
 {
-	if( fabs( FlYawDiff() ) <= 0.006f )//!!!BUGBUG - no magic numbers!!!
-	{
-		return TRUE;
-	}
-
-	return FALSE;
+	return fabs( FlYawDiff() ) <= 0.006f;//!!!BUGBUG - no magic numbers!!!
 }
 
 //=========================================================
@@ -4154,7 +4144,7 @@ void CBaseMonster::MonsterInitDead( void )
 // is lying flat on a surface (traces from all four corners
 // are same length.)
 //=========================================================
-BOOL CBaseMonster::BBoxFlat( void )
+bool CBaseMonster::BBoxFlat( void )
 {
 	TraceResult	tr;
 	Vector		vecPoint;
@@ -4179,7 +4169,7 @@ BOOL CBaseMonster::BBoxFlat( void )
 	flLength2 = ( vecPoint - tr.vecEndPos ).Length();
 	if( flLength2 > flLength )
 	{
-		return FALSE;
+		return false;
 	}
 	flLength = flLength2;
 
@@ -4189,7 +4179,7 @@ BOOL CBaseMonster::BBoxFlat( void )
 	flLength2 = ( vecPoint - tr.vecEndPos ).Length();
 	if( flLength2 > flLength )
 	{
-		return FALSE;
+		return false;
 	}
 	flLength = flLength2;
 
@@ -4199,17 +4189,17 @@ BOOL CBaseMonster::BBoxFlat( void )
 	flLength2 = ( vecPoint - tr.vecEndPos ).Length();
 	if( flLength2 > flLength )
 	{
-		return FALSE;
+		return false;
 	}
 	// flLength = flLength2;
 
-	return TRUE;
+	return true;
 }
 
 //=========================================================
 // Get Enemy - tries to find the best suitable enemy for the monster.
 //=========================================================
-BOOL CBaseMonster::GetEnemy( bool forcePopping )
+bool CBaseMonster::GetEnemy( bool forcePopping )
 {
 	CBaseEntity *pNewEnemy;
 
@@ -4258,13 +4248,7 @@ BOOL CBaseMonster::GetEnemy( bool forcePopping )
 		}
 	}
 
-	if( m_hEnemy != 0 )
-	{
-		// monster has an enemy.
-		return TRUE;
-	}
-
-	return FALSE;// monster has no enemy
+	return m_hEnemy != 0;
 }
 
 //=========================================================

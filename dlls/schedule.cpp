@@ -33,14 +33,9 @@
 // FHaveSchedule - Returns TRUE if monster's m_pSchedule
 // is anything other than NULL.
 //=========================================================
-BOOL CBaseMonster::FHaveSchedule( void )
+bool CBaseMonster::FHaveSchedule( void )
 {
-	if( m_pSchedule == NULL )
-	{
-		return FALSE;
-	}
-
-	return TRUE;
+	return m_pSchedule != nullptr;
 }
 
 //=========================================================
@@ -60,16 +55,10 @@ void CBaseMonster::ClearSchedule( void )
 // FScheduleDone - Returns TRUE if the caller is on the
 // last task in the schedule
 //=========================================================
-BOOL CBaseMonster::FScheduleDone( void )
+bool CBaseMonster::FScheduleDone( void )
 {
 	ASSERT( m_pSchedule != NULL );
-
-	if( m_iScheduleIndex == m_pSchedule->cTasks )
-	{
-		return TRUE;
-	}
-
-	return FALSE;
+	return m_iScheduleIndex == m_pSchedule->cTasks;
 }
 
 //=========================================================
@@ -188,12 +177,12 @@ int CBaseMonster::IScheduleFlags( void )
 // schedule is still the proper schedule to be executing,
 // taking into account all conditions
 //=========================================================
-BOOL CBaseMonster::FScheduleValid( void )
+bool CBaseMonster::FScheduleValid( void )
 {
 	if( m_pSchedule == NULL )
 	{
 		// schedule is empty, and therefore not valid.
-		return FALSE;
+		return false;
 	}
 
 	if( HasConditions( bits_COND_SCHEDULE_DONE | bits_COND_TASK_FAILED ) )
@@ -210,16 +199,16 @@ BOOL CBaseMonster::FScheduleValid( void )
 		}
 #endif // DEBUG
 		// some task failed, or the schedule is done
-		return FALSE;
+		return false;
 	}
 	else if ( HasConditions( m_pSchedule->iInterruptMask ) )
 	{
 		// some condition has interrupted the schedule
 		taskFailReason = "interrupted";
-		return FALSE;
+		return false;
 	}
 	
-	return TRUE;
+	return true;
 }
 
 bool CBaseMonster::ShouldGetIdealState()

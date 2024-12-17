@@ -467,7 +467,7 @@ public:
 	bool CanGoToTargetEnt()
 	{
 		if (m_hTargetEnt)
-			return BuildRoute(m_hTargetEnt->pev->origin, bits_MF_TO_TARGETENT, m_hTargetEnt) == TRUE;
+			return BuildRoute(m_hTargetEnt->pev->origin, bits_MF_TO_TARGETENT, m_hTargetEnt);
 		return false;
 	}
 
