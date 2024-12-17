@@ -318,9 +318,9 @@ float CBaseMonster::FLSoundVolume( CSound *pSound )
 // FValidateHintType - tells use whether or not the monster cares
 // about the type of Hint Node given
 //=========================================================
-BOOL CBaseMonster::FValidateHintType( short sHint )
+bool CBaseMonster::FValidateHintType( short sHint )
 {
-	return FALSE;
+	return false;
 }
 
 //=========================================================
@@ -997,11 +997,11 @@ void CBaseMonster::RouteSimplify( CBaseEntity *pTargetEnt )
 // right now only used when a barnacle snatches someone, so 
 // may have some special case stuff for that.
 //=========================================================
-BOOL CBaseMonster::FBecomeProne( void )
+bool CBaseMonster::FBecomeProne( void )
 {
 	if (m_pCine && !m_pCine->CanInterruptByBarnacle())
 	{
-		return FALSE;
+		return false;
 	}
 
 	if( FBitSet( pev->flags, FL_ONGROUND ) )
@@ -1010,7 +1010,7 @@ BOOL CBaseMonster::FBecomeProne( void )
 	}
 
 	m_IdealMonsterState = MONSTERSTATE_PRONE;
-	return TRUE;
+	return true;
 }
 
 //=========================================================
@@ -2836,7 +2836,7 @@ bool CBaseMonster::FindSpotAway( Vector vecThreat, float flMinDist, float flMaxD
 // if MaxDist isn't supplied, it defaults to a reasonable 
 // value
 //=========================================================
-BOOL CBaseMonster::BuildNearestRoute( Vector vecThreat, Vector vecViewOffset, float flMinDist, float flMaxDist )
+bool CBaseMonster::BuildNearestRoute( Vector vecThreat, Vector vecViewOffset, float flMinDist, float flMaxDist )
 {
 	int i;
 	int iMyHullIndex;
@@ -2862,7 +2862,7 @@ BOOL CBaseMonster::BuildNearestRoute( Vector vecThreat, Vector vecViewOffset, fl
 	if( !WorldGraph.m_fGraphPresent || !WorldGraph.m_fGraphPointersSet )
 	{
 		ALERT( at_aiconsole, "Graph not ready for BuildNearestRoute!\n" );
-		return FALSE;
+		return false;
 	}
 
 	iMyNode = WorldGraph.FindNearestNode( pev->origin, this );
@@ -2872,7 +2872,7 @@ BOOL CBaseMonster::BuildNearestRoute( Vector vecThreat, Vector vecViewOffset, fl
 	if( iMyNode == NO_NODE )
 	{
 		ALERT( at_aiconsole, "BuildNearestRoute() - %s has no nearest node!\n", STRING( pev->classname ) );
-		return FALSE;
+		return false;
 	}
 
 	vecLookersOffset = vecThreat + vecViewOffset;// calculate location of enemy's eyes
@@ -2903,14 +2903,14 @@ BOOL CBaseMonster::BuildNearestRoute( Vector vecThreat, Vector vecViewOffset, fl
 						// flMaxDist = flDist;
 						m_vecMoveGoal = node.m_vecOrigin;
 						WorldGraph.m_iLastCoverSearch = nodeNumber + 1; // next monster that searches for cover node will start where we left off here.
-						return TRUE; // UNDONE: keep looking for something closer!
+						return true; // UNDONE: keep looking for something closer!
 					}
 				}
 			}
 		}
 	}
 
-	return FALSE;
+	return false;
 }
 
 //=========================================================
@@ -4073,7 +4073,7 @@ bool CBaseMonster::FacingIdeal( void )
 //=========================================================
 // FCanActiveIdle
 //=========================================================
-BOOL CBaseMonster::FCanActiveIdle( void )
+bool CBaseMonster::FCanActiveIdle( void )
 {
 	/*
 	if( m_MonsterState == MONSTERSTATE_IDLE && m_IdealMonsterState == MONSTERSTATE_IDLE && !IsMoving() )
@@ -4081,7 +4081,7 @@ BOOL CBaseMonster::FCanActiveIdle( void )
 		return TRUE;
 	}
 	*/
-	return FALSE;
+	return false;
 }
 
 void CBaseMonster::CorpseFallThink( void )

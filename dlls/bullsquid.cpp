@@ -355,7 +355,7 @@ public:
 	virtual BOOL CheckMeleeAttack2(float flDot, float flDist);
 	virtual BOOL CheckRangeAttack1(float flDot, float flDist);
 	virtual void RunAI(void);
-	BOOL FValidateHintType(short sHint);
+	bool FValidateHintType(short sHint) override;
 	Schedule_t *GetSchedule(void);
 	Schedule_t *GetScheduleOfType(int Type);
 	virtual int TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType);
@@ -610,7 +610,7 @@ BOOL CBullsquid::CheckMeleeAttack2( float flDot, float flDist )
 //=========================================================
 //  FValidateHintType 
 //=========================================================
-BOOL CBullsquid::FValidateHintType( short sHint )
+bool CBullsquid::FValidateHintType( short sHint )
 {
 	size_t i;
 
@@ -623,12 +623,12 @@ BOOL CBullsquid::FValidateHintType( short sHint )
 	{
 		if( sSquidHints[i] == sHint )
 		{
-			return TRUE;
+			return true;
 		}
 	}
 
 	ALERT( at_aiconsole, "%s couldn't validate hint type\n", STRING(pev->classname) );
-	return FALSE;
+	return false;
 }
 
 //=========================================================

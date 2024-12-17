@@ -255,7 +255,7 @@ public:
 	void MakeIdealYaw( Vector vecTarget );
 	virtual void SetYawSpeed( void ) { return; };// allows different yaw_speeds for each activity
 	bool BuildRoute( const Vector &vecGoal, int iMoveFlag, CBaseEntity *pTarget, int buildRouteFlags = 0 );
-	virtual BOOL BuildNearestRoute( Vector vecThreat, Vector vecViewOffset, float flMinDist, float flMaxDist );
+	virtual bool BuildNearestRoute( Vector vecThreat, Vector vecViewOffset, float flMinDist, float flMaxDist );
 	int RouteClassify( int iMoveFlag );
 	void InsertWaypoint( Vector vecLocation, int afMoveFlags );
 
@@ -267,7 +267,7 @@ public:
 	bool FindCover(Vector vecThreat, Vector vecViewOffset, float flMinDist, float flMaxDist, int flags);
 	bool FindCover(Vector vecThreat, Vector vecViewOffset, float flMinDist, float flMaxDist);
 	bool FindSpotAway(Vector vecThreat, float flMinDist, float flMaxDist, int flags);
-	virtual BOOL FValidateCover( const Vector &vecCoverLocation ) { return TRUE; };
+	virtual bool FValidateCover( const Vector &vecCoverLocation ) { return true; }
 	virtual float CoverRadius( void ) { return 784; } // Default cover radius
 
 	virtual BOOL FCanCheckAttacks( void );
@@ -279,9 +279,9 @@ public:
 	inline bool HasConditions( int iConditions ) { if ( m_afConditions & iConditions ) return true; return false; }
 	inline bool HasAllConditions( int iConditions ) { if ( (m_afConditions & iConditions) == iConditions ) return true; return false; }
 
-	virtual BOOL FValidateHintType( short sHint );
+	virtual bool FValidateHintType( short sHint );
 	int FindHintNode( void );
-	virtual BOOL FCanActiveIdle( void );
+	virtual bool FCanActiveIdle( void );
 	void SetTurnActivity( void );
 	float FLSoundVolume( CSound *pSound );
 
@@ -300,7 +300,7 @@ public:
 	virtual CSound* PBestScent( void );
 	virtual float HearingSensitivity( void ) { return 1.0; }
 
-	BOOL FBecomeProne( void );
+	bool FBecomeProne( void ) override;
 	virtual void BarnacleVictimBitten( entvars_t *pevBarnacle );
 	virtual void BarnacleVictimReleased( void );
 

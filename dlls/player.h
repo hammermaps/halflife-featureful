@@ -412,7 +412,7 @@ public:
 	void UpdateGeigerCounter( void );
 	void CheckTimeBasedDamage( void );
 
-	BOOL FBecomeProne ( void );
+	bool FBecomeProne( void ) override;
 	void BarnacleVictimBitten ( entvars_t *pevBarnacle );
 	void BarnacleVictimReleased ( void );
 	static int GetAmmoIndex(const char *psz);

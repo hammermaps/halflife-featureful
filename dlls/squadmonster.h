@@ -120,7 +120,7 @@ public:
 	int Save( CSave &save ); 
 	int Restore( CRestore &restore );
 
-	BOOL FValidateCover( const Vector &vecCoverLocation );
+	bool FValidateCover( const Vector &vecCoverLocation ) override;
 
 	MONSTERSTATE GetIdealState( void );
 	Schedule_t *GetScheduleOfType( int iType );

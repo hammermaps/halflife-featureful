@@ -124,8 +124,8 @@ public:
 	void SetActivity( Activity NewActivity );
 	const Visual* GetWaveVisual();
 	BOOL CheckRangeAttack1( float flDot, float flDist );
-	BOOL FValidateHintType( short sHint );
-	BOOL FCanActiveIdle( void );
+	bool FValidateHintType( short sHint ) override;
+	bool FCanActiveIdle( void ) override;
 	Schedule_t *GetScheduleOfType( int Type );
 	Schedule_t *GetSchedule( void );
 	int IgnoreConditions();
@@ -270,7 +270,7 @@ int CHoundeye::DefaultClassify( void )
 //=========================================================
 //  FValidateHintType 
 //=========================================================
-BOOL CHoundeye::FValidateHintType( short sHint )
+bool CHoundeye::FValidateHintType( short sHint )
 {
 	size_t i;
 
@@ -286,18 +286,18 @@ BOOL CHoundeye::FValidateHintType( short sHint )
 	{
 		if( sHoundHints[i] == sHint )
 		{
-			return TRUE;
+			return true;
 		}
 	}
 
 	ALERT( at_aiconsole, "%s couldn't validate hint type\n", STRING(pev->classname) );
-	return FALSE;
+	return false;
 }
 
 //=========================================================
 // FCanActiveIdle
 //=========================================================
-BOOL CHoundeye::FCanActiveIdle( void )
+bool CHoundeye::FCanActiveIdle( void )
 {
 	if( InSquad() )
 	{
@@ -310,14 +310,14 @@ BOOL CHoundeye::FCanActiveIdle( void )
 			if( pMember != NULL && pMember != this && pMember->m_iHintNode != NO_NODE )
 			{
 				// someone else in the group is active idling right now!
-				return FALSE;
+				return false;
 			}
 		}
 
-		return TRUE;
+		return true;
 	}
 
-	return TRUE;
+	return true;
 }
 
 //=========================================================

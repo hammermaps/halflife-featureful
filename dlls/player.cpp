@@ -5552,7 +5552,7 @@ void CBasePlayer::GatherAndSendObjectHints()
 // FBecomeProne - Overridden for the player to set the proper
 // physics flags when a barnacle grabs player.
 //=========================================================
-BOOL CBasePlayer::FBecomeProne( void )
+bool CBasePlayer::FBecomeProne( void )
 {
 	m_afPhysicsFlags |= PFLAG_ONBARNACLE;
 
@@ -5563,7 +5563,7 @@ BOOL CBasePlayer::FBecomeProne( void )
 	}
 #endif
 
-	return TRUE;
+	return true;
 }
 
 //=========================================================

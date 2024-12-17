@@ -94,7 +94,7 @@ CBaseEntity *UTIL_FindEntityInSphere( CBaseEntity *pStartEntity, const Vector &v
 CBaseEntity* CBaseMonster::CheckTraceHullAttack( float flDist, int iDamage, int iDmgType ) { return NULL; }
 void CBaseMonster::BarnacleVictimBitten( entvars_t *pevBarnacle ) { }
 void CBaseMonster::BarnacleVictimReleased( void ) { }
-BOOL CBaseMonster::FValidateHintType( short sHint ) { return FALSE; }
+bool CBaseMonster::FValidateHintType( short sHint ) { return false; }
 void CBaseMonster::Look( int iDistance ) { }
 int CBaseMonster::DefaultISoundMask( void ) { return 0; }
 CSound *CBaseMonster::PBestSound( void ) { return NULL; }
@@ -102,7 +102,7 @@ CSound *CBaseMonster::PBestScent( void ) { return NULL; }
 float CBaseAnimating::StudioFrameAdvance( float flInterval ) { return 0.0; }
 void CBaseMonster::MonsterThink( void ) { }
 int CBaseMonster::IgnoreConditions( void ) { return 0; }
-BOOL CBaseMonster::FBecomeProne( void ) { return TRUE; }
+bool CBaseMonster::FBecomeProne( void ) { return true; }
 BOOL CBaseMonster::CheckRangeAttack1( float flDot, float flDist ) { return FALSE; }
 BOOL CBaseMonster::CheckRangeAttack2( float flDot, float flDist ) { return FALSE; }
 BOOL CBaseMonster::CheckMeleeAttack1( float flDot, float flDist ) { return FALSE; }
@@ -118,7 +118,7 @@ void CBaseMonster::MonsterInit( void ) { }
 void CBaseMonster::MonsterInitThink( void ) { }
 void CBaseMonster::StartMonster( void ) { }
 int CBaseMonster::IRelationship( CBaseEntity *pTarget ) { return 0; }
-BOOL CBaseMonster::BuildNearestRoute( Vector vecThreat, Vector vecViewOffset, float flMinDist, float flMaxDist ) { return FALSE; }
+bool CBaseMonster::BuildNearestRoute( Vector vecThreat, Vector vecViewOffset, float flMinDist, float flMaxDist ) { return false; }
 CBaseEntity *CBaseMonster::BestVisibleEnemy( void ) { return NULL; }
 BOOL CBaseMonster::FInViewCone( CBaseEntity *pEntity ) { return FALSE; }
 BOOL CBaseMonster::FInViewCone( Vector *pOrigin ) { return FALSE; }
@@ -135,7 +135,7 @@ void CBaseMonster::ReportAIState( ALERT_TYPE ) { }
 void CBaseMonster::KeyValue( KeyValueData *pkvd ) { }
 void CBaseMonster::Activate() {}
 int CBaseMonster::CanPlaySequence( int interruptFlags ) { return FALSE; }
-BOOL CBaseMonster::FCanActiveIdle( void ) { return FALSE; }
+bool CBaseMonster::FCanActiveIdle( void ) { return false; }
 bool CBaseToggle::PlaySentence( const char *pszSentence, float duration, float volume, float attenuation, bool subtitle ) { return true; }
 void CBaseToggle::PlayScriptedSentence( const char *pszSentence, float duration, float volume, float attenuation, BOOL bConcurrent, CBaseEntity *pListener ) { }
 void CBaseToggle::SentenceStop( void ) { }
@@ -205,7 +205,7 @@ void CBasePlayer::ImpulseCommands() { }
 int CBasePlayer::AddPlayerItem( CBasePlayerWeapon *pItem ) { return DID_NOT_GET_ITEM; }
 int CBasePlayer::GetAmmoIndex( const char *psz ) { return -1; }
 void CBasePlayer::UpdateClientData( void ) { }
-BOOL CBasePlayer::FBecomeProne( void ) { return TRUE; }
+bool CBasePlayer::FBecomeProne( void ) { return true; }
 void CBasePlayer::BarnacleVictimBitten( entvars_t *pevBarnacle ) { }
 void CBasePlayer::BarnacleVictimReleased( void ) { }
 int CBasePlayer::Illumination( void ) { return 0; }

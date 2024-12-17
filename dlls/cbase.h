@@ -428,7 +428,7 @@ public:
 	static CBaseEntity *Create( const char *szName, const Vector &vecOrigin, const Vector &vecAngles, edict_t *pentOwner = NULL, EntityOverrides entityOverrides = EntityOverrides() );
 	static CBaseEntity *CreateNoSpawn( const char *szName, const Vector &vecOrigin, const Vector &vecAngles, edict_t *pentOwner = NULL, EntityOverrides entityOverrides = EntityOverrides() );
 
-	virtual BOOL FBecomeProne( void ) {return FALSE;};
+	virtual bool FBecomeProne( void ) {return false;}
 	edict_t *edict() { return ENT( pev ); };
 	EOFFSET eoffset() { return OFFSET( pev ); };
 	int entindex() { return ENTINDEX( edict() ); };

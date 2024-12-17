@@ -649,20 +649,20 @@ MONSTERSTATE CSquadMonster::GetIdealState ( void )
 // cover location is a good one to move to. (currently based
 // on proximity to others in the squad)
 //=========================================================
-BOOL CSquadMonster::FValidateCover( const Vector &vecCoverLocation )
+bool CSquadMonster::FValidateCover( const Vector &vecCoverLocation )
 {
 	if( !InSquad() )
 	{
-		return TRUE;
+		return true;
 	}
 
 	if( AllyMonsterInRange( vecCoverLocation, 128 ) )
 	{
 		// another squad member is too close to this piece of cover.
-		return FALSE;
+		return false;
 	}
 
-	return TRUE;
+	return true;
 }
 
 //=========================================================
