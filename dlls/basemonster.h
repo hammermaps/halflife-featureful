@@ -140,7 +140,7 @@ public:
 	virtual void RunAI( void );// core ai function!	
 	void Listen( void );
 
-	virtual BOOL IsAlive( void ) { return ( pev->deadflag != DEAD_DEAD ); }
+	virtual bool IsAlive( void ) override { return ( pev->deadflag != DEAD_DEAD ); }
 	virtual bool IsFullyAlive( void );
 	virtual bool ShouldFadeOnDeath( void );
 

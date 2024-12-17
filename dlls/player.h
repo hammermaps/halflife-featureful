@@ -274,7 +274,7 @@ public:
 	virtual int TakeDamage( entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType);
 	virtual void	Killed( entvars_t *pevInflictor, entvars_t *pevAttacker, int iGib );
 	virtual Vector BodyTarget( const Vector &posSrc ) { return Center( ) + pev->view_ofs * RANDOM_FLOAT( 0.5, 1.1 ); };		// position to shoot at
-	virtual BOOL IsAlive( void ) { return IsFullyAlive(); }
+	virtual bool IsAlive( void ) override { return IsFullyAlive(); }
 	virtual bool ShouldFadeOnDeath( void ) override { return false; }
 	virtual	bool IsPlayer( void ) override { return true; }			// Spectators should return FALSE for this, they aren't "players" as far as game logic is concerned
 

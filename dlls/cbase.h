@@ -230,7 +230,7 @@ public:
 	// This is ONLY used by the node graph to test movement through a door
 	virtual void SetToggleState( int state ) {}
 	virtual bool OnControls( entvars_t *pev ) { return false; }
-	virtual BOOL IsAlive( void ) { return IsFullyAlive(); }
+	virtual bool IsAlive( void ) { return IsFullyAlive(); }
 	virtual bool IsFullyAlive() { return (pev->deadflag == DEAD_NO) && pev->health > 0; } // IsAlive returns true for DEAD_DYING monsters. Use this when checking if monster is not dead and not dying
 	virtual bool IsBSPModel( void ) { return pev->solid == SOLID_BSP || pev->movetype == MOVETYPE_PUSHSTEP; }
 	virtual bool ReflectGauss( void ) { return ( IsBSPModel() && !pev->takedamage ); }
