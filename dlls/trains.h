@@ -86,7 +86,7 @@ public:
 	void EXPORT NearestPath( void );
 	void EXPORT DeadEnd( void );
 
-	void NextThink( float thinkTime, BOOL alwaysThink );
+	void NextThink(float thinkTime, bool alwaysThink );
 
 	void SetTrack( CPathTrack *track ) { m_ppath = track->Nearest( pev->origin ); }
 	void SetControls( entvars_t *pevControls );
@@ -148,7 +148,7 @@ public:
 	void EXPORT NearestPath();
 	void EXPORT DeadEnd();
 
-	void NextThink( float thinkTime, BOOL alwaysThink );
+	void NextThink( float thinkTime, bool alwaysThink );
 	void CollisionDetection();
 	void TerrainFollowing();
 	void CheckTurning();

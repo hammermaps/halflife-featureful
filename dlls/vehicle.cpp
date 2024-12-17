@@ -117,7 +117,7 @@ void CFuncVehicle::KeyValue( KeyValueData *pkvd )
 		CBaseEntity::KeyValue( pkvd );
 }
 
-void CFuncVehicle::NextThink( float thinkTime, BOOL alwaysThink )
+void CFuncVehicle::NextThink( float thinkTime, bool alwaysThink )
 {
 	if( alwaysThink )
 		pev->flags |= FL_ALWAYSTHINK;
@@ -584,7 +584,7 @@ void CFuncVehicle::Next()
 		pev->velocity = g_vecZero;
 
 		SetThink( &CFuncVehicle::Next );
-		NextThink( pev->ltime + time, TRUE );
+		NextThink( pev->ltime + time, true );
 		return;
 	}
 
@@ -675,7 +675,7 @@ void CFuncVehicle::Next()
 	}
 
 	SetThink( &CFuncVehicle::Next );
-	NextThink( pev->ltime + time, TRUE );
+	NextThink( pev->ltime + time, true );
 }
 
 void CFuncVehicle::DeadEnd()
@@ -789,7 +789,7 @@ void CFuncVehicle::Find()
 	}
 
 	UTIL_SetOrigin( pev, nextPos );
-	NextThink( pev->ltime + 0.1f, FALSE );
+	NextThink( pev->ltime + 0.1f, false );
 	SetThink( &CFuncVehicle::Next );
 	pev->speed = m_startSpeed;
 	UpdateSound();
@@ -837,14 +837,14 @@ void CFuncVehicle::NearestPath()
 	m_ppath = (CPathTrack *)pNearest;
 	if( pev->speed != 0 )
 	{
-		NextThink( pev->ltime + 0.1f, FALSE );
+		NextThink( pev->ltime + 0.1f, false );
 		SetThink( &CFuncVehicle::Next );
 	}
 }
 
 void CFuncVehicle::OverrideReset()
 {
-	NextThink( pev->ltime + 0.1f, FALSE );
+	NextThink( pev->ltime + 0.1f, false );
 	SetThink( &CFuncVehicle::NearestPath );
 }
 
@@ -907,7 +907,7 @@ void CFuncVehicle::Spawn()
 	m_controlMaxs = pev->maxs;
 	m_controlMaxs.z += 72;
 
-	NextThink( pev->ltime + 0.1f, FALSE );
+	NextThink( pev->ltime + 0.1f, false );
 	SetThink( &CFuncVehicle::Find );
 	Precache();
 }
@@ -934,7 +934,7 @@ void CFuncVehicle::Restart()
 	UTIL_SetOrigin( pev, pev->oldorigin );
 	STOP_SOUND( ENT( pev ), CHAN_STATIC, STRING( pev->noise ));
 
-	NextThink( pev->ltime + 0.1f, FALSE );
+	NextThink( pev->ltime + 0.1f, false );
 	SetThink( &CFuncVehicle::Find );
 }
 

@@ -1050,7 +1050,7 @@ void CFuncTrackTrain::KeyValue( KeyValueData *pkvd )
 		CBaseEntity::KeyValue( pkvd );
 }
 
-void CFuncTrackTrain::NextThink( float thinkTime, BOOL alwaysThink )
+void CFuncTrackTrain::NextThink( float thinkTime, bool alwaysThink )
 {
 	if( alwaysThink )
 		pev->flags |= FL_ALWAYSTHINK;
@@ -1325,7 +1325,7 @@ void CFuncTrackTrain::Next( void )
 
 		}
 		SetThink( &CFuncTrackTrain::Next );
-		NextThink( pev->ltime + time, TRUE );
+		NextThink( pev->ltime + time, true );
 	}
 	else // end of path, stop
 	{
@@ -1346,7 +1346,7 @@ void CFuncTrackTrain::Next( void )
 			time = distance / m_oldSpeed;
 			pev->velocity = pev->velocity * ( m_oldSpeed / distance );
 			SetThink( &CFuncTrackTrain::DeadEnd );
-			NextThink( pev->ltime + time, FALSE );
+			NextThink( pev->ltime + time, false );
 		}
 		else
 		{
@@ -1458,7 +1458,7 @@ void CFuncTrackTrain::Find( void )
 	if( pev->spawnflags & SF_TRACKTRAIN_NOPITCH )
 		pev->angles.x = 0;
 	UTIL_SetOrigin( pev, nextPos );
-	NextThink( pev->ltime + 0.1f, FALSE );
+	NextThink( pev->ltime + 0.1f, false );
 	SetThink( &CFuncTrackTrain::Next );
 	pev->speed = m_startSpeed;
 
@@ -1507,14 +1507,14 @@ void CFuncTrackTrain::NearestPath( void )
 
 	if( pev->speed != 0 )
 	{
-		NextThink( pev->ltime + 0.1f, FALSE );
+		NextThink( pev->ltime + 0.1f, false );
 		SetThink( &CFuncTrackTrain::Next );
 	}
 }
 
 void CFuncTrackTrain::OverrideReset( void )
 {
-	NextThink( pev->ltime + 0.1f, FALSE );
+	NextThink( pev->ltime + 0.1f, false );
 	SetThink( &CFuncTrackTrain::NearestPath );
 }
 
@@ -1578,7 +1578,7 @@ void CFuncTrackTrain::Spawn( void )
 
 	// start trains on the next frame, to make sure their targets have had
 	// a chance to spawn/activate
-	NextThink( pev->ltime + 0.1f, FALSE );
+	NextThink( pev->ltime + 0.1f, false );
 	SetThink( &CFuncTrackTrain::Find );
 	Precache();
 }
@@ -1916,7 +1916,7 @@ void CFuncTrackChange::UpdateTrain( Vector &dest )
 
 	m_train->pev->velocity = pev->velocity;
 	m_train->pev->avelocity = pev->avelocity;
-	m_train->NextThink( m_train->pev->ltime + time, FALSE );
+	m_train->NextThink( m_train->pev->ltime + time, false );
 
 	// Attempt at getting the train to rotate properly around the origin of the trackchange
 	if( time <= 0 )
