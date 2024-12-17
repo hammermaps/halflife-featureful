@@ -974,7 +974,7 @@ bool CTalkMonster::FOkToSpeak(int speakFlags )
 	return true;
 }
 
-int CTalkMonster::CanPlaySentence( BOOL fDisregardState ) 
+bool CTalkMonster::CanPlaySentence( bool fDisregardState )
 { 
 	if( fDisregardState )
 		return CFollowingMonster::CanPlaySentence( fDisregardState );
