@@ -149,7 +149,7 @@ void CHalfLifeTeamplay::Think( void )
 // the user has typed a command which is unrecognized by everything else;
 // this check to see if the gamerules knows anything about the command
 //=========================================================
-BOOL CHalfLifeTeamplay::ClientCommand( CBasePlayer *pPlayer, const char *pcmd )
+bool CHalfLifeTeamplay::ClientCommand( CBasePlayer *pPlayer, const char *pcmd )
 {
 #if !NO_VOICEGAMEMGR
 	if( g_VoiceGameMgr.ClientCommand( pPlayer, pcmd ) )
@@ -158,15 +158,15 @@ BOOL CHalfLifeTeamplay::ClientCommand( CBasePlayer *pPlayer, const char *pcmd )
 	if( FStrEq( pcmd, "menuselect" ) )
 	{
 		if( CMD_ARGC() < 2 )
-			return TRUE;
+			return true;
 
 		//int slot = atoi( CMD_ARGV( 1 ) );
 
 		// select the item from the current menu
-		return TRUE;
+		return true;
 	}
 
-	return FALSE;
+	return false;
 }
 
 extern int gmsgGameMode;
@@ -244,7 +244,7 @@ void CHalfLifeTeamplay::InitHUD( CBasePlayer *pPlayer )
 		sprintf( text, "* assigned to team %s\n", pPlayer->m_szTeamName );
 	}
 
-	ChangePlayerTeam( pPlayer, pPlayer->m_szTeamName, FALSE, FALSE );
+	ChangePlayerTeam( pPlayer, pPlayer->m_szTeamName, false, false );
 	UTIL_SayText( text, pPlayer );
 	//int clientIndex = pPlayer->entindex();
 	RecountTeams();
@@ -263,7 +263,7 @@ void CHalfLifeTeamplay::InitHUD( CBasePlayer *pPlayer )
 	}
 }
 
-void CHalfLifeTeamplay::ChangePlayerTeam( CBasePlayer *pPlayer, const char *pTeamName, BOOL bKill, BOOL bGib )
+void CHalfLifeTeamplay::ChangePlayerTeam(CBasePlayer *pPlayer, const char *pTeamName, bool bKill, bool bGib )
 {
 	int damageFlags = DMG_GENERIC;
 	int clientIndex = pPlayer->entindex();
@@ -360,10 +360,10 @@ void CHalfLifeTeamplay::ClientUserInfoChanged( CBasePlayer *pPlayer, char *infob
 		pPlayer->m_szTeamName,
 		mdls );
 
-	ChangePlayerTeam( pPlayer, mdls, TRUE, TRUE );
+	ChangePlayerTeam( pPlayer, mdls, true, true );
 
 	// recound stuff
-	RecountTeams( TRUE );
+	RecountTeams( true );
 
 	pPlayer->SetPrefsFromUserinfo( infobuffer );
 }
@@ -413,12 +413,12 @@ void CHalfLifeTeamplay::PlayerKilled( CBasePlayer *pVictim, entvars_t *pKiller, 
 //=========================================================
 // IsTeamplay
 //=========================================================
-BOOL CHalfLifeTeamplay::IsTeamplay( void )
+bool CHalfLifeTeamplay::IsTeamplay( void )
 {
-	return TRUE;
+	return true;
 }
 
-BOOL CHalfLifeTeamplay::FPlayerCanTakeDamage( CBasePlayer *pPlayer, CBaseEntity *pAttacker )
+bool CHalfLifeTeamplay::FPlayerCanTakeDamage( CBasePlayer *pPlayer, CBaseEntity *pAttacker )
 {
 	return CHalfLifeMultiplay::FPlayerCanTakeDamage( pPlayer, pAttacker );
 }
@@ -442,14 +442,14 @@ int CHalfLifeTeamplay::PlayerRelationship( CBaseEntity *pPlayer, CBaseEntity *pT
 
 //=========================================================
 //=========================================================
-BOOL CHalfLifeTeamplay::ShouldAutoAim( CBasePlayer *pPlayer, edict_t *target )
+bool CHalfLifeTeamplay::ShouldAutoAim( CBasePlayer *pPlayer, edict_t *target )
 {
 	// always autoaim, unless target is a teammate
 	CBaseEntity *pTgt = CBaseEntity::Instance( target );
 	if( pTgt && pTgt->IsPlayer() )
 	{
 		if( PlayerRelationship( pPlayer, pTgt ) == GR_TEAMMATE )
-			return FALSE; // don't autoaim at teammates
+			return false; // don't autoaim at teammates
 	}
 
 	return CHalfLifeMultiplay::ShouldAutoAim( pPlayer, target );
@@ -505,12 +505,12 @@ const char *CHalfLifeTeamplay::GetIndexedTeamName( int teamIndex )
 	return team_names[teamIndex];
 }
 
-BOOL CHalfLifeTeamplay::IsValidTeam( const char *pTeamName ) 
+bool CHalfLifeTeamplay::IsValidTeam( const char *pTeamName )
 {
 	if( !m_teamLimit )	// Any team is valid if the teamlist isn't set
-		return TRUE;
+		return true;
 
-	return ( GetTeamIndex( pTeamName ) != -1 ) ? TRUE : FALSE;
+	return GetTeamIndex( pTeamName ) != -1;
 }
 
 const char *CHalfLifeTeamplay::TeamWithFewestPlayers( void )

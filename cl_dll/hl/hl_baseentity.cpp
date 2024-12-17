@@ -78,7 +78,6 @@ void UTIL_GunshotDecalTrace( TraceResult *pTrace, int decalNumber ) { }
 void UTIL_MakeVectors( const Vector &vecAngles ) { }
 BOOL UTIL_IsValidEntity( edict_t *pent ) { return TRUE; }
 void UTIL_SetOrigin( entvars_t *, const Vector &org ) { }
-BOOL UTIL_GetNextBestWeapon( CBasePlayer *pPlayer, CBasePlayerWeapon *pCurrentWeapon ) { return TRUE; }
 void UTIL_LogPrintf(char *,...) { }
 void UTIL_ClientPrintAll( int,char const *,char const *,char const *,char const *,char const *) { }
 void ClientPrint( entvars_t *client, int msg_dest, const char *msg_name, const char *param1, const char *param2, const char *param3, const char *param4 ) { }
@@ -218,9 +217,9 @@ void CBasePlayer::ResetAutoaim() { }
 Vector CBasePlayer::GetGunPosition( void ) { return g_vecZero; }
 const char *CBasePlayer::TeamID( void ) { return ""; }
 int CBasePlayer::GiveAmmo( int iCount, const char *szName ) { return 0; }
-void CBasePlayer::AddPoints( int score, BOOL bAllowNegativeScore ) { }
-void CBasePlayer::AddFloatPoints(float score, BOOL bAllowNegativeScore) {}
-void CBasePlayer::AddPointsToTeam( int score, BOOL bAllowNegativeScore ) { }
+void CBasePlayer::AddPoints( int score, bool bAllowNegativeScore ) { }
+void CBasePlayer::AddFloatPoints(float score, bool bAllowNegativeScore) {}
+void CBasePlayer::AddPointsToTeam( int score, bool bAllowNegativeScore ) { }
 
 float CBasePlayerWeapon::GetNextAttackDelay( float flTime ) { return flTime; }
 void CBasePlayerWeapon::SetObjectCollisionBox( void ) { }

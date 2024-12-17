@@ -376,9 +376,9 @@ public:
 	void StartObserver( Vector vecPosition, Vector vecViewAngle );
 	void StopObserver();
 
-	void AddPoints( int score, BOOL bAllowNegativeScore );
-	void AddPointsToTeam( int score, BOOL bAllowNegativeScore );
-	void AddFloatPoints( float score, BOOL bAllowNegativeScore );
+	void AddPoints( int score, bool bAllowNegativeScore ) override;
+	void AddPointsToTeam( int score, bool bAllowNegativeScore ) override;
+	void AddFloatPoints( float score, bool bAllowNegativeScore ) override;
 	BOOL AddPlayerItem( CBasePlayerWeapon *pItem );
 	BOOL RemovePlayerItem( CBasePlayerWeapon *pItem, bool bCallHoster );
 	void DropPlayerItem ( const char *pszItemName );

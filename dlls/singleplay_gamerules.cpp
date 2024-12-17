@@ -48,62 +48,62 @@ void CHalfLifeRules::Think( void )
 
 //=========================================================
 //=========================================================
-BOOL CHalfLifeRules::IsMultiplayer( void )
+bool CHalfLifeRules::IsMultiplayer( void )
 {
-	return FALSE;
+	return false;
 }
 
 //=========================================================
 //=========================================================
-BOOL CHalfLifeRules::IsDeathmatch( void )
+bool CHalfLifeRules::IsDeathmatch( void )
 {
-	return FALSE;
+	return false;
 }
 
 //=========================================================
 //=========================================================
-BOOL CHalfLifeRules::IsCoOp( void )
+bool CHalfLifeRules::IsCoOp( void )
 {
-	return FALSE;
+	return false;
 }
 
 //=========================================================
 //=========================================================
-BOOL CHalfLifeRules::FShouldSwitchWeapon( CBasePlayer *pPlayer, CBasePlayerWeapon *pWeapon )
+bool CHalfLifeRules::FShouldSwitchWeapon( CBasePlayer *pPlayer, CBasePlayerWeapon *pWeapon )
 {
 	if( !pPlayer->m_pActiveItem )
 	{
 		// player doesn't have an active item!
-		return TRUE;
+		return true;
 	}
 
 	if( !pPlayer->m_iAutoWepSwitch )
 	{
-		return FALSE;
+		return false;
 	}
 
 	if( pPlayer->m_iAutoWepSwitch == 2
 	    && pPlayer->m_afButtonLast & ( IN_ATTACK | IN_ATTACK2 ) )
 	{
-		return FALSE;
+		return false;
 	}
 
 	if( !pPlayer->m_pActiveItem->CanHolster() )
 	{
-		return FALSE;
+		return false;
 	}
 
 	if( !pPlayer->m_settingsLoaded && pWeapon->iWeight() < pPlayer->m_pActiveItem->iWeight() )
 	{
-		return FALSE;
+		return false;
 	}
 
-	return TRUE;
+	return true;
 }
 
 //=========================================================
 //=========================================================
-BOOL HLGetNextBestWeapon(CBasePlayer *pPlayer, CBasePlayerWeapon *pCurrentWeapon )
+bool HLGetNextBestWeapon(CBasePlayer *pPlayer, CBasePlayerWeapon *pCurrentWeapon )
 {
 	CBasePlayerWeapon *pBest = NULL;// this will be used in the event that we don't find a weapon in the same category.
 	int iBestWeight = -1;// no weapon lower than -1 can be autoswitched to
@@ -112,7 +112,7 @@ BOOL HLGetNextBestWeapon(CBasePlayer *pPlayer, CBasePlayerWeapon *pCurrentWeapon
 	if( pCurrentWeapon && !pCurrentWeapon->CanHolster() )
 	{
 		// can't put this gun away right now, so can't switch.
-		return FALSE;
+		return false;
 	}
 
 	const int currentWeight = pCurrentWeapon ? pCurrentWeapon->iWeight() : 0;
@@ -132,7 +132,7 @@ BOOL HLGetNextBestWeapon(CBasePlayer *pPlayer, CBasePlayerWeapon *pCurrentWeapon
 					{
 						if ( pPlayer->SwitchWeapon( pCheck ) )
 						{
-							return TRUE;
+							return true;
 						}
 					}
 				}
@@ -160,28 +160,28 @@ BOOL HLGetNextBestWeapon(CBasePlayer *pPlayer, CBasePlayerWeapon *pCurrentWeapon
 	// at least get the crowbar, but ya never know.
 	if( !pBest )
 	{
-		return FALSE;
+		return false;
 	}
 
 	pPlayer->SwitchWeapon( pBest );
 
-	return TRUE;
+	return true;
 }
 
 //=========================================================
 //=========================================================
-BOOL CHalfLifeRules::GetNextBestWeapon( CBasePlayer *pPlayer, CBasePlayerWeapon *pCurrentWeapon )
+bool CHalfLifeRules::GetNextBestWeapon( CBasePlayer *pPlayer, CBasePlayerWeapon *pCurrentWeapon )
 {
 	if( pCurrentWeapon && FBitSet( pCurrentWeapon->iFlags(), ITEM_FLAG_EXHAUSTIBLE ))
 		return HLGetNextBestWeapon( pPlayer, pCurrentWeapon );
-	return FALSE;
+	return false;
 }
 
 //=========================================================
 //=========================================================
-BOOL CHalfLifeRules::ClientConnected( edict_t *pEntity, const char *pszName, const char *pszAddress, char szRejectReason[128] )
+bool CHalfLifeRules::ClientConnected( edict_t *pEntity, const char *pszName, const char *pszAddress, char szRejectReason[128] )
 {
-	return TRUE;
+	return true;
 }
 
 void CHalfLifeRules::InitHUD( CBasePlayer *pPlayer )
@@ -212,7 +212,7 @@ void CHalfLifeRules::PlayerSpawn( CBasePlayer *pPlayer )
 
 //=========================================================
 //=========================================================
-BOOL CHalfLifeRules::AllowAutoTargetCrosshair( void )
+bool CHalfLifeRules::AllowAutoTargetCrosshair( void )
 {
 	return ( g_iSkillLevel == SKILL_EASY );
 }
@@ -252,9 +252,9 @@ void CHalfLifeRules::PlayerThink( CBasePlayer *pPlayer )
 
 //=========================================================
 //=========================================================
-BOOL CHalfLifeRules::FPlayerCanRespawn( CBasePlayer *pPlayer )
+bool CHalfLifeRules::FPlayerCanRespawn( CBasePlayer *pPlayer )
 {
-	return TRUE;
+	return true;
 }
 
 //=========================================================
@@ -341,9 +341,9 @@ int CHalfLifeRules::WeaponShouldRespawn( CBasePlayerWeapon *pWeapon )
 
 //=========================================================
 //=========================================================
-BOOL CHalfLifeRules::CanHaveItem( CBasePlayer *pPlayer, CItem *pItem )
+bool CHalfLifeRules::CanHaveItem( CBasePlayer *pPlayer, CItem *pItem )
 {
-	return TRUE;
+	return true;
 }
 
 //=========================================================
@@ -378,9 +378,9 @@ Vector CHalfLifeRules::VecItemRespawnSpot( CItem *pItem )
 
 //=========================================================
 //=========================================================
-BOOL CHalfLifeRules::IsAllowedToSpawn( CBaseEntity *pEntity )
+bool CHalfLifeRules::IsAllowedToSpawn( CBaseEntity *pEntity )
 {
-	return TRUE;
+	return true;
 }
 
 //=========================================================
@@ -441,9 +441,9 @@ int CHalfLifeRules::PlayerRelationship( CBaseEntity *pPlayer, CBaseEntity *pTarg
 
 //=========================================================
 //=========================================================
-BOOL CHalfLifeRules::FAllowMonsters( void )
+bool CHalfLifeRules::FAllowMonsters( void )
 {
-	return TRUE;
+	return true;
 }
 
 bool CHalfLifeRules::FMonsterCanDropWeapons(CBaseMonster *pMonster )

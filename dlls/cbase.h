@@ -218,8 +218,8 @@ public:
 	virtual CBaseMonster *MyMonsterPointer( void ) { return NULL; }
 	virtual CSquadMonster *MySquadMonsterPointer( void ) { return NULL; }
 	virtual	int GetToggleState( void ) { return TS_AT_TOP; }
-	virtual void AddPoints( int score, BOOL bAllowNegativeScore ) { AddFloatPoints((float)score, bAllowNegativeScore); }
-	virtual void AddPointsToTeam( int score, BOOL bAllowNegativeScore ) {}
+	virtual void AddPoints( int score, bool bAllowNegativeScore ) { AddFloatPoints((float)score, bAllowNegativeScore); }
+	virtual void AddPointsToTeam( int score, bool bAllowNegativeScore ) {}
 	virtual BOOL AddPlayerItem( CBasePlayerWeapon *pItem ) { return DID_NOT_GET_ITEM; }
 	virtual BOOL RemovePlayerItem( CBasePlayerWeapon *pItem ) { return 0; }
 	virtual int GiveAmmo( int iAmount, const char *szName ) { return -1; }
@@ -443,7 +443,7 @@ public:
 	virtual	BOOL FVisible( CBaseEntity *pEntity );
 	virtual	BOOL FVisible( const Vector &vecOrigin );
 
-	virtual void AddFloatPoints( float score, BOOL bAllowNegativeScore ) {}
+	virtual void AddFloatPoints( float score, bool bAllowNegativeScore ) {}
 	virtual int DefaultSizeForGrapple() { return GRAPPLE_NOT_A_TARGET; }
 	virtual int SizeForGrapple() { return DefaultSizeForGrapple(); }
 	virtual bool IsDisplaceable() { return false; }

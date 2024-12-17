@@ -319,7 +319,7 @@ extern Vector		UTIL_ClampVectorToBox( const Vector &input, const Vector &clampSi
 extern char			*UTIL_VarArgs( const char *format, ... );
 extern void			UTIL_Remove( CBaseEntity *pEntity );
 extern BOOL			UTIL_IsValidEntity( edict_t *pent );
-extern BOOL			UTIL_TeamsMatch( const char *pTeamName1, const char *pTeamName2 );
+extern bool			UTIL_TeamsMatch( const char *pTeamName1, const char *pTeamName2 );
 
 // Use for ease-in, ease-out style interpolation (accel/decel)
 extern float		UTIL_SplineFraction( float value, float scale );
@@ -351,7 +351,6 @@ inline void			UTIL_CenterPrintAll( const char *msg_name, const char *param1 = NU
 
 class CBasePlayerWeapon;
 class CBasePlayer;
-extern BOOL UTIL_GetNextBestWeapon( CBasePlayer *pPlayer, CBasePlayerWeapon *pCurrentWeapon );
 
 // prints messages through the HUD
 extern void ClientPrint( entvars_t *client, int msg_dest, const char *msg_name, const char *param1 = NULL, const char *param2 = NULL, const char *param3 = NULL, const char *param4 = NULL );

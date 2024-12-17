@@ -470,11 +470,6 @@ void DBG_AssertFunction( BOOL fExpr, const char* szExpr, const char* szFile, int
 }
 #endif	// DEBUG
 
-BOOL UTIL_GetNextBestWeapon(CBasePlayer *pPlayer, CBasePlayerWeapon *pCurrentWeapon )
-{
-	return g_pGameRules->GetNextBestWeapon( pPlayer, pCurrentWeapon );
-}
-
 Vector UTIL_VecToAngles( const Vector &vec )
 {
 	float rgflVecOut[3];
@@ -1458,20 +1453,20 @@ void UTIL_Ricochet( const Vector &position, float scale )
 	MESSAGE_END();
 }
 
-BOOL UTIL_TeamsMatch( const char *pTeamName1, const char *pTeamName2 )
+bool UTIL_TeamsMatch( const char *pTeamName1, const char *pTeamName2 )
 {
 	// Everyone matches unless it's teamplay
 	if( !g_pGameRules->IsTeamplay() )
-		return TRUE;
+		return true;
 
 	// Both on a team?
 	if( *pTeamName1 != 0 && *pTeamName2 != 0 )
 	{
 		if( !stricmp( pTeamName1, pTeamName2 ) )	// Same Team?
-			return TRUE;
+			return true;
 	}
 
-	return FALSE;
+	return false;
 }
 
 Vector UTIL_StringToVector(const char* str)

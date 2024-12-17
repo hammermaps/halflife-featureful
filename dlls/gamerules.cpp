@@ -38,7 +38,7 @@ int g_teamplay = 0;
 
 //=========================================================
 //=========================================================
-BOOL CGameRules::CanHaveAmmo(CBasePlayer *pPlayer, const char *pszAmmoName )
+bool CGameRules::CanHaveAmmo(CBasePlayer *pPlayer, const char *pszAmmoName )
 {
 	const AmmoType* ammoType = CBasePlayerWeapon::GetAmmoType(pszAmmoName);
 	if( ammoType )
@@ -46,11 +46,11 @@ BOOL CGameRules::CanHaveAmmo(CBasePlayer *pPlayer, const char *pszAmmoName )
 		if( pPlayer->AmmoInventory( ammoType->id ) < ammoType->maxAmmo )
 		{
 			// player has room for more of this type of ammo
-			return TRUE;
+			return true;
 		}
 	}
 
-	return FALSE;
+	return false;
 }
 
 //=========================================================
@@ -71,11 +71,11 @@ edict_t *CGameRules::GetPlayerSpawnSpot( CBasePlayer *pPlayer )
 
 //=========================================================
 //=========================================================
-BOOL CGameRules::CanHavePlayerItem( CBasePlayer *pPlayer, CBasePlayerWeapon *pWeapon )
+bool CGameRules::CanHavePlayerItem( CBasePlayer *pPlayer, CBasePlayerWeapon *pWeapon )
 {
 	// only living players can have items
 	if( pPlayer->pev->deadflag != DEAD_NO )
-		return FALSE;
+		return false;
 
 	if( pWeapon->pszAmmo1() )
 	{
@@ -85,7 +85,7 @@ BOOL CGameRules::CanHavePlayerItem( CBasePlayer *pPlayer, CBasePlayerWeapon *pWe
 			// have the gun if we aren't already carrying one of this type
 			if( pPlayer->HasPlayerItem( pWeapon ) )
 			{
-				return FALSE;
+				return false;
 			}
 		}
 	}
@@ -94,12 +94,12 @@ BOOL CGameRules::CanHavePlayerItem( CBasePlayer *pPlayer, CBasePlayerWeapon *pWe
 		// weapon doesn't use ammo, don't take another if you already have it.
 		if( pPlayer->HasPlayerItem( pWeapon ) )
 		{
-			return FALSE;
+			return false;
 		}
 	}
 
 	// note: will fall through to here if GetItemInfo doesn't fill the struct!
-	return TRUE;
+	return true;
 }
 
 //=========================================================

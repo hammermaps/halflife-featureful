@@ -298,7 +298,7 @@ CHalfLifeMultiplay::CHalfLifeMultiplay()
 	}
 }
 
-BOOL CHalfLifeMultiplay::ClientCommand( CBasePlayer *pPlayer, const char *pcmd )
+bool CHalfLifeMultiplay::ClientCommand( CBasePlayer *pPlayer, const char *pcmd )
 {
 #if !NO_VOICEGAMEMGR
 	if( g_VoiceGameMgr.ClientCommand( pPlayer, pcmd ) )
@@ -479,81 +479,81 @@ void CHalfLifeMultiplay::Think( void )
 
 //=========================================================
 //=========================================================
-BOOL CHalfLifeMultiplay::IsMultiplayer( void )
+bool CHalfLifeMultiplay::IsMultiplayer( void )
 {
-	return TRUE;
+	return true;
 }
 
 //=========================================================
 //=========================================================
-BOOL CHalfLifeMultiplay::IsDeathmatch( void )
+bool CHalfLifeMultiplay::IsDeathmatch( void )
 {
-	return TRUE;
+	return true;
 }
 
 //=========================================================
 //=========================================================
-BOOL CHalfLifeMultiplay::IsCoOp( void )
+bool CHalfLifeMultiplay::IsCoOp( void )
 {
-	return gpGlobals->coop ? TRUE : FALSE;
+	return gpGlobals->coop ? true : false;
 }
 
 //=========================================================
 //=========================================================
-BOOL CHalfLifeMultiplay::FShouldSwitchWeapon( CBasePlayer *pPlayer, CBasePlayerWeapon *pWeapon )
+bool CHalfLifeMultiplay::FShouldSwitchWeapon( CBasePlayer *pPlayer, CBasePlayerWeapon *pWeapon )
 {
 	if( !pWeapon->CanDeploy() )
 	{
 		// that weapon can't deploy anyway.
-		return FALSE;
+		return false;
 	}
 
 	if( !pPlayer->m_pActiveItem )
 	{
 		// player doesn't have an active item!
-		return TRUE;
+		return true;
 	}
 
 	if( !pPlayer->m_iAutoWepSwitch )
 	{
-		return FALSE;
+		return false;
 	}
 
 	if( pPlayer->m_iAutoWepSwitch == 2
 	    && pPlayer->m_afButtonLast & ( IN_ATTACK | IN_ATTACK2 ) )
 	{
-		return FALSE;
+		return false;
 	}
 
 	if( !pPlayer->m_pActiveItem->CanHolster() )
 	{
 		// can't put away the active item.
-		return FALSE;
+		return false;
 	}
 
 	if( pWeapon->iWeight() > pPlayer->m_pActiveItem->iWeight() )
 	{
-		return TRUE;
+		return true;
 	}
 
-	return FALSE;
+	return false;
 }
 
 //=========================================================
 //=========================================================
-BOOL CHalfLifeMultiplay::GetNextBestWeapon( CBasePlayer *pPlayer, CBasePlayerWeapon *pCurrentWeapon )
+bool CHalfLifeMultiplay::GetNextBestWeapon( CBasePlayer *pPlayer, CBasePlayerWeapon *pCurrentWeapon )
 {
 	return HLGetNextBestWeapon( pPlayer, pCurrentWeapon );
 }
 
 //=========================================================
 //=========================================================
-BOOL CHalfLifeMultiplay::ClientConnected( edict_t *pEntity, const char *pszName, const char *pszAddress, char szRejectReason[128] )
+bool CHalfLifeMultiplay::ClientConnected( edict_t *pEntity, const char *pszName, const char *pszAddress, char szRejectReason[128] )
 {
 #if !NO_VOICEGAMEMGR
 	g_VoiceGameMgr.ClientConnected( pEntity );
 #endif
-	return TRUE;
+	return true;
 }
 
 extern int gmsgSayText;
@@ -688,7 +688,7 @@ float CHalfLifeMultiplay::FlPlayerFallDamage( CBasePlayer *pPlayer )
 
 //=========================================================
 //=========================================================
-BOOL CHalfLifeMultiplay::FPlayerCanTakeDamage( CBasePlayer *pPlayer, CBaseEntity *pAttacker )
+bool CHalfLifeMultiplay::FPlayerCanTakeDamage( CBasePlayer *pPlayer, CBaseEntity *pAttacker )
 {
 	if( pAttacker && PlayerRelationship( pPlayer, pAttacker ) == GR_TEAMMATE )
 	{
@@ -696,10 +696,10 @@ BOOL CHalfLifeMultiplay::FPlayerCanTakeDamage( CBasePlayer *pPlayer, CBaseEntity
 		if( ( friendlyfire.value == 0 ) && ( pAttacker != pPlayer ) )
 		{
 			// friendly fire is off, and this hit came from someone other than myself,  then don't get hurt
-			return FALSE;
+			return false;
 		}
 	}
-	return TRUE;
+	return true;
 }
 
 //=========================================================
@@ -710,7 +710,7 @@ void CHalfLifeMultiplay::PlayerThink( CBasePlayer *pPlayer )
 	{
 		// check for button presses
 		if( pPlayer->m_afButtonPressed & ( IN_DUCK | IN_ATTACK | IN_ATTACK2 | IN_USE | IN_JUMP ) )
-			m_iEndIntermissionButtonHit = TRUE;
+			m_iEndIntermissionButtonHit = true;
 
 		// clear attack/use commands from player
 		pPlayer->m_afButtonPressed = 0;
@@ -769,9 +769,9 @@ void CHalfLifeMultiplay::PlayerSpawn( CBasePlayer *pPlayer )
 
 //=========================================================
 //=========================================================
-BOOL CHalfLifeMultiplay::FPlayerCanRespawn( CBasePlayer *pPlayer )
+bool CHalfLifeMultiplay::FPlayerCanRespawn( CBasePlayer *pPlayer )
 {
-	return TRUE;
+	return true;
 }
 
 //=========================================================
@@ -781,7 +781,7 @@ float CHalfLifeMultiplay::FlPlayerSpawnTime( CBasePlayer *pPlayer )
 	return gpGlobals->time;//now!
 }
 
-BOOL CHalfLifeMultiplay::AllowAutoTargetCrosshair( void )
+bool CHalfLifeMultiplay::AllowAutoTargetCrosshair( void )
 {
 	return ( aimcrosshair.value != 0 );
 }
@@ -1163,7 +1163,7 @@ int CHalfLifeMultiplay::WeaponShouldRespawn( CBasePlayerWeapon *pWeapon )
 // CanHaveWeapon - returns FALSE if the player is not allowed
 // to pick up this weapon
 //=========================================================
-BOOL CHalfLifeMultiplay::CanHavePlayerItem( CBasePlayer *pPlayer, CBasePlayerWeapon *pItem )
+bool CHalfLifeMultiplay::CanHavePlayerItem( CBasePlayer *pPlayer, CBasePlayerWeapon *pItem )
 {
 	if( weaponstay.value > 0 )
 	{
@@ -1172,7 +1172,7 @@ BOOL CHalfLifeMultiplay::CanHavePlayerItem( CBasePlayer *pPlayer, CBasePlayerWea
 
 		// check if the player already has this weapon
 		if (pPlayer->WeaponById(pItem->WeaponId())) {
-			return FALSE;
+			return false;
 		}
 	}
 
@@ -1181,9 +1181,9 @@ BOOL CHalfLifeMultiplay::CanHavePlayerItem( CBasePlayer *pPlayer, CBasePlayerWea
 
 //=========================================================
 //=========================================================
-BOOL CHalfLifeMultiplay::CanHaveItem( CBasePlayer *pPlayer, CItem *pItem )
+bool CHalfLifeMultiplay::CanHaveItem( CBasePlayer *pPlayer, CItem *pItem )
 {
-	return TRUE;
+	return true;
 }
 
 //=========================================================
@@ -1229,12 +1229,12 @@ void CHalfLifeMultiplay::PlayerGotAmmo( CBasePlayer *pPlayer, char *szName, int 
 
 //=========================================================
 //=========================================================
-BOOL CHalfLifeMultiplay::IsAllowedToSpawn( CBaseEntity *pEntity )
+bool CHalfLifeMultiplay::IsAllowedToSpawn( CBaseEntity *pEntity )
 {
 //	if( pEntity->pev->flags & FL_MONSTER )
 //		return FALSE;
 
-	return TRUE;
+	return true;
 }
 
 //=========================================================
@@ -1310,25 +1310,25 @@ int CHalfLifeMultiplay::PlayerRelationship( CBaseEntity *pPlayer, CBaseEntity *p
 	return GR_NOTTEAMMATE;
 }
 
-BOOL CHalfLifeMultiplay::PlayFootstepSounds( CBasePlayer *pl, float fvol )
+bool CHalfLifeMultiplay::PlayFootstepSounds( CBasePlayer *pl, float fvol )
 {
 	if( g_footsteps && g_footsteps->value == 0 )
-		return FALSE;
+		return false;
 
 	if( pl->IsOnLadder() || pl->pev->velocity.Length2D() > 220 )
-		return TRUE;  // only make step sounds in multiplayer if the player is moving fast enough
+		return true;  // only make step sounds in multiplayer if the player is moving fast enough
 
-	return FALSE;
+	return false;
 }
 
-BOOL CHalfLifeMultiplay::FAllowFlashlight( void )
+bool CHalfLifeMultiplay::FAllowFlashlight( void )
 {
 	return flashlight.value != 0; 
 }
 
 //=========================================================
 //=========================================================
-BOOL CHalfLifeMultiplay::FAllowMonsters( void )
+bool CHalfLifeMultiplay::FAllowMonsters( void )
 {
 	return IsCoOp() || ( allowmonsters.value != 0 );
 }
@@ -1394,7 +1394,7 @@ void CHalfLifeMultiplay::GoToIntermission( void )
 	g_flIntermissionStartTime = gpGlobals->time;
 
 	g_fGameOver = TRUE;
-	m_iEndIntermissionButtonHit = FALSE;
+	m_iEndIntermissionButtonHit = false;
 }
 
 #define MAX_RULE_BUFFER 1024
@@ -1926,7 +1926,7 @@ void CHalfLifeMultiplay::SendMOTDToClient( edict_t *client )
 			*pFileList = 0;
 
 		MESSAGE_BEGIN( MSG_ONE, gmsgMOTD, NULL, client );
-			WRITE_BYTE( *pFileList ? FALSE : TRUE );	// FALSE means there is still more message to come
+			WRITE_BYTE( *pFileList ? 0 : 1 );	// 0 means there is still more message to come
 			WRITE_STRING( chunk );
 		MESSAGE_END();
 	}
@@ -1942,15 +1942,15 @@ int CMultiplayBusters::WeaponShouldRespawn( CBasePlayerWeapon *pWeapon )
 	return CHalfLifeMultiplay::WeaponShouldRespawn( pWeapon );
 }
 
-BOOL CMultiplayBusters::CanHaveItem( CBasePlayer *pPlayer, CItem *pItem )
+bool CMultiplayBusters::CanHaveItem( CBasePlayer *pPlayer, CItem *pItem )
 {
 	return BustingCanHaveItem( pPlayer, pItem );
 }
 
-BOOL CMultiplayBusters::CanHavePlayerItem( CBasePlayer *pPlayer, CBasePlayerWeapon *pItem )
+bool CMultiplayBusters::CanHavePlayerItem( CBasePlayer *pPlayer, CBasePlayerWeapon *pItem )
 {
 	if( !BustingCanHaveItem( pPlayer, pItem ))
-		return FALSE;
+		return false;
 
 	return CHalfLifeMultiplay::CanHavePlayerItem( pPlayer, pItem );
 }
@@ -2009,14 +2009,14 @@ void CMultiplayBusters::PlayerKilled( CBasePlayer *pVictim, entvars_t *pKiller, 
 
 void CMultiplayBusters::ClientUserInfoChanged( CBasePlayer *pPlayer, char *infobuffer )
 {
-	SetPlayerModel( pPlayer, FALSE );
+	SetPlayerModel( pPlayer, false );
 	CHalfLifeMultiplay::ClientUserInfoChanged( pPlayer, infobuffer );
 }
 
 void CMultiplayBusters::PlayerSpawn( CBasePlayer *pPlayer )
 {
 	CHalfLifeMultiplay::PlayerSpawn( pPlayer );
-	SetPlayerModel( pPlayer, FALSE );
+	SetPlayerModel( pPlayer, false );
 }
 
 bool IsPlayerBusting( CBaseEntity *pPlayer )
@@ -2029,14 +2029,14 @@ bool IsPlayerBusting( CBaseEntity *pPlayer )
 	return false;
 }
 
-BOOL BustingCanHaveItem( CBasePlayer *pPlayer, CBaseEntity *pItem )
+bool BustingCanHaveItem( CBasePlayer *pPlayer, CBaseEntity *pItem )
 {
 	if( IsPlayerBusting( pPlayer )
 	    && !( strncmp( STRING( pItem->pev->classname ), "weapon_", 7 )
 	    && strncmp( STRING( pItem->pev->classname ), "ammo_", 5 )))
-		return FALSE;
+		return false;
 
-	return TRUE;
+	return true;
 }
 
 CMultiplayBusters::CMultiplayBusters()
@@ -2104,7 +2104,7 @@ void CMultiplayBusters::Think( void )
 	CHalfLifeMultiplay::Think();
 }
 
-void CMultiplayBusters::SetPlayerModel( CBasePlayer *pPlayer, BOOL bKnownBuster )
+void CMultiplayBusters::SetPlayerModel(CBasePlayer *pPlayer, bool bKnownBuster )
 {
 	const char *pszModel = NULL;
 
@@ -2125,10 +2125,10 @@ void CMultiplayBusters::PlayerGotWeapon( CBasePlayer *pPlayer, CBasePlayerWeapon
 	if( pWeapon->WeaponId() != WEAPON_EGON )
 		return;
 
-	pPlayer->RemoveAllItems( FALSE );
+	pPlayer->RemoveAllItems( STRIP_WEAPONS_ONLY );
 	UTIL_ClientPrintAll( HUD_PRINTCENTER, "Long live the new Buster!" );
 	UTIL_ClientPrintAll( HUD_PRINTTALK, UTIL_VarArgs( "%s is busting!\n", STRING( pPlayer->pev->netname )));
-	SetPlayerModel( pPlayer, TRUE );
+	SetPlayerModel( pPlayer, true );
 	pPlayer->pev->health = pPlayer->pev->max_health;
 	pPlayer->pev->armorvalue = pPlayer->MaxArmor();
 	pPlayer->pev->renderfx = kRenderFxGlowShell;

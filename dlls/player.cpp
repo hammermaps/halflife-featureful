@@ -2189,12 +2189,12 @@ int CBasePlayer::Classify( void )
 	return CLASS_PLAYER;
 }
 
-void CBasePlayer::AddPoints( int score, BOOL bAllowNegativeScore )
+void CBasePlayer::AddPoints( int score, bool bAllowNegativeScore )
 {
 	AddFloatPoints(score, bAllowNegativeScore);
 }
 
-void CBasePlayer::AddFloatPoints( float score, BOOL bAllowNegativeScore )
+void CBasePlayer::AddFloatPoints( float score, bool bAllowNegativeScore )
 {
 	// Positive score always adds
 	if( score < 0 )
@@ -2222,7 +2222,7 @@ void CBasePlayer::AddFloatPoints( float score, BOOL bAllowNegativeScore )
 	MESSAGE_END();
 }
 
-void CBasePlayer::AddPointsToTeam( int score, BOOL bAllowNegativeScore )
+void CBasePlayer::AddPointsToTeam( int score, bool bAllowNegativeScore )
 {
 	int index = entindex();
 

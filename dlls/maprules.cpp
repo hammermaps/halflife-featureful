@@ -44,7 +44,7 @@ public:
 	void	SetMaster( string_t iszMaster ) { m_iszMaster = iszMaster; }
 
 protected:
-	BOOL	CanFireForActivator( CBaseEntity *pActivator );
+	bool	CanFireForActivator( CBaseEntity *pActivator );
 
 private:
 	string_t	m_iszMaster;
@@ -75,17 +75,13 @@ void CRuleEntity::KeyValue( KeyValueData *pkvd )
 		CBaseEntity::KeyValue( pkvd );
 }
 
-BOOL CRuleEntity::CanFireForActivator( CBaseEntity *pActivator )
+bool CRuleEntity::CanFireForActivator( CBaseEntity *pActivator )
 {
 	if( m_iszMaster )
 	{
-		if( UTIL_IsMasterTriggered( m_iszMaster, pActivator ) )
-			return TRUE;
-		else
-			return FALSE;
+		return UTIL_IsMasterTriggered( m_iszMaster, pActivator );
 	}
-	
-	return TRUE;
+	return true;
 }
 
 // 
@@ -139,8 +135,8 @@ public:
 	void	KeyValue( KeyValueData *pkvd );
 
 	inline	int		Points( void ) { return (int)pev->frags; }
-	inline	BOOL	AllowNegativeScore( void ) { return pev->spawnflags & SF_SCORE_NEGATIVE; }
-	inline	BOOL	AwardToTeam( void ) { return pev->spawnflags & SF_SCORE_TEAM; }
+	inline	bool	AllowNegativeScore( void ) { return pev->spawnflags & SF_SCORE_NEGATIVE; }
+	inline	bool	AwardToTeam( void ) { return pev->spawnflags & SF_SCORE_TEAM; }
 
 	inline	void	SetPoints( int points ) { pev->frags = points; }
 
@@ -220,7 +216,7 @@ public:
 	virtual int		Restore( CRestore &restore );
 	static	TYPEDESCRIPTION m_SaveData[];
 
-	inline	BOOL	MessageToAll( void ) { return (pev->spawnflags & SF_ENVTEXT_ALLPLAYERS); }
+	inline	bool	MessageToAll( void ) { return (pev->spawnflags & SF_ENVTEXT_ALLPLAYERS); }
 	inline	void	MessageSet( const char *pMessage ) { pev->message = ALLOC_STRING(pMessage); }
 	inline	const char *MessageGet( void )	{ return STRING(pev->message); }
 
@@ -345,11 +341,11 @@ public:
 
 	bool		IsTriggered( CBaseEntity *pActivator );
 	const char	*TeamID( void );
-	inline BOOL RemoveOnFire( void ) { return (pev->spawnflags & SF_TEAMMASTER_FIREONCE) ? TRUE : FALSE; }
-	inline BOOL AnyTeam( void ) { return (pev->spawnflags & SF_TEAMMASTER_ANYTEAM) ? TRUE : FALSE; }
+	inline bool RemoveOnFire( void ) { return (pev->spawnflags & SF_TEAMMASTER_FIREONCE); }
+	inline bool AnyTeam( void ) { return (pev->spawnflags & SF_TEAMMASTER_ANYTEAM); }
 
 private:
-	BOOL		TeamMatch( CBaseEntity *pActivator );
+	bool		TeamMatch( CBaseEntity *pActivator );
 
 	int			m_teamIndex;
 	USE_TYPE	triggerType;
@@ -424,13 +420,13 @@ const char *CGameTeamMaster::TeamID( void )
 	return g_pGameRules->GetIndexedTeamName( m_teamIndex );		// UNDONE: Fill this in with the team from the "teamlist"
 }
 
-BOOL CGameTeamMaster::TeamMatch( CBaseEntity *pActivator )
+bool CGameTeamMaster::TeamMatch( CBaseEntity *pActivator )
 {
 	if( m_teamIndex < 0 && AnyTeam() )
-		return TRUE;
+		return true;
 
 	if( !pActivator )
-		return FALSE;
+		return false;
 
 	return UTIL_TeamsMatch( pActivator->TeamID(), TeamID() );
 }
@@ -447,8 +443,8 @@ class CGameTeamSet : public CRulePointEntity
 {
 public:
 	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
-	inline BOOL RemoveOnFire( void ) { return (pev->spawnflags & SF_TEAMSET_FIREONCE) ? TRUE : FALSE; }
-	inline BOOL ShouldClearTeam( void ) { return (pev->spawnflags & SF_TEAMSET_CLEARTEAM) ? TRUE : FALSE; }
+	inline bool RemoveOnFire( void ) { return (pev->spawnflags & SF_TEAMSET_FIREONCE); }
+	inline bool ShouldClearTeam( void ) { return (pev->spawnflags & SF_TEAMSET_CLEARTEAM); }
 
 private:
 };
@@ -599,7 +595,7 @@ class CGamePlayerHurt : public CRulePointEntity
 {
 public:
 	void		Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
-	inline BOOL RemoveOnFire( void ) { return (pev->spawnflags & SF_PKILL_FIREONCE) ? TRUE : FALSE; }
+	inline bool RemoveOnFire( void ) { return (pev->spawnflags & SF_PKILL_FIREONCE); }
 
 private:
 };
@@ -641,8 +637,8 @@ class CGameCounter : public CRulePointEntity
 public:
 	void		Spawn( void );
 	void		Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
-	inline BOOL RemoveOnFire( void ) { return (pev->spawnflags & SF_GAMECOUNT_FIREONCE) ? TRUE : FALSE; }
-	inline BOOL ResetOnFire( void ) { return (pev->spawnflags & SF_GAMECOUNT_RESET) ? TRUE : FALSE; }
+	inline bool RemoveOnFire( void ) { return (pev->spawnflags & SF_GAMECOUNT_FIREONCE); }
+	inline bool ResetOnFire( void ) { return (pev->spawnflags & SF_GAMECOUNT_RESET); }
 
 	inline void CountUp( void ) { pev->frags++; }
 	inline void CountDown( void ) { pev->frags--; }
@@ -650,7 +646,7 @@ public:
 	inline int CountValue( void ) { return (int)pev->frags; }
 	inline int LimitValue( void ) { return (int)pev->health; }
 
-	inline BOOL HitLimit( void ) {
+	inline bool HitLimit( void ) {
 		const int countValue = CountValue();
 		const int limitValue = LimitValue();
 		if (FBitSet(pev->spawnflags, SF_GAMECOUNT_FIREOVERLIMIT))
@@ -726,7 +722,7 @@ class CGameCounterSet : public CRulePointEntity
 {
 public:
 	void		Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
-	inline BOOL RemoveOnFire( void ) { return (pev->spawnflags & SF_GAMECOUNTSET_FIREONCE) ? TRUE : FALSE; }
+	inline bool RemoveOnFire( void ) { return (pev->spawnflags & SF_GAMECOUNTSET_FIREONCE); }
 
 private:
 };
@@ -760,7 +756,7 @@ public:
 	void		Touch( CBaseEntity *pOther );
 	void		Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 
-	inline BOOL	UseOnly( void ) { return (pev->spawnflags & SF_PLAYEREQUIP_USEONLY) ? TRUE : FALSE; }
+	inline bool	UseOnly( void ) { return (pev->spawnflags & SF_PLAYEREQUIP_USEONLY); }
 
 	virtual int		Save( CSave &save );
 	virtual int		Restore( CRestore &restore );
@@ -862,9 +858,9 @@ public:
 	void		Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 
 private:
-	inline BOOL RemoveOnFire( void ) { return (pev->spawnflags & SF_PTEAM_FIREONCE) ? TRUE : FALSE; }
-	inline BOOL ShouldKillPlayer( void ) { return (pev->spawnflags & SF_PTEAM_KILL) ? TRUE : FALSE; }
-	inline BOOL ShouldGibPlayer( void ) { return (pev->spawnflags & SF_PTEAM_GIB) ? TRUE : FALSE; }
+	inline bool RemoveOnFire( void ) { return (pev->spawnflags & SF_PTEAM_FIREONCE); }
+	inline bool ShouldKillPlayer( void ) { return (pev->spawnflags & SF_PTEAM_KILL); }
+	inline bool ShouldGibPlayer( void ) { return (pev->spawnflags & SF_PTEAM_GIB); }
 	
 	const char *TargetTeamName( const char *pszTargetName );
 };

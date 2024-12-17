@@ -31,13 +31,13 @@ class CHalfLifeTeamplay : public CHalfLifeMultiplay
 public:
 	CHalfLifeTeamplay();
 
-	virtual BOOL ClientCommand( CBasePlayer *pPlayer, const char *pcmd );
+	virtual bool ClientCommand( CBasePlayer *pPlayer, const char *pcmd ) override;
 	virtual void ClientUserInfoChanged( CBasePlayer *pPlayer, char *infobuffer );
-	virtual BOOL IsTeamplay( void );
-	virtual BOOL FPlayerCanTakeDamage( CBasePlayer *pPlayer, CBaseEntity *pAttacker );
+	virtual bool IsTeamplay( void ) override;
+	virtual bool FPlayerCanTakeDamage( CBasePlayer *pPlayer, CBaseEntity *pAttacker );
 	virtual int PlayerRelationship( CBaseEntity *pPlayer, CBaseEntity *pTarget );
 	virtual const char *GetTeamID( CBaseEntity *pEntity );
-	virtual BOOL ShouldAutoAim( CBasePlayer *pPlayer, edict_t *target );
+	virtual bool ShouldAutoAim( CBasePlayer *pPlayer, edict_t *target ) override;
 	virtual int IPointsForKill( CBasePlayer *pAttacker, CBasePlayer *pKilled );
 	virtual void InitHUD( CBasePlayer *pl );
 	virtual void DeathNotice( CBasePlayer *pVictim, entvars_t *pKiller, entvars_t *pevInflictor );
@@ -47,12 +47,12 @@ public:
 	virtual void Think( void );
 	virtual int GetTeamIndex( const char *pTeamName );
 	virtual const char *GetIndexedTeamName( int teamIndex );
-	virtual BOOL IsValidTeam( const char *pTeamName );
+	virtual bool IsValidTeam( const char *pTeamName ) override;
 	const char *SetDefaultPlayerTeam( CBasePlayer *pPlayer );
-	virtual void ChangePlayerTeam( CBasePlayer *pPlayer, const char *pTeamName, BOOL bKill, BOOL bGib );
+	virtual void ChangePlayerTeam( CBasePlayer *pPlayer, const char *pTeamName, bool bKill, bool bGib ) override;
 
 private:
-	void RecountTeams( bool bResendInfo = FALSE );
+	void RecountTeams( bool bResendInfo = false );
 	const char *TeamWithFewestPlayers( void );
 
 	bool m_DisableDeathMessages;
