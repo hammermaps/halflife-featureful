@@ -87,7 +87,7 @@ int CShotgun::GetItemInfo( ItemInfo *p )
 	return 1;
 }
 
-BOOL CShotgun::Deploy()
+bool CShotgun::Deploy()
 {
 	return DefaultDeploy( "models/v_shotgun.mdl", "models/p_shotgun.mdl", SHOTGUN_DRAW, "shotgun" );
 }

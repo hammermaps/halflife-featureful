@@ -112,7 +112,7 @@ int CShockrifle::GetItemInfo(ItemInfo *p)
 	return 1;
 }
 
-BOOL CShockrifle::Deploy()
+bool CShockrifle::Deploy()
 {
 	if( bIsMultiplayer() )
 		m_flRechargeTime = gpGlobals->time + 0.25;

@@ -89,7 +89,7 @@ int CPipeWrench::AddToPlayer( CBasePlayer *pPlayer )
 	return AddToPlayerDefault(pPlayer);
 }
 
-BOOL CPipeWrench::Deploy()
+bool CPipeWrench::Deploy()
 {
 	m_iSwingMode = 0;
 	return DefaultDeploy("models/v_pipe_wrench.mdl", "models/p_pipe_wrench.mdl", PIPEWRENCH_DRAW, "crowbar");

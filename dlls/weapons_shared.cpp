@@ -8,14 +8,14 @@
 #include "gamerules.h"
 #endif
 
-BOOL CBasePlayerWeapon::CanDeploy( void )
+bool CBasePlayerWeapon::CanDeploy( void )
 {
-	BOOL bHasAmmo = 0;
+	bool bHasAmmo = false;
 
 	if( !UsesAmmo() )
 	{
 		// this weapon doesn't use ammo, can always deploy.
-		return TRUE;
+		return true;
 	}
 
 	if( UsesAmmo() )
@@ -28,14 +28,14 @@ BOOL CBasePlayerWeapon::CanDeploy( void )
 	}
 	if( m_iClip > 0 )
 	{
-		bHasAmmo |= 1;
+		bHasAmmo |= true;
 	}
 	if( !bHasAmmo )
 	{
-		return FALSE;
+		return false;
 	}
 
-	return TRUE;
+	return true;
 }
 
 BOOL CBasePlayerWeapon::DefaultReload( int iClipSize, int iAnim, float fDelay, int body )

@@ -68,7 +68,7 @@ void CEgon::Precache( void )
 	m_usEgonStop = PRECACHE_EVENT( 1, "events/egon_stop.sc" );
 }
 
-BOOL CEgon::Deploy( void )
+bool CEgon::Deploy( void )
 {
 	m_deployed = false;
 	m_fireState = FIRE_OFF;
@@ -480,10 +480,10 @@ void CEgon::WeaponIdle( void )
 	m_deployed = true;
 }
 
-BOOL CEgon::CanHolster( void )
+bool CEgon::CanHolster( void )
 {
 #if CLIENT_DLL
-	return TRUE;
+	return true;
 #else
 	return !g_pGameRules->IsBustingGame();
 #endif

@@ -92,7 +92,7 @@ int CM249::AddToPlayer(CBasePlayer *pPlayer)
 	return AddToPlayerDefault(pPlayer);
 }
 
-BOOL CM249::Deploy()
+bool CM249::Deploy()
 {
 	m_fInSpecialReload = FALSE;
 	UpdateTape();

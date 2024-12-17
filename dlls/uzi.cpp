@@ -88,7 +88,7 @@ int CUzi::AddToPlayer( CBasePlayer *pPlayer )
 	return AddToPlayerDefault(pPlayer);
 }
 
-BOOL CUzi::Deploy()
+bool CUzi::Deploy()
 {
 	int r = DefaultDeploy( "models/v_uzi.mdl", "models/p_uzi.mdl", UZI_DEPLOY, "mp5" );
 	if (r)

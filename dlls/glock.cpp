@@ -75,7 +75,7 @@ int CGlock::AddToPlayer( CBasePlayer *pPlayer )
 	return AddToPlayerDefault(pPlayer);
 }
 
-BOOL CGlock::Deploy()
+bool CGlock::Deploy()
 {
 	// pev->body = 1;
 	return DefaultDeploy( "models/v_9mmhandgun.mdl", "models/p_9mmhandgun.mdl", GLOCK_DRAW, "onehanded" );

@@ -98,7 +98,7 @@ int CGauss::GetItemInfo( ItemInfo *p )
 	return 1;
 }
 
-BOOL CGauss::Deploy()
+bool CGauss::Deploy()
 {
 	m_pPlayer->m_flPlayAftershock = 0.0;
 	return DefaultDeploy( "models/v_gauss.mdl", "models/p_gauss.mdl", GAUSS_DRAW, "gauss" );

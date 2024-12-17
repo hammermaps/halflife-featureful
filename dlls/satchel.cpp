@@ -372,31 +372,30 @@ bool CSatchel::CanBeDropped()
 	return m_pPlayer->m_rgAmmo[PrimaryAmmoIndex()] > 0;
 }
 
-BOOL CSatchel::CanDeploy( void )
+bool CSatchel::CanDeploy( void )
 {
 	if( m_pPlayer->m_rgAmmo[PrimaryAmmoIndex()] > 0 ) 
 	{
 		// player is carrying some satchels
-		return TRUE;
+		return true;
 	}
 
 	if( m_chargeReady )
 	{
 		// player isn't carrying any satchels, but has some out
-		return TRUE;
+		return true;
 	}
-
-	return FALSE;
+	return false;
 }
 
-BOOL CSatchel::Deploy()
+bool CSatchel::Deploy()
 {
 	if (m_chargeReady == SATCHEL_RELOAD)
 		m_chargeReady = SATCHEL_IDLE;
 
 	m_pPlayer->m_flNextAttack = UTIL_WeaponTimeBase() + 1.0f;
 
-	BOOL result;
+	bool result;
 	if( m_chargeReady )
 		result = DefaultDeploy( "models/v_satchel_radio.mdl", "models/p_satchel_radio.mdl", SATCHEL_RADIO_DRAW, "hive" );
 	else

@@ -103,7 +103,7 @@ int CHgun::GetItemInfo( ItemInfo *p )
 	return 1;
 }
 
-BOOL CHgun::Deploy()
+bool CHgun::Deploy()
 {
 	return DefaultDeploy( "models/v_hgun.mdl", "models/p_hgun.mdl", HGUN_UP, "hive" );
 }

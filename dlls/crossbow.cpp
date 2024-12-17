@@ -290,7 +290,7 @@ int CCrossbow::GetItemInfo( ItemInfo *p )
 	return 1;
 }
 
-BOOL CCrossbow::Deploy()
+bool CCrossbow::Deploy()
 {
 	if( m_iClip )
 		return DefaultDeploy( "models/v_crossbow.mdl", "models/p_crossbow.mdl", CROSSBOW_DRAW1, "bow" );

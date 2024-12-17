@@ -82,7 +82,7 @@ int CEagle::GetItemInfo(ItemInfo *p)
 	return 1;
 }
 
-BOOL CEagle::Deploy( )
+bool CEagle::Deploy( )
 {
 	return DefaultDeploy( "models/v_desert_eagle.mdl", "models/p_desert_eagle.mdl", EAGLE_DRAW, "onehanded" );
 }

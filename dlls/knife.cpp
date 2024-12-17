@@ -80,7 +80,7 @@ int CKnife::AddToPlayer( CBasePlayer *pPlayer )
 	return AddToPlayerDefault(pPlayer);
 }
 
-BOOL CKnife::Deploy()
+bool CKnife::Deploy()
 {
 	m_iSwingMode = 0;
 	return DefaultDeploy("models/v_knife.mdl", "models/p_knife.mdl", KNIFE_DRAW, "crowbar");

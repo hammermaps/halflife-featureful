@@ -129,7 +129,7 @@ int CMedkit::AddToPlayer(CBasePlayer *pPlayer)
 	return AddToPlayerDefault(pPlayer);
 }
 
-BOOL CMedkit::Deploy()
+bool CMedkit::Deploy()
 {
 	m_flSoundDelay = 0;
 	return DefaultDeploy("models/v_medkit.mdl", "models/p_medkit.mdl", MEDKIT_DRAW, "trip");

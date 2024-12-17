@@ -551,7 +551,7 @@ int CSqueak::GetItemInfo( ItemInfo *p )
 	return 1;
 }
 
-BOOL CSqueak::Deploy()
+bool CSqueak::Deploy()
 {
 	// play hunt sound
 	float flRndSound = RANDOM_FLOAT( 0.0f, 1.0f );
@@ -563,7 +563,7 @@ BOOL CSqueak::Deploy()
 
 	m_pPlayer->m_iWeaponVolume = QUIET_GUN_VOLUME;
 
-	const BOOL result = DefaultDeploy( VModel(), PModel(), SQUEAK_UP, "squeak" );
+	const bool result = DefaultDeploy( VModel(), PModel(), SQUEAK_UP, "squeak" );
 	if (result)
 	{
 		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 1.7f;

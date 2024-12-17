@@ -77,7 +77,7 @@ int CSniperrifle::GetItemInfo(ItemInfo *p)
 	return 1;
 }
 
-BOOL CSniperrifle::Deploy( )
+bool CSniperrifle::Deploy( )
 {
 	return DefaultDeploy( "models/v_m40a1.mdl", "models/p_m40a1.mdl", SNIPER_DRAW, "bow", 0 );
 }

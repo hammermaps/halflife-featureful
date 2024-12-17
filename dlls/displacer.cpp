@@ -106,7 +106,7 @@ void CDisplacer::Precache(void)
 	m_usDisplacer = PRECACHE_EVENT(1, "events/displacer.sc");
 }
 
-BOOL CDisplacer::Deploy()
+bool CDisplacer::Deploy()
 {
 	return DefaultDeploy("models/v_displacer.mdl", "models/p_displacer.mdl", DISPLACER_DRAW, "egon");
 }

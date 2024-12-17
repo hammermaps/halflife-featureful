@@ -76,7 +76,7 @@ void CPython::Precache( void )
 	m_usFirePython = PRECACHE_EVENT( 1, "events/python.sc" );
 }
 
-BOOL CPython::Deploy()
+bool CPython::Deploy()
 {
 	if( bIsMultiplayer() )
 	{

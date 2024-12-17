@@ -202,11 +202,11 @@ public:
 	void FallInit( void );
 	void CheckRespawn( void );
 	virtual int GetItemInfo(ItemInfo *p) { return 0; }	// returns 0 if struct not filled out
-	virtual BOOL CanDeploy( void );
-	virtual BOOL Deploy( )								// returns is deploy was successful
-		 { return TRUE; }
+	virtual bool CanDeploy( void );
+	virtual bool Deploy()								// returns is deploy was successful
+		 { return true; }
 
-	virtual BOOL CanHolster( void ) { return TRUE; }// can this weapon be put away right now?
+	virtual bool CanHolster() { return true; }// can this weapon be put away right now?
 
 	virtual void ItemPreFrame( void )	{ return; }		// called each frame by the player PreThink
 
@@ -285,7 +285,7 @@ public:
 	virtual void SendWeaponAnim( int iAnim, int body = 0 );  // skiplocal is 1 if client is predicting weapon animations
 
 	virtual BOOL IsUseable( void );
-	BOOL DefaultDeploy( const char *szViewModel, const char *szWeaponModel, int iAnim, const char *szAnimExt, int body = 0 );
+	bool DefaultDeploy( const char *szViewModel, const char *szWeaponModel, int iAnim, const char *szAnimExt, int body = 0 );
 	BOOL DefaultReload( int iClipSize, int iAnim, float fDelay, int body = 0 );
 	void PrecachePModel(const char* name);
 
@@ -406,7 +406,7 @@ public:
 	void PrimaryAttack( void );
 	void SecondaryAttack( void );
 	void GlockFire( float flSpread, float flCycleTime, bool fUseAutoAim );
-	BOOL Deploy( void );
+	bool Deploy() override;
 	void Reload( void );
 	void WeaponIdle( void );
 
@@ -441,7 +441,7 @@ public:
 
 	void PrimaryAttack( void );
 	int Swing( int fFirst );
-	BOOL Deploy( void );
+	bool Deploy() override;
 	void Holster();
 	void WeaponIdle();
 	int m_iSwing;
@@ -472,7 +472,7 @@ public:
 	int AddToPlayer( CBasePlayer *pPlayer );
 	void PrimaryAttack( void );
 	void SecondaryAttack( void );
-	BOOL Deploy( void );
+	bool Deploy() override;
 	void Holster();
 	void Reload( void );
 	void WeaponIdle( void );
@@ -503,7 +503,7 @@ public:
 
 	void PrimaryAttack( void );
 	void SecondaryAttack( void );
-	BOOL Deploy( void );
+	bool Deploy() override;
 	void Reload( void );
 	void WeaponIdle( void );
 	float m_flNextAnimTime;
@@ -538,7 +538,7 @@ public:
 	void PrimaryAttack( void );
 	void SecondaryAttack( void );
 	int AddToPlayer( CBasePlayer *pPlayer );
-	BOOL Deploy( );
+	bool Deploy() override;
 	void Holster();
 	void Reload( void );
 	void WeaponIdle( void );
@@ -575,7 +575,7 @@ public:
 
 	void PrimaryAttack( void );
 	void SecondaryAttack( void );
-	BOOL Deploy( );
+	bool Deploy() override;
 	void Reload( void );
 	void WeaponIdle( void );
 
@@ -630,8 +630,8 @@ public:
 	int GetItemInfo(ItemInfo *p);
 	int AddToPlayer( CBasePlayer *pPlayer );
 
-	BOOL Deploy( void );
-	BOOL CanHolster( void );
+	bool Deploy() override;
+	bool CanHolster() override;
 	void Holster();
 
 	void PrimaryAttack( void );
@@ -677,7 +677,7 @@ public:
 	int GetItemInfo(ItemInfo *p);
 	int AddToPlayer( CBasePlayer *pPlayer );
 
-	BOOL Deploy( void );
+	bool Deploy() override;
 	void Holster();
 
 	void PrimaryAttack( void );
@@ -729,8 +729,8 @@ public:
 	int GetItemInfo(ItemInfo *p);
 	int AddToPlayer( CBasePlayer *pPlayer );
 
-	BOOL Deploy( void );
-	BOOL CanHolster( void );
+	bool Deploy() override;
+	bool CanHolster() override;
 	void Holster();
 
 	void UpdateEffect( const Vector &startPoint, const Vector &endPoint, float timeBlend );
@@ -804,7 +804,7 @@ public:
 
 	void PrimaryAttack( void );
 	void SecondaryAttack( void );
-	BOOL Deploy( void );
+	bool Deploy() override;
 	BOOL IsUseable( void );
 	void Holster();
 	void Reload( void );
@@ -838,8 +838,8 @@ public:
 	int GetItemInfo(ItemInfo *p);
 
 	void PrimaryAttack( void );
-	BOOL Deploy( void );
-	BOOL CanHolster( void );
+	bool Deploy() override;
+	bool CanHolster() override;
 	void Holster();
 	void WeaponIdle( void );
 	bool PreferNewPhysics();
@@ -875,8 +875,8 @@ public:
 	void PrimaryAttack( void );
 	void SecondaryAttack( void );
 	int AddDuplicate(CBasePlayerWeapon *pOriginal );
-	BOOL CanDeploy( void );
-	BOOL Deploy( void );
+	bool CanDeploy( void ) override;
+	bool Deploy() override;
 	BOOL IsUseable( void );
 	bool CanBeDropped();
 
@@ -918,7 +918,7 @@ public:
 	}
 
 	void PrimaryAttack( void );
-	BOOL Deploy( void );
+	bool Deploy() override;
 	void Holster();
 	void WeaponIdle( void );
 
@@ -946,7 +946,7 @@ public:
 
 	void PrimaryAttack( void );
 	void SecondaryAttack( void );
-	BOOL Deploy( void );
+	bool Deploy() override;
 	void Holster();
 	void WeaponIdle( void );
 	int m_fJustThrown;
@@ -991,7 +991,7 @@ public:
 
 	void PrimaryAttack( void );
 	void SecondaryAttack( void );
-	BOOL Deploy( void );
+	bool Deploy() override;
 	void Holster();
 	void Reload( void );
 	void ItemPostFrame();
@@ -1042,7 +1042,7 @@ public:
 	void EXPORT Smack(void);
 
 	int Swing(int fFirst);
-	BOOL Deploy(void);
+	bool Deploy() override;
 	void WeaponIdle(void);
 	void Holster();
 	void BigSwing(void);
@@ -1088,7 +1088,7 @@ public:
 
 	void PrimaryAttack(void);
 	void SecondaryAttack(void);
-	BOOL Deploy(void);
+	bool Deploy() override;
 	void Holster();
 	void Reload( void );
 	void WeaponIdle(void);
@@ -1141,7 +1141,7 @@ public:
 
 	int GetItemInfo(ItemInfo *p);
 	int AddToPlayer( CBasePlayer* pPlayer );
-	BOOL Deploy();
+	bool Deploy() override;
 	void Holster();
 	void WeaponIdle( void );
 	void PrimaryAttack( void );
@@ -1195,7 +1195,7 @@ public:
 	int AddToPlayer(CBasePlayer *pPlayer);
 
 	void PrimaryAttack(void);
-	BOOL Deploy(void);
+	bool Deploy() override;
 	void Holster();
 	void Reload(void);
 	void ItemPostFrame();
@@ -1250,7 +1250,7 @@ public:
 	int AddToPlayer(CBasePlayer *pPlayer);
 	void PrimaryAttack(void);
 	void SecondaryAttack(void);
-	BOOL Deploy(void);
+	bool Deploy() override;
 	void Holster();
 	void Reload(void);
 	void WeaponIdle(void);
@@ -1289,7 +1289,7 @@ public:
 	int AddToPlayer( CBasePlayer *pPlayer );
 	void PrimaryAttack( void );
 	void SecondaryAttack( void );
-	BOOL Deploy( void );
+	bool Deploy() override;
 	void Holster();
 	void WeaponIdle( void );
 
@@ -1338,7 +1338,7 @@ public:
 
 	void PrimaryAttack(void);
 	void SecondaryAttack(void);
-	BOOL Deploy(void);
+	bool Deploy() override;
 	void Holster();
 	void Reload(void);
 	void WeaponIdle(void);
@@ -1384,7 +1384,7 @@ public:
 	void EXPORT Smack(void);
 
 	int Swing(int fFirst);
-	BOOL Deploy(void);
+	bool Deploy() override;
 	void WeaponIdle();
 	void Holster();
 	void Stab();
@@ -1441,7 +1441,7 @@ public:
 
 	void PrimaryAttack( void );
 	void SecondaryAttack( void );
-	BOOL Deploy();
+	bool Deploy() override;
 	void Reload( void );
 	void WeaponIdle( void );
 
@@ -1474,7 +1474,7 @@ public:
 	int AddToPlayer( CBasePlayer *pPlayer );
 
 	void PrimaryAttack( void );
-	BOOL Deploy( void );
+	bool Deploy() override;
 	void Reload( void );
 	void WeaponIdle( void );
 	int m_iShell;

@@ -437,7 +437,7 @@ int CRpg::AddToPlayer( CBasePlayer *pPlayer )
 	return AddToPlayerDefault(pPlayer);
 }
 
-BOOL CRpg::Deploy()
+bool CRpg::Deploy()
 {
 	if( m_iClip == 0 )
 	{
@@ -447,15 +447,14 @@ BOOL CRpg::Deploy()
 	return DefaultDeploy( "models/v_rpg.mdl", "models/p_rpg.mdl", RPG_DRAW1, "rpg" );
 }
 
-BOOL CRpg::CanHolster( void )
+bool CRpg::CanHolster( void )
 {
 	if( m_fSpotActive && m_cActiveRockets )
 	{
 		// can't put away while guiding a missile.
-		return FALSE;
+		return false;
 	}
-
-	return TRUE;
+	return true;
 }
 
 void CRpg::Holster()

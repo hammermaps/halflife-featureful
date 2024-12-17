@@ -292,7 +292,7 @@ int CBarnacleGrapple::AddToPlayer( CBasePlayer* pPlayer )
 	return AddToPlayerDefault(pPlayer);
 }
 
-BOOL CBarnacleGrapple::Deploy()
+bool CBarnacleGrapple::Deploy()
 {
 	int r = DefaultDeploy("models/v_bgrap.mdl", "models/p_bgrap.mdl", BGRAPPLE_UP, "gauss" );
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 1.1;

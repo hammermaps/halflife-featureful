@@ -956,10 +956,10 @@ BOOL CBasePlayerWeapon::IsUseable( void )
 	return FALSE;
 }
 
-BOOL CBasePlayerWeapon::DefaultDeploy( const char *szViewModel, const char *szWeaponModel, int iAnim, const char *szAnimExt, int body )
+bool CBasePlayerWeapon::DefaultDeploy( const char *szViewModel, const char *szWeaponModel, int iAnim, const char *szAnimExt, int body )
 {
 	if( !CanDeploy() )
-		return FALSE;
+		return false;
 
 	m_pPlayer->pev->viewmodel = MAKE_STRING( szViewModel );
 	if (g_modFeatures.weapon_p_models)
@@ -971,7 +971,7 @@ BOOL CBasePlayerWeapon::DefaultDeploy( const char *szViewModel, const char *szWe
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 1.0f;
 	m_flLastFireTime = 0.0f;
 
-	return TRUE;
+	return true;
 }
 
 void CBasePlayerWeapon::PrecachePModel(const char *name)
