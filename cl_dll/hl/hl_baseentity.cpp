@@ -202,7 +202,7 @@ void CBasePlayer::Precache( void ) { }
 int CBasePlayer::Save( CSave &save ) { return 0; }
 int CBasePlayer::Restore( CRestore &restore ) { return 0; }
 void CBasePlayer::ImpulseCommands() { }
-int CBasePlayer::AddPlayerItem( CBasePlayerWeapon *pItem ) { return FALSE; }
+int CBasePlayer::AddPlayerItem( CBasePlayerWeapon *pItem ) { return DID_NOT_GET_ITEM; }
 int CBasePlayer::GetAmmoIndex( const char *psz ) { return -1; }
 void CBasePlayer::UpdateClientData( void ) { }
 BOOL CBasePlayer::FBecomeProne( void ) { return TRUE; }

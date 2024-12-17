@@ -379,7 +379,7 @@ public:
 	void AddPoints( int score, bool bAllowNegativeScore ) override;
 	void AddPointsToTeam( int score, bool bAllowNegativeScore ) override;
 	void AddFloatPoints( float score, bool bAllowNegativeScore ) override;
-	BOOL AddPlayerItem( CBasePlayerWeapon *pItem );
+	int AddPlayerItem( CBasePlayerWeapon *pItem ) override;
 	BOOL RemovePlayerItem( CBasePlayerWeapon *pItem, bool bCallHoster );
 	void DropPlayerItem ( const char *pszItemName );
 	void DropPlayerItemById( int iId );

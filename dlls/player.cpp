@@ -4789,7 +4789,7 @@ void CBasePlayer::CheatImpulseCommands( int iImpulse )
 int CBasePlayer::AddPlayerItem( CBasePlayerWeapon *pItem )
 {
 	if( pev->flags & FL_SPECTATOR )
-		return FALSE;
+		return DID_NOT_GET_ITEM;
 
 	CBasePlayerWeapon *pInsert = WeaponById(pItem->WeaponId());
 	if( pInsert )
