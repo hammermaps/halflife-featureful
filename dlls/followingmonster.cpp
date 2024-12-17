@@ -485,7 +485,7 @@ void CFollowingMonster::StartTask( Task_t *pTask )
 		}
 		break;
 	case TASK_CANT_FOLLOW:
-		StopFollowing( FALSE, false );
+		StopFollowing( false, false );
 		TaskComplete();
 		break;
 	default:
@@ -543,7 +543,7 @@ void CFollowingMonster::PrescheduleThink()
 {
 	if (IsFollowingPlayer() && ShouldDeclineFollowing())
 	{
-		StopFollowing(TRUE, false);
+		StopFollowing(true, false);
 	}
 	CSquadMonster::PrescheduleThink();
 }
@@ -575,7 +575,7 @@ void CFollowingMonster::IdleHeadTurn( Vector &vecFriend )
 	}
 }
 
-void CFollowingMonster::StopFollowing(BOOL clearSchedule , bool saySentence)
+void CFollowingMonster::StopFollowing(bool clearSchedule , bool saySentence)
 {
 	if( IsFollowingPlayer() )
 	{
@@ -668,7 +668,7 @@ Schedule_t* CFollowingMonster::GetFollowingSchedule(bool ignoreEnemy)
 		if( !FollowedPlayer()->IsAlive() )
 		{
 			// UNDONE: Comment about the recently dead player here?
-			StopFollowing( FALSE, false );
+			StopFollowing( false, false );
 			return NULL;
 		}
 		else
@@ -761,7 +761,7 @@ int CFollowingMonster::DoFollowerUse(CBaseEntity *pCaller, bool saySentence, USE
 		}
 		if (isFollowing && (useType == USE_TOGGLE || useType == USE_OFF))
 		{
-			StopFollowing( TRUE, saySentence );
+			StopFollowing( true, saySentence );
 			return FOLLOWING_STOPPED;
 		}
 	}

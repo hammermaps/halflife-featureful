@@ -4831,7 +4831,7 @@ void CTriggerSetPatrol::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_
 				CFollowingMonster* followingMonster = pMonster->MyFollowingMonsterPointer();
 				if (followingMonster->IsFollowingPlayer())
 				{
-					followingMonster->StopFollowing(TRUE, false);
+					followingMonster->StopFollowing(true, false);
 				}
 				pMonster->SetState( MONSTERSTATE_IDLE );
 				pMonster->ChangeSchedule( patrolSchedule );
@@ -6244,7 +6244,7 @@ void CTriggerConfigureMonster::Affect(CBaseEntity *pEntity)
 		else if (m_provokedState > 0)
 		{
 			pTalkMonster->Remember( bits_MEMORY_PROVOKED );
-			pTalkMonster->StopFollowing( TRUE );
+			pTalkMonster->StopFollowing( true );
 		}
 
 		if (!FStringNull(m_iszUse))

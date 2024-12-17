@@ -362,7 +362,7 @@ public:
 	virtual void IdleSound( void ) { return; };
 	virtual void PainSound( void ) { return; };
 
-	virtual void StopFollowing( BOOL clearSchedule, bool saySentence = true ) {}
+	virtual void StopFollowing( bool clearSchedule, bool saySentence = true ) {}
 
 	inline void Remember( int iMemory ) { m_afMemory |= iMemory; }
 	inline void Forget( int iMemory ) { m_afMemory &= ~iMemory; }

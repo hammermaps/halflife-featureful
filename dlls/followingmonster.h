@@ -86,7 +86,7 @@ public:
 	bool	IsFollowingPlayer( void );
 	virtual	CBaseEntity* FollowedPlayer();
 	virtual void ClearFollowedPlayer();
-	virtual void StopFollowing(BOOL clearSchedule, bool saySentence = true );
+	virtual void StopFollowing(bool clearSchedule, bool saySentence = true ) override;
 	virtual void StartFollowing( CBaseEntity *pLeader, bool saySentence = true );
 	virtual void DeclineFollowing( CBaseEntity* pCaller ) {}
 	virtual void LimitFollowers( CBaseEntity *pPlayer, int maxFollowers );

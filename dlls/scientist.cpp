@@ -1009,7 +1009,7 @@ Schedule_t *CScientist::GetSchedule( void )
 			if( !FollowedPlayer()->IsAlive() )
 			{
 				// UNDONE: Comment about the recently dead player here?
-				StopFollowing( FALSE, false );
+				StopFollowing( false, false );
 				break;
 			}
 
@@ -1113,7 +1113,7 @@ MONSTERSTATE CScientist::GetIdealState( void )
 		{
 			// Stop following if you take damage
 			if( IsFollowingPlayer() )
-				StopFollowing( TRUE, false );
+				StopFollowing( true, false );
 		}
 		break;
 	case MONSTERSTATE_COMBAT:

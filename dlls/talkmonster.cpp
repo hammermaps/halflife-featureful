@@ -440,7 +440,7 @@ void CTalkMonster::StartTask( Task_t *pTask )
 		TaskComplete();
 		break;
 	case TASK_CANT_FOLLOW:
-		StopFollowing( FALSE, false );
+		StopFollowing( false, false );
 		PlaySentence( SentenceGroup(TLK_STOP), RANDOM_FLOAT( 2, 2.5 ), VOL_NORM, ATTN_NORM );
 		TaskComplete();
 		break;
@@ -719,7 +719,7 @@ void CTalkMonster::LimitFollowers( CBaseEntity *pPlayer, int maxFollowers )
 					{
 						count++;
 						if( count > maxFollowers )
-							pTalkMonster->StopFollowing( TRUE );
+							pTalkMonster->StopFollowing( true );
 					}
 				}
 			}
@@ -1334,7 +1334,7 @@ void CTalkMonster::ReactToPlayerHit(entvars_t *pevInflictor, entvars_t *pevAttac
 		m_hTalkTarget = pAttacker;
 		PlaySentence( SentenceGroup(TLK_MAD), 4, VOL_NORM, ATTN_NORM );
 		Remember( bits_MEMORY_PROVOKED );
-		StopFollowing( TRUE );
+		StopFollowing( true );
 		return;
 	}
 	// This is a heurstic to determine if the player intended to harm me
@@ -1367,7 +1367,7 @@ void CTalkMonster::ReactToPlayerHit(entvars_t *pevInflictor, entvars_t *pevAttac
 			PlaySentence( SentenceGroup(TLK_MAD), 4, VOL_NORM, ATTN_NORM );
 
 			Remember( bits_MEMORY_PROVOKED );
-			StopFollowing( TRUE );
+			StopFollowing( true );
 		}
 		else
 		{

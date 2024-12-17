@@ -313,7 +313,7 @@ public:
 	Schedule_t *GetScheduleOfType(int Type);
 	void OnChangeSchedule( Schedule_t *pNewSchedule );
 	CBaseEntity* FollowedPlayer();
-	void StopFollowing( BOOL clearSchedule, bool saySentence = true );
+	void StopFollowing( bool clearSchedule, bool saySentence = true ) override;
 	void ClearFollowedPlayer();
 	bool SetAnswerQuestion(CTalkMonster *pSpeaker);
 
@@ -3725,7 +3725,7 @@ CBaseEntity* CMedic::FollowedPlayer()
 	return CHFGrunt::FollowedPlayer();
 }
 
-void CMedic::StopFollowing( BOOL clearSchedule, bool saySentence )
+void CMedic::StopFollowing(bool clearSchedule, bool saySentence )
 {
 	if (InHealSchedule() && (m_hTargetEnt != 0 && !m_hTargetEnt->IsPlayer()))
 		clearSchedule = false;
