@@ -859,7 +859,7 @@ public:
 	// Buttons that don't take damage can be IMPULSE used
 	virtual int ObjectCaps( void );
 
-	BOOL IsAllowedToSpeak( void ) { return TRUE; }
+	bool IsAllowedToSpeak( void ) override { return true; }
 	bool IsUsefulToDisplayHint(CBaseEntity *pPlayer) {
 		return !FBitSet(pev->spawnflags, SF_BUTTON_PLAYER_CANT_USE);
 	}

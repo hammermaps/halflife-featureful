@@ -135,7 +135,7 @@ public:
 	virtual CBaseMonster *MyMonsterPointer( void ) { return this; }
 	virtual CFollowingMonster* MyFollowingMonsterPointer() { return NULL; }
 	virtual CTalkMonster* MyTalkMonsterPointer() { return NULL; }
-	virtual BOOL IsAllowedToSpeak( void ) { return IsAlive(); }
+	virtual bool IsAllowedToSpeak( void ) override { return IsAlive(); }
 	virtual void Look( int iDistance );// basic sight function for monsters
 	virtual void RunAI( void );// core ai function!	
 	void Listen( void );

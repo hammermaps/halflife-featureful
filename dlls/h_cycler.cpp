@@ -50,7 +50,7 @@ public:
 	virtual int Restore( CRestore &restore );
 	static TYPEDESCRIPTION m_SaveData[];
 
-	BOOL IsAllowedToSpeak( void ) { return TRUE; }
+	bool IsAllowedToSpeak( void ) override { return true; }
 
 	int m_animate;
 };

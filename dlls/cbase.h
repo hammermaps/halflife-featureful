@@ -615,7 +615,7 @@ public:
 	virtual bool PlaySentence( const char *pszSentence, float duration, float volume, float attenuation, bool subtitle );
 	virtual void PlayScriptedSentence( const char *pszSentence, float duration, float volume, float attenuation, BOOL bConcurrent, CBaseEntity *pListener );
 	virtual void SentenceStop( void );
-	virtual BOOL IsAllowedToSpeak( void ) { return FALSE; }
+	virtual bool IsAllowedToSpeak( void ) { return false; }
 
 	// common member functions
 	void LinearMove( Vector	vecDest, float flSpeed );
