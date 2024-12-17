@@ -912,11 +912,11 @@ void CBreakable::DieToActivator( CBaseEntity* pActivator )
 
 	if( Explodable() )
 	{
-		ExplosionCreate( Center(), pev->angles, edict(), ExplosionMagnitude(), TRUE );
+		ExplosionCreate( Center(), pev->angles, edict(), ExplosionMagnitude(), true );
 	}
 }
 
-BOOL CBreakable::IsBreakable( void ) 
+bool CBreakable::IsBreakable( void )
 { 
 	return m_Material != matUnbreakableGlass;
 }

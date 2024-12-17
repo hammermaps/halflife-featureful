@@ -118,7 +118,7 @@ public:
 	Vector m_vecEstVelocity;
 
 	Vector m_velocity;
-	int m_fInCombat;
+	bool m_fInCombat;
 };
 
 LINK_ENTITY_TO_CLASS( monster_alien_controller, CController )
@@ -684,7 +684,7 @@ void CController::RunTask( Task_t *pTask )
 			m_iBallTime[0] = m_flShootEnd;
 			m_iBall[1] = 64;
 			m_iBallTime[1] = m_flShootEnd;
-			m_fInCombat = FALSE;
+			m_fInCombat = false;
 		}
 	}
 
@@ -702,7 +702,7 @@ void CController::RunTask( Task_t *pTask )
 
 		if( m_fSequenceFinished )
 		{
-			m_fInCombat = FALSE;
+			m_fInCombat = false;
 		}
 
 		CSquadMonster::RunTask( pTask );
@@ -714,14 +714,14 @@ void CController::RunTask( Task_t *pTask )
 				pev->sequence = LookupActivity( ACT_RANGE_ATTACK1 );
 				pev->frame = 0;
 				ResetSequenceInfo();
-				m_fInCombat = TRUE;
+				m_fInCombat = true;
 			}
 			else if( HasConditions( bits_COND_CAN_RANGE_ATTACK2 ) )
 			{
 				pev->sequence = LookupActivity( ACT_RANGE_ATTACK2 );
 				pev->frame = 0;
 				ResetSequenceInfo();
-				m_fInCombat = TRUE;
+				m_fInCombat = true;
 			}
 			else
 			{

@@ -98,7 +98,7 @@ public:
 	void TraceAttack( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType );
 	int IRelationship( CBaseEntity *pTarget );
 	void StopTalking( void );
-	BOOL ShouldSpeak( void );
+	bool ShouldSpeak( void );
 	void PlayUseSentence();
 	void PlayUnUseSentence();
 	CUSTOM_SCHEDULES
@@ -294,12 +294,12 @@ void CAGrunt::StopTalking( void )
 //=========================================================
 // ShouldSpeak - Should this agrunt be talking?
 //=========================================================
-BOOL CAGrunt::ShouldSpeak( void )
+bool CAGrunt::ShouldSpeak( void )
 {
 	if( m_flNextSpeakTime > gpGlobals->time )
 	{
 		// my time to talk is still in the future.
-		return FALSE;
+		return false;
 	}
 
 	if( pev->spawnflags & SF_MONSTER_GAG )
@@ -311,11 +311,11 @@ BOOL CAGrunt::ShouldSpeak( void )
 			// into the future a bit, so we don't talk immediately after
 			// going into combat
 			m_flNextSpeakTime = gpGlobals->time + 3.0f;
-			return FALSE;
+			return false;
 		}
 	}
 
-	return TRUE;
+	return true;
 }
 
 //=========================================================

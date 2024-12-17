@@ -70,7 +70,7 @@ void CEgon::Precache( void )
 
 BOOL CEgon::Deploy( void )
 {
-	m_deployed = FALSE;
+	m_deployed = false;
 	m_fireState = FIRE_OFF;
 	return DefaultDeploy( "models/v_egon.mdl", "models/p_egon.mdl", EGON_DRAW, "egon" );
 }
@@ -118,12 +118,12 @@ float CEgon::GetDischargeInterval( void )
 	return EGON_DISCHARGE_INTERVAL;
 }
 
-BOOL CEgon::HasAmmo( void )
+bool CEgon::HasAmmo( void )
 {
 	if( m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0 )
-		return FALSE;
+		return false;
 
-	return TRUE;
+	return true;
 }
 
 void CEgon::UseAmmo( int count )
@@ -402,7 +402,7 @@ void CEgon::CreateEffect( void )
 	m_pNoise->pev->flags |= FL_SKIPLOCALHOST;
 	m_pNoise->pev->owner = m_pPlayer->edict();
 
-	m_pSprite = CSprite::SpriteCreate( EGON_FLARE_SPRITE, pev->origin, FALSE );
+	m_pSprite = CSprite::SpriteCreate( EGON_FLARE_SPRITE, pev->origin, false );
 	m_pSprite->pev->scale = 1.0;
 	m_pSprite->SetTransparency( kRenderGlow, 255, 255, 255, 255, kRenderFxNoDissipation );
 	m_pSprite->pev->spawnflags |= SF_SPRITE_TEMPORARY;
@@ -477,7 +477,7 @@ void CEgon::WeaponIdle( void )
 	}
 
 	SendWeaponAnim( iAnim );
-	m_deployed = TRUE;
+	m_deployed = true;
 }
 
 BOOL CEgon::CanHolster( void )

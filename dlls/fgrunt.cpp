@@ -203,11 +203,11 @@ public:
 	void SpeakSentence( void );
 	const char* DefaultSentenceGroup(int group);
 
-	BOOL FOkToSpeak( void );
+	bool FOkToSpeak( void );
 	void JustSpoke( void );
 
-	void DropMyItems(BOOL isGibbed);
-	CBaseEntity* DropMyItem(const char *entityName, const Vector &vecGunPos, const Vector &vecGunAngles, BOOL isGibbed);
+	void DropMyItems(bool isGibbed);
+	CBaseEntity* DropMyItem(const char *entityName, const Vector &vecGunPos, const Vector &vecGunAngles, bool isGibbed);
 
 	void TraceAttack( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType);
 	int TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType );
@@ -317,7 +317,7 @@ public:
 	void ClearFollowedPlayer();
 	bool SetAnswerQuestion(CTalkMonster *pSpeaker);
 
-	void DropMyItems(BOOL isGibbed);
+	void DropMyItems(bool isGibbed);
 
 	void FirePistol(const char* shotSoundScript, Bullet bullet);
 	bool Heal();
@@ -401,22 +401,22 @@ void CHFGrunt :: KeyValue( KeyValueData *pkvd )
 //=========================================================
 // someone else is talking - don't speak
 //=========================================================
-BOOL CHFGrunt :: FOkToSpeak( void )
+bool CHFGrunt :: FOkToSpeak( void )
 {
 // if someone else is talking, don't speak
 	if ( CTalkMonster::SomeoneIsTalking() )
-		return FALSE;
+		return false;
 
 	// if in the grip of a barnacle, don't speak
 	if ( m_MonsterState == MONSTERSTATE_PRONE || m_IdealMonsterState == MONSTERSTATE_PRONE )
 	{
-		return FALSE;
+		return false;
 	}
 
 	// if not alive, certainly don't speak
 	if ( pev->deadflag != DEAD_NO )
 	{
-		return FALSE;
+		return false;
 	}
 
 	if ( pev->spawnflags & SF_MONSTER_GAG )
@@ -424,11 +424,11 @@ BOOL CHFGrunt :: FOkToSpeak( void )
 		if ( m_MonsterState != MONSTERSTATE_COMBAT )
 		{
 			// no talking outside of combat if gagged.
-			return FALSE;
+			return false;
 		}
 	}
 
-	return TRUE;
+	return true;
 }
 //=========================================================
 //=========================================================
@@ -1211,7 +1211,7 @@ void CHFGrunt :: GibMonster ( void )
 	CTalkMonster::GibMonster();
 }
 
-CBaseEntity* CHFGrunt::DropMyItem(const char* entityName, const Vector& vecGunPos, const Vector& vecGunAngles, BOOL isGibbed)
+CBaseEntity* CHFGrunt::DropMyItem(const char* entityName, const Vector& vecGunPos, const Vector& vecGunAngles, bool isGibbed)
 {
 	CBaseEntity* pGun = DropItem(entityName, vecGunPos, vecGunAngles);
 	if (pGun && isGibbed) {
@@ -1221,7 +1221,7 @@ CBaseEntity* CHFGrunt::DropMyItem(const char* entityName, const Vector& vecGunPo
 	return pGun;
 }
 
-void CHFGrunt::DropMyItems(BOOL isGibbed)
+void CHFGrunt::DropMyItems(bool isGibbed)
 {
 	if (g_pGameRules->FMonsterCanDropWeapons(this) && !FBitSet(pev->spawnflags, SF_MONSTER_DONT_DROP_GUN))
 	{
@@ -1733,7 +1733,7 @@ void CHFGrunt :: HandleAnimEvent( MonsterEvent_t *pEvent )
 		case HGRUNT_ALLY_AE_DROP_GUN:
 		{
 			if (GetBodygroup(FG_GUN_GROUP) != FG_GUN_NONE)
-				DropMyItems(FALSE);
+				DropMyItems(false);
 		}
 		break;
 
@@ -2951,7 +2951,7 @@ public:
 	void TraceAttack(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType);
 	void PrescheduleThink();
 
-	void DropMyItems(BOOL isGibbed);
+	void DropMyItems(bool isGibbed);
 
 	void MakeGas( bool doSpark );
 	void UpdateGas( void );
@@ -3096,7 +3096,7 @@ void CTorch::HandleAnimEvent(MonsterEvent_t *pEvent)
 	case HGRUNT_ALLY_AE_DROP_GUN:
 		if ( FBitSet( pev->weapons, TORCH_EAGLE ) && pev->body != TORCH_GUN_NONE )
 		{
-			DropMyItems(FALSE);
+			DropMyItems(false);
 		}
 		break;
 	case HGRUNT_ALLY_AE_RELOAD:
@@ -3182,7 +3182,7 @@ void CTorch::GibMonster()
 {
 	if ( FBitSet( pev->weapons, TORCH_EAGLE ) && pev->body != TORCH_GUN_NONE )
 	{// throw a gun if the grunt has one
-		DropMyItems(TRUE);
+		DropMyItems(true);
 	}
 	KillGas();
 	CTalkMonster::GibMonster();
@@ -3200,7 +3200,7 @@ void CTorch::UpdateOnRemove()
 	CHFGrunt::UpdateOnRemove();
 }
 
-void CTorch::DropMyItems(BOOL isGibbed)
+void CTorch::DropMyItems(bool isGibbed)
 {
 	if (g_pGameRules->FMonsterCanDropWeapons(this) && !FBitSet(pev->spawnflags, SF_MONSTER_DONT_DROP_GUN))
 	{
@@ -3728,7 +3728,7 @@ CBaseEntity* CMedic::FollowedPlayer()
 void CMedic::StopFollowing( BOOL clearSchedule, bool saySentence )
 {
 	if (InHealSchedule() && (m_hTargetEnt != 0 && !m_hTargetEnt->IsPlayer()))
-		clearSchedule = FALSE;
+		clearSchedule = false;
 	CHFGrunt::StopFollowing(clearSchedule, saySentence);
 }
 
@@ -3855,7 +3855,7 @@ void CMedic::HandleAnimEvent(MonsterEvent_t *pEvent)
 	case HGRUNT_ALLY_AE_DROP_GUN:
 		if ( FBitSet( pev->weapons, MEDIC_EAGLE | MEDIC_HANDGUN ) && GetBodygroup(gunGroup) != MEDIC_GUN_NONE )
 		{
-			DropMyItems(FALSE);
+			DropMyItems(false);
 		}
 		break;
 	case HGRUNT_ALLY_AE_RELOAD:
@@ -3911,12 +3911,12 @@ void CMedic::GibMonster()
 {
 	if ( FBitSet( pev->weapons, MEDIC_EAGLE | MEDIC_HANDGUN ) && GetBodygroup(gunGroup) != MEDIC_GUN_NONE )
 	{// throw a gun if the grunt has one
-		DropMyItems(TRUE);
+		DropMyItems(true);
 	}
 	CTalkMonster::GibMonster();
 }
 
-void CMedic::DropMyItems(BOOL isGibbed)
+void CMedic::DropMyItems(bool isGibbed)
 {
 	if (g_pGameRules->FMonsterCanDropWeapons(this) && !FBitSet(pev->spawnflags, SF_MONSTER_DONT_DROP_GUN))
 	{

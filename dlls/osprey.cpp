@@ -52,7 +52,7 @@ public:
 	void Killed( entvars_t *pevInflictor, entvars_t *pevAttacker, int iGib );
 
 	void UpdateGoal( void );
-	BOOL HasDead( void );
+	bool HasDead( void );
 	void EXPORT FlyThink( void );
 	void EXPORT DeployThink( void );
 	void Flight( void );
@@ -363,20 +363,20 @@ void COsprey::DeployThink( void )
 	pev->nextthink = gpGlobals->time + 0.1f;
 }
 
-BOOL COsprey::HasDead()
+bool COsprey::HasDead()
 {
 	for( int i = 0; i < m_iUnits; i++ )
 	{
 		if( m_hGrunt[i] == 0 || !m_hGrunt[i]->IsAlive() )
 		{
-			return TRUE;
+			return true;
 		}
 		else
 		{
 			m_vecOrigin[i] = m_hGrunt[i]->pev->origin;  // send them to where they died
 		}
 	}
-	return FALSE;
+	return false;
 }
 
 const char* COsprey::TrooperName()

@@ -83,15 +83,15 @@ BOOL CGlock::Deploy()
 
 void CGlock::SecondaryAttack( void )
 {
-	GlockFire( 0.1f, 0.2f, FALSE );
+	GlockFire( 0.1f, 0.2f, false );
 }
 
 void CGlock::PrimaryAttack( void )
 {
-	GlockFire( 0.01f, 0.3f, TRUE );
+	GlockFire( 0.01f, 0.3f, true );
 }
 
-void CGlock::GlockFire( float flSpread, float flCycleTime, BOOL fUseAutoAim )
+void CGlock::GlockFire(float flSpread, float flCycleTime, bool fUseAutoAim )
 {
 	if( m_iClip <= 0 )
 	{

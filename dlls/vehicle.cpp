@@ -691,7 +691,7 @@ void CFuncVehicle::DeadEnd()
 		{
 			do
 			{
-				pNext = pTrack->ValidPath( pTrack->GetPrevious(), TRUE );
+				pNext = pTrack->ValidPath( pTrack->GetPrevious(), true );
 
 				if( pNext != NULL )
 				{
@@ -704,7 +704,7 @@ void CFuncVehicle::DeadEnd()
 		{
 			do
 			{
-				pNext = pTrack->ValidPath( pTrack->GetNext(), TRUE );
+				pNext = pTrack->ValidPath( pTrack->GetNext(), true );
 
 				if( pNext != NULL )
 				{
@@ -777,7 +777,7 @@ void CFuncVehicle::Find()
 
 	Vector look = nextPos;
 	look.z -= m_height;
-	m_ppath->LookAhead( &look, m_length, 0 );
+	m_ppath->LookAhead( &look, m_length, false );
 	look.z += m_height;
 
 	pev->angles = UTIL_VecToAngles( look - nextPos );

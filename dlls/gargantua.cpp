@@ -452,7 +452,7 @@ public:
 	void FlameUpdate( void );
 	void FlameControls( float angleX, float angleY );
 	void FlameDestroy( void );
-	inline BOOL FlameIsOn( void ) { return m_pFlame[0] != NULL; }
+	inline bool FlameIsOn( void ) { return m_pFlame[0] != NULL; }
 
 	void FlameDamage( Vector vecStart, Vector vecEnd, entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int iClassIgnore, int bitsDamageType );
 
@@ -1531,7 +1531,7 @@ void CGargantua::RunTask( Task_t *pTask )
 		}
 		else
 		{
-			BOOL cancel = FALSE;
+			bool cancel = false;
 
 			Vector angles = g_vecZero;
 
@@ -1567,10 +1567,10 @@ void CGargantua::RunTask( Task_t *pTask )
 				angles.x = -angles.x;
 				angles.y -= pev->angles.y;
 				if( dir.Length() > 400 )
-					cancel = TRUE;
+					cancel = true;
 			}
 			if( fabs(angles.y) > 60 )
-				cancel = TRUE;
+				cancel = true;
 
 			if( cancel )
 			{

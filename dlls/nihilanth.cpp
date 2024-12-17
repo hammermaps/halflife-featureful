@@ -63,8 +63,8 @@ public:
 
 	void Flight( void );
 
-	BOOL AbsorbSphere( void );
-	BOOL EmitSphere( void );
+	bool AbsorbSphere( void );
+	bool EmitSphere( void );
 	void TargetSphere( USE_TYPE useType, float value );
 	CBaseEntity *RandomTargetname( const char *szName );
 	void ShootBalls( void );
@@ -198,7 +198,7 @@ public:
 	void ZapInit( CBaseEntity *pEnemy );
 
 	void EXPORT HoverThink( void );
-	BOOL CircleTarget( Vector vecTarget );
+	bool CircleTarget( Vector vecTarget );
 	void EXPORT DissipateThink( void );
 
 	void EXPORT ZapThink( void );
@@ -1115,7 +1115,7 @@ void CNihilanth::Flight( void )
 	// ALERT( at_console, "%5.0f %5.0f : %4.0f : %3.0f : %2.0f\n", m_posDesired.z, pev->origin.z, m_velocity.z, m_avelocity.y, m_flForce ); 
 }
 
-BOOL CNihilanth::AbsorbSphere( void )
+bool CNihilanth::AbsorbSphere( void )
 {
 	for( int i = 0; i < N_SPHERES; i++ )
 	{
@@ -1125,13 +1125,13 @@ BOOL CNihilanth::AbsorbSphere( void )
 			pSphere->AbsorbInit();
 			m_hSphere[i] = NULL;
 			m_iActiveSpheres--;
-			return TRUE;
+			return true;
 		}
 	}
-	return FALSE;
+	return false;
 }
 
-BOOL CNihilanth::EmitSphere( void )
+bool CNihilanth::EmitSphere( void )
 {
 	m_iActiveSpheres = 0;
 	int empty = 0;
@@ -1149,7 +1149,7 @@ BOOL CNihilanth::EmitSphere( void )
 	}
 
 	if( m_iActiveSpheres >= N_SPHERES )
-		return FALSE;
+		return false;
 
 	Vector vecSrc = m_hRecharger->pev->origin;
 	CNihilanthHVR *pEntity = (CNihilanthHVR *)Create( "nihilanth_energy_ball", vecSrc, pev->angles, edict(), GetProjectileOverrides() );
@@ -1157,7 +1157,7 @@ BOOL CNihilanth::EmitSphere( void )
 	pEntity->CircleInit( this );
 
 	m_hSphere[empty] = pEntity;
-	return TRUE;
+	return true;
 }
 
 void CNihilanth::TargetSphere( USE_TYPE useType, float value )
@@ -1729,9 +1729,9 @@ void CNihilanthHVR::DissipateThink( void )
 	}
 }
 
-BOOL CNihilanthHVR::CircleTarget( Vector vecTarget )
+bool CNihilanthHVR::CircleTarget( Vector vecTarget )
 {
-	BOOL fClose = FALSE;
+	bool fClose = false;
 
 	Vector vecDest = vecTarget;
 	Vector vecEst = pev->origin + pev->velocity * 0.5;
@@ -1761,7 +1761,7 @@ BOOL CNihilanthHVR::CircleTarget( Vector vecTarget )
 
 	if( d1 < 32 )
 	{
-		fClose = TRUE;
+		fClose = true;
 	}
 
 	m_vecIdeal = m_vecIdeal + Vector( RANDOM_FLOAT( -2, 2 ), RANDOM_FLOAT( -2, 2 ), RANDOM_FLOAT( -2, 2 ));

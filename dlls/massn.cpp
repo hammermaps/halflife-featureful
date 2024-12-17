@@ -69,7 +69,7 @@ public:
 		return CHGrunt::DefaultClassify();
 	}
 
-	BOOL FOkToSpeak(void);
+	bool FOkToSpeak(void);
 
 	void Spawn( void );
 	void Precache( void );
@@ -137,9 +137,9 @@ void CMassn::PlayUnUseSentence()
 	JustSpoke();
 }
 
-BOOL CMassn::FOkToSpeak(void)
+bool CMassn::FOkToSpeak(void)
 {
-	return FALSE;
+	return false;
 }
 
 void CMassn::IdleSound(void)
@@ -172,7 +172,7 @@ void CMassn::GibMonster( void )
 {
 	if( GetBodygroup( MASSN_GUN_GROUP ) != MASSN_GUN_NONE )
 	{
-		DropMyItems(TRUE);
+		DropMyItems(true);
 	}
 
 	CBaseMonster::GibMonster();
@@ -234,7 +234,7 @@ void CMassn::HandleAnimEvent(MonsterEvent_t *pEvent)
 	case MASSN_AE_DROP_GUN:
 	{
 		if(GetBodygroup(MASSN_GUN_GROUP) != MASSN_GUN_NONE)
-			DropMyItems(FALSE);
+			DropMyItems(false);
 	}
 	break;
 

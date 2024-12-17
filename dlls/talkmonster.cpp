@@ -1303,7 +1303,7 @@ int CTalkMonster::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, f
 	return ret;
 }
 
-static BOOL IsFacing( entvars_t *pevTest, const Vector &reference )
+static bool IsFacing( entvars_t *pevTest, const Vector &reference )
 {
 	Vector vecDir = reference - pevTest->origin;
 	vecDir.z = 0.0f;
@@ -1316,9 +1316,9 @@ static BOOL IsFacing( entvars_t *pevTest, const Vector &reference )
 	// He's facing me, he meant it
 	if( DotProduct( forward, vecDir ) > 0.96f )	// +/- 15 degrees or so
 	{
-		return TRUE;
+		return true;
 	}
-	return FALSE;
+	return false;
 }
 
 void CTalkMonster::ReactToPlayerHit(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType)

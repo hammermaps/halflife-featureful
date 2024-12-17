@@ -204,7 +204,7 @@ public:
 
 	void NodeStart(string_t iszNextNode );
 	void NodeReach( void );
-	BOOL ShouldGoToNode( void );
+	bool ShouldGoToNode( void );
 
 	void SetYawSpeed( void );
 	int DefaultClassify( void );
@@ -271,10 +271,10 @@ public:
 
 	void DeathNotice( entvars_t *pevChild );
 
-	BOOL CanLayCrab( void ) 
+	bool CanLayCrab( void )
 	{ 
 		if (FBitSet(pev->spawnflags, SF_BIGMOM_NOBABYCRABS))
-			return FALSE;
+			return false;
 
 		if( m_crabTime < gpGlobals->time && m_crabCount < BIG_MAXCHILDREN )
 		{
@@ -287,12 +287,12 @@ public:
 			for( int i = 0; i < count; i++ )
 			{
 				if( pList[i] != this )	// Don't hurt yourself!
-					return FALSE;
+					return false;
 			}
-			return TRUE;
+			return true;
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	void LaunchMortar( void );
@@ -941,14 +941,14 @@ Schedule_t *CBigMomma::GetScheduleOfType( int Type )
 	return CBaseMonster::GetScheduleOfType( Type );
 }
 
-BOOL CBigMomma::ShouldGoToNode( void )
+bool CBigMomma::ShouldGoToNode( void )
 {
 	if( HasMemory( bits_MEMORY_ADVANCE_NODE ) )
 	{
 		if( m_nodeTime < gpGlobals->time )
-			return TRUE;
+			return true;
 	}
-	return FALSE;
+	return false;
 }
 
 Schedule_t *CBigMomma::GetSchedule( void )

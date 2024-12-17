@@ -51,27 +51,27 @@ void CSound::Reset( void )
 //=========================================================
 // FIsSound - returns TRUE if the sound is an Audible sound
 //=========================================================
-BOOL CSound::FIsSound( void )
+bool CSound::FIsSound( void )
 {
 	if( m_iType & ( bits_SOUND_COMBAT | bits_SOUND_WORLD | bits_SOUND_PLAYER | bits_SOUND_DANGER ) )
 	{
-		return TRUE;
+		return true;
 	}
 
-	return FALSE;
+	return false;
 }
 
 //=========================================================
 // FIsScent - returns TRUE if the sound is actually a scent
 //=========================================================
-BOOL CSound::FIsScent( void )
+bool CSound::FIsScent( void )
 {
 	if( m_iType & ( bits_SOUND_CARCASS | bits_SOUND_MEAT | bits_SOUND_GARBAGE ) )
 	{
-		return TRUE;
+		return true;
 	}
 
-	return FALSE;
+	return false;
 }
 
 //=========================================================

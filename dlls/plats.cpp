@@ -1245,7 +1245,7 @@ void CFuncTrackTrain::Next( void )
 	Vector nextPos = pev->origin;
 
 	nextPos.z -= m_height;
-	CPathTrack *pnext = m_ppath->LookAhead( &nextPos, pev->speed * 0.1f, 1 );
+	CPathTrack *pnext = m_ppath->LookAhead( &nextPos, pev->speed * 0.1f, true );
 	nextPos.z += m_height;
 
 	pev->velocity = ( nextPos - pev->origin ) * 10;
@@ -1253,9 +1253,9 @@ void CFuncTrackTrain::Next( void )
 
 	nextFront.z -= m_height;
 	if( m_length > 0 )
-		m_ppath->LookAhead( &nextFront, m_length, 0 );
+		m_ppath->LookAhead( &nextFront, m_length, false );
 	else
-		m_ppath->LookAhead( &nextFront, 100, 0 );
+		m_ppath->LookAhead( &nextFront, 100, false );
 	nextFront.z += m_height;
 
 	Vector delta = nextFront - pev->origin;
@@ -1372,7 +1372,7 @@ void CFuncTrackTrain::DeadEnd( void )
 		{
 			do
 			{
-				pNext = pTrack->ValidPath( pTrack->GetPrevious(), TRUE );
+				pNext = pTrack->ValidPath( pTrack->GetPrevious(), true );
 				if( pNext )
 					pTrack = pNext;
 			} while( pNext );
@@ -1381,7 +1381,7 @@ void CFuncTrackTrain::DeadEnd( void )
 		{
 			do
 			{
-				pNext = pTrack->ValidPath( pTrack->GetNext(), TRUE );
+				pNext = pTrack->ValidPath( pTrack->GetNext(), true );
 				if( pNext )
 					pTrack = pNext;
 			} while( pNext );
@@ -1448,7 +1448,7 @@ void CFuncTrackTrain::Find( void )
 
 	Vector look = nextPos;
 	look.z -= m_height;
-	m_ppath->LookAhead( &look, m_length, 0 );
+	m_ppath->LookAhead( &look, m_length, false );
 	look.z += m_height;
 
 	pev->angles = UTIL_VecToAngles( look - nextPos );

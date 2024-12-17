@@ -46,12 +46,12 @@ public:
 	void Link( void );
 	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 
-	CPathTrack *ValidPath( CPathTrack *ppath, int testFlag );		// Returns ppath if enabled, NULL otherwise
+	CPathTrack *ValidPath( CPathTrack *ppath, bool testFlag );		// Returns ppath if enabled, NULL otherwise
 	void Project( CPathTrack *pstart, CPathTrack *pend, Vector *origin, float dist );
 
 	static CPathTrack *Instance( edict_t *pent );
 
-	CPathTrack *LookAhead( Vector *origin, float dist, int move );
+	CPathTrack *LookAhead( Vector *origin, float dist, bool move );
 	CPathTrack *Nearest( Vector origin );
 
 	CPathTrack *GetNext( void );

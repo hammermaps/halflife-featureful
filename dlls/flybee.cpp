@@ -406,7 +406,7 @@ void CFlybee::HandleAnimEvent( MonsterEvent_t *pEvent )
 				pBeam->LiveForTime( 0.35 );
 			}
 
-			CSprite *pSprite = CSprite::SpriteCreate ( "sprites/nhth1.spr", vecEnd, TRUE );
+			CSprite *pSprite = CSprite::SpriteCreate ( "sprites/nhth1.spr", vecEnd, true );
 			pSprite->AnimateAndDie( 10 );
 			pSprite->SetScale( 0.8 );
 			pSprite->SetTransparency( kRenderTransAdd, 230, 255, 230, 150, kRenderFxNone );
@@ -1191,7 +1191,7 @@ Vector CFlybee::DoProbe(const Vector &Probe)
 {
 	Vector WallNormal = Vector(0,0,-1); // WATER normal is Straight Down for fish.
 	float frac;
-	BOOL bBumpedSomething = ProbeZ(pev->origin, Probe, &frac);
+	bool bBumpedSomething = ProbeZ(pev->origin, Probe, &frac);
 
 	TraceResult tr;
 	TRACE_MONSTER_HULL(edict(), pev->origin, Probe, dont_ignore_monsters, edict(), &tr);
@@ -1202,7 +1202,7 @@ Vector CFlybee::DoProbe(const Vector &Probe)
 		if (tr.flFraction < frac)
 		{
 			frac = tr.flFraction;
-			bBumpedSomething = TRUE;
+			bBumpedSomething = true;
 			WallNormal = tr.vecPlaneNormal;
 		}
 	}
@@ -1312,7 +1312,7 @@ void CFlyBall::AnimateThink( void )
 
 	if ( delta > 0 && delta < 0.9 )
 	{
-		CSprite *pTrail = CSprite::SpriteCreate ( "sprites/xspark3.spr", pev->origin, TRUE );
+		CSprite *pTrail = CSprite::SpriteCreate ( "sprites/xspark3.spr", pev->origin, true );
 		pTrail->AnimateAndDie ( 22 );
 		pTrail->SetScale ( 0.2 );
 		pTrail->SetTransparency ( kRenderTransAdd, 230, 255, 230, 150, kRenderFxNone );

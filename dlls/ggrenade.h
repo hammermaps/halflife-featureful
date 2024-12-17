@@ -37,7 +37,7 @@ public:
 	virtual void Killed( entvars_t *pevInflictor, entvars_t *pevAttacker, int iGib );
 	virtual float ExplosionRadius() { return 0.0f; } // if 0 the default radius is used (depending on amount of damage)
 
-	BOOL m_fRegisteredSound;// whether or not this grenade has issued its DANGER sound to the world sound list yet.
+	bool m_fRegisteredSound;// whether or not this grenade has issued its DANGER sound to the world sound list yet.
 
 	static const NamedSoundScript debrisSoundScript;
 	static const NamedSoundScript bounceSoundScript;

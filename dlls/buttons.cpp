@@ -1452,7 +1452,7 @@ void CBaseButton::ButtonTouch( CBaseEntity *pOther )
 	{
 		OnLocked();
 		// play button locked sound
-		PlayLockSounds( pev, &m_ls, TRUE, TRUE );
+		PlayLockSounds( pev, &m_ls, true, true );
 		return;
 	}
 
@@ -1521,13 +1521,13 @@ bool CBaseButton::PrepareActivation(bool doActivationCheck)
 		{
 			OnLocked();
 			// button is locked, play locked sound
-			PlayLockSounds( pev, &m_ls, TRUE, TRUE );
+			PlayLockSounds( pev, &m_ls, true, true );
 			return false;
 		}
 		else
 		{
 			// button is unlocked, play unlocked sound
-			PlayLockSounds( pev, &m_ls, FALSE, TRUE );
+			PlayLockSounds( pev, &m_ls, false, true );
 		}
 	}
 	return true;

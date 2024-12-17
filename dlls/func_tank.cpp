@@ -102,7 +102,7 @@ public:
 	static	TYPEDESCRIPTION m_SaveData[];
 
 	BOOL OnControls( entvars_t *pevTest );
-	BOOL StartControl( CBasePlayer* pController );
+	bool StartControl( CBasePlayer* pController );
 	void StopControl( void );
 	void ControllerPostFrame( void );
 	virtual void StopFire( void ){}
@@ -389,16 +389,16 @@ BOOL CFuncTank::OnControls( entvars_t *pevTest )
 	return FALSE;
 }
 
-BOOL CFuncTank::StartControl( CBasePlayer *pController )
+bool CFuncTank::StartControl( CBasePlayer *pController )
 {
 	if( m_pController != NULL )
-		return FALSE;
+		return false;
 
 	// Team only or disabled?
 	if( m_iszMaster )
 	{
 		if( !UTIL_IsMasterTriggered( m_iszMaster, pController ) )
-			return FALSE;
+			return false;
 	}
 
 	ALERT( at_aiconsole, "using TANK!\n");
@@ -419,7 +419,7 @@ BOOL CFuncTank::StartControl( CBasePlayer *pController )
 
 	pev->nextthink = pev->ltime + 0.1f;
 
-	return TRUE;
+	return true;
 }
 
 void CFuncTank::StopControl()
@@ -856,7 +856,7 @@ void CFuncTank::Fire( const Vector &barrelEnd, const Vector &forward, entvars_t 
 	{
 		if( m_iszSpriteSmoke )
 		{
-			CSprite *pSprite = CSprite::SpriteCreate( STRING( m_iszSpriteSmoke ), barrelEnd, TRUE );
+			CSprite *pSprite = CSprite::SpriteCreate( STRING( m_iszSpriteSmoke ), barrelEnd, true );
 			pSprite->AnimateAndDie( RANDOM_FLOAT( 15.0f, 20.0f ) );
 			pSprite->SetTransparency( m_smokeRenderMode ? m_smokeRenderMode : kRenderTransAlpha, (int)pev->rendercolor.x, (int)pev->rendercolor.y, (int)pev->rendercolor.z, 255, kRenderFxNone );
 			pSprite->pev->velocity.z = RANDOM_FLOAT( 40.0f, 80.0f );
@@ -864,7 +864,7 @@ void CFuncTank::Fire( const Vector &barrelEnd, const Vector &forward, entvars_t 
 		}
 		if( m_iszSpriteFlash )
 		{
-			CSprite *pSprite = CSprite::SpriteCreate( STRING( m_iszSpriteFlash ), barrelEnd, TRUE );
+			CSprite *pSprite = CSprite::SpriteCreate( STRING( m_iszSpriteFlash ), barrelEnd, true );
 			pSprite->AnimateAndDie( 60 );
 			pSprite->SetTransparency( kRenderTransAdd, 255, 255, 255, 255, kRenderFxNoDissipation );
 			pSprite->SetScale( m_spriteScale );
@@ -1198,7 +1198,7 @@ void CFuncTankMortar::Fire( const Vector &barrelEnd, const Vector &forward, entv
 
 			TankTrace( barrelEnd, forward, gTankSpread[m_spread], tr );
 
-			ExplosionCreate( tr.vecEndPos, pev->angles, edict(), pev->impulse, TRUE, pevAttacker );
+			ExplosionCreate( tr.vecEndPos, pev->angles, edict(), pev->impulse, true, pevAttacker );
 
 			RemoveBullet();
 			CFuncTank::Fire( barrelEnd, forward, pev );

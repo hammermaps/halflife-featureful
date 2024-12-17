@@ -325,7 +325,7 @@ public:
 	void EXPORT HurtTouch( CBaseEntity *pOther );
 	void EXPORT RotatingUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 	void EXPORT Rotate( void );
-	void RampPitchVol(int fUp );
+	void RampPitchVol(bool fUp );
 	void Blocked( CBaseEntity *pOther );
 	virtual int ObjectCaps( void ) { return CBaseEntity :: ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
 	virtual int Save( CSave &save );
@@ -560,7 +560,7 @@ void CFuncRotating::HurtTouch( CBaseEntity *pOther )
 #define FANPITCHMIN		30
 #define FANPITCHMAX		100
 
-void CFuncRotating::RampPitchVol( int fUp )
+void CFuncRotating::RampPitchVol( bool fUp )
 {
 	Vector vecAVel = pev->avelocity;
 	float vecCur;
@@ -622,7 +622,7 @@ void CFuncRotating::SpinUp( void )
 	} 
 	else
 	{
-		RampPitchVol( TRUE );
+		RampPitchVol( true );
 	}
 }
 
@@ -663,7 +663,7 @@ void CFuncRotating::SpinDown( void )
 	} 
 	else
 	{
-		RampPitchVol( FALSE );
+		RampPitchVol( false );
 	}
 }
 

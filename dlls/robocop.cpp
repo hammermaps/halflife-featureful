@@ -430,12 +430,12 @@ void CRoboCop::FistAttack( void )
 
 void CRoboCop::CreateLaser( void )
 {
-	m_pLaserPointer = CSprite::SpriteCreate( ROBOCOP_EYE_SPRITE_NAME, pev->origin, FALSE );
+	m_pLaserPointer = CSprite::SpriteCreate( ROBOCOP_EYE_SPRITE_NAME, pev->origin, false );
 	m_pLaserPointer->SetTransparency( kRenderTransAdd, 255, 255, 255, 0, kRenderFxNone );
 	m_pLaserPointer->SetAttachment( edict(), 1 );
 	m_pLaserPointer->SetScale( 0.5f );
 
-	m_pBeamSpot = CSprite::SpriteCreate( ROBOCOP_EYE_SPRITE_NAME, pev->origin, FALSE );
+	m_pBeamSpot = CSprite::SpriteCreate( ROBOCOP_EYE_SPRITE_NAME, pev->origin, false );
 	m_pBeamSpot->pev->origin = pev->origin;
 	m_pBeamSpot->SetTransparency( kRenderTransAdd, 255, 255, 255, 0, kRenderFxNone );
 	m_pBeamSpot->SetScale( 0.3f );
@@ -787,7 +787,7 @@ void CRoboCop::StartTask( Task_t *pTask )
 
 	case TASK_ROBOCOP_MORTAR_SPAWN:
 		{
-			ExplosionCreate(m_vecAimPos, g_vecZero, edict(), gSkillData.robocopDmgMortar, TRUE, pev);
+			ExplosionCreate(m_vecAimPos, g_vecZero, edict(), gSkillData.robocopDmgMortar, true, pev);
 			UTIL_ScreenShake( tr.vecEndPos, 25.0f, 150.0f, 1.0f, 750 );
 			m_flWaitFinished = gpGlobals->time + pTask->flData; 
 		}

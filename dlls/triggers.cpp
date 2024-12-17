@@ -4441,7 +4441,7 @@ public:
 	static TYPEDESCRIPTION m_SaveData[];
 
 	float GetRandomDelay();
-	void SetActive(BOOL active, CBaseEntity* pActivator = NULL);
+	void SetActive(bool active, CBaseEntity* pActivator = NULL);
 
 	bool HasPredeterminedDelays() const {
 		return FBitSet(pev->spawnflags, SF_TRIGGER_TIMER_PREDETERMINED_TIMED);
@@ -4573,7 +4573,7 @@ float CTriggerTimer::GetRandomDelay()
 	return RANDOM_FLOAT(minDelay, maxDelay);
 }
 
-void CTriggerTimer::SetActive(BOOL active, CBaseEntity* pActivator)
+void CTriggerTimer::SetActive(bool active, CBaseEntity* pActivator)
 {
 	if (m_active == active)
 		return;

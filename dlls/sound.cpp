@@ -352,7 +352,7 @@ void CAmbientGeneric::RampThink( void )
 	int pitch = m_dpv.pitch; 
 	int vol = m_dpv.vol;
 	int flags = 0;
-	int fChanged = 0;		// FALSE if pitch and vol remain unchanged this round
+	bool fChanged = false;		// false if pitch and vol remain unchanged this round
 	int prev;
 
 	if( !m_dpv.spinup && !m_dpv.spindown && !m_dpv.fadein && !m_dpv.fadeout && !m_dpv.lfotype )
@@ -692,7 +692,7 @@ void CAmbientGeneric::ToggleUse( CBaseEntity *pActivator, CBaseEntity *pCaller, 
 	}
 
 	// Toggle
-	// m_fActive is TRUE only if a looping sound is playing.
+	// m_fActive is true only if a looping sound is playing.
 	if( m_fActive )
 	{
 		// turn sound off
@@ -1054,10 +1054,10 @@ void CEnvSound::KeyValue( KeyValueData *pkvd )
 	}
 }
 
-// returns TRUE if the given sound entity (pev) is in range 
+// returns true if the given sound entity (pev) is in range
 // and can see the given player entity (pevTarget)
 
-BOOL FEnvSoundInRange( entvars_t *pev, entvars_t *pevTarget, float *pflRange )
+bool FEnvSoundInRange( entvars_t *pev, entvars_t *pevTarget, float *pflRange )
 {
 	CEnvSound *pSound = GetClassPtr( (CEnvSound *)pev );
 	Vector vecSpot1 = pev->origin + pev->view_ofs;
@@ -1070,19 +1070,19 @@ BOOL FEnvSoundInRange( entvars_t *pev, entvars_t *pevTarget, float *pflRange )
 
 	// check if line of sight crosses water boundary, or is blocked
 	if( ( tr.fInOpen && tr.fInWater ) || tr.flFraction != 1 )
-		return FALSE;
+		return false;
 
 	// calc range from sound entity to player
 	vecRange = tr.vecEndPos - vecSpot1;
 	flRange = vecRange.Length();
 
 	if( pSound->m_flRadius < flRange )		
-		return FALSE;
+		return false;
 
 	if( pflRange )
 		*pflRange = flRange;
 
-	return TRUE;
+	return true;
 }
 
 //
@@ -1277,7 +1277,7 @@ typedef struct sentenceg
 // globals
 
 SENTENCEG rgsentenceg[CSENTENCEG_MAX];
-int fSentencesInit = FALSE;
+bool fSentencesInit = false;
 
 char gszallsentencenames[CVOXFILESENTENCEMAX][CBSENTENCENAME_MAX];
 int gcallsentences = 0;
@@ -1315,7 +1315,7 @@ void USENTENCEG_InitLRU( unsigned char *plru, int count )
 // ipick 'next' is returned.  
 // return of -1 indicates an error.
 
-int USENTENCEG_PickSequential( int isentenceg, char *szfound, int ipick, int freset )
+int USENTENCEG_PickSequential( int isentenceg, char *szfound, int ipick, bool freset )
 {
 	const char *szgroupname;
 	unsigned char count;
@@ -1364,7 +1364,7 @@ int USENTENCEG_Pick( int isentenceg, char *szfound )
 	unsigned char i;
 	unsigned char count;
 	unsigned char ipick;
-	int ffound = FALSE;
+	bool ffound = false;
 
 	if( !fSentencesInit )
 		return -1;
@@ -1383,7 +1383,7 @@ int USENTENCEG_Pick( int isentenceg, char *szfound )
 			{
 				ipick = plru[i];
 				plru[i] = 0xFF;
-				ffound = TRUE;
+				ffound = true;
 				break;
 			}
 
@@ -1490,7 +1490,7 @@ int SENTENCEG_PlayRndSzSub( edict_t *entity, const char *szgroupname, float volu
 
 // play sentences in sequential order from sentence group.  Reset after last sentence.
 
-int SENTENCEG_PlaySequentialSz( edict_t *entity, const char *szgroupname, float volume, float attenuation, int flags, int pitch, int ipick, int freset )
+int SENTENCEG_PlaySequentialSz( edict_t *entity, const char *szgroupname, float volume, float attenuation, int flags, int pitch, int ipick, bool freset )
 {
 	char name[64];
 	int ipicknext;
@@ -1650,7 +1650,7 @@ void SENTENCEG_Init()
 		ALERT( at_warning, "NOTE: this mod might not work properly under GoldSource (pre-anniversary update) engine: more than %d sentences\n", CVOXFILESENTENCEMAX_GOLDSOURCE_LEGACY );
 	}
 
-	fSentencesInit = TRUE;
+	fSentencesInit = true;
 
 	// init lru lists
 
@@ -2029,9 +2029,9 @@ void CSpeaker::SpeakerThink( void )
 //
 void CSpeaker::ToggleUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 {
-	int fActive = ( pev->nextthink > 0.0f );
+	bool fActive = ( pev->nextthink > 0.0f );
 
-	// fActive is TRUE only if an announcement is pending
+	// fActive is true only if an announcement is pending
 
 	if( useType != USE_TOGGLE )
 	{

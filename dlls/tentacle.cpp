@@ -94,8 +94,8 @@ public:
 	float m_flTapRadius;
 
 	float m_flNextSong;
-	static int g_fFlySound;
-	static int g_fSquirmSound;
+	static bool g_fFlySound;
+	static bool g_fSquirmSound;
 
 	float m_flMaxYaw;
 	int m_iTapSound;
@@ -118,8 +118,8 @@ public:
 	static const NamedSoundScript painSoundScript;
 };
 
-int CTentacle::g_fFlySound;
-int CTentacle::g_fSquirmSound;
+bool CTentacle::g_fFlySound;
+bool CTentacle::g_fSquirmSound;
 
 LINK_ENTITY_TO_CLASS( monster_tentacle, CTentacle )
 
@@ -328,8 +328,8 @@ void CTentacle::Spawn()
 	m_flInitialYaw = pev->angles.y;
 	pev->ideal_yaw = m_flInitialYaw;
 
-	g_fFlySound = FALSE;
-	g_fSquirmSound = FALSE;
+	g_fFlySound = false;
+	g_fSquirmSound = false;
 
 	m_iHitDmg = 20;
 
@@ -939,13 +939,13 @@ void CTentacle::Start( void )
 	if( !g_fFlySound )
 	{
 		EmitSoundScript(fliesSoundScript);
-		g_fFlySound = TRUE;
+		g_fFlySound = true;
 		//pev->nextthink = gpGlobals-> time + 0.1;
 	}
 	else if( !g_fSquirmSound )
 	{
 		EmitSoundScript(squirmSoundScript);
-		g_fSquirmSound = TRUE;
+		g_fSquirmSound = true;
 	}
 	
 	pev->nextthink = gpGlobals->time + 0.1f;

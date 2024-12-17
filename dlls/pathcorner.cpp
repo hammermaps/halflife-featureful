@@ -228,7 +228,7 @@ void CPathTrack::Activate( void )
 		Link();
 }
 
-CPathTrack *CPathTrack::ValidPath( CPathTrack *ppath, int testFlag )
+CPathTrack *CPathTrack::ValidPath(CPathTrack *ppath, bool testFlag )
 {
 	if( !ppath )
 		return NULL;
@@ -273,7 +273,7 @@ void CPathTrack::SetPrevious( CPathTrack *pprev )
 }
 
 // Assumes this is ALWAYS enabled
-CPathTrack *CPathTrack::LookAhead( Vector *origin, float dist, int move )
+CPathTrack *CPathTrack::LookAhead(Vector *origin, float dist, bool move )
 {
 	CPathTrack *pcurrent;
 	float originalDist = dist;

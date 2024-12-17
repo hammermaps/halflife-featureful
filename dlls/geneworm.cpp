@@ -454,7 +454,7 @@ public:
 
 	void IdleSound(void);
 
-	BOOL ClawAttack();
+	bool ClawAttack();
 
 	Vector m_posTarget;
 
@@ -954,7 +954,7 @@ void CGeneWorm::TrackHead()
 	SetBoneController(0, diff);
 }
 
-BOOL CGeneWorm::ClawAttack()
+bool CGeneWorm::ClawAttack()
 {
 	Vector targetAngle;
 
@@ -977,7 +977,7 @@ BOOL CGeneWorm::ClawAttack()
 
 			m_flNextRangeTime = gpGlobals->time + RANDOM_FLOAT(10,15);
 
-			return TRUE;
+			return true;
 		}
 
 		if(m_flNextMeleeTime <= gpGlobals->time)
@@ -1004,12 +1004,12 @@ BOOL CGeneWorm::ClawAttack()
 				}
 
 				m_flNextMeleeTime = gpGlobals->time + RANDOM_FLOAT(3,5);
-				return TRUE;
+				return true;
 			}
 		}
 	}
 
-	return FALSE;
+	return false;
 }
 
 void CGeneWorm::TraceAttack(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType)
@@ -1175,7 +1175,7 @@ void CGeneWorm::HuntThink(void)
 				{
 					Vector pos, angle;
 					GetAttachment(GENEWORM_ATTACHMENT_SPAWN, pos, angle);
-					m_pBall = CSprite::SpriteCreate( "sprites/boss_glow.spr", pos, TRUE );
+					m_pBall = CSprite::SpriteCreate( "sprites/boss_glow.spr", pos, true );
 					if( m_pBall )
 					{
 						m_pBall->SetTransparency( kRenderTransAdd, 255, 255, 255, 255, kRenderFxNoDissipation );

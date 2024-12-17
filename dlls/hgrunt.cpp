@@ -240,13 +240,13 @@ void CHGrunt::GibMonster( void )
 {
 	if( GetBodygroup( GUN_GROUP ) != GUN_NONE )
 	{
-		DropMyItems(TRUE);
+		DropMyItems(true);
 	}
 
 	CBaseMonster::GibMonster();
 }
 
-CBaseEntity *CHGrunt::DropMyItem(const char* entityName, const Vector& vecGunPos, const Vector& vecGunAngles, BOOL isGibbed)
+CBaseEntity *CHGrunt::DropMyItem(const char* entityName, const Vector& vecGunPos, const Vector& vecGunAngles, bool isGibbed)
 {
 	CBaseEntity* pGun = DropItem(entityName, vecGunPos, vecGunAngles);
 	if (pGun && isGibbed) {
@@ -256,7 +256,7 @@ CBaseEntity *CHGrunt::DropMyItem(const char* entityName, const Vector& vecGunPos
 	return pGun;
 }
 
-void CHGrunt::DropMyItems(BOOL isGibbed)
+void CHGrunt::DropMyItems(bool isGibbed)
 {
 	if (g_pGameRules->FMonsterCanDropWeapons(this) && !FBitSet(pev->spawnflags, SF_MONSTER_DONT_DROP_GUN))
 	{
@@ -306,18 +306,18 @@ int CHGrunt::DefaultISoundMask( void )
 //=========================================================
 // someone else is talking - don't speak
 //=========================================================
-BOOL CHGrunt::FOkToSpeak( void )
+bool CHGrunt::FOkToSpeak( void )
 {
 	// if someone else is talking, don't speak
 	if( CTalkMonster::SomeoneIsTalking() )
-		return FALSE;
+		return false;
 
 	if( pev->spawnflags & SF_MONSTER_GAG )
 	{
 		if( m_MonsterState != MONSTERSTATE_COMBAT )
 		{
 			// no talking outside of combat if gagged.
-			return FALSE;
+			return false;
 		}
 	}
 
@@ -325,7 +325,7 @@ BOOL CHGrunt::FOkToSpeak( void )
 	//if( FNullEnt( FIND_CLIENT_IN_PVS( edict() ) ) )
 	//		return FALSE;
 
-	return TRUE;
+	return true;
 }
 
 //=========================================================
@@ -888,7 +888,7 @@ void CHGrunt::HandleAnimEvent( MonsterEvent_t *pEvent )
 		case HGRUNT_AE_DROP_GUN:
 		{
 			if( GetBodygroup( GUN_GROUP ) != GUN_NONE )
-				DropMyItems(FALSE);
+				DropMyItems(false);
 		}
 			break;
 		case HGRUNT_AE_RELOAD:

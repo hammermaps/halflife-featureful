@@ -48,8 +48,8 @@ public:
 	int		m_iNext;		// index of next sound in this list ( Active or Free )
 	int		m_iNextAudible;	// temporary link that monsters use to build a list of audible sounds
 
-	BOOL	FIsSound( void );
-	BOOL	FIsScent( void );
+	bool FIsSound( void );
+	bool FIsScent( void );
 };
 
 //=========================================================

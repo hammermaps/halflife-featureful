@@ -1697,7 +1697,7 @@ void UTIL_PrecacheOther( const char *szClassname, EntityOverrides entityOverride
 	REMOVE_ENTITY( pent );
 }
 
-bool UTIL_PrecacheMonster(const char *szClassname, BOOL reverseRelationship, Vector* vecMin, Vector* vecMax, EntityOverrides entityOverrides)
+bool UTIL_PrecacheMonster(const char *szClassname, bool reverseRelationship, Vector* vecMin, Vector* vecMax, EntityOverrides entityOverrides)
 {
 	edict_t	*pent = CREATE_NAMED_ENTITY( MAKE_STRING( szClassname ) );
 	if( FNullEnt( pent ) )

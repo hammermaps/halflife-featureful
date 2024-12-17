@@ -83,7 +83,7 @@ public:
 	void SpreadFlock2( void );
 	void Killed( entvars_t *pevInflictor, entvars_t *pevAttacker, int iGib );
 	void Poop ( void );
-	BOOL FPathBlocked( void );
+	bool FPathBlocked( void );
 	//void KeyValue( KeyValueData *pkvd );
 
 	virtual int Save( CSave &save );
@@ -545,24 +545,24 @@ void CFlockingFlyer::SpreadFlock2()
 //=========================================================
 // FBoidPathBlocked - returns TRUE if there is an obstacle ahead
 //=========================================================
-BOOL CFlockingFlyer::FPathBlocked()
+bool CFlockingFlyer::FPathBlocked()
 {
 	TraceResult tr;
 	Vector vecDist;// used for general measurements
 	Vector vecDir;// used for general measurements
-	BOOL fBlocked;
+	bool fBlocked;
 
 	if( m_flFakeBlockedTime > gpGlobals->time )
 	{
 		m_flLastBlockedTime = gpGlobals->time;
-		return TRUE;
+		return true;
 	}
 
 	// use VELOCITY, not angles, not all boids point the direction they are flying
 	//vecDir = UTIL_VecToAngles( pevBoid->velocity );
 	UTIL_MakeVectors ( pev->angles );
 
-	fBlocked = FALSE;// assume the way ahead is clear
+	fBlocked = false;// assume the way ahead is clear
 
 	const float checkDist = CheckDist();
 
@@ -571,7 +571,7 @@ BOOL CFlockingFlyer::FPathBlocked()
 	if( tr.flFraction != 1.0f )
 	{
 		m_flLastBlockedTime = gpGlobals->time;
-		fBlocked = TRUE;
+		fBlocked = true;
 	}
 
 	// extra wide checks
@@ -579,14 +579,14 @@ BOOL CFlockingFlyer::FPathBlocked()
 	if( tr.flFraction != 1.0f )
 	{
 		m_flLastBlockedTime = gpGlobals->time;
-		fBlocked = TRUE;
+		fBlocked = true;
 	}
 
 	UTIL_TraceLine( pev->origin - gpGlobals->v_right * 12.0f, pev->origin - gpGlobals->v_right * 12.0f + gpGlobals->v_forward * checkDist, ignore_monsters, ENT( pev ), &tr );
 	if( tr.flFraction != 1.0f )
 	{
 		m_flLastBlockedTime = gpGlobals->time;
-		fBlocked = TRUE;
+		fBlocked = true;
 	}
 
 	if( !fBlocked && gpGlobals->time - m_flLastBlockedTime > 6.0f )

@@ -27,7 +27,7 @@
 #include "nodes.h"
 #include "doors.h"
 
-extern BOOL FEntIsVisible( entvars_t *pev, entvars_t *pevTarget );
+extern bool FEntIsVisible( entvars_t *pev, entvars_t *pevTarget );
 
 extern DLL_GLOBAL int g_iSkillLevel;
 
@@ -585,7 +585,7 @@ FEntIsVisible
 returns TRUE if the passed entity is visible to caller, even if not infront ()
 =============
 */
-BOOL FEntIsVisible( entvars_t *pev, entvars_t *pevTarget)
+bool FEntIsVisible( entvars_t *pev, entvars_t *pevTarget)
 {
 	Vector vecSpot1 = pev->origin + pev->view_ofs;
 	Vector vecSpot2 = pevTarget->origin + pevTarget->view_ofs;
@@ -594,10 +594,10 @@ BOOL FEntIsVisible( entvars_t *pev, entvars_t *pevTarget)
 	UTIL_TraceLine( vecSpot1, vecSpot2, ignore_monsters, ENT( pev ), &tr );
 
 	if( tr.fInOpen && tr.fInWater )
-		return FALSE;                   // sight line crossed contents
+		return false;                   // sight line crossed contents
 
 	if( tr.flFraction == 1 )
-		return TRUE;
+		return true;
 
-	return FALSE;
+	return false;
 }

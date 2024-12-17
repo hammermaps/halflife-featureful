@@ -110,7 +110,7 @@ public:
 			return 1200; // Need more room for cover because scientists want to get far away!
 		return CTalkMonster::CoverRadius(); // Don't run too far when following the player
 	}
-	BOOL DisregardEnemy( CBaseEntity *pEnemy ) { return !pEnemy->IsAlive() || ( gpGlobals->time - m_fearTime ) > 15; }
+	bool DisregardEnemy( CBaseEntity *pEnemy ) { return !pEnemy->IsAlive() || ( gpGlobals->time - m_fearTime ) > 15; }
 	bool CanTolerateWhileFollowing( CBaseEntity* pEnemy );
 
 	virtual bool AbleToHeal() { return true; }

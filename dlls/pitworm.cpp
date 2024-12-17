@@ -70,7 +70,7 @@ public:
 	void EXPORT HitTouch(CBaseEntity* pOther);
 
 	void LockTopLevel();
-	BOOL ClawAttack();
+	bool ClawAttack();
 	void ShootBeam();
 	void StrafeBeam();
 	void ChangeLevel();
@@ -990,14 +990,14 @@ void CPitWorm::LockTopLevel()
 	}
 }
 
-BOOL CPitWorm::ClawAttack()
+bool CPitWorm::ClawAttack()
 {
 	if (m_hEnemy == 0)
-		return FALSE;
+		return false;
 	if (pev->origin.z != m_posDesired.z)
-		return FALSE;
+		return false;
 	if ( m_flNextMeleeTime > gpGlobals->time )
-		return FALSE;
+		return false;
 
 	float flDist = (pev->origin - m_hEnemy->pev->origin).Length2D();
 	Vector targetAngle = UTIL_VecToAngles((m_posTarget - pev->origin).Normalize());
@@ -1010,14 +1010,14 @@ BOOL CPitWorm::ClawAttack()
 			return 0;
 		}
 
-		BOOL shouldClaw = FALSE;
+		bool shouldClaw = false;
 		if (m_iLevel == 2)
 		{
 			if (angleDiff >= 30)
 			{
 				pev->sequence = LookupSequence("doorclaw1");
 				m_flIdealHeadYaw = 0;
-				shouldClaw = TRUE;
+				shouldClaw = true;
 			}
 		}
 		else if (m_iLevel == 1)
@@ -1026,13 +1026,13 @@ BOOL CPitWorm::ClawAttack()
 			{
 				pev->sequence = LookupSequence("doorclaw2");
 				m_flIdealHeadYaw = 0;
-				shouldClaw = TRUE;
+				shouldClaw = true;
 			}
 			if ( angleDiff >= 30.0 )
 			{
 				pev->sequence = LookupSequence("doorclaw3");
 				m_flIdealHeadYaw = 0;
-				shouldClaw = TRUE;
+				shouldClaw = true;
 			}
 		}
 
@@ -1042,13 +1042,13 @@ BOOL CPitWorm::ClawAttack()
 			m_fLockHeight = TRUE;
 			m_fLockYaw = TRUE;
 			m_fAttacking = TRUE;
-			return TRUE;
+			return true;
 		}
 
-		return FALSE;
+		return false;
 	}
 
-	m_fLockYaw = FALSE;
+	m_fLockYaw = false;
 	if (m_iLevel == 2)
 	{
 		if (angleDiff < 30)
@@ -1126,7 +1126,7 @@ BOOL CPitWorm::ClawAttack()
 	}
 	m_fAttacking = TRUE;
 	m_fLockHeight = TRUE;
-	return TRUE;
+	return true;
 }
 
 void CPitWorm::ShootBeam()
@@ -1180,7 +1180,7 @@ void CPitWorm::ShootBeam()
 
 			EyeLight(vecEyePos);
 
-			m_pSprite = CSprite::SpriteCreate("sprites/tele1.spr", vecEyePos, TRUE);
+			m_pSprite = CSprite::SpriteCreate("sprites/tele1.spr", vecEyePos, true);
 			if ( m_pSprite )
 			{
 				m_pSprite->SetTransparency(kRenderGlow, 0, 255, 0, 255, kRenderFxNoDissipation);

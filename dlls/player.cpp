@@ -1629,7 +1629,7 @@ void CBasePlayer::PlayerDeathThink( void )
 	pev->effects |= EF_NOINTERP;
 	pev->framerate = 0.0;
 
-	BOOL fAnyButtonDown = ( pev->button & ~IN_SCORE );
+	bool fAnyButtonDown = ( pev->button & ~IN_SCORE );
 
 	// wait for all buttons released
 	if( pev->deadflag == DEAD_DEAD )
@@ -3628,23 +3628,23 @@ pt_end:
 #define SF_SPAWNPOINT_OFF 2
 
 // checks if the spot is clear of players
-BOOL IsSpawnPointValid( CBaseEntity *pPlayer, CBaseEntity *pSpot )
+bool IsSpawnPointValid( CBaseEntity *pPlayer, CBaseEntity *pSpot )
 {
 	CBaseEntity *ent = NULL;
 
 	if( FBitSet(pSpot->pev->spawnflags, SF_SPAWNPOINT_OFF) || !pSpot->IsTriggered( pPlayer ) )
 	{
-		return FALSE;
+		return false;
 	}
 
 	while( ( ent = UTIL_FindEntityInSphere( ent, pSpot->pev->origin, 128 ) ) != NULL )
 	{
 		// if ent is a client, don't spawn on 'em
 		if( ent->IsPlayer() && ent != pPlayer )
-			return FALSE;
+			return false;
 	}
 
-	return TRUE;
+	return true;
 }
 
 DLL_GLOBAL CBaseEntity	*g_pLastSpawn;

@@ -359,7 +359,7 @@ public:
 	void Spawn( void );
 	void Touch( CBaseEntity *pOther );
 	void KeyValue( KeyValueData *pkvd );
-	BOOL IsEmpty( void );
+	bool IsEmpty( void );
 	void SetObjectCollisionBox( void );
 
 	int ObjectCaps();
@@ -371,9 +371,9 @@ public:
 	int		Restore( CRestore &restore );
 	static	TYPEDESCRIPTION m_SaveData[];
 
-	BOOL HasWeapon( CBasePlayerWeapon *pCheckItem );
-	BOOL PackWeapon( CBasePlayerWeapon *pWeapon );
-	BOOL PackAmmo( string_t iszName, int iCount );
+	bool HasWeapon( CBasePlayerWeapon *pCheckItem );
+	bool PackWeapon( CBasePlayerWeapon *pWeapon );
+	bool PackAmmo( string_t iszName, int iCount );
 
 	void SetWeaponModel( CBasePlayerWeapon* pItem );
 
@@ -405,7 +405,7 @@ public:
 
 	void PrimaryAttack( void );
 	void SecondaryAttack( void );
-	void GlockFire( float flSpread, float flCycleTime, BOOL fUseAutoAim );
+	void GlockFire( float flSpread, float flCycleTime, bool fUseAutoAim );
 	BOOL Deploy( void );
 	void Reload( void );
 	void WeaponIdle( void );
@@ -749,7 +749,7 @@ public:
 
 	void Fire( const Vector &vecOrigSrc, const Vector &vecDir );
 
-	BOOL HasAmmo( void );
+	bool HasAmmo( void );
 
 	void UseAmmo( int count );
 
@@ -783,7 +783,7 @@ private:
 #endif
 	EGON_FIREMODE		m_fireMode;
 	float				m_shakeTime;
-	BOOL				m_deployed;
+	bool				m_deployed;
 
 	unsigned short m_usEgonFire;
 };
@@ -1306,7 +1306,7 @@ public:
 
 	const char* MyWModel() { return "models/w_displacer.mdl"; }
 
-	BOOL CanFireDisplacer( int count ) const;
+	bool CanFireDisplacer( int count ) const;
 
 	enum DISPLACER_FIREMODE { FIREMODE_FORWARD = 1, FIREMODE_BACKWARD };
 

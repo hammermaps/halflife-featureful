@@ -66,7 +66,7 @@ public:
 	void ShowDamage( void );
 	void Flight( void );
 	void FireRocket( void );
-	BOOL FireGun( void );
+	bool FireGun( void );
 
 	int  TakeDamage( entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType );
 	void TraceAttack( entvars_t *pevInflictor,  entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType );
@@ -871,7 +871,7 @@ void CApache::FireRocket( void )
 	}
 }
 
-BOOL CApache::FireGun()
+bool CApache::FireGun()
 {
 	UTIL_MakeAimVectors( pev->angles );
 
@@ -939,7 +939,7 @@ BOOL CApache::FireGun()
 			m_pBeam->SetStartPos( tr.vecEndPos );
 		}
 #endif
-		return TRUE;
+		return true;
 	}
 	else
 	{
@@ -949,7 +949,7 @@ BOOL CApache::FireGun()
 			m_pBeam = NULL;
 		}
 	}
-	return FALSE;
+	return false;
 }
 
 void CApache::ShowDamage( void )

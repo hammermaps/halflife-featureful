@@ -515,7 +515,7 @@ typedef struct locksounds			// sounds that doors and buttons make when locked/un
 	BYTE	bEOFUnlocked;			// true if hit end of list of unlocked sentences
 } locksound_t;
 
-void PlayLockSounds( entvars_t *pev, locksound_t *pls, int flocked, int fbutton );
+void PlayLockSounds( entvars_t *pev, locksound_t *pls, bool flocked, bool fbutton );
 
 //
 // generic Delay entity.

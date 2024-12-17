@@ -399,11 +399,11 @@ public:
 	void EXPORT StrikeUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 	void EXPORT ToggleUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 	
-	inline BOOL ServerSide( void )
+	inline bool ServerSide( void )
 	{
 		if( m_life == 0 && !( pev->spawnflags & SF_BEAM_RING ) )
-			return TRUE;
-		return FALSE;
+			return true;
+		return false;
 	}
 
 	virtual int Save( CSave &save );
@@ -1023,7 +1023,7 @@ CSprite* CLaser::CreateTerminalSprite(string_t spriteName)
 	CSprite* pSprite = nullptr;
 	if(spriteName)
 	{
-		pSprite = CSprite::SpriteCreate( STRING(spriteName), pev->origin, TRUE );
+		pSprite = CSprite::SpriteCreate( STRING(spriteName), pev->origin, true );
 		if (pSprite)
 		{
 			pSprite->SetTransparency( kRenderGlow, (int)pev->rendercolor.x, (int)pev->rendercolor.y, (int)pev->rendercolor.z, (int)pev->renderamt, (int)pev->renderfx );
@@ -3425,7 +3425,7 @@ void CEnvXenMaker::Precache()
 	m_beamTexture = PRECACHE_MODEL(XENMAKER_BEAM);
 	if (!FBitSet(pev->spawnflags, SF_XENMAKER_NOSPAWN) && !FStringNull(m_iszMonsterClassname))
 	{
-		UTIL_PrecacheMonster(STRING(m_iszMonsterClassname), FALSE, &m_defaultMinHullSize, &m_defaultMaxHullSize);
+		UTIL_PrecacheMonster(STRING(m_iszMonsterClassname), false, &m_defaultMinHullSize, &m_defaultMaxHullSize);
 	}
 	if (g_modFeatures.alien_teleport_sound)
 	{

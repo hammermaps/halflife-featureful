@@ -373,7 +373,7 @@ void CDisplacer::ClearBeams( void )
 #endif
 }
 
-BOOL CDisplacer::CanFireDisplacer( int count ) const
+bool CDisplacer::CanFireDisplacer( int count ) const
 {
 	return m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] >= count;
 }
