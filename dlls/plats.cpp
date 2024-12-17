@@ -59,7 +59,7 @@ public:
 	void Precache( void );
 
 	// This is done to fix spawn flag collisions between this class and a derived class
-	virtual BOOL IsTogglePlat( void ) { return ( pev->spawnflags & SF_PLAT_TOGGLE ) ? TRUE : FALSE; }
+	virtual bool IsTogglePlat( void ) { return ( pev->spawnflags & SF_PLAT_TOGGLE ) != 0; }
 
 	virtual int Save( CSave &save );
 	virtual int Restore( CRestore &restore );
@@ -1726,7 +1726,7 @@ public:
 	virtual void HitTop( void );
 	void Touch( CBaseEntity *pOther );
 	virtual void UpdateAutoTargets( int toggleState );
-	virtual	BOOL IsTogglePlat( void ) { return TRUE; }
+	virtual	bool IsTogglePlat( void ) override { return true; }
 
 	void DisableUse( void ) { m_use = 0; }
 	void EnableUse( void ) { m_use = 1; }
