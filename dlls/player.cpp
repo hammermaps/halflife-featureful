@@ -60,7 +60,7 @@ extern DLL_GLOBAL int g_iSkillLevel, gDisplayTitle;
 BOOL gInitHUD = TRUE;
 
 extern void CopyToBodyQue( entvars_t *pev);
-extern void respawn( entvars_t *pev, BOOL fCopyCorpse );
+extern void respawn( entvars_t *pev, bool fCopyCorpse );
 extern edict_t *EntSelectSpawnPoint( CBaseEntity *pPlayer );
 
 #define TRAIN_ACTIVE		0x80

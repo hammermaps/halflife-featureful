@@ -4096,7 +4096,7 @@ public:
 	int ObjectCaps( void ) { return CBaseEntity::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
 };
 
-extern void respawn( entvars_t *pev, BOOL fCopyCorpse );
+extern void respawn( entvars_t *pev, bool fCopyCorpse );
 
 void CTriggerRespawn::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
 {

@@ -140,7 +140,7 @@ void ClientDisconnect( edict_t *pEntity )
 }
 
 // called by ClientKill and DeadThink
-void respawn( entvars_t *pev, BOOL fCopyCorpse )
+void respawn( entvars_t *pev, bool fCopyCorpse )
 {
 	if( gpGlobals->coop || gpGlobals->deathmatch )
 	{
