@@ -861,7 +861,7 @@ void CBasePlayerWeapon::SendWeaponAnim(int iAnim, int body )
 	MESSAGE_END();
 }
 
-BOOL CBasePlayerWeapon::AddPrimaryAmmo( int iCount )
+bool CBasePlayerWeapon::AddPrimaryAmmo( int iCount )
 {
 	int iIdAmmo;
 	int maxClip = iMaxClip();
@@ -897,10 +897,10 @@ BOOL CBasePlayerWeapon::AddPrimaryAmmo( int iCount )
 		}
 	}
 
-	return iIdAmmo > 0 ? TRUE : FALSE;
+	return iIdAmmo > 0;
 }
 
-BOOL CBasePlayerWeapon::AddSecondaryAmmo(int iCount)
+bool CBasePlayerWeapon::AddSecondaryAmmo(int iCount)
 {
 	int iIdAmmo = m_pPlayer->GiveAmmo( iCount, pszAmmo2() );
 
@@ -911,7 +911,7 @@ BOOL CBasePlayerWeapon::AddSecondaryAmmo(int iCount)
 		m_iSecondaryAmmoType = iIdAmmo;
 		EmitSoundScript(Items::ammoPickupSoundScript);
 	}
-	return iIdAmmo > 0 ? TRUE : FALSE;
+	return iIdAmmo > 0;
 }
 
 //=========================================================
