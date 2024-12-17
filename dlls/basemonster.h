@@ -352,7 +352,7 @@ public:
 
 	void RadiusDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int iClassIgnore, int bitsDamageType );
 	void RadiusDamage( Vector vecSrc, entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int iClassIgnore, int bitsDamageType );
-	virtual int IsMoving( void ) { return m_movementGoal != MOVEGOAL_NONE; }
+	virtual bool IsMoving( void ) override { return m_movementGoal != MOVEGOAL_NONE; }
 
 	void RouteClear( void );
 	void RouteNew( void );

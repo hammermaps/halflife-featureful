@@ -224,7 +224,7 @@ public:
 	virtual bool RemovePlayerItem( CBasePlayerWeapon *pItem ) { return false; }
 	virtual int GiveAmmo( int iAmount, const char *szName ) { return -1; }
 	virtual float GetDelay( void ) { return 0; }
-	virtual int IsMoving( void ) { return pev->velocity != g_vecZero; }
+	virtual bool IsMoving( void ) { return pev->velocity != g_vecZero; }
 	virtual void OverrideReset( void ) {}
 	virtual int DamageDecal( int bitsDamageType );
 	// This is ONLY used by the node graph to test movement through a door
@@ -232,8 +232,8 @@ public:
 	virtual BOOL OnControls( entvars_t *pev ) { return FALSE; }
 	virtual BOOL IsAlive( void ) { return IsFullyAlive(); }
 	virtual bool IsFullyAlive() { return (pev->deadflag == DEAD_NO) && pev->health > 0; } // IsAlive returns true for DEAD_DYING monsters. Use this when checking if monster is not dead and not dying
-	virtual BOOL IsBSPModel( void ) { return pev->solid == SOLID_BSP || pev->movetype == MOVETYPE_PUSHSTEP; }
-	virtual BOOL ReflectGauss( void ) { return ( IsBSPModel() && !pev->takedamage ); }
+	virtual bool IsBSPModel( void ) { return pev->solid == SOLID_BSP || pev->movetype == MOVETYPE_PUSHSTEP; }
+	virtual bool ReflectGauss( void ) { return ( IsBSPModel() && !pev->takedamage ); }
 	virtual BOOL HasTarget( string_t targetname ) { return FStrEq(STRING(targetname), STRING(pev->target) ); }
 	virtual bool IsInWorld( void );
 	virtual	bool IsPlayer( void ) { return false; }
