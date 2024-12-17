@@ -162,10 +162,10 @@ public:
 	void RunTask( Task_t *pTask );
 	void StartTask( Task_t *pTask );
 	void KeyValue( KeyValueData *pkvd );
-	BOOL FCanCheckAttacks ( void );
-	BOOL CheckRangeAttack1 ( float flDot, float flDist );
-	BOOL CheckRangeAttack2 ( float flDot, float flDist );
-	BOOL CheckMeleeAttack1 ( float flDot, float flDist );
+	bool FCanCheckAttacks ( void ) override;
+	bool CheckRangeAttack1 ( float flDot, float flDist ) override;
+	bool CheckRangeAttack2 ( float flDot, float flDist ) override;
+	bool CheckMeleeAttack1 ( float flDot, float flDist ) override;
 	int MaxFollowers() { return -1; }
 	int TalkFriendCategory() { return TALK_FRIEND_SOLDIER; }
 	void PlayCallForMedic();
@@ -255,7 +255,7 @@ protected:
 	void SpeakCaughtEnemy();
 
 	virtual bool HasWeaponEquiped();
-	BOOL CheckRangeAttack2Impl(float grenadeSpeed, float flDot, float flDist , bool contact = false);
+	bool CheckRangeAttack2Impl(float grenadeSpeed, float flDot, float flDist , bool contact = false);
 };
 
 LINK_ENTITY_TO_CLASS( monster_human_grunt_ally, CHFGrunt )
@@ -301,8 +301,8 @@ public:
 	bool IsEnabledInMod() { return g_modFeatures.IsMonsterEnabled("human_grunt_medic"); }
 	const char* DefaultDisplayName() { return "Human Medic"; }
 	void HandleAnimEvent( MonsterEvent_t *pEvent );
-	BOOL CheckRangeAttack1 ( float flDot, float flDist );
-	BOOL CheckRangeAttack2 ( float flDot, float flDist );
+	bool CheckRangeAttack1 ( float flDot, float flDist ) override;
+	bool CheckRangeAttack2 ( float flDot, float flDist ) override;
 	void GibMonster();
 	const char* DefaultSentenceGroup(int group);
 
@@ -1401,15 +1401,15 @@ void CHFGrunt::PlayCallForMedic()
 // this is a bad bug. Friendly machine gun fire avoidance
 // will unecessarily prevent the throwing of a grenade as well.
 //=========================================================
-BOOL CHFGrunt :: FCanCheckAttacks ( void )
+bool CHFGrunt :: FCanCheckAttacks ( void )
 {
 	if ( !HasConditions( bits_COND_ENEMY_TOOFAR ) )
 	{
-		return TRUE;
+		return true;
 	}
 	else
 	{
-		return FALSE;
+		return false;
 	}
 }
 
@@ -1417,7 +1417,7 @@ BOOL CHFGrunt :: FCanCheckAttacks ( void )
 //=========================================================
 // CheckMeleeAttack1
 //=========================================================
-BOOL CHFGrunt :: CheckMeleeAttack1 ( float flDot, float flDist )
+bool CHFGrunt :: CheckMeleeAttack1 ( float flDot, float flDist )
 {
 	return CTalkMonster::CheckMeleeAttack1(flDot, flDist);
 }
@@ -1435,7 +1435,7 @@ bool CHFGrunt::HasWeaponEquiped()
 	return GetBodygroup( FG_GUN_GROUP ) != FG_GUN_NONE;
 }
 
-BOOL CHFGrunt :: CheckRangeAttack1 ( float flDot, float flDist )
+bool CHFGrunt :: CheckRangeAttack1 ( float flDot, float flDist )
 {
 	if ( !HasConditions( bits_COND_ENEMY_OCCLUDED ) && flDist <= 2048 && flDot >= 0.5 && HasWeaponEquiped() && NoFriendlyFire() )
 	{
@@ -1444,7 +1444,7 @@ BOOL CHFGrunt :: CheckRangeAttack1 ( float flDot, float flDist )
 		if ( !m_hEnemy->IsPlayer() && flDist <= 64 )
 		{
 			// kick nonclients, but don't shoot at them.
-			return FALSE;
+			return false;
 		}
 
 		Vector vecSrc = GetGunPosition();
@@ -1454,27 +1454,27 @@ BOOL CHFGrunt :: CheckRangeAttack1 ( float flDot, float flDist )
 
 		if ( tr.flFraction == 1.0 )
 		{
-			return TRUE;
+			return true;
 		}
 	}
 
-	return FALSE;
+	return false;
 }
 
 //=========================================================
 // CheckRangeAttack2 - this checks the Grunt's grenade
 // attack.
 //=========================================================
-BOOL CHFGrunt::CheckRangeAttack2 ( float flDot, float flDist )
+bool CHFGrunt::CheckRangeAttack2 ( float flDot, float flDist )
 {
 	if ( !FBitSet(pev->weapons, (FGRUNT_HANDGRENADE | FGRUNT_GRENADELAUNCHER)) )
 	{
-		return FALSE;
+		return false;
 	}
 	return CheckRangeAttack2Impl(gSkillData.fgruntGrenadeSpeed, flDot, flDist, FBitSet(pev->weapons, FGRUNT_GRENADELAUNCHER));
 }
 
-BOOL CHFGrunt::CheckRangeAttack2Impl( float grenadeSpeed, float flDot, float flDist, bool contact )
+bool CHFGrunt::CheckRangeAttack2Impl( float grenadeSpeed, float flDot, float flDist, bool contact )
 {
 	// if the grunt isn't moving, it's ok to check.
 	if ( m_flGroundSpeed != 0 )
@@ -1587,8 +1587,6 @@ BOOL CHFGrunt::CheckRangeAttack2Impl( float grenadeSpeed, float flDot, float flD
 			m_flNextGrenadeCheck = gpGlobals->time + 1; // one full second.
 		}
 	}
-
-
 
 	return m_fThrowGrenade;
 }
@@ -2943,8 +2941,8 @@ public:
 	const char* DefaultDisplayName() { return "Human Torch"; }
 	void HandleAnimEvent( MonsterEvent_t* pEvent );
 	int LookupActivity(int activity);
-	BOOL CheckRangeAttack1(float flDot, float flDist);
-	BOOL CheckRangeAttack2(float flDot, float flDist);
+	bool CheckRangeAttack1(float flDot, float flDist) override;
+	bool CheckRangeAttack2(float flDot, float flDist) override;
 	void GibMonster();
 	void OnDying();
 	void UpdateOnRemove();
@@ -3146,15 +3144,15 @@ bool CTorch::HasWeaponEquiped()
 	return FBitSet( pev->weapons, TORCH_EAGLE );
 }
 
-BOOL CTorch::CheckRangeAttack1(float flDot, float flDist)
+bool CTorch::CheckRangeAttack1(float flDot, float flDist)
 {
 	return CHFGrunt::CheckRangeAttack1(flDot, flDist);
 }
 
-BOOL CTorch::CheckRangeAttack2(float flDot, float flDist)
+bool CTorch::CheckRangeAttack2(float flDot, float flDist)
 {
 	if (!FBitSet(pev->weapons, TORCH_HANDGRENADE))
-		return FALSE;
+		return false;
 	return CheckRangeAttack2Impl(gSkillData.torchGrenadeSpeed, flDot, flDist);
 }
 
@@ -3894,15 +3892,15 @@ bool CMedic::HasWeaponEquiped()
 	return FBitSet( pev->weapons, MEDIC_EAGLE | MEDIC_HANDGUN );
 }
 
-BOOL CMedic::CheckRangeAttack1(float flDot, float flDist)
+bool CMedic::CheckRangeAttack1(float flDot, float flDist)
 {
 	return CHFGrunt::CheckRangeAttack1(flDot, flDist);
 }
 
-BOOL CMedic::CheckRangeAttack2(float flDot, float flDist)
+bool CMedic::CheckRangeAttack2(float flDot, float flDist)
 {
 	if (!FBitSet(pev->weapons, MEDIC_HANDGRENADE))
-		return FALSE;
+		return false;
 	ALERT(at_console, "Checking for handgrenade attack! Grenade speed: %g\n", gSkillData.medicGrenadeSpeed);
 	return CheckRangeAttack2Impl(gSkillData.medicGrenadeSpeed, flDot, flDist);
 }

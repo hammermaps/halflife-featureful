@@ -64,10 +64,10 @@ public:
 	const char* ReverseRelationshipModel();
 	int DefaultISoundMask( void );
 	void HandleAnimEvent( MonsterEvent_t *pEvent );
-	BOOL FCanCheckAttacks( void );
-	BOOL CheckMeleeAttack1( float flDot, float flDist );
-	BOOL CheckRangeAttack1( float flDot, float flDist );
-	BOOL CheckRangeAttack2( float flDot, float flDist );
+	bool FCanCheckAttacks( void ) override;
+	bool CheckMeleeAttack1( float flDot, float flDist ) override;
+	bool CheckRangeAttack1( float flDot, float flDist ) override;
+	bool CheckRangeAttack2( float flDot, float flDist ) override;
 	void CheckAmmo( void );
 	int LookupActivity(int activity);
 	void StartTask( Task_t *pTask );
@@ -149,7 +149,7 @@ protected:
 	virtual void PlayReloadSound();
 	virtual void PlayGrenadeLaunchSound();
 	virtual void PlayShogtunSound();
-	BOOL CheckRangeAttack2Impl(float grenadeSpeed, float flDot, float flDist, bool contact);
+	bool CheckRangeAttack2Impl(float grenadeSpeed, float flDot, float flDist, bool contact);
 	virtual int GetRangeAttack1Sequence();
 	virtual int GetRangeAttack2Sequence();
 	virtual Schedule_t* ScheduleOnRangeAttack1();

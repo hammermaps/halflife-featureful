@@ -103,11 +103,11 @@ float CBaseAnimating::StudioFrameAdvance( float flInterval ) { return 0.0; }
 void CBaseMonster::MonsterThink( void ) { }
 int CBaseMonster::IgnoreConditions( void ) { return 0; }
 bool CBaseMonster::FBecomeProne( void ) { return true; }
-BOOL CBaseMonster::CheckRangeAttack1( float flDot, float flDist ) { return FALSE; }
-BOOL CBaseMonster::CheckRangeAttack2( float flDot, float flDist ) { return FALSE; }
-BOOL CBaseMonster::CheckMeleeAttack1( float flDot, float flDist ) { return FALSE; }
-BOOL CBaseMonster::CheckMeleeAttack2( float flDot, float flDist ) { return FALSE; }
-BOOL CBaseMonster::FCanCheckAttacks( void ) { return FALSE; }
+bool CBaseMonster::CheckRangeAttack1( float flDot, float flDist ) { return false; }
+bool CBaseMonster::CheckRangeAttack2( float flDot, float flDist ) { return false; }
+bool CBaseMonster::CheckMeleeAttack1( float flDot, float flDist ) { return false; }
+bool CBaseMonster::CheckMeleeAttack2( float flDot, float flDist ) { return false; }
+bool CBaseMonster::FCanCheckAttacks( void ) { return false; }
 int CBaseMonster::CheckEnemy( CBaseEntity *pEnemy ) { return 0; }
 void CBaseMonster::SetActivity( Activity NewActivity ) { }
 int CBaseMonster::CheckLocalMove( const Vector &vecStart, const Vector &vecEnd, CBaseEntity *pTarget, float *pflDist ) { return 0; }

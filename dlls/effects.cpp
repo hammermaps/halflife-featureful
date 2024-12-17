@@ -1301,7 +1301,7 @@ void CSprite::SpriteInit( const char *pSpriteName, const Vector &origin )
 	Spawn();
 }
 
-CSprite *CSprite::SpriteCreate( const char *pSpriteName, const Vector &origin, BOOL animate, int spawnflags )
+CSprite *CSprite::SpriteCreate( const char *pSpriteName, const Vector &origin, bool animate, int spawnflags )
 {
 	CSprite *pSprite = GetClassPtr( (CSprite *)NULL );
 	pSprite->pev->spawnflags = spawnflags;

@@ -123,7 +123,7 @@ public:
 	int LookupActivity(int activity);
 	void SetActivity( Activity NewActivity );
 	const Visual* GetWaveVisual();
-	BOOL CheckRangeAttack1( float flDot, float flDist );
+	bool CheckRangeAttack1( float flDot, float flDist ) override;
 	bool FValidateHintType( short sHint ) override;
 	bool FCanActiveIdle( void ) override;
 	Schedule_t *GetScheduleOfType( int Type );
@@ -325,13 +325,13 @@ bool CHoundeye::FCanActiveIdle( void )
 // try to get within half of their max attack radius before
 // attacking, so as to increase their chances of doing damage.
 //=========================================================
-BOOL CHoundeye::CheckRangeAttack1( float flDot, float flDist )
+bool CHoundeye::CheckRangeAttack1( float flDot, float flDist )
 {
 	if( flDist <= ( HOUNDEYE_MAX_ATTACK_RADIUS * 0.5f ) && flDot >= 0.3f )
 	{
-		return TRUE;
+		return true;
 	}
-	return FALSE;
+	return false;
 }
 
 //=========================================================

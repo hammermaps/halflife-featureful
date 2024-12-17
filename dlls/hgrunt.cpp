@@ -372,22 +372,22 @@ void CHGrunt::PrescheduleThink( void )
 // this is a bad bug. Friendly machine gun fire avoidance
 // will unecessarily prevent the throwing of a grenade as well.
 //=========================================================
-BOOL CHGrunt::FCanCheckAttacks( void )
+bool CHGrunt::FCanCheckAttacks( void )
 {
 	if( !HasConditions( bits_COND_ENEMY_TOOFAR ) )
 	{
-		return TRUE;
+		return true;
 	}
 	else
 	{
-		return FALSE;
+		return false;
 	}
 }
 
 //=========================================================
 // CheckMeleeAttack1
 //=========================================================
-BOOL CHGrunt::CheckMeleeAttack1( float flDot, float flDist )
+bool CHGrunt::CheckMeleeAttack1( float flDot, float flDist )
 {
 	// Note: this code used to have a check for CLASS_ALIEN_BIOWEAPON and CLASS_PLAYER_BIOWEAPON enemy classes.
 	// This code was probably outdated as human grunts don't see hornets as enemies anyway.
@@ -403,7 +403,7 @@ BOOL CHGrunt::CheckMeleeAttack1( float flDot, float flDist )
 // occluded (throw grenade over wall, etc). We must 
 // disqualify the machine gun attack if the enemy is occluded.
 //=========================================================
-BOOL CHGrunt::CheckRangeAttack1( float flDot, float flDist )
+bool CHGrunt::CheckRangeAttack1( float flDot, float flDist )
 {
 	if( !HasConditions( bits_COND_ENEMY_OCCLUDED ) && flDist <= 2048.0f && flDot >= 0.5f && NoFriendlyFire() )
 	{
@@ -412,7 +412,7 @@ BOOL CHGrunt::CheckRangeAttack1( float flDot, float flDist )
 		if( !m_hEnemy->IsPlayer() && flDist <= 64 )
 		{
 			// kick nonclients, but don't shoot at them.
-			return FALSE;
+			return false;
 		}
 
 		Vector vecSrc = GetGunPosition();
@@ -422,27 +422,27 @@ BOOL CHGrunt::CheckRangeAttack1( float flDot, float flDist )
 
 		if( tr.flFraction == 1.0f )
 		{
-			return TRUE;
+			return true;
 		}
 	}
 
-	return FALSE;
+	return false;
 }
 
 //=========================================================
 // CheckRangeAttack2 - this checks the Grunt's grenade
 // attack. 
 //=========================================================
-BOOL CHGrunt::CheckRangeAttack2( float flDot, float flDist )
+bool CHGrunt::CheckRangeAttack2( float flDot, float flDist )
 {
 	if( !FBitSet( pev->weapons, ( HGRUNT_HANDGRENADE | HGRUNT_GRENADELAUNCHER ) ) )
 	{
-		return FALSE;
+		return false;
 	}
 	return CheckRangeAttack2Impl(gSkillData.hgruntGrenadeSpeed, flDot, flDist, FBitSet(pev->weapons, HGRUNT_GRENADELAUNCHER));
 }
 
-BOOL CHGrunt::CheckRangeAttack2Impl( float grenadeSpeed, float flDot, float flDist, bool contact )
+bool CHGrunt::CheckRangeAttack2Impl( float grenadeSpeed, float flDot, float flDist, bool contact )
 {
 	// if the grunt isn't moving, it's ok to check.
 	if( m_flGroundSpeed != 0 )

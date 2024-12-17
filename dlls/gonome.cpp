@@ -128,8 +128,8 @@ public:
 	void DeathSound(void);
 	void AlertSound(void);
 
-	BOOL CheckMeleeAttack2(float flDot, float flDist);
-	BOOL CheckRangeAttack1(float flDot, float flDist);
+	bool CheckMeleeAttack2(float flDot, float flDist) override;
+	bool CheckRangeAttack1(float flDot, float flDist) override;
 	int LookupActivity(int activity);
 	void SetActivity( Activity NewActivity );
 
@@ -378,16 +378,16 @@ int CGonome::TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, float f
 //=========================================================
 // CheckRangeAttack1
 //=========================================================
-BOOL CGonome::CheckRangeAttack1(float flDot, float flDist)
+bool CGonome::CheckRangeAttack1(float flDot, float flDist)
 {
 	// gonome won't try to shoot in short range
 	if (flDist < 256)
-		return FALSE;
+		return false;
 
 	if (IsMoving() && flDist >= 512)
 	{
 		// gonome will far too far behind if he stops running to spit at this distance from the enemy.
-		return FALSE;
+		return false;
 	}
 
 	if (flDist > 64 && flDist <= 784 && flDot >= 0.5 && gpGlobals->time >= m_flNextThrowTime)
@@ -397,7 +397,7 @@ BOOL CGonome::CheckRangeAttack1(float flDot, float flDist)
 			if (fabs(pev->origin.z - m_hEnemy->pev->origin.z) > 256)
 			{
 				// don't try to spit at someone up really high or down really low.
-				return FALSE;
+				return false;
 			}
 		}
 
@@ -412,18 +412,18 @@ BOOL CGonome::CheckRangeAttack1(float flDot, float flDist)
 			m_flNextThrowTime = gpGlobals->time + 0.5;
 		}
 
-		return TRUE;
+		return true;
 	}
 
-	return FALSE;
+	return false;
 }
 
 //=========================================================
 // CheckMeleeAttack2 - both gonome's melee attacks are ACT_MELEE_ATTACK1
 //=========================================================
-BOOL CGonome::CheckMeleeAttack2(float flDot, float flDist)
+bool CGonome::CheckMeleeAttack2(float flDot, float flDist)
 {
-	return FALSE;
+	return false;
 }
 
 

@@ -420,9 +420,9 @@ public:
 	void TraceAttack( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType );
 	void HandleAnimEvent( MonsterEvent_t *pEvent );
 
-	BOOL CheckMeleeAttack1( float flDot, float flDist );		// Swipe
-	BOOL CheckMeleeAttack2( float flDot, float flDist );		// Flames
-	BOOL CheckRangeAttack1( float flDot, float flDist );		// Stomp attack
+	bool CheckMeleeAttack1( float flDot, float flDist ) override;		// Swipe
+	bool CheckMeleeAttack2( float flDot, float flDist ) override;		// Flames
+	bool CheckRangeAttack1( float flDot, float flDist ) override;		// Stomp attack
 	void SetObjectCollisionBox( void )
 	{
 		pev->absmin = pev->origin + Vector( -80, -80, 0 );
@@ -1201,20 +1201,20 @@ void CGargantua::OnDying()
 // Garg swipe attack
 // 
 //=========================================================
-BOOL CGargantua::CheckMeleeAttack1( float flDot, float flDist )
+bool CGargantua::CheckMeleeAttack1( float flDot, float flDist )
 {
 	//ALERT( at_aiconsole, "CheckMelee(%f, %f)\n", flDot, flDist );
 
 	if( flDot >= 0.7f )
 	{
 		if( flDist <= GARG_ATTACKDIST )
-			return TRUE;
+			return true;
 	}
-	return FALSE;
+	return false;
 }
 
 // Flame thrower madness!
-BOOL CGargantua::CheckMeleeAttack2( float flDot, float flDist )
+bool CGargantua::CheckMeleeAttack2( float flDot, float flDist )
 {
 	//ALERT( at_aiconsole, "CheckMelee(%f, %f)\n", flDot, flDist );
 
@@ -1223,10 +1223,10 @@ BOOL CGargantua::CheckMeleeAttack2( float flDot, float flDist )
 		if( flDot >= 0.8f && flDist > GARG_ATTACKDIST )
 		{
 			if ( flDist <= FlameLength() )
-				return TRUE;
+				return true;
 		}
 	}
-	return FALSE;
+	return false;
 }
 
 //=========================================================
@@ -1238,16 +1238,16 @@ BOOL CGargantua::CheckMeleeAttack2( float flDot, float flDist )
 // Stomp attack
 //
 //=========================================================
-BOOL CGargantua::CheckRangeAttack1( float flDot, float flDist )
+bool CGargantua::CheckRangeAttack1( float flDot, float flDist )
 {
 	if( gpGlobals->time > m_seeTime )
 	{
 		if( flDot >= 0.7f && flDist > GARG_ATTACKDIST )
 		{
-				return TRUE;
+				return true;
 		}
 	}
-	return FALSE;
+	return false;
 }
 
 //=========================================================

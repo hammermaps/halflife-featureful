@@ -40,15 +40,15 @@ public:
 	int DefaultISoundMask( void );
 	void HandleAnimEvent( MonsterEvent_t *pEvent );
 	void SetActivity( Activity NewActivity );
-	BOOL CheckMeleeAttack1( float flDot, float flDist ) {
-		return FALSE;
+	bool CheckMeleeAttack1( float flDot, float flDist ) override {
+		return false;
 	}
-	BOOL CheckMeleeAttack2( float flDot, float flDist ) {
-		return FALSE;
+	bool CheckMeleeAttack2( float flDot, float flDist ) override {
+		return false;
 	}
-	BOOL CheckRangeAttack1( float flDot, float flDist );
-	BOOL CheckRangeAttack2( float flDot, float flDist ) {
-		return FALSE;
+	bool CheckRangeAttack1( float flDot, float flDist ) override;
+	bool CheckRangeAttack2( float flDot, float flDist ) override {
+		return false;
 	}
 	void StartTask( Task_t *pTask );
 	void RunTask( Task_t *pTask );
@@ -224,7 +224,7 @@ void CHWGrunt::SetActivity( Activity NewActivity )
 	CFollowingMonster::SetActivity(NewActivity);
 }
 
-BOOL CHWGrunt::CheckRangeAttack1( float flDot, float flDist )
+bool CHWGrunt::CheckRangeAttack1( float flDot, float flDist )
 {
 	if( !HasConditions( bits_COND_ENEMY_OCCLUDED ) && flDist <= 2048 && flDot >= 0.5 && NoFriendlyFire() )
 	{
@@ -236,11 +236,11 @@ BOOL CHWGrunt::CheckRangeAttack1( float flDot, float flDist )
 
 		if( tr.flFraction == 1.0 )
 		{
-			return TRUE;
+			return true;
 		}
 	}
 
-	return FALSE;
+	return false;
 }
 
 void CHWGrunt::StartTask( Task_t *pTask )

@@ -63,8 +63,8 @@ public:
 	static constexpr const char* attackMissSoundScript = "Zombie.AttackMiss";
 
 	// No range attacks
-	BOOL CheckRangeAttack1( float flDot, float flDist ) { return FALSE; }
-	BOOL CheckRangeAttack2( float flDot, float flDist ) { return FALSE; }
+	bool CheckRangeAttack1( float flDot, float flDist ) override { return false; }
+	bool CheckRangeAttack2( float flDot, float flDist ) override { return false; }
 	int TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType );
 
 	virtual int DefaultSizeForGrapple() { return GRAPPLE_MEDIUM; }

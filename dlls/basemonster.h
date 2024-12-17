@@ -184,10 +184,10 @@ public:
 	inline void StopAnimation( void ) { pev->framerate = 0; }
 
 	// these functions will survey conditions and set appropriate conditions bits for attack types.
-	virtual BOOL CheckRangeAttack1( float flDot, float flDist );
-	virtual BOOL CheckRangeAttack2( float flDot, float flDist );
-	virtual BOOL CheckMeleeAttack1( float flDot, float flDist );
-	virtual BOOL CheckMeleeAttack2( float flDot, float flDist );
+	virtual bool CheckRangeAttack1( float flDot, float flDist );
+	virtual bool CheckRangeAttack2( float flDot, float flDist );
+	virtual bool CheckMeleeAttack1( float flDot, float flDist );
+	virtual bool CheckMeleeAttack2( float flDot, float flDist );
 
 	bool FHaveSchedule( void );
 	bool FScheduleValid( void );
@@ -270,7 +270,7 @@ public:
 	virtual bool FValidateCover( const Vector &vecCoverLocation ) { return true; }
 	virtual float CoverRadius( void ) { return 784; } // Default cover radius
 
-	virtual BOOL FCanCheckAttacks( void );
+	virtual bool FCanCheckAttacks( void );
 	virtual void CheckAmmo( void ) { return; };
 	virtual int IgnoreConditions( void );
 

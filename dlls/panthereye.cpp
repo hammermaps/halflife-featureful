@@ -34,10 +34,10 @@ public:
 	void HandleAnimEvent( MonsterEvent_t *pEvent );
 	Schedule_t* GetScheduleOfType(int Type);
 
-	BOOL CheckMeleeAttack1( float flDot, float flDist );
-	BOOL CheckMeleeAttack2( float flDot, float flDist ) {return FALSE;}
-	BOOL CheckRangeAttack1( float flDot, float flDist ) {return FALSE;}
-	BOOL CheckRangeAttack2( float flDot, float flDist ) {return FALSE;}
+	bool CheckMeleeAttack1( float flDot, float flDist ) override;
+	bool CheckMeleeAttack2( float flDot, float flDist ) override {return false;}
+	bool CheckRangeAttack1( float flDot, float flDist ) override {return false;}
+	bool CheckRangeAttack2( float flDot, float flDist ) override {return false;}
 
 	void PerformStrike(const PantherStrikeParams& params);
 
@@ -149,13 +149,13 @@ void CPantherEye::Precache()
 	RegisterAndPrecacheSoundScript(attackSoundScript);
 }
 
-BOOL CPantherEye::CheckMeleeAttack1 ( float flDot, float flDist )
+bool CPantherEye::CheckMeleeAttack1 ( float flDot, float flDist )
 {
 	if ( flDist <= 64.0f && flDot >= 0.7f && m_hEnemy != 0 && FBitSet ( m_hEnemy->pev->flags, FL_ONGROUND ) )
 	{
-		return TRUE;
+		return true;
 	}
-	return FALSE;
+	return false;
 }
 
 void CPantherEye::PerformStrike(const PantherStrikeParams& params)

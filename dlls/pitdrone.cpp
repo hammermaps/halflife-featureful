@@ -226,8 +226,8 @@ public:
 	int DefaultClassify(void);
 	const char* DefaultDisplayName() { return "Pit Drone"; }
 
-	BOOL CheckMeleeAttack1(float flDot, float flDist);
-	BOOL CheckRangeAttack1(float flDot, float flDist);
+	bool CheckMeleeAttack1(float flDot, float flDist) override;
+	bool CheckRangeAttack1(float flDot, float flDist) override;
 	void IdleSound(void);
 	void PainSound(void);
 	void AlertSound(void);
@@ -393,28 +393,28 @@ int CPitdrone::TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, float
 //=========================================================
 // CheckMeleeAttack1 - attack with both claws at the same time
 //=========================================================
-BOOL CPitdrone::CheckMeleeAttack1(float flDot, float flDist)
+bool CPitdrone::CheckMeleeAttack1(float flDot, float flDist)
 {
 	// Give a better chance for MeleeAttack2
 	if (RANDOM_LONG(0,2) == 0) {
 		return CFollowingMonster::CheckMeleeAttack1(flDot, flDist);
 	}
-	return FALSE;
+	return false;
 }
 
 //=========================================================
 // CheckRangeAttack1 - spike attack
 //=========================================================
-BOOL CPitdrone::CheckRangeAttack1(float flDot, float flDist)
+bool CPitdrone::CheckRangeAttack1(float flDot, float flDist)
 {
 	if (m_cAmmoLoaded <= 0)
 	{
-		return FALSE;
+		return false;
 	}
 	if (IsMoving() && flDist >= 512)
 	{
 		// pitdone will far too far behind if he stops running to spit at this distance from the enemy.
-		return FALSE;
+		return false;
 	}
 
 	if (flDist > 64 && flDist <= 784 && flDot >= 0.5 && gpGlobals->time >= m_flNextSpitTime)
@@ -431,10 +431,10 @@ BOOL CPitdrone::CheckRangeAttack1(float flDot, float flDist)
 			m_flNextSpitTime = gpGlobals->time + 1;
 		}
 
-		return TRUE;
+		return true;
 	}
 
-	return FALSE;
+	return false;
 
 }
 

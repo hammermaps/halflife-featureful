@@ -372,9 +372,9 @@ public:
 	const char* ReverseRelationshipModel() { return "models/islavef.mdl"; }
 	int IRelationship( CBaseEntity *pTarget );
 	void HandleAnimEvent( MonsterEvent_t *pEvent );
-	BOOL CheckRangeAttack1( float flDot, float flDist );
-	BOOL CheckRangeAttack2( float flDot, float flDist );
-	BOOL CheckHealOrReviveTargets( float flDist = 784, bool mustSee = false );
+	bool CheckRangeAttack1( float flDot, float flDist ) override;
+	bool CheckRangeAttack2( float flDot, float flDist ) override;
+	bool CheckHealOrReviveTargets( float flDist = 784, bool mustSee = false );
 	bool IsValidHealTarget( CBaseEntity* pEntity );
 	void CallForHelp( float flDist, EHANDLE hEnemy, Vector &vecLocation );
 	void TraceAttack( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType );
@@ -1125,16 +1125,16 @@ void CISlave::HandleAnimEvent( MonsterEvent_t *pEvent )
 //=========================================================
 // CheckRangeAttack1 - normal beam attack 
 //=========================================================
-BOOL CISlave::CheckRangeAttack1( float flDot, float flDist )
+bool CISlave::CheckRangeAttack1( float flDot, float flDist )
 {
 	if( m_flNextAttack > gpGlobals->time )
 	{
-		return FALSE;
+		return false;
 	}
 
 	if( g_modFeatures.vortigaunt_coil_attack && flDist > 64 && flDist <= ISLAVE_COIL_ATTACK_RADIUS )
 	{
-		return TRUE;
+		return true;
 	}
 
 	return CFollowingMonster::CheckRangeAttack1( flDot, flDist );
@@ -1143,17 +1143,17 @@ BOOL CISlave::CheckRangeAttack1( float flDot, float flDist )
 //=========================================================
 // CheckRangeAttack2 - try to resurect dead comrades or heal wounded ones
 //=========================================================
-BOOL CISlave::CheckRangeAttack2( float flDot, float flDist )
+bool CISlave::CheckRangeAttack2( float flDot, float flDist )
 {
 	if( m_flNextAttack > gpGlobals->time )
 	{
-		return FALSE;
+		return false;
 	}
 
 	return HasFreeEnergy() && CheckHealOrReviveTargets(flDist, true);
 }
 
-BOOL CISlave::CheckHealOrReviveTargets(float flDist, bool mustSee)
+bool CISlave::CheckHealOrReviveTargets(float flDist, bool mustSee)
 {
 	if (m_nextHealTargetCheck >= gpGlobals->time)
 	{
@@ -1196,10 +1196,7 @@ BOOL CISlave::CheckHealOrReviveTargets(float flDist, bool mustSee)
 			}
 		}
 	}
-	if( m_hDead != 0 || m_hWounded != 0 )
-		return TRUE;
-	else
-		return FALSE;
+	return m_hDead != 0 || m_hWounded != 0;
 }
 
 bool CISlave::IsValidHealTarget(CBaseEntity *pEntity)

@@ -71,8 +71,8 @@ public:
 	void StartTask( Task_t *pTask );
 	void RunTask( Task_t *pTask );
 
-	BOOL CheckMeleeAttack1( float flDot, float flDist );
-	BOOL CheckRangeAttack1( float flDot, float flDist );
+	bool CheckMeleeAttack1( float flDot, float flDist ) override;
+	bool CheckRangeAttack1( float flDot, float flDist ) override;
 
 	float ChangeYaw( int yawSpeed );
 	Activity GetStoppedActivity( void );
@@ -347,13 +347,13 @@ int CIchthyosaur::DefaultClassify( void )
 //=========================================================
 // CheckMeleeAttack1
 //=========================================================
-BOOL CIchthyosaur::CheckMeleeAttack1( float flDot, float flDist )
+bool CIchthyosaur::CheckMeleeAttack1( float flDot, float flDist )
 {
 	if( flDot >= 0.7f && m_flEnemyTouched > gpGlobals->time - 0.2f )
 	{
-		return TRUE;
+		return true;
 	}
-	return FALSE;
+	return false;
 }
 
 void CIchthyosaur::BiteTouch( CBaseEntity *pOther )
@@ -385,14 +385,13 @@ void CIchthyosaur::CombatUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE
 // CheckRangeAttack1  - swim in for a chomp
 //
 //=========================================================
-BOOL CIchthyosaur::CheckRangeAttack1( float flDot, float flDist )
+bool CIchthyosaur::CheckRangeAttack1( float flDot, float flDist )
 {
 	if( flDot > -0.7f && (m_bOnAttack || ( flDist <= 192 && m_idealDist <= 192 ) ) )
 	{
-		return TRUE;
+		return true;
 	}
-
-	return FALSE;
+	return false;
 }
 
 //=========================================================

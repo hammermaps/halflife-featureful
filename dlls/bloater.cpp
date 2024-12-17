@@ -50,8 +50,8 @@ public:
 	void AttackSnd( void );
 
 	// No range attacks
-	BOOL CheckRangeAttack1( float flDot, float flDist ) { return FALSE; }
-	BOOL CheckRangeAttack2( float flDot, float flDist ) { return FALSE; }
+	bool CheckRangeAttack1( float flDot, float flDist ) override { return false; }
+	bool CheckRangeAttack2( float flDot, float flDist ) override { return false; }
 	int TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType );
 	virtual int DefaultSizeForGrapple() { return GRAPPLE_SMALL; }
 	bool IsDisplaceable() { return true; }
@@ -199,9 +199,9 @@ public:
 	void GibMonster();
 	void UpdateOnRemove();
 
-	BOOL CheckRangeAttack1( float flDot, float flDist );
-	BOOL CheckRangeAttack2( float flDot, float flDist );
-	BOOL CheckMeleeAttack1( float flDot, float flDist );
+	bool CheckRangeAttack1( float flDot, float flDist ) override;
+	bool CheckRangeAttack2( float flDot, float flDist ) override;
+	bool CheckMeleeAttack1( float flDot, float flDist ) override;
 	Schedule_t *GetSchedule( void );
 	Schedule_t *GetScheduleOfType( int Type );
 	void RunTask( Task_t *pTask );
@@ -669,19 +669,19 @@ Schedule_t *CFloater::GetScheduleOfType( int Type )
 	return CBaseMonster::GetScheduleOfType( Type );
 }
 
-BOOL CFloater::CheckRangeAttack1( float flDot, float flDist )
+bool CFloater::CheckRangeAttack1( float flDot, float flDist )
 {
-	return FALSE;
+	return false;
 }
 
-BOOL CFloater::CheckRangeAttack2( float flDot, float flDist )
+bool CFloater::CheckRangeAttack2( float flDot, float flDist )
 {
-	return FALSE;
+	return false;
 }
 
-BOOL CFloater::CheckMeleeAttack1( float flDot, float flDist )
+bool CFloater::CheckMeleeAttack1( float flDot, float flDist )
 {
-	return FALSE;
+	return false;
 }
 
 void CFloater::SetActivity( Activity NewActivity )

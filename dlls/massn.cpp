@@ -57,7 +57,7 @@ public:
 	const char* ReverseRelationshipModel() { return "models/massnf.mdl"; }
 	void KeyValue(KeyValueData* pkvd);
 	void HandleAnimEvent(MonsterEvent_t *pEvent);
-	BOOL CheckRangeAttack2(float flDot, float flDist);
+	bool CheckRangeAttack2(float flDot, float flDist) override;
 	void Sniperrifle(void);
 	void GibMonster();
 	void PlayUseSentence();
@@ -84,7 +84,7 @@ public:
 
 	void SetHead(int head);
 
-	void DropMyItems(BOOL isGibbed);
+	void DropMyItems(bool isGibbed);
 
 	int m_iHead;
 
@@ -178,7 +178,7 @@ void CMassn::GibMonster( void )
 	CBaseMonster::GibMonster();
 }
 
-void CMassn::DropMyItems(BOOL isGibbed)
+void CMassn::DropMyItems(bool isGibbed)
 {
 	if (g_pGameRules->FMonsterCanDropWeapons(this) && !FBitSet(pev->spawnflags, SF_MONSTER_DONT_DROP_GUN))
 	{
@@ -292,11 +292,11 @@ void CMassn::HandleAnimEvent(MonsterEvent_t *pEvent)
 // CheckRangeAttack2 - this checks the Grunt's grenade
 // attack.
 //=========================================================
-BOOL CMassn::CheckRangeAttack2( float flDot, float flDist )
+bool CMassn::CheckRangeAttack2( float flDot, float flDist )
 {
 	if( !FBitSet( pev->weapons, ( MASSN_HANDGRENADE | MASSN_GRENADELAUNCHER ) ) )
 	{
-		return FALSE;
+		return false;
 	}
 	return CheckRangeAttack2Impl(gSkillData.massnGrenadeSpeed, flDot, flDist, FBitSet(pev->weapons, MASSN_GRENADELAUNCHER));
 }

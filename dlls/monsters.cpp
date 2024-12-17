@@ -1016,31 +1016,31 @@ bool CBaseMonster::FBecomeProne( void )
 //=========================================================
 // CheckRangeAttack1
 //=========================================================
-BOOL CBaseMonster::CheckRangeAttack1( float flDot, float flDist )
+bool CBaseMonster::CheckRangeAttack1( float flDot, float flDist )
 {
 	if( flDist > 64.0f && flDist <= 784.0f && flDot >= 0.5f )
 	{
-		return TRUE;
+		return true;
 	}
-	return FALSE;
+	return false;
 }
 
 //=========================================================
 // CheckRangeAttack2
 //=========================================================
-BOOL CBaseMonster::CheckRangeAttack2( float flDot, float flDist )
+bool CBaseMonster::CheckRangeAttack2( float flDot, float flDist )
 {
 	if( flDist > 64.0f && flDist <= 512.0f && flDot >= 0.5f )
 	{
-		return TRUE;
+		return true;
 	}
-	return FALSE;
+	return false;
 }
 
 //=========================================================
 // CheckMeleeAttack1
 //=========================================================
-BOOL CBaseMonster::CheckMeleeAttack1( float flDot, float flDist )
+bool CBaseMonster::CheckMeleeAttack1( float flDot, float flDist )
 {
 	// Decent fix to keep folks from kicking/punching hornets and snarks is to check the onground flag(sjb)
 	// Note: the check for FL_ONGROUND actually causes problems. E.g. zombies can't attack sentry turrets and flying enemies.
@@ -1048,21 +1048,21 @@ BOOL CBaseMonster::CheckMeleeAttack1( float flDot, float flDist )
 	// Disabling this check for now.
 	if( flDist <= 64.0f && flDot >= 0.7f && m_hEnemy != 0 /*&& FBitSet( m_hEnemy->pev->flags, FL_ONGROUND )*/ )
 	{
-		return TRUE;
+		return true;
 	}
-	return FALSE;
+	return false;
 }
 
 //=========================================================
 // CheckMeleeAttack2
 //=========================================================
-BOOL CBaseMonster::CheckMeleeAttack2( float flDot, float flDist )
+bool CBaseMonster::CheckMeleeAttack2( float flDot, float flDist )
 {
 	if( flDist <= 64.0f && flDot >= 0.7f )
 	{
-		return TRUE;
+		return true;
 	}
-	return FALSE;
+	return false;
 }
 
 //=========================================================
@@ -1117,14 +1117,13 @@ void CBaseMonster::CheckAttacks(CBaseEntity *pTarget, float flDist, float flMele
 // CanCheckAttacks - prequalifies a monster to do more fine
 // checking of potential attacks. 
 //=========================================================
-BOOL CBaseMonster::FCanCheckAttacks( void )
+bool CBaseMonster::FCanCheckAttacks( void )
 {
 	if( HasConditions( bits_COND_SEE_ENEMY ) && !HasConditions( bits_COND_ENEMY_TOOFAR ) )
 	{
-		return TRUE;
+		return true;
 	}
-
-	return FALSE;
+	return false;
 }
 
 //=========================================================

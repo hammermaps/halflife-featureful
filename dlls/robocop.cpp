@@ -134,10 +134,10 @@ public:
 	void HandleAnimEvent( MonsterEvent_t *pEvent );
 	void SetActivity( Activity NewActivity );
 
-	BOOL CheckMeleeAttack1( float flDot, float flDist );
-	BOOL CheckMeleeAttack2( float flDot, float flDist ) { return FALSE; }
-	BOOL CheckRangeAttack1( float flDot, float flDist );
-	BOOL CheckRangeAttack2( float flDot, float flDist ) { return FALSE; }
+	bool CheckMeleeAttack1( float flDot, float flDist ) override;
+	bool CheckMeleeAttack2( float flDot, float flDist ) override { return false; }
+	bool CheckRangeAttack1( float flDot, float flDist ) override;
+	bool CheckRangeAttack2( float flDot, float flDist ) override { return false; }
 
 	void SetObjectCollisionBox( void )
 	{
@@ -687,30 +687,30 @@ void CRoboCop::Killed( entvars_t *pevInflictor, entvars_t *pevAttacker, int iGib
 	CBaseMonster::Killed( pevInflictor, pevAttacker, GIB_NEVER );
 }
 
-BOOL CRoboCop::CheckMeleeAttack1( float flDot, float flDist )
+bool CRoboCop::CheckMeleeAttack1( float flDot, float flDist )
 {
 	if( m_flFistTime <= gpGlobals->time )
 	{
 		if( flDot >= 0.8f && flDist <= gSkillData.robocopSWRadius )
 		{
-			return TRUE;
+			return true;
 		}
 	}
-	return FALSE;
+	return false;
 }
 
-BOOL CRoboCop::CheckRangeAttack1( float flDot, float flDist )
+bool CRoboCop::CheckRangeAttack1( float flDot, float flDist )
 {
 	if( m_flLaserTime <= gpGlobals->time )
 	{
 		if( flDot >= 0.8f && flDist > gSkillData.robocopSWRadius )
 		{
 			if( flDist < 4096.0f )
-				return TRUE;
+				return true;
 		}
 	}
 
-	return FALSE;
+	return false;
 }
 
 void CRoboCop::HandleAnimEvent( MonsterEvent_t *pEvent )

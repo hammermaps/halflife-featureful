@@ -61,7 +61,7 @@ public:
 	void RunTask( Task_t *pTask );
 	void StartTask( Task_t *pTask );
 	int DefaultToleranceLevel() { return TOLERANCE_LOW; }
-	BOOL CheckRangeAttack1( float flDot, float flDist );
+	bool CheckRangeAttack1( float flDot, float flDist ) override;
 
 	// Override these to set behavior
 	Schedule_t *GetScheduleOfType( int Type );
@@ -278,7 +278,7 @@ void CBarney::SetYawSpeed( void )
 //=========================================================
 // CheckRangeAttack1
 //=========================================================
-BOOL CBarney::CheckRangeAttack1( float flDot, float flDist )
+bool CBarney::CheckRangeAttack1( float flDot, float flDist )
 {
 	if( flDist <= 1024.0f && flDot >= 0.5f )
 	{
@@ -298,7 +298,7 @@ BOOL CBarney::CheckRangeAttack1( float flDot, float flDist )
 		}
 		return m_lastAttackCheck;
 	}
-	return FALSE;
+	return false;
 }
 
 //=========================================================
@@ -1061,7 +1061,7 @@ public:
 	void HandleAnimEvent( MonsterEvent_t *pEvent );
 	int LookupActivity(int activity);
 	int DefaultToleranceLevel() { return TOLERANCE_AVERAGE; }
-	BOOL CheckMeleeAttack1( float flDot, float flDist );
+	bool CheckMeleeAttack1( float flDot, float flDist ) override;
 	void DeathSound( void );
 	void PlayPainSound( void );
 
@@ -1244,7 +1244,7 @@ int CKate::LookupActivity(int activity)
 	}
 }
 
-BOOL CKate::CheckMeleeAttack1(float flDot, float flDist)
+bool CKate::CheckMeleeAttack1(float flDot, float flDist)
 {
 	return CTalkMonster::CheckMeleeAttack1(flDot, flDist);
 }

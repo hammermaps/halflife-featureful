@@ -381,8 +381,8 @@ public:
 	virtual void DeathSound();
 	virtual void AlertSound();
 	virtual void StartTask(Task_t *pTask);
-	virtual BOOL CheckMeleeAttack1(float flDot, float flDist);
-	virtual BOOL CheckRangeAttack1(float flDot, float flDist);
+	virtual bool CheckMeleeAttack1(float flDot, float flDist) override;
+	virtual bool CheckRangeAttack1(float flDot, float flDist) override;
 	virtual void RunAI(void);
 	virtual void GibMonster();
 	void EXPORT CallDeathGibThink();
@@ -507,12 +507,12 @@ const NamedVisual CVoltigore::deathBeamVisual = BuildVisual("Voltigore.DeathBeam
 		.BeamParams(30, 128)
 		.Mixin(&beamVisual);
 
-BOOL CVoltigore::CheckRangeAttack1(float flDot, float flDist)
+bool CVoltigore::CheckRangeAttack1(float flDot, float flDist)
 {
 	if (IsMoving() && flDist >= 512)
 	{
 		// voltigore will far too far behind if he stops running to spit at this distance from the enemy.
-		return FALSE;
+		return false;
 	}
 
 	if (flDist > 128.0f && flDist <= 1024.0f && flDot >= 0.5f && gpGlobals->time >= m_flNextBeamAttackCheck)
@@ -527,7 +527,7 @@ BOOL CVoltigore::CheckRangeAttack1(float flDot, float flDist)
 		if( tr.flFraction == 1.0f || tr.pHit == m_hEnemy->edict() )
 		{
 			m_flNextBeamAttackCheck = gpGlobals->time + RANDOM_FLOAT(1.5f, 5.0f);
-			return TRUE;
+			return true;
 		}
 		else
 		{
@@ -535,7 +535,7 @@ BOOL CVoltigore::CheckRangeAttack1(float flDot, float flDist)
 		}
 	}
 
-	return FALSE;
+	return false;
 }
 
 void CVoltigore::RunAI(void)
@@ -635,13 +635,13 @@ void CVoltigore::DeathGibThink()
 	}
 }
 
-BOOL CVoltigore::CheckMeleeAttack1(float flDot, float flDist)
+bool CVoltigore::CheckMeleeAttack1(float flDot, float flDist)
 {
 	if (HasConditions(bits_COND_SEE_ENEMY) && flDist <= 128.0f && flDot >= 0.6 && m_hEnemy != 0)
 	{
-		return TRUE;
+		return true;
 	}
-	return FALSE;
+	return false;
 }
 
 //=========================================================
@@ -1131,8 +1131,8 @@ public:
 	bool IsEnabledInMod() { return g_modFeatures.IsMonsterEnabled("babyvoltigore"); }
 	const char* DefaultDisplayName() { return "Baby Voltigore"; }
 	void	HandleAnimEvent(MonsterEvent_t* pEvent);
-	BOOL	CheckMeleeAttack1(float flDot, float flDist);
-	BOOL	CheckRangeAttack1(float flDot, float flDist);
+	bool	CheckMeleeAttack1(float flDot, float flDist) override;
+	bool	CheckRangeAttack1(float flDot, float flDist) override;
 	void	StartTask(Task_t *pTask);
 	void	GibMonster();
 	const char* DefaultGibModel() {
@@ -1284,13 +1284,13 @@ void CBabyVoltigore::HandleAnimEvent(MonsterEvent_t* pEvent)
 	}
 }
 
-BOOL CBabyVoltigore::CheckMeleeAttack1(float flDot, float flDist)
+bool CBabyVoltigore::CheckMeleeAttack1(float flDot, float flDist)
 {
 	if (HasConditions(bits_COND_SEE_ENEMY) && flDist <= 64.0f && flDot >= 0.6f && m_hEnemy != 0)
 	{
-		return TRUE;
+		return true;
 	}
-	return FALSE;
+	return false;
 }
 
 //=========================================================
@@ -1320,9 +1320,9 @@ void CBabyVoltigore::GibMonster()
 	CSquadMonster::GibMonster();
 }
 
-BOOL CBabyVoltigore::CheckRangeAttack1(float flDot, float flDist)
+bool CBabyVoltigore::CheckRangeAttack1(float flDot, float flDist)
 {
-	return FALSE;
+	return false;
 }
 
 //=========================================================

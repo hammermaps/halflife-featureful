@@ -85,9 +85,9 @@ public:
 
 	Schedule_t *GetSchedule( void );
 	Schedule_t *GetScheduleOfType( int Type );
-	BOOL FCanCheckAttacks( void );
-	BOOL CheckMeleeAttack1( float flDot, float flDist );
-	BOOL CheckRangeAttack1( float flDot, float flDist );
+	bool FCanCheckAttacks( void ) override;
+	bool CheckMeleeAttack1( float flDot, float flDist ) override;
+	bool CheckRangeAttack1( float flDot, float flDist ) override;
 	void StartTask( Task_t *pTask );
 	void AlertSound( void );
 	void DeathSound( void );
@@ -900,15 +900,15 @@ IMPLEMENT_CUSTOM_SCHEDULES( CAGrunt, CFollowingMonster )
 // because they can use their smart weapons against unseen
 // enemies. Base class doesn't attack anyone it can't see.
 //=========================================================
-BOOL CAGrunt::FCanCheckAttacks( void )
+bool CAGrunt::FCanCheckAttacks( void )
 {
 	if( !HasConditions( bits_COND_ENEMY_TOOFAR ) )
 	{
-		return TRUE;
+		return true;
 	}
 	else
 	{
-		return FALSE;
+		return false;
 	}
 }
 
@@ -916,13 +916,13 @@ BOOL CAGrunt::FCanCheckAttacks( void )
 // CheckMeleeAttack1 - alien grunts zap the crap out of
 // any enemy that gets too close.
 //=========================================================
-BOOL CAGrunt::CheckMeleeAttack1( float flDot, float flDist )
+bool CAGrunt::CheckMeleeAttack1( float flDot, float flDist )
 {
 	if( HasConditions( bits_COND_SEE_ENEMY ) && flDist <= AGRUNT_MELEE_DIST && flDot >= 0.6f && m_hEnemy != 0 )
 	{
-		return TRUE;
+		return true;
 	}
-	return FALSE;
+	return false;
 }
 
 //=========================================================
@@ -932,7 +932,7 @@ BOOL CAGrunt::CheckMeleeAttack1( float flDot, float flDist )
 // tracelines are done, so we may not want to do this every
 // server frame. Definitely not while firing.
 //=========================================================
-BOOL CAGrunt::CheckRangeAttack1( float flDot, float flDist )
+bool CAGrunt::CheckRangeAttack1( float flDot, float flDist )
 {
 	if( gpGlobals->time < m_flNextHornetAttackCheck )
 	{

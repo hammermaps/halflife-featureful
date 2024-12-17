@@ -60,9 +60,9 @@ public:
 	void	StartTask( Task_t *pTask );
 	void	RunTask( Task_t *pTask );
 
-	BOOL	CheckMeleeAttack1( float flDot, float flDist );
-	BOOL	CheckRangeAttack1( float flDot, float flDist );
-	BOOL	CheckRangeAttack2( float flDot, float flDist );
+	bool	CheckMeleeAttack1( float flDot, float flDist ) override;
+	bool	CheckRangeAttack1( float flDot, float flDist ) override;
+	bool	CheckRangeAttack2( float flDot, float flDist ) override;
 
 	Activity GetStoppedActivity( void );
 
@@ -319,32 +319,31 @@ int	CFlybee::DefaultClassify ( void )
 	return	CLASS_ALIEN_MONSTER;
 }
 
-BOOL CFlybee::CheckMeleeAttack1 ( float flDot, float flDist )
+bool CFlybee::CheckMeleeAttack1 ( float flDot, float flDist )
 {
 	if ( flDist <= 64  )
 	{
-		return TRUE;
+		return true;
 	}
-	return FALSE;
+	return false;
 }
 
-BOOL CFlybee::CheckRangeAttack1 ( float flDot, float flDist )
+bool CFlybee::CheckRangeAttack1 ( float flDot, float flDist )
 {
 	if ( !HasConditions( bits_COND_ENEMY_OCCLUDED ) && flDot > -0.7 && m_iFear <= HATE_LEVEL )
 	{
-		return TRUE;
+		return true;
 	}
-
-	return FALSE;
+	return false;
 }
 
-BOOL CFlybee::CheckRangeAttack2 ( float flDot, float flDist )
+bool CFlybee::CheckRangeAttack2 ( float flDot, float flDist )
 {
 	if ( !HasConditions( bits_COND_ENEMY_OCCLUDED ) && m_iFear >= FEAR_LEVEL && m_flNextAttack < gpGlobals->time )
 	{
-		return TRUE;
+		return true;
 	}
-	return FALSE;
+	return false;
 }
 
 void CFlybee::SetYawSpeed ( void )

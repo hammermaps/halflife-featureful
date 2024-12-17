@@ -95,8 +95,8 @@ public:
 	int  DefaultClassify ( void );
 	const char* DefaultDisplayName() { return "Headcrab"; }
 	void HandleAnimEvent( MonsterEvent_t *pEvent );
-	BOOL CheckRangeAttack1 ( float flDot, float flDist );
-	BOOL CheckRangeAttack2 ( float flDot, float flDist );
+	bool CheckRangeAttack1 ( float flDot, float flDist ) override;
+	bool CheckRangeAttack2 ( float flDot, float flDist ) override;
 	int TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType );
 
 	virtual float GetDamageAmount( void ) { return gSkillData.headcrabDmgBite; }
@@ -442,21 +442,21 @@ void CHeadCrab::StartTask( Task_t *pTask )
 //=========================================================
 // CheckRangeAttack1
 //=========================================================
-BOOL CHeadCrab::CheckRangeAttack1( float flDot, float flDist )
+bool CHeadCrab::CheckRangeAttack1( float flDot, float flDist )
 {
 	if( FBitSet( pev->flags, FL_ONGROUND ) && flDist <= 256 && flDot >= 0.65f )
 	{
-		return TRUE;
+		return true;
 	}
-	return FALSE;
+	return false;
 }
 
 //=========================================================
 // CheckRangeAttack2
 //=========================================================
-BOOL CHeadCrab::CheckRangeAttack2( float flDot, float flDist )
+bool CHeadCrab::CheckRangeAttack2( float flDot, float flDist )
 {
-	return FALSE;
+	return false;
 }
 
 int CHeadCrab::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType )
@@ -554,7 +554,7 @@ public:
 	const char* DefaultDisplayName() { return "Baby Headcrab"; }
 	void SetYawSpeed( void );
 	float GetDamageAmount( void ) { return gSkillData.headcrabDmgBite * 0.3f; }
-	BOOL CheckRangeAttack1( float flDot, float flDist );
+	bool CheckRangeAttack1( float flDot, float flDist ) override;
 	Schedule_t *GetScheduleOfType ( int Type );
 
 	static constexpr const char* idleSoundScript = "Babycrab.Idle";
@@ -632,19 +632,19 @@ void CBabyCrab::SetYawSpeed( void )
 	pev->yaw_speed = 120;
 }
 
-BOOL CBabyCrab::CheckRangeAttack1( float flDot, float flDist )
+bool CBabyCrab::CheckRangeAttack1( float flDot, float flDist )
 {
 	if( pev->flags & FL_ONGROUND )
 	{
 		if( pev->groundentity && ( pev->groundentity->v.flags & ( FL_CLIENT | FL_MONSTER ) ) )
-			return TRUE;
+			return true;
 
 		// A little less accurate, but jump from closer
 		if( flDist <= 180.0f && flDot >= 0.55f )
-			return TRUE;
+			return true;
 	}
 
-	return FALSE;
+	return false;
 }
 
 Schedule_t *CBabyCrab::GetScheduleOfType( int Type )

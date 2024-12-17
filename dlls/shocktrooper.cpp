@@ -85,8 +85,8 @@ public:
 	int  DefaultClassify(void);
 	const char* ReverseRelationshipModel() { return NULL; }
 	const char* DefaultDisplayName() { return "Shock Trooper"; }
-	BOOL CheckRangeAttack1(float flDot, float flDist);
-	BOOL CheckRangeAttack2(float flDot, float flDist);
+	bool CheckRangeAttack1(float flDot, float flDist) override;
+	bool CheckRangeAttack2(float flDot, float flDist) override;
 	void HandleAnimEvent(MonsterEvent_t *pEvent);
 
 	void DeathSound(void);
@@ -308,16 +308,16 @@ int	CShockTrooper::DefaultClassify(void)
 	return CLASS_RACEX_SHOCK;
 }
 
-BOOL CShockTrooper::CheckRangeAttack1(float flDot, float flDist)
+bool CShockTrooper::CheckRangeAttack1(float flDot, float flDist)
 {
 	return m_cAmmoLoaded >= 1 && CHGrunt::CheckRangeAttack1(flDot, flDist);
 }
 
-BOOL CShockTrooper::CheckRangeAttack2( float flDot, float flDist )
+bool CShockTrooper::CheckRangeAttack2( float flDot, float flDist )
 {
 	if( !FBitSet( pev->weapons, STROOPER_HANDGRENADE ) )
 	{
-		return FALSE;
+		return false;
 	}
 	return CheckRangeAttack2Impl(gSkillData.strooperGrenadeSpeed, flDot, flDist, false);
 }
