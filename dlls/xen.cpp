@@ -18,11 +18,12 @@
 #include "animation.h"
 #include "effects.h"
 #include "common_soundscripts.h"
+#include "visuals_utils.h"
 
 #define SF_XEN_PLANT_DROP_TO_FLOOR 2
 #define SF_XEN_PLANT_NONSOLID 8
 
-#define SF_XEN_PLATN_LIGHT_IGNORE_PLAYER 64
+#define SF_XEN_PLANT_LIGHT_IGNORE_PLAYER 64
 
 #define XEN_PLANT_GLOW_SPRITE		"sprites/flare3.spr"
 #define XEN_PLANT_HIDE_TIME			5
@@ -88,6 +89,7 @@ public:
 	virtual int Restore( CRestore &restore );
 	static TYPEDESCRIPTION m_SaveData[];
 
+	static const NamedVisual glowVisual;
 private:
 	CSprite *m_pGlow;
 };
@@ -101,11 +103,15 @@ TYPEDESCRIPTION	CXenPLight::m_SaveData[] =
 
 IMPLEMENT_SAVERESTORE( CXenPLight, CActAnimating )
 
+const NamedVisual CXenPLight::glowVisual = BuildVisual("XenLight.Glow")
+		.Model(XEN_PLANT_GLOW_SPRITE)
+		.RenderMode(kRenderGlow);
+
 void CXenPLight::Spawn( void )
 {
 	Precache();
 
-	SET_MODEL( ENT( pev ), "models/light.mdl" );
+	SetMyModel("models/light.mdl");
 	pev->movetype = MOVETYPE_NONE;
 
 	if (FBitSet(pev->spawnflags, SF_XEN_PLANT_DROP_TO_FLOOR))
@@ -123,15 +129,32 @@ void CXenPLight::Spawn( void )
 	if (FBitSet(pev->flags, FL_KILLME))
 		return;
 
-	m_pGlow = CSprite::SpriteCreate( XEN_PLANT_GLOW_SPRITE, pev->origin + Vector( 0, 0, ( pev->mins.z + pev->maxs.z ) * 0.5f ), FALSE );
-	m_pGlow->SetTransparency( kRenderGlow, (int)pev->rendercolor.x, (int)pev->rendercolor.y, (int)pev->rendercolor.z, (int)pev->renderamt, (int)pev->renderfx );
-	m_pGlow->SetAttachment( edict(), 1 );
+	const Visual* pGlow = GetVisual(glowVisual);
+	if (pGlow)
+	{
+		Visual glow = *pGlow;
+		if (!glow.HasDefined(Visual::COLOR_DEFINED))
+		{
+			glow.SetColor(Color((int)pev->rendercolor.x, (int)pev->rendercolor.y, (int)pev->rendercolor.z));
+		}
+		if (!glow.HasDefined(Visual::ALPHA_DEFINED))
+		{
+			glow.SetAlpha((int)pev->renderamt);
+		}
+		if (!glow.HasDefined(Visual::RENDERFX_DEFINED))
+		{
+			glow.SetRenderFx(pev->renderfx);
+		}
+		m_pGlow = CreateSpriteFromVisual(&glow, pev->origin + Vector( 0, 0, ( pev->mins.z + pev->maxs.z ) * 0.5f ));
+		if (m_pGlow)
+			m_pGlow->SetAttachment( edict(), 1 );
+	}
 }
 
 void CXenPLight::Precache( void )
 {
-	PRECACHE_MODEL( "models/light.mdl" );
-	PRECACHE_MODEL( XEN_PLANT_GLOW_SPRITE );
+	PrecacheMyModel("models/light.mdl");
+	RegisterVisual(glowVisual);
 }
 
 void CXenPLight::Think( void )
@@ -167,7 +190,7 @@ void CXenPLight::Think( void )
 
 void CXenPLight::Touch( CBaseEntity *pOther )
 {
-	if( !FBitSet(pev->spawnflags, SF_XEN_PLATN_LIGHT_IGNORE_PLAYER) && pOther->IsPlayer() )
+	if( !FBitSet(pev->spawnflags, SF_XEN_PLANT_LIGHT_IGNORE_PLAYER) && pOther->IsPlayer() )
 	{
 		pev->dmgtime = gpGlobals->time + XEN_PLANT_HIDE_TIME;
 		if( GetActivity() == ACT_IDLE || GetActivity() == ACT_STAND )
@@ -206,7 +229,7 @@ LINK_ENTITY_TO_CLASS( xen_hair, CXenHair )
 void CXenHair::Spawn( void )
 {
 	Precache();
-	SET_MODEL( edict(), "models/hair.mdl" );
+	SetMyModel("models/hair.mdl");
 	UTIL_SetSize( pev, Vector( -4, -4, 0 ), Vector( 4, 4, 32 ) );
 	pev->sequence = 0;
 
@@ -235,7 +258,7 @@ void CXenHair::Think( void )
 
 void CXenHair::Precache( void )
 {
-	PRECACHE_MODEL( "models/hair.mdl" );
+	PrecacheMyModel( "models/hair.mdl" );
 }
 
 class CXenTreeTrigger : public CBaseEntity
@@ -307,7 +330,7 @@ void CXenTree::Spawn( void )
 {
 	Precache();
 
-	SET_MODEL( ENT( pev ), "models/tree.mdl" );
+	SetMyModel("models/tree.mdl");
 	pev->movetype = MOVETYPE_NONE;
 	pev->solid = FBitSet(pev->spawnflags, SF_XEN_PLANT_NONSOLID) ? SOLID_NOT : SOLID_BBOX;
 
@@ -337,7 +360,7 @@ void CXenTree::Spawn( void )
 
 void CXenTree::Precache( void )
 {
-	PRECACHE_MODEL( "models/tree.mdl" );
+	PrecacheMyModel( "models/tree.mdl" );
 	RegisterAndPrecacheSoundScript(attackHitSoundScript, NPC::attackHitSoundScript);
 	RegisterAndPrecacheSoundScript(attackMissSoundScript, NPC::attackMissSoundScript);
 }
@@ -437,22 +460,32 @@ public:
 	//void HandleAnimEvent( MonsterEvent_t *pEvent );
 	void Attack( void ) {}
 
-	static const char *pModelNames[];
+	virtual const char* DefaultModel() const = 0;
+	void SetMySize(const Vector& vecMin, const Vector& vecMax);
 };
 
 class CXenSporeSmall : public CXenSpore
 {
 	void Spawn( void );
+	const char* DefaultModel() const override {
+		return "models/fungus(small).mdl";
+	}
 };
 
 class CXenSporeMed : public CXenSpore
 {
 	void Spawn( void );
+	const char* DefaultModel() const override {
+		return "models/fungus.mdl";
+	}
 };
 
 class CXenSporeLarge : public CXenSpore
 {
 	void Spawn( void );
+	const char* DefaultModel() const override {
+		return "models/fungus(small).mdl";
+	}
 
 	static const Vector m_hullSizes[];
 };
@@ -490,16 +523,14 @@ LINK_ENTITY_TO_CLASS( xen_hull, CXenHull )
 
 void CXenSporeSmall::Spawn( void )
 {
-	pev->skin = 0;
 	CXenSpore::Spawn();
-	UTIL_SetSize( pev, Vector( -16, -16, 0 ), Vector( 16, 16, 64) );
+	SetMySize( Vector( -16, -16, 0 ), Vector( 16, 16, 64) );
 }
 
 void CXenSporeMed::Spawn( void )
 {
-	pev->skin = 1;
 	CXenSpore::Spawn();
-	UTIL_SetSize( pev, Vector( -40, -40, 0 ), Vector( 40, 40, 120 ) );
+	SetMySize( Vector( -40, -40, 0 ), Vector( 40, 40, 120 ) );
 }
 
 // I just eyeballed these -- fill in hulls for the legs
@@ -514,9 +545,8 @@ const Vector CXenSporeLarge::m_hullSizes[] =
 
 void CXenSporeLarge::Spawn( void )
 {
-	pev->skin = 2;
 	CXenSpore::Spawn();
-	UTIL_SetSize( pev, Vector( -48, -48, 110 ), Vector( 48, 48, 240 ) );
+	SetMySize( Vector( -48, -48, 110 ), Vector( 48, 48, 240 ) );
 
 	if (FBitSet(pev->flags, FL_KILLME))
 		return;
@@ -537,7 +567,7 @@ void CXenSpore :: Spawn( void )
 {
 	Precache();
 
-	SET_MODEL( ENT( pev ), pModelNames[pev->skin] );
+	SetMyModel(DefaultModel());
 	pev->movetype = MOVETYPE_NONE;
 	pev->solid = FBitSet(pev->spawnflags, SF_XEN_PLANT_NONSOLID) ? SOLID_NOT : SOLID_BBOX;
 	pev->takedamage = DAMAGE_YES;
@@ -555,16 +585,9 @@ void CXenSpore :: Spawn( void )
 	}
 }
 
-const char *CXenSpore::pModelNames[] =
-{
-	"models/fungus(small).mdl",
-	"models/fungus.mdl",
-	"models/fungus(large).mdl",
-};
-
 void CXenSpore::Precache( void )
 {
-	PRECACHE_MODEL( pModelNames[pev->skin] );
+	PrecacheMyModel(DefaultModel());
 }
 
 void CXenSpore::Touch( CBaseEntity *pOther )
@@ -585,4 +608,17 @@ void CXenSpore::Think( void )
 		break;
 	}
 #endif
+}
+
+void CXenSpore::SetMySize(const Vector &vecMin, const Vector &vecMax)
+{
+	Vector vecMins = vecMin;
+	Vector vecMaxs = vecMax;
+	const EntTemplate* entTemplate = GetMyEntTemplate();
+	if (entTemplate && entTemplate->IsSizeDefined())
+	{
+		vecMins = entTemplate->MinSize();
+		vecMaxs = entTemplate->MaxSize();
+	}
+	UTIL_SetSize(pev, vecMins, vecMaxs);
 }

@@ -9008,8 +9008,9 @@
 // Xen
 //
 
-@BaseClass base(Targetname, RenderFields, Angles) flags(Angle) = XenPlant
+@BaseClass base(Targetname, RenderFields, Angles, EntityTemplate) flags(Angle) = XenPlant
 [
+	model(studio) : "Custom Model"
 	scale(string) : "Scale (1.0 = normal size)"
 	spawnflags(Flags) =
 	[
