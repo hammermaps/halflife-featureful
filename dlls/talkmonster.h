@@ -262,7 +262,7 @@ public:
 	float		m_flMedicWaitTime;
 
 	EHANDLE		m_hTalkTarget;	// who to look at while talking
-	BOOL m_fStartSuspicious;
+	bool m_fStartSuspicious;
 	short m_iTolerance;
 	short m_alertFriendsPolicy;
 	short m_alertableByFriends;

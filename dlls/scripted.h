@@ -209,8 +209,8 @@ public:
 	int	m_saved_solid;
 	int m_saved_effects;
 	//Vector m_vecOrigOrigin;
-	BOOL m_interruptable;
-	BOOL m_firedOnAnimStart;
+	bool m_interruptable;
+	bool m_firedOnAnimStart;
 	string_t m_iszFireOnAnimStart;
 	string_t m_iszFireOnPossessed;
 	short m_targetActivator;

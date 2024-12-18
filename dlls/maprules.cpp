@@ -986,8 +986,8 @@ private:
 	short m_suitLight;
 	short m_longjump;
 
-	BOOL m_allowOverheal;
-	BOOL m_allowOvercharge;
+	bool m_allowOverheal;
+	bool m_allowOvercharge;
 	float m_armorStrength;
 
 	short m_healthSetting;

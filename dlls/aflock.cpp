@@ -100,9 +100,9 @@ public:
 
 	CFlockingFlyer *m_pSquadLeader;
 	CFlockingFlyer *m_pSquadNext;
-	BOOL m_fTurning;// is this boid turning?
-	BOOL m_fCourseAdjust;// followers set this flag TRUE to override flocking while they avoid something
-	BOOL m_fPathBlocked;// TRUE if there is an obstacle ahead
+	bool m_fTurning;// is this boid turning?
+	bool m_fCourseAdjust;// followers set this flag true to override flocking while they avoid something
+	bool m_fPathBlocked;// true if there is an obstacle ahead
 	Vector m_vecReferencePoint;// last place we saw leader
 	Vector m_vecAdjustedVelocity;// adjusted velocity (used when fCourseAdjust is TRUE)
 	float m_flGoalSpeed;
@@ -370,7 +370,7 @@ void CFlockingFlyer::SpawnCommonCode()
 	pev->takedamage	= DAMAGE_NO;
 	pev->health = 1;
 
-	m_fPathBlocked	= FALSE;// obstacles will be detected
+	m_fPathBlocked	= false;// obstacles will be detected
 	SetMyFieldOfView(0.2f);
 
 	//SET_MODEL( ENT( pev ), "models/aflock.mdl" );
@@ -619,11 +619,11 @@ void CFlockingFlyer::FlockLeaderThink( void )
 		// if the boid is turning, stop the trend.
 		if( m_fTurning )
 		{
-			m_fTurning = FALSE;
+			m_fTurning = false;
 			pev->avelocity.y = 0;
 		}
 
-		m_fPathBlocked = FALSE;
+		m_fPathBlocked = false;
 
 		if( pev->speed <= FlySpeed() )
 			pev->speed += 5.0f;
@@ -636,7 +636,7 @@ void CFlockingFlyer::FlockLeaderThink( void )
 	}
 	
 	// IF we get this far in the function, the leader's path is blocked!
-	m_fPathBlocked = TRUE;
+	m_fPathBlocked = true;
 
 	if( !m_fTurning )// something in the way and boid is not already turning to avoid
 	{
@@ -655,18 +655,18 @@ void CFlockingFlyer::FlockLeaderThink( void )
 		if( flRightSide > flLeftSide )
 		{
 			pev->avelocity.y = -TurnRate();
-			m_fTurning = TRUE;
+			m_fTurning = true;
 		}
 		// default to left turn :)
 		else if( flLeftSide > flRightSide )
 		{
 			pev->avelocity.y = TurnRate();
-			m_fTurning = TRUE;
+			m_fTurning = true;
 		}
 		else
 		{
 			// equidistant. Pick randomly between left and right.
-			m_fTurning = TRUE;
+			m_fTurning = true;
 
 			if( RANDOM_LONG( 0, 1 ) == 0 )
 			{
@@ -799,7 +799,7 @@ void CFlockingFlyer::FlockFollowerThink( void )
 		}
 		else // set course adjust flag and calculate adjusted velocity
 		{
-			m_fCourseAdjust = TRUE;
+			m_fCourseAdjust = true;
 
 			// use VELOCITY, not angles, not all boids point the direction they are flying
 			//vecDir = UTIL_VecToAngles( pev->velocity );
@@ -831,7 +831,7 @@ void CFlockingFlyer::FlockFollowerThink( void )
 	}
 
 	// if we make it this far, boids path is CLEAR!
-	m_fCourseAdjust = FALSE;
+	m_fCourseAdjust = false;
 */
 
 //=========================================================

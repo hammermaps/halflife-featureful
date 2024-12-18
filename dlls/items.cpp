@@ -1150,8 +1150,8 @@ public:
 	float m_fireTime;
 	float m_playSentenceTime;
 	float m_sentenceDelay;
-	BOOL m_willUnlock;
-	BOOL m_wasUnlocked;
+	bool m_willUnlock;
+	bool m_wasUnlocked;
 };
 
 TYPEDESCRIPTION CEyeScanner::m_SaveData[] =

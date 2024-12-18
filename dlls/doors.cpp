@@ -80,7 +80,7 @@ public:
 	BYTE m_bUnlockedSentence;
 
 	short	m_iDirectUse;
-	BOOL	m_fIgnoreTargetname;
+	bool	m_fIgnoreTargetname;
 	short	m_iObeyTriggerMode;
 
 	short m_soundRadius;

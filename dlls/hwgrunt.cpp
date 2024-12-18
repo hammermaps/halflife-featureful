@@ -135,7 +135,7 @@ void CHWGrunt::Spawn()
 
 	m_afCapability		= bits_CAP_SQUAD | bits_CAP_TURN_HEAD | bits_CAP_DOORS_GROUP;
 
-	m_fEnemyEluded		= FALSE;
+	m_fEnemyEluded		= false;
 
 	m_HackedGunPos = Vector( 0, 0, 55 );
 

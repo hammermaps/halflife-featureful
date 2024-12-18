@@ -2665,7 +2665,7 @@ public:
 	virtual int		Restore( CRestore &restore );
 	static	TYPEDESCRIPTION m_SaveData[];
 
-	BOOL m_fInactive;
+	bool m_fInactive;
 };
 
 LINK_ENTITY_TO_CLASS( trigger_teleport, CTriggerTeleport )
@@ -4213,7 +4213,7 @@ void CTriggerXenReturn::TeleportTouch(CBaseEntity* pOther)
 		if (pOther->IsPlayer())
 		{
 			CBasePlayer* pPlayer = (CBasePlayer*)pOther;
-			pPlayer->m_fInXen = FALSE;
+			pPlayer->m_fInXen = false;
 			pPlayer->pev->gravity = 1.0f;
 			pPlayer->m_SndRoomtype = pPlayer->m_DisplacerSndRoomtype;
 		}
@@ -4451,7 +4451,7 @@ public:
 	int m_triggerCounter;
 	float m_minDelay;
 	float m_maxDelay;
-	BOOL m_active;
+	bool m_active;
 	string_t m_triggerOnLimit;
 	unsigned int m_delayRandomSeed;
 	EHANDLE m_hActivator;
@@ -4504,7 +4504,7 @@ void CTriggerTimer::KeyValue( KeyValueData *pkvd )
 void CTriggerTimer::Spawn()
 {
 	m_triggerCounter = 0;
-	m_active = FALSE;
+	m_active = false;
 	SetThink(&CTriggerTimer::TimerThink);
 
 	if (HasPredeterminedDelays()) {
@@ -4512,7 +4512,7 @@ void CTriggerTimer::Spawn()
 	}
 
 	if (pev->spawnflags & SF_TRIGGER_TIMER_START_ON) {
-		SetActive(TRUE);
+		SetActive(true);
 		pev->nextthink += 0.1; // some little delay of spawn
 	}
 }
@@ -4521,10 +4521,10 @@ void CTriggerTimer::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE 
 {
 	switch (useType) {
 	case USE_OFF:
-		SetActive(FALSE);
+		SetActive(false);
 		break;
 	case USE_ON:
-		SetActive(TRUE, pActivator);
+		SetActive(true, pActivator);
 		break;
 	default:
 		SetActive(!m_active, pActivator);
@@ -4546,7 +4546,7 @@ void CTriggerTimer::TimerThink()
 		if (m_triggerNumberLimit) {
 			m_triggerCounter++;
 			if (m_triggerCounter >= m_triggerNumberLimit) {
-				SetActive(FALSE);
+				SetActive(false);
 				m_triggerCounter = 0;
 				if (!FStringNull(m_triggerOnLimit))
 				{
@@ -5336,8 +5336,8 @@ public:
 	int m_iPosMode;
 	string_t m_iszFacing;
 	int m_iFaceMode;
-	BOOL m_activated;
-	BOOL m_active;
+	bool m_activated;
+	bool m_active;
 };
 LINK_ENTITY_TO_CLASS( motion_manager, CMotionManager )
 
@@ -5387,7 +5387,7 @@ void CMotionManager::Activate( void )
 	{
 		Use( this, this, USE_ON, 0 );
 	}
-	m_activated = TRUE;
+	m_activated = true;
 }
 
 void CMotionManager::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
@@ -5398,12 +5398,12 @@ void CMotionManager::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYP
 		{
 			if (m_active)
 			{
-				m_active = FALSE;
+				m_active = false;
 				RemoveThreads();
 			}
 			else
 			{
-				m_active = TRUE;
+				m_active = true;
 				AffectTargets(pActivator);
 			}
 		}

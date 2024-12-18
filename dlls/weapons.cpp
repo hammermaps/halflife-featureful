@@ -839,7 +839,7 @@ int CBasePlayerWeapon::UpdateClientData( CBasePlayer *pPlayer )
 
 		m_iClientClip = m_iClip;
 		m_iClientWeaponState = state;
-		pPlayer->m_fWeapon = TRUE;
+		pPlayer->m_fWeapon = true;
 	}
 
 	return 1;

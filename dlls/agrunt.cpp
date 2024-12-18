@@ -126,7 +126,7 @@ public:
 	static constexpr const char* useSoundScript = "AlienGrunt.Use";
 	static constexpr const char* unuseSoundScript = "AlienGrunt.UnUse";
 
-	BOOL m_fCanHornetAttack;
+	bool m_fCanHornetAttack;
 	float m_flNextHornetAttackCheck;
 
 	float m_flNextPainTime;
@@ -954,13 +954,13 @@ bool CAGrunt::CheckRangeAttack1( float flDot, float flDist )
 		if( tr.flFraction == 1.0f || tr.pHit == m_hEnemy->edict() )
 		{
 			m_flNextHornetAttackCheck = gpGlobals->time + RANDOM_FLOAT( 2.0f, 5.0f );
-			m_fCanHornetAttack = TRUE;
+			m_fCanHornetAttack = true;
 			return m_fCanHornetAttack;
 		}
 	}
 
 	m_flNextHornetAttackCheck = gpGlobals->time + 0.2f;// don't check for half second if this check wasn't successful
-	m_fCanHornetAttack = FALSE;
+	m_fCanHornetAttack = false;
 	return m_fCanHornetAttack;
 }
 

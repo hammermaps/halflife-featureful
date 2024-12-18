@@ -4444,7 +4444,7 @@ void CBaseMonster::GlowShellOn(const Visual* visual)
 		if (visual->HasDefined(Visual::RENDERMODE_DEFINED))
 			pev->rendermode = visual->rendermode;
 
-		m_glowShellUpdate = TRUE;
+		m_glowShellUpdate = true;
 	}
 	m_glowShellTime = gpGlobals->time + RandomizeNumberFromRange(visual->life);
 }
@@ -4460,7 +4460,7 @@ void CBaseMonster::GlowShellOff( void )
 
 		m_glowShellTime = 0.0f;
 
-		m_glowShellUpdate = FALSE;
+		m_glowShellUpdate = false;
 	}
 }
 void CBaseMonster::GlowShellUpdate( void )

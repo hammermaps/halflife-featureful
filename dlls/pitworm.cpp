@@ -116,9 +116,9 @@ public:
 	CBeam* m_pBeam;
 	CSprite* m_pSprite;
 
-	BOOL m_fAttacking;
-	BOOL m_fLockHeight;
-	BOOL m_fLockYaw;
+	bool m_fAttacking;
+	bool m_fLockHeight;
+	bool m_fLockYaw;
 
 	int m_iWasHit;
 	float m_flTakeHitTime;
@@ -128,8 +128,8 @@ public:
 	float m_flNextRangeTime;
 	float m_flDeathStartTime;
 
-	BOOL m_fFirstSighting;
-	BOOL m_fTopLevelLocked;
+	bool m_fFirstSighting;
+	bool m_fTopLevelLocked;
 
 	float m_flLastBlinkTime;
 	float m_flLastBlinkInterval;
@@ -335,19 +335,19 @@ void CPitWorm::Spawn()
 	m_vecDesired = Vector(1,0,0);
 	m_posDesired = pev->origin;
 
-	m_fAttacking = FALSE;
-	m_fLockHeight = FALSE;
-	m_fFirstSighting = FALSE;
+	m_fAttacking = false;
+	m_fLockHeight = false;
+	m_fFirstSighting = false;
 	m_flBeamExpireTime = gpGlobals->time;
 	m_iLevel = 0;
-	m_fLockYaw = FALSE;
+	m_fLockYaw = false;
 
 	m_iWasHit = 0;
 	m_flTakeHitTime = 0;
 	m_flHitTime = 0;
 	m_flLevelSpeed = 10;
 
-	m_fTopLevelLocked = FALSE;
+	m_fTopLevelLocked = false;
 	m_flLastBlinkTime = gpGlobals->time;
 	m_flLastBlinkInterval = gpGlobals->time;
 	m_flLastEventTime = gpGlobals->time;
@@ -492,14 +492,14 @@ void CPitWorm::HandleAnimEvent(MonsterEvent_t *pEvent)
 				m_angleBeam = UTIL_VecToAngles(m_vecBeam);
 				UTIL_MakeVectors(m_angleBeam);
 				ShootBeam();
-				m_fLockYaw = TRUE;
+				m_fLockYaw = true;
 			}
 		}
 	}
 		break;
 	case PITWORM_AE_EYEBLAST_END: // end killing swing
 	{
-		m_fLockYaw = TRUE;
+		m_fLockYaw = true;
 	}
 		break;
 	default:
@@ -518,7 +518,7 @@ void CPitWorm::TraceAttack( entvars_t *pevInflictor, entvars_t *pevAttacker, flo
 			if (pev->health <= 0)
 			{
 				pev->health = pev->max_health;
-				m_iWasHit = TRUE;
+				m_iWasHit = 1;
 				m_flTakeHitTime = m_flTakeHitTime + RANDOM_LONG(2,4);
 			}
 		}
@@ -750,7 +750,7 @@ void CPitWorm::HuntThink(void)
 	if (pev->health <= 0)
 	{
 		SetThink(&CPitWorm::DyingThink);
-		m_fSequenceFinished = TRUE;
+		m_fSequenceFinished = true;
 	}
 	else
 	{
@@ -788,7 +788,7 @@ void CPitWorm::HuntThink(void)
 			pev->frame = 255;
 		}
 		ResetSequenceInfo();
-		m_iWasHit = FALSE;
+		m_iWasHit = 0;
 		PainSound();
 	}
 	else if (m_fSequenceFinished)
@@ -796,9 +796,9 @@ void CPitWorm::HuntThink(void)
 		int oldSeq = pev->sequence;
 		if ( m_fAttacking )
 		{
-			m_fLockHeight = FALSE;
-			m_fLockYaw = FALSE;
-			m_fAttacking = FALSE;
+			m_fLockHeight = false;
+			m_fLockYaw = false;
+			m_fAttacking = false;
 			m_flNextMeleeTime = gpGlobals->time + 0.25;
 		}
 		NextActivity();
@@ -901,7 +901,7 @@ void CPitWorm::NextActivity()
 		{
 			const char* flinchAnim = RANDOM_LONG(0,1) ? "flinch1" : "flinch2";
 			pev->sequence = LookupSequence(flinchAnim);
-			m_iWasHit = FALSE;
+			m_iWasHit = 0;
 			PainSound();
 			m_fLockHeight = 0;
 			m_fLockYaw = 0;
@@ -917,9 +917,9 @@ void CPitWorm::NextActivity()
 				}
 
 				pev->sequence = LookupSequence("idle2");
-				m_fLockHeight = FALSE;
-				m_fLockYaw = FALSE;
-				m_fAttacking = FALSE;
+				m_fLockHeight = false;
+				m_fLockYaw = false;
+				m_fAttacking = false;
 			}
 		}
 		else
@@ -929,15 +929,15 @@ void CPitWorm::NextActivity()
 				IdleSound();
 			}
 			pev->sequence = LookupSequence("idle");
-			m_fLockHeight = FALSE;
-			m_fLockYaw = FALSE;
-			m_fAttacking = FALSE;
+			m_fLockHeight = false;
+			m_fLockYaw = false;
+			m_fAttacking = false;
 		}
 	}
 	if (m_hEnemy != 0 && !m_fFirstSighting)
 	{
 		AlertSound();
-		m_fFirstSighting = TRUE;
+		m_fFirstSighting = true;
 		pev->sequence = LookupSequence("scream");
 	}
 }
@@ -980,13 +980,13 @@ void CPitWorm::LockTopLevel()
 		pev->health = pev->max_health;
 		m_iWasHit = 1;
 		m_iLevel = 2;
-		m_fTopLevelLocked = TRUE;
+		m_fTopLevelLocked = true;
 		m_flTakeHitTime = gpGlobals->time + RANDOM_LONG(0,2);
 		m_posDesired.z = m_flLevels[2];
 	}
 	else
 	{
-		m_fTopLevelLocked = TRUE;
+		m_fTopLevelLocked = true;
 	}
 }
 
@@ -1039,9 +1039,9 @@ bool CPitWorm::ClawAttack()
 		if (shouldClaw)
 		{
 			EmitSoundScript(swipeSoundScript);
-			m_fLockHeight = TRUE;
-			m_fLockYaw = TRUE;
-			m_fAttacking = TRUE;
+			m_fLockHeight = true;
+			m_fLockYaw = true;
+			m_fAttacking = true;
 			return true;
 		}
 
@@ -1069,7 +1069,7 @@ bool CPitWorm::ClawAttack()
 		{
 			pev->sequence = LookupSequence("doorclaw1");
 			m_flIdealHeadYaw = 0;
-			m_fLockYaw = TRUE;
+			m_fLockYaw = true;
 		}
 	}
 	else if (m_iLevel == 3)
@@ -1113,7 +1113,7 @@ bool CPitWorm::ClawAttack()
 		{
 			pev->sequence = LookupSequence("doorclaw3");
 			m_flIdealHeadYaw = 0;
-			m_fLockYaw = TRUE;
+			m_fLockYaw = true;
 		}
 	}
 	if (pev->sequence == LookupSequence("eyeblast"))
@@ -1124,8 +1124,8 @@ bool CPitWorm::ClawAttack()
 	{
 		EmitSoundScript(swipeSoundScript);
 	}
-	m_fAttacking = TRUE;
-	m_fLockHeight = TRUE;
+	m_fAttacking = true;
+	m_fLockHeight = true;
 	return true;
 }
 

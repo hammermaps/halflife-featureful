@@ -169,7 +169,7 @@ public:
 	float				m_flFallVelocity;
 
 	int					m_rgItems[MAX_ITEMS];
-	int					m_fKnownItem;		// True when a new item needs to be added
+	bool				m_fKnownItem;		// True when a new item needs to be added
 	int					m_fNewAmmo;			// True when a new item has been added
 
 	unsigned int		m_afPhysicsFlags;	// physics flags - set when 'normal' physics should be revisited or overriden
@@ -202,18 +202,18 @@ public:
 
 	int					m_bitsHUDDamage;		// Damage bits for the current fame. These get sent to 
 										// the hude via the DAMAGE message
-	BOOL				m_fInitHUD;				// True when deferred HUD restart msg needs to be sent
-	BOOL				m_fGameHUDInitialized;
+	bool				m_fInitHUD;				// True when deferred HUD restart msg needs to be sent
+	bool				m_fGameHUDInitialized;
 	int					m_iTrain;				// Train control position
-	BOOL				m_fWeapon;				// Set this to FALSE to force a reset of the current weapon HUD info
+	bool				m_fWeapon;				// Set this to FALSE to force a reset of the current weapon HUD info
 
 	EHANDLE				m_pTank;				// the tank which the player is currently controlling,  NULL if no tank
 	EHANDLE				m_hViewEntity;			// The view entity being used, or null if the player is using itself as the view entity
 	bool				m_bResetViewEntity;		//True if the player's view needs to be set back to the view entity
 	float				m_fDeadTime;			// the time at which the player died  (used in PlayerDeathThink())
 
-	BOOL			m_fNoPlayerSound;	// a debugging feature. Player makes no sound if this is true. 
-	BOOL			m_fLongJump; // does this player have the longjump module?
+	bool			m_fNoPlayerSound;	// a debugging feature. Player makes no sound if this is true.
+	bool			m_fLongJump; // does this player have the longjump module?
 
 	int			m_iUpdateTime;		// stores the number of frame ticks before sending HUD update messages
 	int			m_iClientHealth;	// the health currently known by the client.  If this changes, send a new
@@ -241,7 +241,7 @@ public:
 	int	m_rgAmmoLast[MAX_AMMO_TYPES];
 
 	Vector				m_vecAutoAim;
-	BOOL				m_fOnTarget;
+	bool				m_fOnTarget;
 	int					m_iDeaths;
 	float				m_flRespawnTimer;	// used in PlayerDeathThink() to make sure players can always respawn
 
@@ -467,11 +467,11 @@ public:
 	Vector m_vecLastViewAngles;
 	float m_flNextRespawnMessageTime;
 #if FEATURE_DISPLACER
-	BOOL	m_fInXen;
+	bool	m_fInXen;
 	Vector m_DisplacerReturn;
 	int m_DisplacerSndRoomtype;
 #endif
-	BOOL	m_fNVGisON;
+	bool	m_fNVGisON;
 	friend class CDisplacer;
 	friend class CTriggerXenReturn;
 
@@ -520,8 +520,8 @@ public:
 
 	BYTE m_timeBasedDmgModifiers[CDMG_TIMEBASED];
 
-	BOOL m_settingsLoaded;
-	BOOL m_buddha;
+	bool m_settingsLoaded;
+	bool m_buddha;
 	short m_iSatchelControl;
 	short m_iPreferNewGrenadePhysics;
 

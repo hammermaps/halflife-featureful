@@ -84,9 +84,9 @@ public:
 	virtual int Restore( CRestore &restore );
 	static TYPEDESCRIPTION m_SaveData[];
 
-	BOOL m_fGunDrawn;
+	bool m_fGunDrawn;
 	float m_checkAttackTime;
-	BOOL m_lastAttackCheck;
+	bool m_lastAttackCheck;
 
 	virtual void SetGunState(int gunState);
 	int bodystate;
@@ -292,9 +292,9 @@ bool CBarney::CheckRangeAttack1( float flDot, float flDist )
 			UTIL_TraceLine( shootOrigin, shootTarget, dont_ignore_monsters, ENT( pev ), &tr );
 			m_checkAttackTime = gpGlobals->time + 1.0f;
 			if( tr.flFraction == 1.0f || ( tr.pHit != NULL && CBaseEntity::Instance( tr.pHit ) == pEnemy ) )
-				m_lastAttackCheck = TRUE;
+				m_lastAttackCheck = true;
 			else
-				m_lastAttackCheck = FALSE;
+				m_lastAttackCheck = false;
 		}
 		return m_lastAttackCheck;
 	}

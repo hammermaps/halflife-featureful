@@ -1801,7 +1801,7 @@ void CBasePlayer::StartObserver( Vector vecPosition, Vector vecViewAngle )
 	pev->health = 1;
 
 	// Clear out the status bar
-	m_fInitHUD = TRUE;
+	m_fInitHUD = true;
 
 	pev->team = 0;
 	MESSAGE_BEGIN( MSG_ALL, gmsgTeamInfo );
@@ -3829,7 +3829,7 @@ void CBasePlayer::Spawn( void )
 	m_bitsHUDDamage = -1;
 	m_bitsDamageType = 0;
 	m_afPhysicsFlags = 0;
-	m_fLongJump = FALSE;// no longjump module. 
+	m_fLongJump = false;// no longjump module.
 
 	g_engfuncs.pfnSetPhysicsKeyValue( edict(), "slj", "0" );
 	g_engfuncs.pfnSetPhysicsKeyValue( edict(), "hl", "1" );
@@ -3879,12 +3879,12 @@ void CBasePlayer::Spawn( void )
 		ALERT( at_console, "Couldn't alloc player sound slot!\n" );
 	}
 
-	m_fNoPlayerSound = FALSE;// normal sound behavior.
+	m_fNoPlayerSound = false;// normal sound behavior.
 
 	m_pLastItem = NULL;
-	m_fInitHUD = TRUE;
+	m_fInitHUD = true;
 	m_iClientHideHUD = -1;  // force this to be recalculated
-	m_fWeapon = FALSE;
+	m_fWeapon = false;
 	m_pClientActiveItem = NULL;
 	m_iClientBattery = -1;
 	m_iClientMaxBattery = -1;
@@ -3900,7 +3900,7 @@ void CBasePlayer::Spawn( void )
 
 	m_flNextChatTime = gpGlobals->time;
 #if FEATURE_DISPLACER
-	m_fInXen = FALSE;
+	m_fInXen = false;
 #endif
 
 	g_pGameRules->PlayerSpawn( this );
@@ -3933,7 +3933,7 @@ void CBasePlayer::Precache( void )
 	m_iUpdateTime = 5;  // won't update for 1/2 a second
 
 	if( gInitHUD )
-		m_fInitHUD = TRUE;
+		m_fInitHUD = true;
 
 	pev->fov = m_iFOV;	// Vit_amiN: restore the FOV on level change or map/saved game load
 	m_movementState = MovementStand;
@@ -4405,7 +4405,7 @@ void CBasePlayer::NVGTurnOn()
 		else if (*g_modFeatures.nvg_sound_on)
 			EMIT_SOUND_DYN( ENT( pev ), CHAN_WEAPON, g_modFeatures.nvg_sound_on, 1.0, ATTN_NORM, 0, PITCH_NORM );
 
-		m_fNVGisON = TRUE;
+		m_fNVGisON = true;
 		MESSAGE_BEGIN( MSG_ONE, gmsgNightvision, NULL, pev );
 			WRITE_BYTE( 1 );
 		MESSAGE_END();
@@ -4428,7 +4428,7 @@ void CBasePlayer::NVGTurnOff(bool playOffSound)
 				EMIT_SOUND_DYN( ENT( pev ), CHAN_WEAPON, g_modFeatures.nvg_sound_off, 1.0, ATTN_NORM, 0, PITCH_NORM );
 		}
 
-		m_fNVGisON = FALSE;
+		m_fNVGisON = false;
 		MESSAGE_BEGIN( MSG_ONE, gmsgNightvision, NULL, pev );
 			WRITE_BYTE( 0 );
 		MESSAGE_END();
@@ -4456,9 +4456,9 @@ void CBasePlayer::ForceClientDllUpdate( void )
 	m_iClientFOV = -1;	// Vit_amiN: force client weapons to be sent
 	m_ClientSndRoomtype = -1;
 	m_iTrain |= TRAIN_NEW;  // Force new train message.
-	m_fWeapon = FALSE;          // Force weapon send
-	m_fKnownItem = FALSE;    // Force weaponinit messages.
-	m_fInitHUD = TRUE;		// Force HUD gmsgResetHUD message
+	m_fWeapon = false;          // Force weapon send
+	m_fKnownItem = false;    // Force weaponinit messages.
+	m_fInitHUD = true;		// Force HUD gmsgResetHUD message
 	memset( m_rgAmmoLast, 0, sizeof( m_rgAmmoLast )); // a1ba: Force update AmmoX
 	m_iClientItemsBits = 0;
 
@@ -4689,12 +4689,12 @@ void CBasePlayer::CheatImpulseCommands( int iImpulse )
 		if( m_fNoPlayerSound )
 		{
 			ALERT( at_console, "Player is audible\n" );
-			m_fNoPlayerSound = FALSE;
+			m_fNoPlayerSound = false;
 		}
 		else
 		{
 			ALERT( at_console, "Player is silent\n" );
-			m_fNoPlayerSound = TRUE;
+			m_fNoPlayerSound = true;
 		}
 		break;
 	case 106:
@@ -5095,7 +5095,7 @@ void CBasePlayer::UpdateClientData( void )
 {
 	if( m_fInitHUD )
 	{
-		m_fInitHUD = FALSE;
+		m_fInitHUD = false;
 		gInitHUD = false;
 
 		MESSAGE_BEGIN( MSG_ONE, gmsgResetHUD, NULL, pev );
@@ -5130,7 +5130,7 @@ void CBasePlayer::UpdateClientData( void )
 				}
 			}
 
-			m_fGameHUDInitialized = TRUE;
+			m_fGameHUDInitialized = true;
 
 			m_iObserverLastMode = OBS_ROAMING;
 
@@ -5324,7 +5324,7 @@ void CBasePlayer::UpdateClientData( void )
 	//
 	if( !m_fKnownItem )
 	{
-		m_fKnownItem = TRUE;
+		m_fKnownItem = true;
 
 	// WeaponInit Message
 	// byte  = # of weapons
@@ -5672,12 +5672,12 @@ Vector CBasePlayer::GetAutoaimVectorFromPoint( const Vector& vecSrc, float flDel
 		// flDelta *= 0.5;
 	}
 
-	BOOL m_fOldTargeting = m_fOnTarget;
+	bool m_fOldTargeting = m_fOnTarget;
 	Vector angles = AutoaimDeflection(vecSrc, flDist, flDelta );
 
 	// update ontarget if changed
 	if( !g_pGameRules->AllowAutoTargetCrosshair() )
-		m_fOnTarget = 0;
+		m_fOnTarget = false;
 	else if( m_fOldTargeting != m_fOnTarget )
 	{
 		m_pActiveItem->UpdateItemInfo();
@@ -5743,7 +5743,7 @@ Vector CBasePlayer::AutoaimDeflection( const Vector &vecSrc, float flDist, float
 
 	if( !( g_psv_aim->value && g_psv_allow_autoaim && g_psv_allow_autoaim->value ))
 	{
-		m_fOnTarget = FALSE;
+		m_fOnTarget = false;
 		return g_vecZero;
 	}
 
@@ -5754,7 +5754,7 @@ Vector CBasePlayer::AutoaimDeflection( const Vector &vecSrc, float flDist, float
 	bestdot = flDelta; // +- 10 degrees
 	bestent = NULL;
 
-	m_fOnTarget = FALSE;
+	m_fOnTarget = false;
 
 	UTIL_TraceLine( vecSrc, vecSrc + bestdir * flDist, dont_ignore_monsters, edict(), &tr );
 
@@ -5764,7 +5764,7 @@ Vector CBasePlayer::AutoaimDeflection( const Vector &vecSrc, float flDist, float
 		if( !LineOfSightSeparatedByWaterSurface(pev->waterlevel, tr.pHit->v.waterlevel) )
 		{
 			if( tr.pHit->v.takedamage == DAMAGE_AIM )
-				m_fOnTarget = TRUE;
+				m_fOnTarget = true;
 
 			return m_vecAutoAim;
 		}
@@ -5843,7 +5843,7 @@ Vector CBasePlayer::AutoaimDeflection( const Vector &vecSrc, float flDist, float
 		bestdir = bestdir - pev->v_angle - pev->punchangle;
 
 		if( bestent->v.takedamage == DAMAGE_AIM )
-			m_fOnTarget = TRUE;
+			m_fOnTarget = true;
 
 		return bestdir;
 	}
@@ -5858,7 +5858,7 @@ void CBasePlayer::ResetAutoaim()
 		m_vecAutoAim = Vector( 0, 0, 0 );
 		SET_CROSSHAIRANGLE( edict(), 0, 0 );
 	}
-	m_fOnTarget = FALSE;
+	m_fOnTarget = false;
 }
 
 /*

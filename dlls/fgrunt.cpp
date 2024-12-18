@@ -230,9 +230,9 @@ public:
 
 	Vector	m_vecTossVelocity;
 
-	BOOL	m_fThrowGrenade;
-	BOOL	m_fStanding;
-	BOOL	m_fFirstEncounter;// only put on the handsign show in the squad's first encounter.
+	bool	m_fThrowGrenade;
+	bool	m_fStanding;
+	bool	m_fFirstEncounter;// only put on the handsign show in the squad's first encounter.
 	int		m_cClipSize;
 
 	int		m_iSentence;
@@ -340,10 +340,10 @@ public:
 
 	CUSTOM_SCHEDULES
 	float m_flHealCharge;
-	BOOL m_fDepleteLine;
-	BOOL m_fHealing;
+	bool m_fDepleteLine;
+	bool m_fHealing;
 	EHANDLE m_hLeadingPlayer;
-	BOOL m_fSaidHeal;
+	bool m_fSaidHeal;
 
 	static constexpr const char* painSoundScript = "MedicGrunt.Pain";
 	static constexpr const char* dieSoundScript = "MedicGrunt.Die";
@@ -1377,7 +1377,7 @@ void CHFGrunt :: PrescheduleThink ( void )
 			if ( gpGlobals->time - MySquadLeader()->m_flLastEnemySightTime > 5 )
 			{
 				// been a while since we've seen the enemy
-				MySquadLeader()->m_fEnemyEluded = TRUE;
+				MySquadLeader()->m_fEnemyEluded = true;
 			}
 		}
 	}
@@ -1479,7 +1479,7 @@ bool CHFGrunt::CheckRangeAttack2Impl( float grenadeSpeed, float flDot, float flD
 	// if the grunt isn't moving, it's ok to check.
 	if ( m_flGroundSpeed != 0 )
 	{
-		m_fThrowGrenade = FALSE;
+		m_fThrowGrenade = false;
 		return m_fThrowGrenade;
 	}
 
@@ -1494,7 +1494,7 @@ bool CHFGrunt::CheckRangeAttack2Impl( float grenadeSpeed, float flDot, float flD
 		//!!!BUGBUG - we should make this check movetype and make sure it isn't FLY? Players who jump a lot are unlikely to
 		// be grenaded.
 		// don't throw grenades at anything that isn't on the ground!
-		m_fThrowGrenade = FALSE;
+		m_fThrowGrenade = false;
 		return m_fThrowGrenade;
 	}
 
@@ -1532,7 +1532,7 @@ bool CHFGrunt::CheckRangeAttack2Impl( float grenadeSpeed, float flDot, float flD
 	{
 		// crap, I might blow my own guy up. Don't throw a grenade and don't check again for a while.
 		m_flNextGrenadeCheck = gpGlobals->time + 1; // one full second.
-		m_fThrowGrenade = FALSE;
+		m_fThrowGrenade = false;
 		return m_fThrowGrenade;
 	}
 
@@ -1540,7 +1540,7 @@ bool CHFGrunt::CheckRangeAttack2Impl( float grenadeSpeed, float flDot, float flD
 	{
 		// crap, I don't want to blow myself up
 		m_flNextGrenadeCheck = gpGlobals->time + 1; // one full second.
-		m_fThrowGrenade = FALSE;
+		m_fThrowGrenade = false;
 		return m_fThrowGrenade;
 	}
 
@@ -1554,14 +1554,14 @@ bool CHFGrunt::CheckRangeAttack2Impl( float grenadeSpeed, float flDot, float flD
 			m_vecTossVelocity = vecToss;
 
 			// throw a hand grenade
-			m_fThrowGrenade = TRUE;
+			m_fThrowGrenade = true;
 			// don't check again for a while.
 			m_flNextGrenadeCheck = gpGlobals->time; // 1/3 second.
 		}
 		else
 		{
 			// don't throw
-			m_fThrowGrenade = FALSE;
+			m_fThrowGrenade = false;
 			// don't check again for a while.
 			m_flNextGrenadeCheck = gpGlobals->time + 1; // one full second.
 		}
@@ -1575,14 +1575,14 @@ bool CHFGrunt::CheckRangeAttack2Impl( float grenadeSpeed, float flDot, float flD
 			m_vecTossVelocity = vecToss;
 
 			// throw a hand grenade
-			m_fThrowGrenade = TRUE;
+			m_fThrowGrenade = true;
 			// don't check again for a while.
 			m_flNextGrenadeCheck = gpGlobals->time + 0.3; // 1/3 second.
 		}
 		else
 		{
 			// don't throw
-			m_fThrowGrenade = FALSE;
+			m_fThrowGrenade = false;
 			// don't check again for a while.
 			m_flNextGrenadeCheck = gpGlobals->time + 1; // one full second.
 		}
@@ -1769,7 +1769,7 @@ void CHFGrunt :: HandleAnimEvent( MonsterEvent_t *pEvent )
 			else
 				CGrenade::ShootTimed( pev, GetGunPosition(), m_vecTossVelocity, 3.5 );
 
-			m_fThrowGrenade = FALSE;
+			m_fThrowGrenade = false;
 			m_flNextGrenadeCheck = gpGlobals->time + 6;// wait six seconds before even looking again to see if a grenade can be thrown.
 			// !!!LATER - when in a group, only try to throw grenade if ordered.
 		}
@@ -1794,7 +1794,7 @@ void CHFGrunt :: HandleAnimEvent( MonsterEvent_t *pEvent )
 			}
 			else
 				CGrenade::ShootContact( pev, GetGunPosition(), m_vecTossVelocity );
-			m_fThrowGrenade = FALSE;
+			m_fThrowGrenade = false;
 			if (g_iSkillLevel == SKILL_EASY)
 				m_flNextGrenadeCheck = gpGlobals->time + RANDOM_FLOAT( 2, 5 );// wait a random amount of time before shooting again
 			else
@@ -1963,8 +1963,8 @@ void CHFGrunt::SpawnHelper(const char *defaultModel, float defaultHealth)
 
 	m_afCapability		= bits_CAP_HEAR | bits_CAP_SQUAD | bits_CAP_TURN_HEAD | bits_CAP_DOORS_GROUP;
 
-	m_fEnemyEluded		= FALSE;
-	m_fFirstEncounter	= TRUE;// this is true when the grunt spawns, because he hasn't encountered an enemy yet.
+	m_fEnemyEluded		= false;
+	m_fFirstEncounter	= true;// this is true when the grunt spawns, because he hasn't encountered an enemy yet.
 
 	m_HackedGunPos = Vector ( 0, 0, 55 );
 	m_iSentence = -1;
@@ -2227,7 +2227,7 @@ Schedule_t* CHFGrunt :: GetScheduleOfType ( int Type )
 		{
 			// randomly stand or crouch
 			if (RANDOM_LONG(0,9) == 0)
-				m_fStanding = RANDOM_LONG(0,1);
+				m_fStanding = RANDOM_LONG(0,1) ? true : false;
 
 			if (m_fStanding)
 				return &slFGruntRangeAttack1B[ 0 ];
@@ -2281,7 +2281,7 @@ Schedule_t* CHFGrunt :: GetScheduleOfType ( int Type )
 		{
 			if ( m_fFirstEncounter )
 			{
-				m_fFirstEncounter = FALSE;// after first encounter, leader won't issue handsigns anymore when he has a new enemy
+				m_fFirstEncounter = false;// after first encounter, leader won't issue handsigns anymore when he has a new enemy
 				return &slFGruntSignalSuppress[ 0 ];
 			}
 			else
@@ -2517,7 +2517,7 @@ Schedule_t *CHFGrunt :: GetSchedule ( void )
 			{
 				if ( InSquad() )
 				{
-					MySquadLeader()->m_fEnemyEluded = FALSE;
+					MySquadLeader()->m_fEnemyEluded = false;
 
 					if ( !IsLeader() )
 					{
@@ -2611,7 +2611,7 @@ Schedule_t *CHFGrunt :: GetSchedule ( void )
 					// little time and give the player a chance to turn.
 					if ( MySquadLeader()->m_fEnemyEluded && !HasConditions ( bits_COND_ENEMY_FACING_ME ) )
 					{
-						MySquadLeader()->m_fEnemyEluded = FALSE;
+						MySquadLeader()->m_fEnemyEluded = false;
 						return GetScheduleOfType ( SCHED_HGRUNT_ALLY_FOUND_ENEMY );
 					}
 				}
@@ -2960,8 +2960,8 @@ public:
 	static	TYPEDESCRIPTION m_SaveData[];
 
 	CBeam *m_pBeam;
-	BOOL m_torchActive;
-	BOOL m_gasTankExploded;
+	bool m_torchActive;
+	bool m_gasTankExploded;
 
 	static constexpr const char* painSoundScript = "TorchGrunt.Pain";
 	static constexpr const char* dieSoundScript = "TorchGrunt.Die";
@@ -3221,7 +3221,7 @@ void CTorch::TraceAttack(entvars_t *pevInflictor, entvars_t *pevAttacker, float 
 		{
 			if (!m_gasTankExploded && g_pGameRules->FMonsterCanTakeDamage(this, CBaseEntity::Instance(pevAttacker)))
 			{
-				m_gasTankExploded = TRUE;
+				m_gasTankExploded = true;
 
 				bitsDamageType = (DMG_ALWAYSGIB | DMG_BLAST);
 				flDamage = pev->health + 1;
@@ -3297,7 +3297,7 @@ void CTorch::UpdateGas( void )
 
 void CTorch::MakeGas( bool doSpark )
 {
-	m_torchActive = TRUE;
+	m_torchActive = true;
 
 	m_pBeam = CreateBeamFromVisual(GetVisual(beamVisual));
 	if ( m_pBeam )
@@ -3316,7 +3316,7 @@ void CTorch::MakeGas( bool doSpark )
 
 void CTorch::KillGas( void )
 {
-	m_torchActive = FALSE;
+	m_torchActive = false;
 	if ( m_pBeam )
 	{
 		UTIL_Remove( m_pBeam );
@@ -3512,7 +3512,7 @@ bool CMedic::Heal( void )
 
 	m_flHealCharge -= m_hTargetEnt->TakeHealth( this, Q_min(10, m_flHealCharge), DMG_GENERIC );
 	ALERT(at_aiconsole, "Medic grunt heal charge left: %f\n", m_flHealCharge);
-	m_fHealing = TRUE;
+	m_fHealing = true;
 	return true;
 }
 
@@ -3536,7 +3536,7 @@ void CMedic::StartTask(Task_t *pTask)
 			{
 				m_hTalkTarget = m_hTargetEnt;
 				PlaySentence( SentenceGroup(TLK_HEAL), 2, VOL_NORM, ATTN_IDLE );
-				m_fSaidHeal = TRUE;
+				m_fSaidHeal = true;
 			}
 			TaskComplete();
 		}
@@ -3639,7 +3639,7 @@ Schedule_t *CMedic::GetSchedule()
 		{
 			if (m_hTargetEnt != 0 && FollowedPlayer() == m_hTargetEnt)
 			{
-				m_fSaidHeal = FALSE;
+				m_fSaidHeal = false;
 				if ( TargetDistance() <= 128 )
 				{
 					if ( m_hTargetEnt->pev->health <= m_hTargetEnt->pev->max_health * 0.75 && CheckHealCharge() ) {
@@ -3963,7 +3963,7 @@ void CMedic::StartFollowingHealTarget(CBaseEntity *pTarget)
 	if (m_hTargetEnt != 0 && m_hTargetEnt->IsPlayer())
 		m_hLeadingPlayer = m_hTargetEnt;
 
-	m_fSaidHeal = FALSE;
+	m_fSaidHeal = false;
 
 	StopScript();
 
@@ -3976,7 +3976,7 @@ void CMedic::StartFollowingHealTarget(CBaseEntity *pTarget)
 
 void CMedic::RestoreTargetEnt()
 {
-	m_fSaidHeal = FALSE;
+	m_fSaidHeal = false;
 	if (m_hLeadingPlayer != 0)
 	{
 		ALERT(at_aiconsole, "Medic restoring old target\n");
@@ -3989,7 +3989,7 @@ void CMedic::RestoreTargetEnt()
 
 void CMedic::StopHealing(bool clearTargetEnt)
 {
-	m_fHealing = FALSE;
+	m_fHealing = false;
 
 	const SoundScript* soundScript = GetSoundScript(healSoundScript);
 	if (soundScript)
@@ -4027,7 +4027,7 @@ bool CMedic::CheckHealCharge()
 		{
 			m_hTalkTarget = m_hTargetEnt;
 			PlaySentence( SentenceGroup(TLK_NOTHEAL), 2, VOL_NORM, ATTN_IDLE );
-			m_fDepleteLine = TRUE;
+			m_fDepleteLine = true;
 		}
 		return false;
 	}

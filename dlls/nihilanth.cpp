@@ -997,7 +997,7 @@ void CNihilanth::HuntThink( void )
 	if( pev->health <= 0 )
 	{
 		SetThink( &CNihilanth::DyingThink );
-		m_fSequenceFinished = TRUE;
+		m_fSequenceFinished = true;
 		return;
 	}
 

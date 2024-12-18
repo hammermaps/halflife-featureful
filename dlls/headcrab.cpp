@@ -718,7 +718,7 @@ public:
 	static const NamedSoundScript biteSoundScript;
 
 	float m_flBirthTime;
-	BOOL m_fRoachSolid;
+	bool m_fRoachSolid;
 
 protected:
 	void AttackSound();
@@ -811,7 +811,7 @@ void CShockRoach::Spawn()
 	SetMyFieldOfView(0.5f);// indicates the width of this monster's forward view cone ( as a dotproduct result )
 	m_MonsterState = MONSTERSTATE_NONE;
 
-	m_fRoachSolid = FALSE;
+	m_fRoachSolid = false;
 	m_flBirthTime = gpGlobals->time;
 
 	MonsterInit();
@@ -904,7 +904,7 @@ void CShockRoach::MonsterThink(void)
 		pev->movetype = MOVETYPE_STEP;
 	}
 	if (!m_fRoachSolid && lifeTime >= 2.0) {
-		m_fRoachSolid = TRUE;
+		m_fRoachSolid = true;
 		SetMySize(DefaultMinHullSize(), DefaultMaxHullSize());
 	}
 	// die when ready

@@ -539,7 +539,7 @@ void CWallHealthJarDecay::Update(bool slosh, float value)
 		pev->sequence = 1;
 		ResetSequenceInfo();
 		pev->frame = 0;
-		m_fSequenceLoops = TRUE;
+		m_fSequenceLoops = true;
 		pev->nextthink = gpGlobals->time;
 	}
 	const float jarBoneControllerValue = value * 11 - 11;
@@ -599,9 +599,9 @@ public:
 	int m_iState;
 	float m_flSoundTime;
 	float m_goToOffTime;
-	BOOL m_goingToOff;
+	bool m_goingToOff;
+	bool m_playingChargeSound;
 	CWallHealthJarDecay* m_jar;
-	BOOL m_playingChargeSound;
 	float m_currentYaw;
 	float m_goalYaw;
 	string_t m_triggerOnFirstUse;
@@ -804,7 +804,7 @@ void CWallHealthDecay::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TY
 	if (m_iState != Idle && m_iState != GiveShot && m_iState != Healing && m_iState != Inactive)
 		return;
 
-	m_goingToOff = TRUE;
+	m_goingToOff = true;
 	// if there is no juice left, turn it off
 	if( (m_iState == Healing || m_iState == GiveShot) && m_iJuice <= 0 )
 	{
@@ -838,7 +838,7 @@ void CWallHealthDecay::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TY
 		if (!m_playingChargeSound && m_flSoundTime <= gpGlobals->time)
 		{
 			soundType = 2;
-			m_playingChargeSound = TRUE;
+			m_playingChargeSound = true;
 		}
 		break;
 	default:
@@ -872,7 +872,7 @@ void CWallHealthDecay::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TY
 		else if (soundType == 2)
 		{
 			EmitSoundScript(CWallHealth::loopingSoundScript);
-			m_playingChargeSound = TRUE;
+			m_playingChargeSound = true;
 		}
 	}
 	else
@@ -888,7 +888,7 @@ void CWallHealthDecay::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TY
 		}
 		if (m_playingChargeSound) {
 			StopSoundScript(CWallHealth::loopingSoundScript);
-			m_playingChargeSound = FALSE;
+			m_playingChargeSound = false;
 		}
 	}
 
@@ -914,7 +914,7 @@ void CWallHealthDecay::Off( void )
 	case Healing:
 		if (m_playingChargeSound) {
 			StopSoundScript(CWallHealth::loopingSoundScript);
-			m_playingChargeSound = FALSE;
+			m_playingChargeSound = false;
 		}
 		if (m_jar)
 		{
@@ -927,7 +927,7 @@ void CWallHealthDecay::Off( void )
 		{
 			if (m_iJuice > 0) {
 				SetNeedleState(Idle);
-				m_goingToOff = FALSE;
+				m_goingToOff = false;
 				pev->nextthink = gpGlobals->time;
 			} else {
 				SetNeedleState(RetractArm);

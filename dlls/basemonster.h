@@ -114,7 +114,7 @@ public:
 	int m_iClass;
 	string_t m_gibModel;
 
-	BOOL m_reverseRelationship;
+	bool m_reverseRelationship;
 	string_t m_displayName;
 
 	virtual int Save( CSave &save ); 
@@ -432,7 +432,7 @@ public:
 	void GlowShellUpdate( void );
 
 	float m_glowShellTime;
-	BOOL m_glowShellUpdate;
+	bool m_glowShellUpdate;
 
 	Vector m_prevRenderColor;
 	short m_prevRenderFx;
@@ -464,7 +464,7 @@ public:
 	int m_suggestedScheduleFlags;
 
 	short m_gibPolicy;
-	BOOL m_bForceConditionsGather;
+	bool m_bForceConditionsGather;
 
 	float m_flLastYawTime;
 

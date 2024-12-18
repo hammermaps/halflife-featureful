@@ -1798,7 +1798,7 @@ static int gSizes[FIELD_TYPECOUNT] =
 #else
 	sizeof(void *),		// FIELD_FUNCTION	
 #endif
-	sizeof(int),		// FIELD_BOOLEAN
+	sizeof(byte),		// FIELD_BOOLEAN
 	sizeof(short),		// FIELD_SHORT
 	sizeof(char),		// FIELD_CHARACTER
 	sizeof(float),		// FIELD_TIME
@@ -1826,7 +1826,7 @@ static int gInputSizes[FIELD_TYPECOUNT] =
 #else
 	sizeof(void *),		// FIELD_FUNCTION
 #endif
-	sizeof(int),		// FIELD_BOOLEAN
+	sizeof(byte),		// FIELD_BOOLEAN
 	sizeof(short),		// FIELD_SHORT
 	sizeof(char),		// FIELD_CHARACTER
 	sizeof(float),		// FIELD_TIME
@@ -2199,6 +2199,7 @@ int CSave::WriteFields( const char *pname, void *pBaseData, TYPEDESCRIPTION *pFi
 	int i, j, actualCount, emptyCount;
 	TYPEDESCRIPTION	*pTest;
 	int entityArray[MAX_ENTITYARRAY];
+	byte boolArray[MAX_ENTITYARRAY];
 
 	// Precalculate the number of empty fields
 	emptyCount = 0;
@@ -2276,6 +2277,14 @@ int CSave::WriteFields( const char *pname, void *pBaseData, TYPEDESCRIPTION *pFi
 			WriteVector( pTest->fieldName, (float *)pOutputData, pTest->fieldSize );
 			break;
 		case FIELD_BOOLEAN:
+		{
+			for (j = 0; j < pTest->fieldSize; j++)
+			{
+				boolArray[j] = ((bool*)pOutputData)[j] ? 1 : 0;
+			}
+			WriteData(pTest->fieldName, pTest->fieldSize, (char*)boolArray);
+		}
+			break;
 		case FIELD_INTEGER:
 			WriteInt( pTest->fieldName, (int *)pOutputData, pTest->fieldSize );
 			break;
@@ -2502,6 +2511,12 @@ int CRestore::ReadField( void *pBaseData, TYPEDESCRIPTION *pFields, int fieldCou
 						#endif
 						break;
 					case FIELD_BOOLEAN:
+					{
+						pOutputData = (char*)pOutputData + j * (sizeof(bool) - gSizes[pTest->fieldType]);
+						const bool value = *((byte*)pInputData) != 0;
+						*((bool*)pOutputData) = value;
+					}
+						break;
 					case FIELD_INTEGER:
 						*( (int *)pOutputData ) = *(int *)pInputData;
 						break;

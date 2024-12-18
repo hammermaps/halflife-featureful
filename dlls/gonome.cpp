@@ -169,7 +169,7 @@ protected:
 	float m_flNextFlinch;
 	float m_flNextThrowTime;// last time the gonome used the guts attack.
 	CGonomeGuts* m_pGonomeGuts;
-	BOOL m_fPlayerLocked;
+	bool m_fPlayerLocked;
 	EHANDLE m_lockedPlayer;
 	bool m_meleeAttack2;
 	bool m_playedAttackSound;
@@ -262,7 +262,7 @@ void CGonome::UnlockPlayer()
 				player->EnableControl(true);
 
 			m_lockedPlayer = 0;
-			m_fPlayerLocked = FALSE;
+			m_fPlayerLocked = false;
 		}
 	}
 }
@@ -587,7 +587,7 @@ void CGonome::HandleAnimEvent(MonsterEvent_t *pEvent)
 							CBasePlayer* player = (CBasePlayer*)pHurt;
 							player->EnableControl(false);
 							m_lockedPlayer = player;
-							m_fPlayerLocked = TRUE;
+							m_fPlayerLocked = true;
 						}
 					}
 				}

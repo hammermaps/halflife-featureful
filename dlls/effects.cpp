@@ -1639,16 +1639,16 @@ void CEnvModel :: SetSequence( void )
 	if (pev->spawnflags & SF_ENVMODEL_OFF)
 	{
 		if (m_iAction_Off == 1)
-			m_fSequenceLoops = 1;
+			m_fSequenceLoops = true;
 		else
-			m_fSequenceLoops = 0;
+			m_fSequenceLoops = false;
 	}
 	else
 	{
 		if (m_iAction_On == 1)
-			m_fSequenceLoops = 1;
+			m_fSequenceLoops = true;
 		else
-			m_fSequenceLoops = 0;
+			m_fSequenceLoops = false;
 	}
 }
 
@@ -4087,7 +4087,7 @@ public:
 
 	Vector m_vecPos;
 	int m_iKey;
-	BOOL m_activated;
+	bool m_activated;
 	static int	ms_iNextFreeKey;
 };
 
@@ -4112,7 +4112,7 @@ void CEnvDLight::Activate( void )
 		m_iKey = ms_iNextFreeKey;
 		ms_iNextFreeKey++;
 
-		m_activated = TRUE;
+		m_activated = true;
 
 		if (FStringNull(pev->targetname) || IsActive())
 		{

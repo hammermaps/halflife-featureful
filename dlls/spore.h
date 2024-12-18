@@ -55,9 +55,9 @@ private:
 	float m_flIgniteTime;
 	float m_flSoundDelay;
 
-	BOOL m_bIsAI;
+	bool m_bIsAI;
 	EHANDLE m_hSprite;
-	BOOL m_bPuked;
+	bool m_bPuked;
 };
 #endif
 #endif

@@ -569,8 +569,8 @@ public:
 	float m_flFrameRate;		// computed FPS for current sequence
 	float m_flGroundSpeed;	// computed linear movement rate for current sequence
 	float m_flLastEventCheck;	// last time the event list was checked
-	BOOL m_fSequenceFinished;// flag set when StudioAdvanceFrame moves across a frame boundry
-	BOOL m_fSequenceLoops;	// true if the sequence loops
+	bool m_fSequenceFinished;// flag set when StudioAdvanceFrame moves across a frame boundry
+	bool m_fSequenceLoops;	// true if the sequence loops
 	int m_minAnimEventFrame;
 };
 
@@ -855,11 +855,10 @@ DEFINE_FIELD_DEFINER(decltype(CBaseEntity::m_pfnThink), FIELD_FUNCTION);
 DEFINE_FIELD_DEFINER(decltype(CBaseEntity::m_pfnTouch), FIELD_FUNCTION);
 DEFINE_FIELD_DEFINER(decltype(CBaseEntity::m_pfnUse), FIELD_FUNCTION);
 DEFINE_FIELD_DEFINER(decltype(CBaseToggle::m_pfnCallWhenMoveDone), FIELD_FUNCTION);
-DEFINE_FIELD_DEFINER(BOOL, FIELD_BOOLEAN);
+DEFINE_FIELD_DEFINER(bool, FIELD_BOOLEAN);
 DEFINE_FIELD_DEFINER(short, FIELD_SHORT);
 DEFINE_FIELD_DEFINER(char, FIELD_CHARACTER);
 DEFINE_FIELD_DEFINER(unsigned char, FIELD_CHARACTER);
-DEFINE_FIELD_DEFINER(bool, FIELD_CHARACTER);
 DEFINE_FIELD_DEFINER(float, FIELD_TIME);
 DEFINE_FIELD_DEFINER(string_t, FIELD_MODELNAME);
 DEFINE_FIELD_DEFINER(string_t, FIELD_SOUNDNAME);

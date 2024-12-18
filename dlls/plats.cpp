@@ -694,8 +694,8 @@ public:
 	}
 
 	entvars_t *m_pevCurrentTarget;
-	BOOL m_activated;
-	BOOL m_iObeyTriggerMode;
+	bool m_activated;
+	bool m_iObeyTriggerMode;
 	short m_iPitch;
 
 protected:
@@ -718,7 +718,7 @@ void CFuncTrain::KeyValue( KeyValueData *pkvd )
 {
 	if( FStrEq( pkvd->szKeyName, "m_iObeyTriggerMode" ) )
 	{
-		m_iObeyTriggerMode = atoi( pkvd->szValue );
+		m_iObeyTriggerMode = atoi( pkvd->szValue ) != 0;
 		pkvd->fHandled = TRUE;
 	}
 	else if( FStrEq( pkvd->szKeyName, "soundpitch" ) )
@@ -887,7 +887,7 @@ void CFuncTrain::Activate( void )
 	// Not yet active, so teleport to first target
 	if( !m_activated )
 	{
-		m_activated = TRUE;
+		m_activated = true;
 		entvars_t *pevTarg = VARS( FIND_ENTITY_BY_TARGETNAME( NULL, STRING( pev->target ) ) );
 
 		pev->target = pevTarg->target;
@@ -947,7 +947,7 @@ void CFuncTrain::SetDefaultTrainValues()
 	if (m_iPitch == 0)
 		m_iPitch = 100;
 
-	m_activated = FALSE;
+	m_activated = false;
 
 	if( m_volume == 0 )
 		m_volume = 0.85f;
@@ -1540,7 +1540,7 @@ void CFuncTrackTrain::Spawn( void )
 {
 	if (!FStringNull(pev->noise))
 	{
-		m_customMoveSound = TRUE;
+		m_customMoveSound = true;
 	}
 
 	if( pev->speed == 0 )
@@ -2200,7 +2200,7 @@ public:
 	static TYPEDESCRIPTION m_SaveData[];
 
 private:
-	BOOL m_on;
+	bool m_on;
 };
 
 LINK_ENTITY_TO_CLASS( func_guntarget, CGunTarget )
@@ -2227,7 +2227,7 @@ void CGunTarget::Spawn( void )
 	pev->takedamage = DAMAGE_NO;
 	pev->flags |= FL_MONSTER;
 
-	m_on = FALSE;
+	m_on = false;
 	pev->max_health = pev->health;
 
 	if( pev->spawnflags & FGUNTARGET_START_ON )
@@ -2527,7 +2527,7 @@ void CModelTrain::AdvanceAnimation(void)
 
 		if (!m_fSequenceLoops)
 		{
-			m_fSequenceFinished = TRUE;
+			m_fSequenceFinished = true;
 			return;
 		}
 		else

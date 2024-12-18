@@ -1183,7 +1183,7 @@ int CBaseMonster::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, f
 				SetConditions( bits_COND_HEAVY_DAMAGE );
 			}
 
-			m_bForceConditionsGather = TRUE;
+			m_bForceConditionsGather = true;
 		}
 	}
 

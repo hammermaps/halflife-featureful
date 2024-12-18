@@ -1668,7 +1668,7 @@ void CTalkMonster::KeyValue( KeyValueData *pkvd )
 	}
 	else if( FStrEq( pkvd->szKeyName, "suspicious" ) )
 	{
-		m_fStartSuspicious = atoi( pkvd->szValue );
+		m_fStartSuspicious = atoi( pkvd->szValue ) != 0;
 		pkvd->fHandled = TRUE;
 	}
 	else if( FStrEq( pkvd->szKeyName, "tolerance" ) )

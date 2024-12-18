@@ -25,7 +25,7 @@ public:
 
 	static TYPEDESCRIPTION m_SaveData[];
 	int m_iTrail;
-	BOOL m_iSoundedOff;
+	bool m_iSoundedOff;
 	float m_flIgniteTime;
 	float m_velocity;
 
@@ -84,7 +84,7 @@ void CMortarShell::Spawn()
 
 	pev->nextthink = gpGlobals->time + 0.01;
 	m_flIgniteTime = gpGlobals->time;
-	m_iSoundedOff = FALSE;
+	m_iSoundedOff = false;
 }
 
 void CMortarShell::MortarExplodeTouch(CBaseEntity *pOther)
@@ -191,7 +191,7 @@ void CMortarShell::FlyThink()
 
 	if(pev->velocity.z < 20.0f && !m_iSoundedOff)
 	{
-		m_iSoundedOff = TRUE;
+		m_iSoundedOff = true;
 		EmitSoundScript(flySoundScript);
 	}
 
@@ -250,7 +250,7 @@ public:
 	int m_iEnemyType;
 	float m_fireDelay;
 	float m_trackDelay;
-	BOOL m_tracking;
+	bool m_tracking;
 	float m_zeroYaw;
 	Vector m_vGunAngle;
 	Vector m_vIdealGunVector;
@@ -328,7 +328,7 @@ void COp4Mortar::Spawn()
 	pev->frame = 0;
 	pev->framerate = 1;
 
-	m_tracking = FALSE;
+	m_tracking = false;
 
 	if (m_fireDelay < 0.5)
 		m_fireDelay = 5;

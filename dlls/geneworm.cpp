@@ -96,7 +96,7 @@ public:
 	float m_lastTime;
 	float m_birthtime;
 
-	BOOL m_bLaunched;
+	bool m_bLaunched;
 };
 
 
@@ -136,7 +136,7 @@ void CGeneWormCloud::Spawn()
 	m_birthtime = gpGlobals->time;
 
 	m_fadeScale = 0;
-	m_bLaunched = FALSE;
+	m_bLaunched = false;
 
 	SetTouch(&CGeneWormCloud::CloudTouch);
 	SetThink(&CGeneWormCloud::GeneWormCloudThink);
@@ -235,7 +235,7 @@ CGeneWormCloud *CGeneWormCloud::LaunchCloud(const Vector origin, const Vector ai
 	pCloud->m_fadeScale = 2.5 / fadeTime;
 	pCloud->m_fadeRender = (pCloud->pev->renderamt - 7) / fadeTime;
 
-	pCloud->m_bLaunched = TRUE;
+	pCloud->m_bLaunched = true;
 
 	return pCloud;
 }
@@ -268,7 +268,7 @@ public:
 	static TYPEDESCRIPTION m_SaveData[];
 	float m_flBirthTime;
 	int m_maxFrame;
-	BOOL m_bTrooperDropped;
+	bool m_bTrooperDropped;
 
 	static const NamedSoundScript spawnSoundScript;
 };
@@ -324,7 +324,7 @@ void CGeneWormSpawn::Spawn()
 		pev->angles.y = 0;
 	}
 
-	m_bTrooperDropped = FALSE;
+	m_bTrooperDropped = false;
 	m_flBirthTime = gpGlobals->time;
 
 	SetTouch(&CGeneWormSpawn::SpawnTouch);
@@ -368,7 +368,7 @@ void CGeneWormSpawn::SpawnThink()
 					}
 					DispatchSpawn(pEntity->edict());
 				}
-				m_bTrooperDropped = TRUE;
+				m_bTrooperDropped = true;
 			}
 			else
 				pev->scale -= 0.25;
@@ -472,14 +472,14 @@ public:
 	float m_flNextRangeTime;
 	float m_flDeathStart;
 
-	BOOL m_fActivated;
-	BOOL m_fRightEyeHit;
-	BOOL m_fLeftEyeHit;
-	BOOL m_fGetMad;
-	BOOL m_fOrificeHit;
-	BOOL m_fSpiting;
-	BOOL m_fSpawningTrooper;
-	BOOL m_fHasEntered;
+	bool m_fActivated;
+	bool m_fRightEyeHit;
+	bool m_fLeftEyeHit;
+	bool m_fGetMad;
+	bool m_fOrificeHit;
+	bool m_fSpiting;
+	bool m_fSpawningTrooper;
+	bool m_fHasEntered;
 
 	int m_iHitTimes;
 	int m_iMaxHitTimes;
@@ -684,12 +684,12 @@ void CGeneWorm::Spawn()
 	m_flHitTime = 0;
 
 	m_iWasHit = FALSE;
-	m_fRightEyeHit = FALSE;
-	m_fLeftEyeHit = FALSE;
-	m_fGetMad = FALSE;
-	m_fOrificeHit = FALSE;
-	m_fActivated = FALSE;
-	m_fHasEntered = FALSE;
+	m_fRightEyeHit = false;
+	m_fLeftEyeHit = false;
+	m_fGetMad = false;
+	m_fOrificeHit = false;
+	m_fActivated = false;
+	m_fHasEntered = false;
 	m_pCloud = NULL;
 
 	UTIL_SetOrigin(pev, pev->origin);
@@ -901,7 +901,7 @@ void CGeneWorm::NextActivity(void)
 	{
 		pev->sequence = LookupSequence("mad");
 		m_flMadDelayTime = gpGlobals->time;
-		m_fGetMad = FALSE;
+		m_fGetMad = false;
 		return;
 	}
 
@@ -920,14 +920,14 @@ void CGeneWorm::NextActivity(void)
 		{
 			pev->sequence = LookupSequence("bigpain4");
 			EmitSoundScript(bigPain4SoundScript);
-			m_fSpawningTrooper = TRUE;
+			m_fSpawningTrooper = true;
 			return;
 		}
 
-		m_fLeftEyeHit = FALSE;
-		m_fRightEyeHit = FALSE;
-		m_fOrificeHit = FALSE;
-		m_fSpawningTrooper = FALSE;
+		m_fLeftEyeHit = false;
+		m_fRightEyeHit = false;
+		m_fOrificeHit = false;
+		m_fSpawningTrooper = false;
 		pev->skin = 0;
 	}
 
@@ -1048,7 +1048,7 @@ void CGeneWorm::TraceAttack(entvars_t *pevInflictor, entvars_t *pevAttacker, flo
 
 		if(ptr->iHitgroup == 4 && !m_fLeftEyeHit && FStrEq("left_eye_laser", STRING(pevInflictor->targetname)))
 		{
-			m_fLeftEyeHit = TRUE;
+			m_fLeftEyeHit = true;
 			m_iWasHit = 1;
 
 			if(!m_fRightEyeHit)
@@ -1056,13 +1056,13 @@ void CGeneWorm::TraceAttack(entvars_t *pevInflictor, entvars_t *pevAttacker, flo
 				pev->skin = GENEWORM_SKIN_EYE_LEFT;
 
 				if(gpGlobals->time - m_flMadDelayTime >= 6)
-					m_fGetMad = TRUE;
+					m_fGetMad = true;
 			}
 			else
 			{
 				pev->skin = GENEWORM_SKIN_EYE_CLOSED;
 				m_flOrificeOpenTime = gpGlobals->time + 20;
-				m_fGetMad = FALSE;
+				m_fGetMad = false;
 			}
 
 			UTIL_BloodDrips(ptr->vecEndPos, ptr->vecEndPos, m_bloodColor, 256);
@@ -1070,7 +1070,7 @@ void CGeneWorm::TraceAttack(entvars_t *pevInflictor, entvars_t *pevAttacker, flo
 
 		if(ptr->iHitgroup == 5 && !m_fRightEyeHit && FStrEq("right_eye_laser", STRING(pevInflictor->targetname)))
 		{
-			m_fRightEyeHit = TRUE;
+			m_fRightEyeHit = true;
 			m_iWasHit = 1;
 
 			if(!m_fLeftEyeHit)
@@ -1078,13 +1078,13 @@ void CGeneWorm::TraceAttack(entvars_t *pevInflictor, entvars_t *pevAttacker, flo
 				pev->skin = GENEWORM_SKIN_EYE_RIGHT;
 
 				if(gpGlobals->time - m_flMadDelayTime >= 6)
-					m_fGetMad = TRUE;
+					m_fGetMad = true;
 			}
 			else
 			{
 				pev->skin = GENEWORM_SKIN_EYE_CLOSED;
 				m_flOrificeOpenTime = gpGlobals->time + 20;
-				m_fGetMad = FALSE;
+				m_fGetMad = false;
 			}
 
 			UTIL_BloodDrips(ptr->vecEndPos, ptr->vecEndPos, m_bloodColor, 256);
@@ -1102,7 +1102,7 @@ void CGeneWorm::TraceAttack(entvars_t *pevInflictor, entvars_t *pevAttacker, flo
 				UTIL_BloodDecalTrace(ptr, m_bloodColor);
 				pev->health = gSkillData.gwormHealth;
 				m_iHitTimes++;
-				m_fOrificeHit = TRUE;
+				m_fOrificeHit = true;
 				m_flOrificeOpenTime = gpGlobals->time;
 				m_iWasHit = 1;
 			}
@@ -1145,7 +1145,7 @@ void CGeneWorm::HuntThink(void)
 	{
 		if(m_fSequenceFinished)
 		{
-			m_fHasEntered = TRUE;
+			m_fHasEntered = true;
 			int oldSeq = pev->sequence;
 			NextActivity();
 			if (pev->sequence != oldSeq || !m_fSequenceLoops)
@@ -1159,7 +1159,7 @@ void CGeneWorm::HuntThink(void)
 	{
 		UTIL_Remove(m_pCloud);
 		m_pCloud = NULL;
-		m_fSpiting = FALSE;
+		m_fSpiting = false;
 
 		int iDir = 1;
 		const char* painAnimation = 0;
@@ -1285,7 +1285,7 @@ void CGeneWorm::HuntThink(void)
 		}
 		else
 		{
-			m_fSpiting = FALSE;
+			m_fSpiting = false;
 		}
 	}
 	else
@@ -1302,7 +1302,7 @@ void CGeneWorm::HandleAnimEvent(MonsterEvent_t *pEvent)
 	switch (pEvent->event)
 	{
 	case GENEWORM_AE_BEAM:
-		m_fSpiting = TRUE;
+		m_fSpiting = true;
 		m_flSpitStartTime = gpGlobals->time;
 		break;
 	case GENEWORM_AE_PORTAL:
@@ -1364,7 +1364,7 @@ void CGeneWorm::CommandUse(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TY
 		pev->renderfx = 0;
 		pev->renderamt = 0;
 
-		m_fActivated = TRUE;
+		m_fActivated = true;
 
 		pev->solid = SOLID_BBOX;
 

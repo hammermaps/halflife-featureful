@@ -119,7 +119,7 @@ public:
 	float m_flVolume;
 	float m_flBank;
 	float m_oldSpeed;
-	BOOL m_customMoveSound;
+	bool m_customMoveSound;
 	short m_soundRadius;
 
 private:

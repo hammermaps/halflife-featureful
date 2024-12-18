@@ -84,7 +84,7 @@ void CMedkit::Spawn()
 	SET_MODEL(ENT(pev), MyWModel());
 
 	InitDefaultAmmo(MEDKIT_DEFAULT_GIVE);
-	m_secondaryAttack = FALSE;
+	m_secondaryAttack = false;
 	m_flSoundDelay = 0;
 
 	FallInit();// get ready to fall down.
@@ -161,7 +161,7 @@ void CMedkit::PrimaryAttack(void)
 		return;
 	}
 
-	m_secondaryAttack = FALSE;
+	m_secondaryAttack = false;
 	PLAYBACK_EVENT_FULL(0, m_pPlayer->edict(), m_usMedkitFire, 0.0, g_vecZero, g_vecZero, 0, 0, 0, 0, 0, 0);
 	float delay = GetNextAttackDelay(2);
 	if (delay < UTIL_WeaponTimeBase())
@@ -181,7 +181,7 @@ void CMedkit::SecondaryAttack()
 		return;
 	}
 
-	m_secondaryAttack = TRUE;
+	m_secondaryAttack = true;
 
 	PLAYBACK_EVENT_FULL(0, m_pPlayer->edict(), m_usMedkitFire, 0.0, g_vecZero, g_vecZero, 0, 0, 1, 0.0, 0, 0.0);
 	float delay = GetNextAttackDelay(3);

@@ -864,8 +864,8 @@ public:
 		return !FBitSet(pev->spawnflags, SF_BUTTON_PLAYER_CANT_USE);
 	}
 
-	BOOL m_fStayPushed;	// button stays pushed in until touched again?
-	BOOL m_fRotating;		// a rotating button?  default is a sliding button.
+	bool m_fStayPushed;	// button stays pushed in until touched again?
+	bool m_fRotating;		// a rotating button?  default is a sliding button.
 
 	string_t m_strChangeTarget;	// if this field is not null, this is an index into the engine string array.
 							// when this button is touched, it's target entity's TARGET field will be set
@@ -892,7 +892,7 @@ public:
 	float m_toggleAgainTime;
 
 	short m_iDirectUse;
-	BOOL m_fNonMoving;
+	bool m_fNonMoving;
 };
 
 static constexpr const char* sparkSoundScript = "DoSpark";
@@ -1257,10 +1257,10 @@ void CBaseButton::Spawn()
 		m_vecPosition2 = m_vecPosition1;
 
 	if ( FBitSet( pev->spawnflags, SF_BUTTON_DONTMOVE ) )
-		m_fNonMoving = TRUE;
+		m_fNonMoving = true;
 
-	m_fStayPushed = m_flWait == -1.0f ? TRUE : FALSE;
-	m_fRotating = FALSE;
+	m_fStayPushed = m_flWait == -1.0f;
+	m_fRotating = false;
 
 	// if the button is flagged for USE button activation only, take away it's touch function and add a use function
 	if( FBitSet( pev->spawnflags, SF_BUTTON_TOUCH_ONLY ) ) // touchable button
@@ -1752,8 +1752,8 @@ void CRotButton::Spawn( void )
 	m_vecAngle2 = pev->angles + pev->movedir * m_flMoveDistance;
 	ASSERTSZ( m_vecAngle1 != m_vecAngle2, "rotating button start/end positions are equal" );
 
-	m_fStayPushed = m_flWait == -1.0f ? TRUE : FALSE;
-	m_fRotating = TRUE;
+	m_fStayPushed = m_flWait == -1.0f;
+	m_fRotating = true;
 
 	// if the button is flagged for USE button activation only, take away it's touch function and add a use function
 	if( !FBitSet( pev->spawnflags, SF_BUTTON_TOUCH_ONLY ) )

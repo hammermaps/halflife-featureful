@@ -70,8 +70,8 @@ void CBarnacleGrappleTip::Spawn()
 
 	pev->nextthink = gpGlobals->time + 0.02;
 
-	m_bIsStuck = FALSE;
-	m_bMissed = FALSE;
+	m_bIsStuck = false;
+	m_bMissed = false;
 }
 
 void CBarnacleGrappleTip::FlyThink()
@@ -114,7 +114,7 @@ void CBarnacleGrappleTip::TongueTouch( CBaseEntity* pOther )
 	if( !pOther )
 	{
 		targetClass = GRAPPLE_NOT_A_TARGET;
-		m_bMissed = TRUE;
+		m_bMissed = true;
 	}
 	else
 	{
@@ -124,7 +124,7 @@ void CBarnacleGrappleTip::TongueTouch( CBaseEntity* pOther )
 
 			m_hGrappleTarget = pOther;
 
-			m_bIsStuck = TRUE;
+			m_bIsStuck = true;
 		}
 		else
 		{
@@ -132,11 +132,11 @@ void CBarnacleGrappleTip::TongueTouch( CBaseEntity* pOther )
 
 			if( targetClass != GRAPPLE_NOT_A_TARGET )
 			{
-				m_bIsStuck = TRUE;
+				m_bIsStuck = true;
 			}
 			else
 			{
-				m_bMissed = TRUE;
+				m_bMissed = true;
 			}
 		}
 	}
@@ -266,7 +266,7 @@ void CBarnacleGrapple::Spawn( void )
 	Precache();
 	SET_MODEL( ENT(pev), MyWModel() );
 	m_pTip = NULL;
-	m_bGrappling = FALSE;
+	m_bGrappling = false;
 	m_iClip = -1;
 
 	FallInit();
@@ -322,7 +322,7 @@ void CBarnacleGrapple::WeaponIdle( void )
 		return;
 	}
 
-	m_bMissed = FALSE;
+	m_bMissed = false;
 
 	const float flNextIdle = RANDOM_FLOAT( 0.0, 1.0 );
 
@@ -389,7 +389,7 @@ void CBarnacleGrapple::PrimaryAttack( void )
 					EMIT_SOUND_DYN( ENT(pTarget->pev), CHAN_STATIC,"weapons/bgrapple_impact.wav", 0.98, ATTN_NORM, 0, 125 );
 				}
 
-				m_bMomentaryStuck = FALSE;
+				m_bMomentaryStuck = false;
 			}
 
 			switch( m_pTip->GetGrappleType() )
@@ -427,21 +427,21 @@ void CBarnacleGrapple::PrimaryAttack( void )
 
 					if( (vecPitch.x > 55.0 && vecPitch.x < 205.0) || vecPitch.x < -55.0 )
 					{
-						m_bGrappling = FALSE;
+						m_bGrappling = false;
 						m_pPlayer->SetAnimation( PLAYER_IDLE );
 					}
 					else
 					{
 						if (!m_bGrappling)
 							EMIT_SOUND_DYN(  ENT( m_pPlayer->pev ), CHAN_WEAPON, "weapons/bgrapple_pull.wav", 0.98, ATTN_NORM, 0, 125 );
-						m_bGrappling = TRUE;
+						m_bGrappling = true;
 						m_pPlayer->m_afPhysicsFlags |= PFLAG_LATCHING;
 						m_pPlayer->SetAnimation(PLAYER_GRAPPLE);
 					}
 				}
 				else
 				{
-					m_bGrappling = FALSE;
+					m_bGrappling = false;
 					m_pPlayer->SetAnimation( PLAYER_IDLE );
 				}
 
@@ -479,7 +479,7 @@ void CBarnacleGrapple::PrimaryAttack( void )
 	}
 	else
 	{
-		m_bMomentaryStuck = TRUE;
+		m_bMomentaryStuck = true;
 
 		SendWeaponAnim( BGRAPPLE_FIRE );
 
@@ -541,15 +541,15 @@ void CBarnacleGrapple::PrimaryAttack( void )
 			{
 				if( m_pTip )
 				{
-					bool bValidTarget = FALSE;
+					bool bValidTarget = false;
 					if( pHit->IsPlayer() )
 					{
 						m_pTip->SetGrappleTarget( pHit );
-						bValidTarget = TRUE;
+						bValidTarget = true;
 					}
 					else if( m_pTip->CheckTarget( pHit ) != GRAPPLE_NOT_A_TARGET )
 					{
-						bValidTarget = TRUE;
+						bValidTarget = true;
 					}
 					if( bValidTarget )
 					{

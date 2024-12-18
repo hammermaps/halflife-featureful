@@ -144,8 +144,8 @@ public:
 	float m_flAttenuation;		// attenuation value
 	dynpitchvol_t m_dpv;
 
-	BOOL m_fActive;	// only TRUE when the entity is playing a looping sound
-	BOOL m_fLooping;	// TRUE when the sound played will loop
+	bool m_fActive;	// only true when the entity is playing a looping sound
+	bool m_fLooping;	// true when the sound played will loop
 
 	EHANDLE m_hPlayFrom; //LRC - the entity to play from
 	int		m_iChannel; //LRC - the channel to play from, for "play from X" sounds
@@ -258,12 +258,12 @@ void CAmbientGeneric::Spawn( void )
 
 	SetUse( &CAmbientGeneric::ToggleUse );
 	
-	m_fActive = FALSE;
+	m_fActive = false;
 
 	if( FBitSet( pev->spawnflags, AMBIENT_SOUND_NOT_LOOPING ) )
-		m_fLooping = FALSE;
+		m_fLooping = false;
 	else
-		m_fLooping = TRUE;
+		m_fLooping = true;
 
 	if (m_iChannel == 0)
 		m_iChannel = CHAN_STATIC;
@@ -288,7 +288,7 @@ void CAmbientGeneric::Precache( void )
 	{
 		// start the sound ASAP
 		if( m_fLooping )
-			m_fActive = TRUE;
+			m_fActive = true;
 	}
 
 	if (m_fActive && !EntityToPlayFromIsDefined())
@@ -721,7 +721,7 @@ void CAmbientGeneric::ToggleUse( CBaseEntity *pActivator, CBaseEntity *pCaller, 
 		}
 		else
 		{
-			m_fActive = FALSE;
+			m_fActive = false;
 
 			// HACKHACK - this makes the code in Precache() work properly after a save/restore
 			pev->spawnflags |= AMBIENT_SOUND_START_SILENT;
@@ -755,7 +755,7 @@ void CAmbientGeneric::ToggleUse( CBaseEntity *pActivator, CBaseEntity *pCaller, 
 		// playing from a previous trigger press, it will be shut off
 		// and then restarted.
 		if( m_fLooping )
-			m_fActive = TRUE;
+			m_fActive = true;
 		else if (m_hPlayFrom != 0)
 		{
 			STOP_SOUND( m_hPlayFrom->edict(), m_iChannel, szSoundFile); //LRC

@@ -719,10 +719,10 @@ void ClientCommand( edict_t *pEntity )
 		if (g_enable_cheats->value != 0)
 		{
 			if (pPlayer->m_buddha) {
-				pPlayer->m_buddha = FALSE;
+				pPlayer->m_buddha = false;
 				ClientPrint(&pEntity->v, HUD_PRINTCONSOLE, "Buddha Mode off\n");
 			} else {
-				pPlayer->m_buddha = TRUE;
+				pPlayer->m_buddha = true;
 				ClientPrint(&pEntity->v, HUD_PRINTCONSOLE, "Buddha Mode on\n");
 			}
 		}

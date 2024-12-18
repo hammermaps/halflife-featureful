@@ -115,7 +115,7 @@ public:
 	Vector DefaultMinHullSize() { return Vector( -24.0f, -24.0f, 0.0f ); }
 	Vector DefaultMaxHullSize() { return Vector( 24.0f, 24.0f, 72.0f ); }
 
-	BOOL m_bRightClaw;
+	bool m_bRightClaw;
 	float m_rechargeTime;
 	float m_blinkTime;
 	float m_eyeChangeTime;
@@ -221,7 +221,7 @@ Schedule_t* CShockTrooper::ScheduleOnRangeAttack1()
 		// little time and give the player a chance to turn.
 		if( MySquadLeader()->m_fEnemyEluded && !HasConditions( bits_COND_ENEMY_FACING_ME ) )
 		{
-			MySquadLeader()->m_fEnemyEluded = FALSE;
+			MySquadLeader()->m_fEnemyEluded = false;
 			return GetScheduleOfType( SCHED_GRUNT_FOUND_ENEMY );
 		}
 	}
@@ -363,7 +363,7 @@ void CShockTrooper::HandleAnimEvent(MonsterEvent_t *pEvent)
 		else
 			CSpore::CreateSpore(vecOrigin, pev->angles, m_vecTossVelocity, this, CSpore::GRENADE, true, false, GetProjectileOverrides());
 
-		m_fThrowGrenade = FALSE;
+		m_fThrowGrenade = false;
 		m_flNextGrenadeCheck = gpGlobals->time + 6;// wait six seconds before even looking again to see if a grenade can be thrown.
 		// !!!LATER - when in a group, only try to throw grenade if ordered.
 	}
@@ -448,7 +448,7 @@ void CShockTrooper::Spawn()
 
 	m_cAmmoLoaded = m_cClipSize;
 
-	m_bRightClaw = FALSE;
+	m_bRightClaw = false;
 
 	CTalkMonster::g_talkWaitTime = 0;
 	m_rechargeTime = gpGlobals->time + gSkillData.strooperRchgSpeed;

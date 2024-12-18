@@ -354,7 +354,7 @@ void CHGrunt::PrescheduleThink( void )
 			if( gpGlobals->time - MySquadLeader()->m_flLastEnemySightTime > 5.0f )
 			{
 				// been a while since we've seen the enemy
-				MySquadLeader()->m_fEnemyEluded = TRUE;
+				MySquadLeader()->m_fEnemyEluded = true;
 			}
 		}
 	}
@@ -447,7 +447,7 @@ bool CHGrunt::CheckRangeAttack2Impl( float grenadeSpeed, float flDot, float flDi
 	// if the grunt isn't moving, it's ok to check.
 	if( m_flGroundSpeed != 0 )
 	{
-		m_fThrowGrenade = FALSE;
+		m_fThrowGrenade = false;
 		return m_fThrowGrenade;
 	}
 
@@ -462,7 +462,7 @@ bool CHGrunt::CheckRangeAttack2Impl( float grenadeSpeed, float flDot, float flDi
 		//!!!BUGBUG - we should make this check movetype and make sure it isn't FLY? Players who jump a lot are unlikely to 
 		// be grenaded.
 		// don't throw grenades at anything that isn't on the ground!
-		m_fThrowGrenade = FALSE;
+		m_fThrowGrenade = false;
 		return m_fThrowGrenade;
 	}
 
@@ -500,7 +500,7 @@ bool CHGrunt::CheckRangeAttack2Impl( float grenadeSpeed, float flDot, float flDi
 	{
 		// crap, I might blow my own guy up. Don't throw a grenade and don't check again for a while.
 		m_flNextGrenadeCheck = gpGlobals->time + 1; // one full second.
-		m_fThrowGrenade = FALSE;
+		m_fThrowGrenade = false;
 		return m_fThrowGrenade;
 	}
 
@@ -508,7 +508,7 @@ bool CHGrunt::CheckRangeAttack2Impl( float grenadeSpeed, float flDot, float flDi
 	{
 		// crap, I don't want to blow myself up
 		m_flNextGrenadeCheck = gpGlobals->time + 1; // one full second.
-		m_fThrowGrenade = FALSE;
+		m_fThrowGrenade = false;
 		return m_fThrowGrenade;
 	}
 
@@ -521,14 +521,14 @@ bool CHGrunt::CheckRangeAttack2Impl( float grenadeSpeed, float flDot, float flDi
 			m_vecTossVelocity = vecToss;
 
 			// throw a hand grenade
-			m_fThrowGrenade = TRUE;
+			m_fThrowGrenade = true;
 			// don't check again for a while.
 			m_flNextGrenadeCheck = gpGlobals->time; // 1/3 second.
 		}
 		else
 		{
 			// don't throw
-			m_fThrowGrenade = FALSE;
+			m_fThrowGrenade = false;
 			// don't check again for a while.
 			m_flNextGrenadeCheck = gpGlobals->time + 1.0f; // one full second.
 		}
@@ -542,14 +542,14 @@ bool CHGrunt::CheckRangeAttack2Impl( float grenadeSpeed, float flDot, float flDi
 			m_vecTossVelocity = vecToss;
 
 			// throw a hand grenade
-			m_fThrowGrenade = TRUE;
+			m_fThrowGrenade = true;
 			// don't check again for a while.
 			m_flNextGrenadeCheck = gpGlobals->time + 0.3f; // 1/3 second.
 		}
 		else
 		{
 			// don't throw
-			m_fThrowGrenade = FALSE;
+			m_fThrowGrenade = false;
 			// don't check again for a while.
 			m_flNextGrenadeCheck = gpGlobals->time + 1.0f; // one full second.
 		}
@@ -917,7 +917,7 @@ void CHGrunt::HandleAnimEvent( MonsterEvent_t *pEvent )
 			else
 				CGrenade::ShootTimed( pev, GetGunPosition(), m_vecTossVelocity, 3.5 );
 
-			m_fThrowGrenade = FALSE;
+			m_fThrowGrenade = false;
 			m_flNextGrenadeCheck = gpGlobals->time + 6;// wait six seconds before even looking again to see if a grenade can be thrown.
 			// !!!LATER - when in a group, only try to throw grenade if ordered.
 		}
@@ -941,7 +941,7 @@ void CHGrunt::HandleAnimEvent( MonsterEvent_t *pEvent )
 			}
 			else
 				CGrenade::ShootContact( pev, GetGunPosition(), m_vecTossVelocity );
-			m_fThrowGrenade = FALSE;
+			m_fThrowGrenade = false;
 			if( g_iSkillLevel == SKILL_HARD )
 				m_flNextGrenadeCheck = gpGlobals->time + RANDOM_FLOAT( 2.0f, 5.0f );// wait a random amount of time before shooting again
 			else
@@ -1016,8 +1016,8 @@ void CHGrunt::SpawnHelper(const char* modelName, int health, int bloodColor)
 
 	m_afCapability		= bits_CAP_SQUAD | bits_CAP_TURN_HEAD | bits_CAP_DOORS_GROUP;
 
-	m_fEnemyEluded		= FALSE;
-	m_fFirstEncounter	= TRUE;// this is true when the grunt spawns, because he hasn't encountered an enemy yet.
+	m_fEnemyEluded		= false;
+	m_fFirstEncounter	= true;// this is true when the grunt spawns, because he hasn't encountered an enemy yet.
 
 	m_HackedGunPos = Vector( 0, 0, 55 );
 }
@@ -1277,7 +1277,7 @@ Schedule_t* CHGrunt::ScheduleOnRangeAttack1()
 		// little time and give the player a chance to turn.
 		if( MySquadLeader()->m_fEnemyEluded && !HasConditions( bits_COND_ENEMY_FACING_ME ) )
 		{
-			MySquadLeader()->m_fEnemyEluded = FALSE;
+			MySquadLeader()->m_fEnemyEluded = false;
 			return GetScheduleOfType( SCHED_GRUNT_FOUND_ENEMY );
 		}
 	}
@@ -2056,7 +2056,7 @@ Schedule_t *CHGrunt::GetSchedule( void )
 			{
 				if( InSquad() )
 				{
-					MySquadLeader()->m_fEnemyEluded = FALSE;
+					MySquadLeader()->m_fEnemyEluded = false;
 
 					if( !IsLeader() )
 					{
@@ -2269,7 +2269,7 @@ Schedule_t *CHGrunt::GetScheduleOfType( int Type )
 		{
 			// randomly stand or crouch
 			if( RANDOM_LONG( 0, 9 ) == 0 )
-				m_fStanding = RANDOM_LONG( 0, 1 );
+				m_fStanding = RANDOM_LONG( 0, 1 ) ? true : false;
 
 			if( m_fStanding )
 				return &slGruntRangeAttack1B[0];
@@ -2313,7 +2313,7 @@ Schedule_t *CHGrunt::GetScheduleOfType( int Type )
 		{
 			if( m_hEnemy->IsPlayer() && m_fFirstEncounter )
 			{
-				m_fFirstEncounter = FALSE;// after first encounter, leader won't issue handsigns anymore when he has a new enemy
+				m_fFirstEncounter = false;// after first encounter, leader won't issue handsigns anymore when he has a new enemy
 				return &slGruntSignalSuppress[0];
 			}
 			else

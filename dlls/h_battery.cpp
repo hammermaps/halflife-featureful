@@ -182,9 +182,9 @@ public:
 	int m_iState;
 	float m_flSoundTime;
 	float m_goToOffTime;
-	BOOL m_goingToOff;
+	bool m_goingToOff;
+	bool m_playingChargeSound;
 	CRechargeGlassDecay* m_glass;
-	BOOL m_playingChargeSound;
 	CBeam* m_beam;
 	float m_currentYaw;
 	float m_goalYaw;
@@ -403,7 +403,7 @@ void CRechargeDecay::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE
 	if (m_iState != Idle && m_iState != GiveShot && m_iState != Healing && m_iState != Inactive)
 		return;
 
-	m_goingToOff = TRUE;
+	m_goingToOff = true;
 	// if there is no juice left, turn it off
 	if( (m_iState == Healing || m_iState == GiveShot) && m_iJuice <= 0 )
 	{
@@ -435,7 +435,7 @@ void CRechargeDecay::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE
 	case Healing:
 		if (!m_playingChargeSound && m_flSoundTime <= gpGlobals->time)
 		{
-			m_playingChargeSound = TRUE;
+			m_playingChargeSound = true;
 			EmitSoundScript(CRecharge::loopingSoundScript);
 		}
 		// We need to keep playing animation even though it's 1 frame only for controllers smoothing
@@ -493,7 +493,7 @@ void CRechargeDecay::Off( void )
 	case Healing:
 		if (m_playingChargeSound) {
 			StopSoundScript(CRecharge::loopingSoundScript);
-			m_playingChargeSound = FALSE;
+			m_playingChargeSound = false;
 		}
 		SetChargeState(RetractShot);
 		break;
@@ -502,7 +502,7 @@ void CRechargeDecay::Off( void )
 		{
 			if (m_iJuice > 0) {
 				SetChargeState(Idle);
-				m_goingToOff = FALSE;
+				m_goingToOff = false;
 				pev->nextthink = gpGlobals->time;
 			} else {
 				SetChargeState(RetractArm);

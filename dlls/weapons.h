@@ -694,7 +694,7 @@ public:
 
 	// was this weapon just fired primary or secondary?
 	// we need to know so we can pick the right set of effects.
-	BOOL m_fPrimaryFire;
+	bool m_fPrimaryFire;
 
 	bool UseDecrement() override
 	{
@@ -1108,7 +1108,7 @@ public:
 
 	float	m_flSoundDelay;
 	float	m_flRechargeTime;
-	BOOL	m_secondaryAttack;
+	bool	m_secondaryAttack;
 
 protected:
 	bool CanRecharge();

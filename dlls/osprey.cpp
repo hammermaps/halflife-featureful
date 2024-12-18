@@ -414,11 +414,11 @@ CBaseMonster *COsprey::MakeGrunt( Vector vecSrc )
 			// If player is my enemy and default relationship of my grunts with player is ally, reverse their relationship
 			if (IDefaultRelationship(CLASS_PLAYER) >= R_DL && IDefaultRelationship(pGrunt->DefaultClassify(), CLASS_PLAYER) < R_DL)
 			{
-				pGrunt->m_reverseRelationship = TRUE;
+				pGrunt->m_reverseRelationship = true;
 			}
 			else if (IDefaultRelationship(CLASS_PLAYER) < R_DL && IDefaultRelationship(pGrunt->DefaultClassify(), CLASS_PLAYER) >= R_DL)
 			{
-				pGrunt->m_reverseRelationship = TRUE;
+				pGrunt->m_reverseRelationship = true;
 			}
 			pGrunt->m_iClass = m_iClass;
 			PrepareGruntBeforeSpawn(pGrunt);

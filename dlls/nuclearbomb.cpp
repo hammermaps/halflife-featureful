@@ -30,8 +30,8 @@ public:
 	void SetNuclearBombTimer(bool on);
 	int ObjectCaps() {return FCAP_DONT_SAVE;}
 
-	BOOL bPlayBombSound;
-	BOOL bBombSoundPlaying;
+	bool bPlayBombSound;
+	bool bBombSoundPlaying;
 };
 
 LINK_ENTITY_TO_CLASS(item_nuclearbombtimer, CNuclearBombTimer)
@@ -148,7 +148,7 @@ public:
 	virtual int Restore( CRestore &restore );
 	static TYPEDESCRIPTION m_SaveData[];
 
-	BOOL m_fOn;
+	bool m_fOn;
 	float m_flLastPush;
 	int m_iPushCount;
 	CNuclearBombTimer* m_pTimer;
@@ -204,7 +204,7 @@ void CNuclearBomb::KeyValue(KeyValueData *pkvd)
 {
 	if( FStrEq( pkvd->szKeyName, "initialstate" ) )
 	{
-		m_fOn = atoi( pkvd->szValue );
+		m_fOn = atoi( pkvd->szValue ) != 0;
 		pkvd->fHandled = TRUE;
 	}
 	else if( FStrEq( pkvd->szKeyName, "wait" ) )
@@ -223,12 +223,12 @@ void CNuclearBomb::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE u
 		const char* sound = NULL;
 		if (m_fOn)
 		{
-			m_fOn = FALSE;
+			m_fOn = false;
 			sound = "buttons/button4.wav";
 		}
 		else
 		{
-			m_fOn = TRUE;
+			m_fOn = true;
 			sound = "buttons/button6.wav";
 		}
 		EMIT_SOUND(ENT(pev), CHAN_VOICE, sound, VOL_NORM, ATTN_NORM);

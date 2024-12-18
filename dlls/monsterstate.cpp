@@ -94,7 +94,7 @@ void CBaseMonster::RunAI( void )
 		 m_MonsterState != MONSTERSTATE_DEAD )// don't bother with this crap if monster is prone. 
 	{
 		bool bForcedGather = m_bForceConditionsGather;
-		m_bForceConditionsGather = FALSE;
+		m_bForceConditionsGather = false;
 
 		// collect some sensory Condition information.
 		// don't let monsters outside of the player's PVS act up, or most of the interesting

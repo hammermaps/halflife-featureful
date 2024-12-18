@@ -160,7 +160,7 @@ void CCycler::Think( void )
 		// hack to avoid reloading model every frame
 		pev->animtime = gpGlobals->time;
 		pev->framerate = 1.0;
-		m_fSequenceFinished = FALSE;
+		m_fSequenceFinished = false;
 		m_flLastEventCheck = gpGlobals->time;
 		pev->frame = 0;
 		if( !m_animate )

@@ -107,12 +107,12 @@ public:
 
 	float m_flGround; // z coord of the ground under me, used to make sure no monsters are under the maker when it drops a new child
 
-	BOOL m_fActive;
-	BOOL m_fFadeChildren;// should we make the children fadeout?
+	bool m_fActive;
+	bool m_fFadeChildren;// should we make the children fadeout?
 	string_t m_customModel;
 	int m_iPose;
-	BOOL m_notSolid;
-	BOOL m_gag;
+	bool m_notSolid;
+	bool m_gag;
 	int m_iHead;
 	int m_cyclicBacklogSize;
 	string_t m_iszPlacePosition;
@@ -344,7 +344,7 @@ void CMonsterMaker::Spawn()
 #if MONSTERMAKER_START_ON_FIX
 			pev->nextthink = gpGlobals->time + m_flDelay;
 #endif
-			m_fActive = TRUE;
+			m_fActive = true;
 			SetThink( &CMonsterMaker::MakerThink );
 		}
 		else if( FBitSet( pev->spawnflags, SF_MONSTERMAKER_CYCLIC ) && FBitSet( pev->spawnflags, SF_MONSTERMAKER_CYCLIC_BACKLOG ) )
@@ -354,7 +354,7 @@ void CMonsterMaker::Spawn()
 		else
 		{
 			// wait to be activated.
-			m_fActive = FALSE;
+			m_fActive = false;
 			SetThink( &CBaseEntity::SUB_DoNothing );
 		}
 	}
@@ -362,17 +362,17 @@ void CMonsterMaker::Spawn()
 	{
 		// no targetname, just start.
 		pev->nextthink = gpGlobals->time + m_flDelay;
-		m_fActive = TRUE;
+		m_fActive = true;
 		SetThink( &CMonsterMaker::MakerThink );
 	}
 
 	if( m_cNumMonsters == 1 )
 	{
-		m_fFadeChildren = FALSE;
+		m_fFadeChildren = false;
 	}
 	else
 	{
-		m_fFadeChildren = TRUE;
+		m_fFadeChildren = true;
 	}
 
 	m_flGround = 0;
@@ -723,7 +723,7 @@ CBaseEntity* CMonsterMaker::SpawnMonster(const Vector &placePosition, const Vect
 			SetBits( pevCreate->spawnflags, SF_MONSTER_ACT_OUT_OF_PVS );
 		if( FBitSet( pev->spawnflags, SF_MONSTERMAKER_IGNORE_PLAYER_PUSHING ) )
 			SetBits( pevCreate->spawnflags, SF_MONSTER_IGNORE_PLAYER_PUSH );
-		if (m_gag > 0)
+		if (m_gag)
 			SetBits(pevCreate->spawnflags, SF_MONSTER_GAG);
 		pevCreate->weapons = pev->weapons;
 
@@ -1031,12 +1031,12 @@ void CMonsterMaker::ToggleUse( CBaseEntity *pActivator, CBaseEntity *pCaller, US
 
 	if( m_fActive )
 	{
-		m_fActive = FALSE;
+		m_fActive = false;
 		SetThink( NULL );
 	}
 	else
 	{
-		m_fActive = TRUE;
+		m_fActive = true;
 		SetThink( &CMonsterMaker::MakerThink );
 	}
 

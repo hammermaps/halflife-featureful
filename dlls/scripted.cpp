@@ -324,9 +324,9 @@ void CCineMonster::Spawn( void )
 			m_startTime = gpGlobals->time + (float)1E6;
 	}
 	if( ForcedNoInterruptions() )
-		m_interruptable = FALSE;
+		m_interruptable = false;
 	else
-		m_interruptable = TRUE;
+		m_interruptable = true;
 }
 
 //=========================================================
@@ -645,7 +645,7 @@ void CCineMonster::PossessEntity( void )
 		//ALERT( at_aiconsole, "\"%s\" found and used (INT: %s)\n", STRING( pTarget->pev->targetname ), FBitSet( pev->spawnflags, SF_SCRIPT_NOINTERRUPT )? "No" : "Yes" );
 
 		m_moveFailCount = 0;
-		m_firedOnAnimStart = FALSE;
+		m_firedOnAnimStart = false;
 		pTarget->m_IdealMonsterState = MONSTERSTATE_SCRIPT;
 //		if( m_iszIdle )
 //		{
@@ -760,7 +760,7 @@ bool CCineMonster::StartSequence(CBaseMonster *pTarget, string_t iszSeq, bool co
 			CBaseEntity* pActivator = GetActivator(pTarget);
 			FireTargets( STRING( m_iszFireOnAnimStart ), pActivator, this );
 		}
-		m_firedOnAnimStart = TRUE;
+		m_firedOnAnimStart = true;
 	}
 
 	pTarget->pev->sequence = pTarget->LookupSequence( STRING( iszSeq ) );
@@ -1080,7 +1080,7 @@ bool CBaseMonster::CineCleanup()
 	{
 		// okay, reset me to what it thought I was before
 		m_pCine->m_hTargetEnt = NULL;
-		m_pCine->m_firedOnAnimStart = FALSE;
+		m_pCine->m_firedOnAnimStart = false;
 		pev->movetype = m_pCine->m_saved_movetype;
 		pev->solid = m_pCine->m_saved_solid;
 		pev->effects = m_pCine->m_saved_effects;
@@ -1281,7 +1281,7 @@ private:
 	float m_flRepeat;	// repeat rate
 	float m_flAttenuation;
 	float m_flVolume;
-	BOOL m_active;
+	bool m_active;
 	string_t m_iszListener; // name of entity to look at while talking
 	short m_requiredState;
 	short m_followAction;
@@ -1415,7 +1415,7 @@ void CScriptedSentence::Spawn( void )
 {
 	pev->solid = SOLID_NOT;
 
-	m_active = TRUE;
+	m_active = true;
 	// if no targetname, start now
 	if( !pev->targetname )
 	{
@@ -1465,7 +1465,7 @@ void CScriptedSentence::FindThink( void )
 			UTIL_Remove( this );
 		SetThink( &CScriptedSentence::DelayThink );
 		pev->nextthink = gpGlobals->time + m_flDuration + m_flRepeat;
-		m_active = FALSE;
+		m_active = false;
 		//ALERT( at_console, "%s: found target %s\n", STRING( m_iszSentence ), STRING( m_iszEntity ) );
 	}
 	else
@@ -1478,7 +1478,7 @@ void CScriptedSentence::FindThink( void )
 
 void CScriptedSentence::DelayThink( void )
 {
-	m_active = TRUE;
+	m_active = true;
 	if( !pev->targetname )
 		pev->nextthink = gpGlobals->time + 0.1f;
 	SetThink( &CScriptedSentence::FindThink );

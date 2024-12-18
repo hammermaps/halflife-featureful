@@ -105,7 +105,7 @@ public:
 
 	float m_flNextGrenadeCheck;
 	Vector	m_vecTossVelocity;
-	BOOL m_fThrowGrenade;
+	bool m_fThrowGrenade;
 
 	int m_iTargetRanderamt;
 
@@ -339,7 +339,7 @@ void CHAssassin::HandleAnimEvent( MonsterEvent_t *pEvent )
 				CGrenade::ShootTimed( pev, vecGunPosition, m_vecTossVelocity, 2.0 );
 
 			m_flNextGrenadeCheck = gpGlobals->time + 6.0f;// wait six seconds before even looking again to see if a grenade can be thrown.
-			m_fThrowGrenade = FALSE;
+			m_fThrowGrenade = false;
 			// !!!LATER - when in a group, only try to throw grenade if ordered.
 		}
 		break;
@@ -766,7 +766,7 @@ bool CHAssassin::CheckRangeAttack1( float flDot, float flDist )
 //=========================================================
 bool CHAssassin::CheckRangeAttack2( float flDot, float flDist )
 {
-	m_fThrowGrenade = FALSE;
+	m_fThrowGrenade = false;
 	if( !FBitSet( m_hEnemy->pev->flags, FL_ONGROUND ) )
 	{
 		// don't throw grenades at anything that isn't on the ground!
@@ -786,7 +786,7 @@ bool CHAssassin::CheckRangeAttack2( float flDot, float flDist )
 			m_vecTossVelocity = vecToss;
 
 			// throw a hand grenade
-			m_fThrowGrenade = TRUE;
+			m_fThrowGrenade = true;
 
 			return true;
 		}

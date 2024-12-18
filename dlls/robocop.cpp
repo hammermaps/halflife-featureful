@@ -183,12 +183,12 @@ public:
 	float	m_flFistTime;
 	float	m_flSparkTime;
 	Vector	m_vecAimPos;
-	BOOL m_vecAimPosSet;
+	bool m_vecAimPosSet;
 
 	int m_renderAmtAlive;
 	int m_renderFxAlive;
 	Vector m_renderColorAlive;
-	BOOL m_renderAliveSaved;
+	bool m_renderAliveSaved;
 
 	int m_RobocopGibModel;
 	int m_WaveSprite;
@@ -760,7 +760,7 @@ void CRoboCop::StartTask( Task_t *pTask )
 			m_flFistTime = m_flLaserTime = gpGlobals->time + 9.0f;
 
 			ChangeLaserState();
-			m_vecAimPosSet = FALSE;
+			m_vecAimPosSet = false;
 		}
 		break;
 
@@ -821,7 +821,7 @@ void CRoboCop::StartTask( Task_t *pTask )
 			m_renderAmtAlive = pev->renderamt;
 			m_renderFxAlive = pev->renderfx;
 			m_renderColorAlive = pev->rendercolor;
-			m_renderAliveSaved = TRUE;
+			m_renderAliveSaved = true;
 		}
 
 		pev->renderamt = 15;
@@ -884,7 +884,7 @@ void CRoboCop::RunTask( Task_t *pTask )
 		{
 			m_vecAimPos = tr.vecEndPos;
 		}
-		m_vecAimPosSet = TRUE;
+		m_vecAimPosSet = true;
 
 		vecAngle = UTIL_VecToAngles( vecDir );
 
