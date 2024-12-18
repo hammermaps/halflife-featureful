@@ -69,7 +69,7 @@ bool CSporelauncher::AddToPlayer(CBasePlayer *pPlayer)
 }
 
 
-int CSporelauncher::GetItemInfo(ItemInfo *p)
+bool CSporelauncher::GetItemInfo(ItemInfo *p)
 {
 	p->pszName = STRING(pev->classname);
 	p->pszAmmo1 = "spores";
@@ -88,7 +88,7 @@ int CSporelauncher::GetItemInfo(ItemInfo *p)
 	p->pszAmmoEntity = NULL;
 	p->iDropAmmo = 0;
 
-	return 1;
+	return true;
 }
 
 

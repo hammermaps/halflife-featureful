@@ -81,7 +81,7 @@ bool CGauss::AddToPlayer( CBasePlayer *pPlayer )
 	return AddToPlayerDefault(pPlayer);
 }
 
-int CGauss::GetItemInfo( ItemInfo *p )
+bool CGauss::GetItemInfo( ItemInfo *p )
 {
 	p->pszName = STRING( pev->classname );
 	p->pszAmmo1 = "uranium";
@@ -95,7 +95,7 @@ int CGauss::GetItemInfo( ItemInfo *p )
 	p->pszAmmoEntity = "ammo_gaussclip";
 	p->iDropAmmo = AMMO_URANIUMBOX_GIVE;
 
-	return 1;
+	return true;
 }
 
 bool CGauss::Deploy()

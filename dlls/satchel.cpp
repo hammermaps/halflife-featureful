@@ -342,7 +342,7 @@ void CSatchel::Precache( void )
 	UTIL_PrecacheOther( "monster_satchel" );
 }
 
-int CSatchel::GetItemInfo( ItemInfo *p )
+bool CSatchel::GetItemInfo( ItemInfo *p )
 {
 	p->pszName = STRING( pev->classname );
 	p->pszAmmo1 = "Satchel Charge";
@@ -356,7 +356,7 @@ int CSatchel::GetItemInfo( ItemInfo *p )
 	p->pszAmmoEntity = STRING(pev->classname);
 	p->iDropAmmo = SATCHEL_DEFAULT_GIVE;
 
-	return 1;
+	return true;
 }
 
 //=========================================================

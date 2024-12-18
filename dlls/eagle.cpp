@@ -65,7 +65,7 @@ bool CEagle::AddToPlayer(CBasePlayer *pPlayer)
 	return AddToPlayerDefault(pPlayer);
 }
 
-int CEagle::GetItemInfo(ItemInfo *p)
+bool CEagle::GetItemInfo(ItemInfo *p)
 {
 	p->pszName = STRING(pev->classname);
 	p->pszAmmo1 = "357";
@@ -79,7 +79,7 @@ int CEagle::GetItemInfo(ItemInfo *p)
 	p->pszAmmoEntity = "ammo_357";
 	p->iDropAmmo = AMMO_357BOX_GIVE;
 
-	return 1;
+	return true;
 }
 
 bool CEagle::Deploy( )

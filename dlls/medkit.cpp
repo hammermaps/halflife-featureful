@@ -104,7 +104,7 @@ void CMedkit::Precache(void)
 	m_usMedkitFire = PRECACHE_EVENT(1, "events/medkit.sc");
 }
 
-int CMedkit::GetItemInfo(ItemInfo *p)
+bool CMedkit::GetItemInfo(ItemInfo *p)
 {
 	p->pszName = STRING(pev->classname);
 	p->pszAmmo1 = "Medicine";
@@ -121,7 +121,7 @@ int CMedkit::GetItemInfo(ItemInfo *p)
 		p->iFlags = ITEM_FLAG_NOAUTORELOAD;
 	}
 
-	return 1;
+	return true;
 }
 
 bool CMedkit::AddToPlayer(CBasePlayer *pPlayer)

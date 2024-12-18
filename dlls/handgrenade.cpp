@@ -56,7 +56,7 @@ void CHandGrenade::Precache( void )
 	PrecachePModel( "models/p_grenade.mdl" );
 }
 
-int CHandGrenade::GetItemInfo( ItemInfo *p )
+bool CHandGrenade::GetItemInfo( ItemInfo *p )
 {
 	p->pszName = STRING( pev->classname );
 	p->pszAmmo1 = "Hand Grenade";
@@ -70,7 +70,7 @@ int CHandGrenade::GetItemInfo( ItemInfo *p )
 	p->pszAmmoEntity = STRING(pev->classname);
 	p->iDropAmmo = HANDGRENADE_DEFAULT_GIVE;
 
-	return 1;
+	return true;
 }
 
 bool CHandGrenade::Deploy()

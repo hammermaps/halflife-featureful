@@ -70,7 +70,7 @@ bool CShotgun::AddToPlayer( CBasePlayer *pPlayer )
 	return AddToPlayerDefault(pPlayer);
 }
 
-int CShotgun::GetItemInfo( ItemInfo *p )
+bool CShotgun::GetItemInfo( ItemInfo *p )
 {
 	p->pszName = STRING( pev->classname );
 	p->pszAmmo1 = "buckshot";
@@ -84,7 +84,7 @@ int CShotgun::GetItemInfo( ItemInfo *p )
 	p->pszAmmoEntity = "ammo_buckshot";
 	p->iDropAmmo = AMMO_BUCKSHOTBOX_GIVE;
 
-	return 1;
+	return true;
 }
 
 bool CShotgun::Deploy()

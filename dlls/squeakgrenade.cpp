@@ -534,7 +534,7 @@ void CSqueak::Precache( void )
 	m_usSnarkFire = PRECACHE_EVENT( 1, EventsFile() );
 }
 
-int CSqueak::GetItemInfo( ItemInfo *p )
+bool CSqueak::GetItemInfo( ItemInfo *p )
 {
 	p->pszName = STRING( pev->classname );
 	p->pszAmmo1 = AmmoName();
@@ -548,7 +548,7 @@ int CSqueak::GetItemInfo( ItemInfo *p )
 	p->pszAmmoEntity = STRING(pev->classname);
 	p->iDropAmmo = DefaultGive();
 
-	return 1;
+	return true;
 }
 
 bool CSqueak::Deploy()

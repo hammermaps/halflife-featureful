@@ -66,7 +66,7 @@ void CUzi::Precache( void )
 	m_usUzi = PRECACHE_EVENT( 1, "events/uzi.sc" );
 }
 
-int CUzi::GetItemInfo( ItemInfo *p )
+bool CUzi::GetItemInfo( ItemInfo *p )
 {
 	p->pszName = STRING( pev->classname );
 	p->pszAmmo1 = "9mm";
@@ -80,7 +80,7 @@ int CUzi::GetItemInfo( ItemInfo *p )
 	p->pszAmmoEntity = "ammo_9mmclip";
 	p->iDropAmmo = AMMO_GLOCKCLIP_GIVE;
 
-	return 1;
+	return true;
 }
 
 bool CUzi::AddToPlayer( CBasePlayer *pPlayer )

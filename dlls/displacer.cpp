@@ -38,7 +38,7 @@ extern edict_t *EntSelectSpawnPoint( CBaseEntity *pPlayer );
 
 LINK_ENTITY_TO_CLASS(weapon_displacer, CDisplacer)
 
-int CDisplacer::GetItemInfo(ItemInfo *p)
+bool CDisplacer::GetItemInfo(ItemInfo *p)
 {
 	p->pszName = STRING(pev->classname);
 	p->pszAmmo1 = "uranium";
@@ -57,7 +57,7 @@ int CDisplacer::GetItemInfo(ItemInfo *p)
 	p->pszAmmoEntity = "ammo_gaussclip";
 	p->iDropAmmo = AMMO_URANIUMBOX_GIVE;
 
-	return 1;
+	return true;
 }
 
 bool CDisplacer::AddToPlayer(CBasePlayer *pPlayer)

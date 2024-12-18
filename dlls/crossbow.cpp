@@ -274,7 +274,7 @@ void CCrossbow::Precache( void )
 	m_usCrossbow2 = PRECACHE_EVENT( 1, "events/crossbow2.sc" );
 }
 
-int CCrossbow::GetItemInfo( ItemInfo *p )
+bool CCrossbow::GetItemInfo( ItemInfo *p )
 {
 	p->pszName = STRING( pev->classname );
 	p->pszAmmo1 = "bolts";
@@ -287,7 +287,7 @@ int CCrossbow::GetItemInfo( ItemInfo *p )
 	p->iWeight = CROSSBOW_WEIGHT;
 	p->pszAmmoEntity = "ammo_crossbow";
 	p->iDropAmmo = AMMO_CROSSBOWCLIP_GIVE;
-	return 1;
+	return true;
 }
 
 bool CCrossbow::Deploy()

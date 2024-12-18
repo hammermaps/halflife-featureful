@@ -53,7 +53,7 @@ void CGlock::Precache( void )
 	m_usFireGlock2 = PRECACHE_EVENT( 1, "events/glock2.sc" );
 }
 
-int CGlock::GetItemInfo( ItemInfo *p )
+bool CGlock::GetItemInfo( ItemInfo *p )
 {
 	p->pszName = STRING( pev->classname );
 	p->pszAmmo1 = "9mm";
@@ -67,7 +67,7 @@ int CGlock::GetItemInfo( ItemInfo *p )
 	p->pszAmmoEntity = "ammo_9mmclip";
 	p->iDropAmmo = AMMO_GLOCKCLIP_GIVE;
 
-	return 1;
+	return true;
 }
 
 bool CGlock::AddToPlayer( CBasePlayer *pPlayer )

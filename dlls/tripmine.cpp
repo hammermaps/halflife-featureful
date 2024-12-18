@@ -437,7 +437,7 @@ void CTripmine::Precache( void )
 	m_usTripFire = PRECACHE_EVENT( 1, "events/tripfire.sc" );
 }
 
-int CTripmine::GetItemInfo( ItemInfo *p )
+bool CTripmine::GetItemInfo( ItemInfo *p )
 {
 	p->pszName = STRING( pev->classname );
 	p->pszAmmo1 = "Trip Mine";
@@ -451,7 +451,7 @@ int CTripmine::GetItemInfo( ItemInfo *p )
 	p->pszAmmoEntity = STRING(pev->classname);
 	p->iDropAmmo = TRIPMINE_DEFAULT_GIVE;
 
-	return 1;
+	return true;
 }
 
 bool CTripmine::Deploy()

@@ -55,7 +55,7 @@ void CSniperrifle::Precache( void )
 	m_usSniper = PRECACHE_EVENT( 1, "events/sniper.sc" );
 }
 
-int CSniperrifle::GetItemInfo(ItemInfo *p)
+bool CSniperrifle::GetItemInfo(ItemInfo *p)
 {
 	p->pszName = STRING(pev->classname);
 	p->pszAmmo1 = "762";
@@ -74,7 +74,7 @@ int CSniperrifle::GetItemInfo(ItemInfo *p)
 	p->pszAmmoEntity = "ammo_762";
 	p->iDropAmmo = AMMO_762BOX_GIVE;
 
-	return 1;
+	return true;
 }
 
 bool CSniperrifle::Deploy( )

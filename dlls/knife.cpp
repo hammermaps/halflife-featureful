@@ -60,7 +60,7 @@ void CKnife::Precache(void)
 	m_usKnife = PRECACHE_EVENT(1, "events/knife.sc");
 }
 
-int CKnife::GetItemInfo(ItemInfo *p)
+bool CKnife::GetItemInfo(ItemInfo *p)
 {
 	p->pszName = STRING(pev->classname);
 	p->pszAmmo1 = NULL;
@@ -72,7 +72,7 @@ int CKnife::GetItemInfo(ItemInfo *p)
 	p->iWeight = KNIFE_WEIGHT;
 	p->pszAmmoEntity = NULL;
 	p->iDropAmmo = 0;
-	return 1;
+	return true;
 }
 
 bool CKnife::AddToPlayer( CBasePlayer *pPlayer )

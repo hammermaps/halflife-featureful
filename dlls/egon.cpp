@@ -88,7 +88,7 @@ void CEgon::Holster()
 	EndAttack();
 }
 
-int CEgon::GetItemInfo( ItemInfo *p )
+bool CEgon::GetItemInfo( ItemInfo *p )
 {
 	p->pszName = STRING( pev->classname );
 	p->pszAmmo1 = "uranium";
@@ -102,7 +102,7 @@ int CEgon::GetItemInfo( ItemInfo *p )
 	p->pszAmmoEntity = "ammo_gaussclip";
 	p->iDropAmmo = AMMO_URANIUMBOX_GIVE;
 
-	return 1;
+	return true;
 }
 
 #define EGON_PULSE_INTERVAL		0.1

@@ -53,7 +53,7 @@ void CCrowbar::Precache( void )
 	m_usCrowbar = PRECACHE_EVENT( 1, "events/crowbar.sc" );
 }
 
-int CCrowbar::GetItemInfo( ItemInfo *p )
+bool CCrowbar::GetItemInfo( ItemInfo *p )
 {
 	p->pszName = STRING( pev->classname );
 	p->pszAmmo1 = NULL;
@@ -65,7 +65,7 @@ int CCrowbar::GetItemInfo( ItemInfo *p )
 	p->iWeight = CROWBAR_WEIGHT;
 	p->pszAmmoEntity = NULL;
 	p->iDropAmmo = 0;
-	return 1;
+	return true;
 }
 
 bool CCrowbar::AddToPlayer( CBasePlayer *pPlayer )

@@ -86,7 +86,7 @@ bool CHgun::AddToPlayer( CBasePlayer *pPlayer )
 	return false;
 }
 
-int CHgun::GetItemInfo( ItemInfo *p )
+bool CHgun::GetItemInfo( ItemInfo *p )
 {
 	p->pszName = STRING( pev->classname );
 	p->pszAmmo1 = "Hornets";
@@ -100,7 +100,7 @@ int CHgun::GetItemInfo( ItemInfo *p )
 	p->pszAmmoEntity = NULL;
 	p->iDropAmmo = 0;
 
-	return 1;
+	return true;
 }
 
 bool CHgun::Deploy()

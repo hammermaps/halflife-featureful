@@ -69,7 +69,7 @@ void CPipeWrench::Precache(void)
 	m_usPWrench = PRECACHE_EVENT(1, "events/pipewrench.sc");
 }
 
-int CPipeWrench::GetItemInfo(ItemInfo *p)
+bool CPipeWrench::GetItemInfo(ItemInfo *p)
 {
 	p->pszName = STRING(pev->classname);
 	p->pszAmmo1 = NULL;
@@ -81,7 +81,7 @@ int CPipeWrench::GetItemInfo(ItemInfo *p)
 	p->iWeight = PIPEWRENCH_WEIGHT;
 	p->pszAmmoEntity = NULL;
 	p->iDropAmmo = 0;
-	return 1;
+	return true;
 }
 
 bool CPipeWrench::AddToPlayer( CBasePlayer *pPlayer )

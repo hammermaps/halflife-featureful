@@ -90,7 +90,7 @@ bool CShockrifle::AddToPlayer(CBasePlayer *pPlayer)
 	return false;
 }
 
-int CShockrifle::GetItemInfo(ItemInfo *p)
+bool CShockrifle::GetItemInfo(ItemInfo *p)
 {
 	p->pszName = STRING(pev->classname);
 	p->pszAmmo1 = "Shocks";
@@ -109,7 +109,7 @@ int CShockrifle::GetItemInfo(ItemInfo *p)
 	p->pszAmmoEntity = NULL;
 	p->iDropAmmo = 0;
 
-	return 1;
+	return true;
 }
 
 bool CShockrifle::Deploy()

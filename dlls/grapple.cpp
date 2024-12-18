@@ -272,7 +272,7 @@ void CBarnacleGrapple::Spawn( void )
 	FallInit();
 }
 
-int CBarnacleGrapple::GetItemInfo(ItemInfo *p)
+bool CBarnacleGrapple::GetItemInfo(ItemInfo *p)
 {
 	p->pszName = STRING(pev->classname);
 	p->pszAmmo1 = NULL;
@@ -284,7 +284,7 @@ int CBarnacleGrapple::GetItemInfo(ItemInfo *p)
 	p->iWeight = GRAPPLE_WEIGHT;
 	p->pszAmmoEntity = NULL;
 	p->iDropAmmo = 0;
-	return 1;
+	return true;
 }
 
 bool CBarnacleGrapple::AddToPlayer( CBasePlayer* pPlayer )

@@ -407,7 +407,7 @@ void CRpg::Precache( void )
 	m_usRpg = PRECACHE_EVENT( 1, "events/rpg.sc" );
 }
 
-int CRpg::GetItemInfo( ItemInfo *p )
+bool CRpg::GetItemInfo( ItemInfo *p )
 {
 	p->pszName = STRING( pev->classname );
 	p->pszAmmo1 = "rockets";
@@ -429,7 +429,7 @@ int CRpg::GetItemInfo( ItemInfo *p )
 		p->iDropAmmo = AMMO_RPGCLIP_GIVE;
 	}
 
-	return 1;
+	return true;
 }
 
 bool CRpg::AddToPlayer( CBasePlayer *pPlayer )

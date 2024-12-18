@@ -201,7 +201,7 @@ public:
 	CBaseEntity* Respawn ( void );// copy a weapon
 	void FallInit( void );
 	void CheckRespawn( void );
-	virtual int GetItemInfo(ItemInfo *p) { return 0; }	// returns 0 if struct not filled out
+	virtual bool GetItemInfo(ItemInfo *p) { return false; }	// returns 0 if struct not filled out
 	virtual bool CanDeploy( void );
 	virtual bool Deploy()								// returns is deploy was successful
 		 { return true; }
@@ -400,7 +400,7 @@ public:
 	void Spawn( void );
 	void Precache( void );
 	int WeaponId() const override { return WEAPON_GLOCK; }
-	int GetItemInfo( ItemInfo *p );
+	bool GetItemInfo(ItemInfo *p) override;
 	bool AddToPlayer( CBasePlayer *pPlayer ) override;
 
 	void PrimaryAttack( void );
@@ -436,7 +436,7 @@ public:
 	int WeaponId() const override { return WEAPON_CROWBAR; }
 	void EXPORT SwingAgain( void );
 	void EXPORT Smack( void );
-	int GetItemInfo( ItemInfo *p );
+	bool GetItemInfo(ItemInfo *p) override;
 	bool AddToPlayer( CBasePlayer *pPlayer ) override;
 
 	void PrimaryAttack( void );
@@ -468,7 +468,7 @@ public:
 	void Spawn( void );
 	void Precache( void );
 	int WeaponId() const override { return WEAPON_PYTHON; }
-	int GetItemInfo(ItemInfo *p);
+	bool GetItemInfo(ItemInfo *p) override;
 	bool AddToPlayer( CBasePlayer *pPlayer ) override;
 	void PrimaryAttack( void );
 	void SecondaryAttack( void );
@@ -498,7 +498,7 @@ public:
 	void Spawn( void );
 	void Precache( void );
 	int WeaponId() const override { return WEAPON_MP5; }
-	int GetItemInfo(ItemInfo *p);
+	bool GetItemInfo(ItemInfo *p) override;
 	bool AddToPlayer( CBasePlayer *pPlayer ) override;
 
 	void PrimaryAttack( void );
@@ -531,7 +531,7 @@ public:
 	void Spawn( void );
 	void Precache( void );
 	int WeaponId() const override { return WEAPON_CROSSBOW; }
-	int GetItemInfo(ItemInfo *p);
+	bool GetItemInfo(ItemInfo *p) override;
 
 	void FireBolt( void );
 	void FireSniperBolt( void );
@@ -570,7 +570,7 @@ public:
 	void Spawn( void );
 	void Precache( void );
 	int WeaponId() const override { return WEAPON_SHOTGUN; }
-	int GetItemInfo(ItemInfo *p);
+	bool GetItemInfo(ItemInfo *p) override;
 	bool AddToPlayer( CBasePlayer *pPlayer ) override;
 
 	void PrimaryAttack( void );
@@ -627,7 +627,7 @@ public:
 	void Precache( void );
 	int WeaponId() const override { return WEAPON_RPG; }
 	void Reload( void );
-	int GetItemInfo(ItemInfo *p);
+	bool GetItemInfo(ItemInfo *p) override;
 	bool AddToPlayer( CBasePlayer *pPlayer ) override;
 
 	bool Deploy() override;
@@ -674,7 +674,7 @@ public:
 	void Spawn( void );
 	void Precache( void );
 	int WeaponId() const override { return WEAPON_GAUSS; }
-	int GetItemInfo(ItemInfo *p);
+	bool GetItemInfo(ItemInfo *p) override;
 	bool AddToPlayer( CBasePlayer *pPlayer ) override;
 
 	bool Deploy() override;
@@ -726,7 +726,7 @@ public:
 	void Spawn( void );
 	void Precache( void );
 	int WeaponId() const override { return WEAPON_EGON; }
-	int GetItemInfo(ItemInfo *p);
+	bool GetItemInfo(ItemInfo *p) override;
 	bool AddToPlayer( CBasePlayer *pPlayer ) override;
 
 	bool Deploy() override;
@@ -799,7 +799,7 @@ public:
 	void Spawn( void );
 	void Precache( void );
 	int WeaponId() const override { return WEAPON_HORNETGUN; }
-	int GetItemInfo(ItemInfo *p);
+	bool GetItemInfo(ItemInfo *p) override;
 	bool AddToPlayer( CBasePlayer *pPlayer ) override;
 
 	void PrimaryAttack( void );
@@ -835,7 +835,7 @@ public:
 	void Spawn( void );
 	void Precache( void );
 	int WeaponId() const override { return WEAPON_HANDGRENADE; }
-	int GetItemInfo(ItemInfo *p);
+	bool GetItemInfo(ItemInfo *p) override;
 
 	void PrimaryAttack( void );
 	bool Deploy() override;
@@ -870,7 +870,7 @@ public:
 	void Spawn( void );
 	void Precache( void );
 	int WeaponId() const override { return WEAPON_SATCHEL; }
-	int GetItemInfo(ItemInfo *p);
+	bool GetItemInfo(ItemInfo *p) override;
 	bool AddToPlayer( CBasePlayer *pPlayer ) override;
 	void PrimaryAttack( void );
 	void SecondaryAttack( void );
@@ -909,7 +909,7 @@ public:
 	void Spawn( void );
 	void Precache( void );
 	int WeaponId() const override { return WEAPON_TRIPMINE; }
-	int GetItemInfo(ItemInfo *p);
+	bool GetItemInfo(ItemInfo *p) override;
 	void SetObjectCollisionBox( void )
 	{
 		//!!!BUGBUG - fix the model!
@@ -942,7 +942,7 @@ public:
 	void Spawn( void );
 	void Precache( void );
 	int WeaponId() const override { return WEAPON_SNARK; }
-	int GetItemInfo(ItemInfo *p);
+	bool GetItemInfo(ItemInfo *p) override;
 
 	void PrimaryAttack( void );
 	void SecondaryAttack( void );
@@ -986,7 +986,7 @@ public:
 	void Spawn( void );
 	void Precache( void );
 	int WeaponId() const override { return WEAPON_EAGLE; }
-	int GetItemInfo( ItemInfo *p );
+	bool GetItemInfo(ItemInfo *p) override;
 	bool AddToPlayer( CBasePlayer *pPlayer ) override;
 
 	void PrimaryAttack( void );
@@ -1033,7 +1033,7 @@ public:
 	void Spawn(void);
 	void Precache(void);
 	int WeaponId() const override { return WEAPON_PIPEWRENCH; }
-	int GetItemInfo(ItemInfo *p);
+	bool GetItemInfo(ItemInfo *p) override;
 	bool AddToPlayer(CBasePlayer *pPlayer) override;
 
 	void PrimaryAttack(void);
@@ -1083,7 +1083,7 @@ public:
 	void Spawn(void);
 	void Precache(void);
 	int WeaponId() const override { return WEAPON_MEDKIT; }
-	int GetItemInfo(ItemInfo *p);
+	bool GetItemInfo(ItemInfo *p) override;
 	bool AddToPlayer(CBasePlayer *pPlayer) override;
 
 	void PrimaryAttack(void);
@@ -1139,7 +1139,7 @@ public:
 	int WeaponId() const override { return WEAPON_GRAPPLE; }
 	void EndAttack( void );
 
-	int GetItemInfo(ItemInfo *p);
+	bool GetItemInfo(ItemInfo *p) override;
 	bool AddToPlayer( CBasePlayer* pPlayer ) override;
 	bool Deploy() override;
 	void Holster();
@@ -1191,7 +1191,7 @@ public:
 	void Spawn(void);
 	void Precache(void);
 	int WeaponId() const override { return WEAPON_M249; }
-	int GetItemInfo(ItemInfo *p);
+	bool GetItemInfo(ItemInfo *p) override;
 	bool AddToPlayer(CBasePlayer *pPlayer) override;
 
 	void PrimaryAttack(void);
@@ -1246,7 +1246,7 @@ public:
 	void Precache(void);
 	int WeaponId() const override { return WEAPON_SNIPERRIFLE; }
 
-	int GetItemInfo(ItemInfo *p);
+	bool GetItemInfo(ItemInfo *p) override;
 	bool AddToPlayer(CBasePlayer *pPlayer) override;
 	void PrimaryAttack(void);
 	void SecondaryAttack(void);
@@ -1285,7 +1285,7 @@ public:
 	void Precache( void );
 	int WeaponId() const override { return WEAPON_DISPLACER; }
 
-	int GetItemInfo( ItemInfo *p );
+	bool GetItemInfo(ItemInfo *p) override;
 	bool AddToPlayer( CBasePlayer *pPlayer ) override;
 	void PrimaryAttack( void );
 	void SecondaryAttack( void );
@@ -1333,7 +1333,7 @@ public:
 	void Precache(void);
 	int WeaponId() const override { return WEAPON_SHOCKRIFLE; }
 
-	int GetItemInfo(ItemInfo *p);
+	bool GetItemInfo(ItemInfo *p) override;
 	bool AddToPlayer(CBasePlayer *pPlayer) override;
 
 	void PrimaryAttack(void);
@@ -1375,7 +1375,7 @@ public:
 	void Spawn(void);
 	void Precache(void);
 	int WeaponId() const override { return WEAPON_KNIFE; }
-	int GetItemInfo(ItemInfo *p);
+	bool GetItemInfo(ItemInfo *p) override;
 	bool AddToPlayer( CBasePlayer *pPlayer ) override;
 
 	void PrimaryAttack(void);
@@ -1436,7 +1436,7 @@ public:
 	void Precache( void );
 	int WeaponId() const override { return WEAPON_SPORELAUNCHER; }
 
-	int GetItemInfo( ItemInfo *p );
+	bool GetItemInfo(ItemInfo *p) override;
 	bool AddToPlayer( CBasePlayer *pPlayer ) override;
 
 	void PrimaryAttack( void );
@@ -1470,7 +1470,7 @@ public:
 	void Spawn( void );
 	void Precache( void );
 	int WeaponId() const override { return WEAPON_UZI; }
-	int GetItemInfo(ItemInfo *p);
+	bool GetItemInfo(ItemInfo *p) override;
 	bool AddToPlayer( CBasePlayer *pPlayer ) override;
 
 	void PrimaryAttack( void );

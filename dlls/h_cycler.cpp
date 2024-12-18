@@ -309,7 +309,7 @@ class CWeaponCycler : public CBasePlayerWeapon
 {
 public:
 	void Spawn( void );
-	int GetItemInfo(ItemInfo *p) {return 0; }
+	bool GetItemInfo(ItemInfo *p) { return false; }
 
 	void PrimaryAttack( void );
 	void SecondaryAttack( void );
