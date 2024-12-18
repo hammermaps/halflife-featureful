@@ -71,8 +71,8 @@ public:
 	void EXPORT AutoSearchThink(void);
 	void EXPORT TurretDeath(void);
 
-	virtual void EXPORT SpinDownCall(void) { m_iSpin = 0; }
-	virtual void EXPORT SpinUpCall(void) { m_iSpin = 1; }
+	virtual void EXPORT SpinDownCall(void) { m_iSpin = false; }
+	virtual void EXPORT SpinUpCall(void) { m_iSpin = true; }
 
 	// void SpinDown( void );
 	// float EXPORT SpinDownCall( void ) { return SpinDown(); }
@@ -103,7 +103,7 @@ public:
 	void SetEnemy(CBaseEntity* enemy);
 
 	float m_flMaxSpin;		// Max time to spin the barrel w/o a target
-	int m_iSpin;
+	bool m_iSpin;
 
 	CSprite *m_pEyeGlow;
 	int m_eyeBrightness;
@@ -115,9 +115,9 @@ public:
 	int m_iBaseTurnRate;	// angles per second
 	float m_fTurnRate;		// actual turn rate
 	int m_iOrientation;		// 0 = floor, 1 = Ceiling
-	int m_iOn;
-	int m_fBeserk;			// Sometimes this bitch will just freak out
-	int m_iAutoStart;		// true if the turret auto deploys when a target
+	bool m_iOn;
+	bool m_fBeserk;			// Sometimes this bitch will just freak out
+	bool m_iAutoStart;		// true if the turret auto deploys when a target
 						// enters its range
 
 	Vector m_vecLastSight;
@@ -144,7 +144,7 @@ public:
 TYPEDESCRIPTION	CBaseTurret::m_SaveData[] =
 {
 	DEFINE_FIELD( CBaseTurret, m_flMaxSpin, FIELD_FLOAT ),
-	DEFINE_FIELD( CBaseTurret, m_iSpin, FIELD_INTEGER ),
+	DEFINE_FIELD( CBaseTurret, m_iSpin, FIELD_BOOLEAN ),
 
 	DEFINE_FIELD( CBaseTurret, m_pEyeGlow, FIELD_CLASSPTR ),
 	DEFINE_FIELD( CBaseTurret, m_eyeBrightness, FIELD_INTEGER ),
@@ -155,9 +155,9 @@ TYPEDESCRIPTION	CBaseTurret::m_SaveData[] =
 	DEFINE_FIELD( CBaseTurret, m_iBaseTurnRate, FIELD_INTEGER ),
 	DEFINE_FIELD( CBaseTurret, m_fTurnRate, FIELD_FLOAT ),
 	DEFINE_FIELD( CBaseTurret, m_iOrientation, FIELD_INTEGER ),
-	DEFINE_FIELD( CBaseTurret, m_iOn, FIELD_INTEGER ),
-	DEFINE_FIELD( CBaseTurret, m_fBeserk, FIELD_INTEGER ),
-	DEFINE_FIELD( CBaseTurret, m_iAutoStart, FIELD_INTEGER ),
+	DEFINE_FIELD( CBaseTurret, m_iOn, FIELD_BOOLEAN ),
+	DEFINE_FIELD( CBaseTurret, m_fBeserk, FIELD_BOOLEAN ),
+	DEFINE_FIELD( CBaseTurret, m_iAutoStart, FIELD_BOOLEAN ),
 
 	DEFINE_FIELD( CBaseTurret, m_vecLastSight, FIELD_POSITION_VECTOR ),
 	DEFINE_FIELD( CBaseTurret, m_flLastSight, FIELD_TIME ),
@@ -244,7 +244,7 @@ public:
 
 	static const NamedVisual glowVisual;
 private:
-	int m_iStartSpin;
+	bool m_iStartSpin;
 };
 
 const NamedSoundScript CTurret::shootSoundScript = {
@@ -280,7 +280,7 @@ const NamedVisual CTurret::glowVisual = BuildVisual("Turret.Glow")
 
 TYPEDESCRIPTION	CTurret::m_SaveData[] =
 {
-	DEFINE_FIELD( CTurret, m_iStartSpin, FIELD_INTEGER ),
+	DEFINE_FIELD( CTurret, m_iStartSpin, FIELD_BOOLEAN ),
 };
 
 IMPLEMENT_SAVERESTORE( CTurret, CBaseTurret )
@@ -349,7 +349,7 @@ void CBaseTurret::Spawn()
 	if( ( pev->spawnflags & SF_MONSTER_TURRET_AUTOACTIVATE ) 
 		 && !( pev->spawnflags & SF_MONSTER_TURRET_STARTINACTIVE ) )
 	{
-		m_iAutoStart = TRUE;
+		m_iAutoStart = true;
 	}
 
 	ResetSequenceInfo();
@@ -448,9 +448,9 @@ void CMiniTurret::Precache()
 
 void CBaseTurret::Initialize( void )
 {
-	m_iOn = 0;
-	m_fBeserk = 0;
-	m_iSpin = 0;
+	m_iOn = false;
+	m_fBeserk = false;
+	m_iSpin = false;
 
 	SetBoneController( 0, 0 );
 	SetBoneController( 1, 0 );
@@ -492,7 +492,7 @@ void CBaseTurret::TurretUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_
 	{
 		m_hEnemy = NULL;
 		pev->nextthink = gpGlobals->time + 0.1f;
-		m_iAutoStart = FALSE;// switching off a turret disables autostart
+		m_iAutoStart = false;// switching off a turret disables autostart
 
 		//!!!! this should spin down first!!BUGBUG
 		SetThink( &CBaseTurret::Retire );
@@ -504,7 +504,7 @@ void CBaseTurret::TurretUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_
 		// if the turret is flagged as an autoactivate turret, re-enable it's ability open self.
 		if( pev->spawnflags & SF_MONSTER_TURRET_AUTOACTIVATE )
 		{
-			m_iAutoStart = TRUE;
+			m_iAutoStart = true;
 		}
 
 		SetThink( &CBaseTurret::Deploy );
@@ -555,7 +555,7 @@ void CBaseTurret::EyeOff()
 
 void CBaseTurret::ActiveThink( void )
 {
-	int fAttack = 0;
+	bool fAttack = false;
 	Vector vecDirToEnemy;
 
 	pev->nextthink = gpGlobals->time + 0.1f;
@@ -636,9 +636,9 @@ void CBaseTurret::ActiveThink( void )
 
 	// Is the Gun looking at the target
 	if( DotProduct( vecLOS, gpGlobals->v_forward ) <= 0.866f ) // 30 degree slop
-		fAttack = FALSE;
+		fAttack = false;
 	else
-		fAttack = TRUE;
+		fAttack = true;
 
 	// fire the gun
 	if( m_iSpin && ( ( fAttack ) || ( m_fBeserk ) ) )
@@ -730,7 +730,7 @@ void CBaseTurret::Deploy( void )
 
 	if( pev->sequence != TURRET_ANIM_DEPLOY )
 	{
-		m_iOn = 1;
+		m_iOn = true;
 		SetTurretAnim( TURRET_ANIM_DEPLOY );
 		EmitSoundScript(deploySoundScript);
 		SUB_UseTargets( this, USE_ON );
@@ -788,7 +788,7 @@ void CBaseTurret::Retire( void )
 		}
 		else if( m_fSequenceFinished )
 		{
-			m_iOn = 0;
+			m_iOn = false;
 			m_flLastSight = 0;
 			SetTurretAnim( TURRET_ANIM_NONE );
 			pev->maxs.z = m_iRetractHeight;
@@ -833,8 +833,8 @@ void CTurret::SpinUpCall( void )
 			pev->nextthink = gpGlobals->time + 0.1f; // retarget delay
 			EmitSoundScript(spinupSoundScript);
 			SetThink( &CBaseTurret::ActiveThink );
-			m_iStartSpin = 0;
-			m_iSpin = 1;
+			m_iStartSpin = false;
+			m_iSpin = true;
 		} 
 		else
 		{
@@ -862,7 +862,7 @@ void CTurret::SpinDownCall( void )
 		if( pev->framerate <= 0 )
 		{
 			pev->framerate = 0;
-			m_iSpin = 0;
+			m_iSpin = false;
 		}
 	}
 }
@@ -1127,7 +1127,7 @@ int CBaseTurret::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, fl
 	{
 		if( m_iOn && ( 1 || RANDOM_LONG( 0, 0x7FFF ) > 800 ) )
 		{
-			m_fBeserk = 1;
+			m_fBeserk = true;
 			SetThink( &CBaseTurret::SearchThink );
 		}
 	}
