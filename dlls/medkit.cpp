@@ -255,7 +255,7 @@ bool CMedkit::PlayEmptySound()
 	if (m_iPlayEmptySound)
 	{
 		EMIT_SOUND(ENT(m_pPlayer->pev), CHAN_WEAPON, "items/medshotno1.wav", 1.0, ATTN_NORM);
-		m_iPlayEmptySound = 0;
+		m_iPlayEmptySound = false;
 		return 0;
 	}
 	return 0;

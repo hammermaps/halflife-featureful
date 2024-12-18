@@ -276,8 +276,8 @@ public:
 	enum EGON_FIRESTATE { FIRE_OFF, FIRE_CHARGE };
 	int m_fireState;
 
-	int m_iPlayEmptySound;
-	int m_fFireOnEmpty;		// True when the gun is empty and the player is still holding down the
+	bool m_iPlayEmptySound;
+	bool m_fFireOnEmpty;		// True when the gun is empty and the player is still holding down the
 							// attack key(s)
 	virtual bool PlayEmptySound( void );
 	virtual void ResetEmptySound( void );

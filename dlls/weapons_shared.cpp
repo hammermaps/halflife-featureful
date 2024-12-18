@@ -61,7 +61,7 @@ bool CBasePlayerWeapon::DefaultReload( int iClipSize, int iAnim, float fDelay, i
 
 void CBasePlayerWeapon::ResetEmptySound( void )
 {
-	m_iPlayEmptySound = 1;
+	m_iPlayEmptySound = true;
 }
 
 bool CanAttack( float attack_time, float curtime, bool isPredicted )
@@ -110,7 +110,7 @@ void CBasePlayerWeapon::ItemPostFrame( void )
 	{
 		if( UsesSecondaryAmmo() && !m_pPlayer->m_rgAmmo[SecondaryAmmoIndex()] )
 		{
-			m_fFireOnEmpty = TRUE;
+			m_fFireOnEmpty = true;
 		}
 
 		if (!FBitSet(m_pPlayer->m_suppressedCapabilities, PLAYER_SUPPRESS_ATTACK) && !FBitSet(m_pPlayer->pev->flags, FL_FROZEN))
@@ -121,7 +121,7 @@ void CBasePlayerWeapon::ItemPostFrame( void )
 	{
 		if( ( m_iClip == 0 && UsesAmmo() ) || ( iMaxClip() == -1 && !m_pPlayer->m_rgAmmo[PrimaryAmmoIndex()] ) )
 		{
-			m_fFireOnEmpty = TRUE;
+			m_fFireOnEmpty = true;
 		}
 
 		if (!FBitSet(m_pPlayer->m_suppressedCapabilities, PLAYER_SUPPRESS_ATTACK) && !FBitSet(m_pPlayer->pev->flags, FL_FROZEN))
@@ -135,7 +135,7 @@ void CBasePlayerWeapon::ItemPostFrame( void )
 	else if( !( m_pPlayer->pev->button & ( IN_ATTACK | IN_ATTACK2 ) ) )
 	{
 		// no fire buttons down
-		m_fFireOnEmpty = FALSE;
+		m_fFireOnEmpty = false;
 
 #ifndef CLIENT_DLL
 		if( !IsUseable() && m_flNextPrimaryAttack < ( UseDecrement() ? 0.0f : gpGlobals->time ) )

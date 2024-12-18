@@ -985,7 +985,7 @@ bool CBasePlayerWeapon::PlayEmptySound( void )
 	if( m_iPlayEmptySound )
 	{
 		m_pPlayer->EmitSoundScript(Items::weaponEmptySoundScript);
-		m_iPlayEmptySound = 0;
+		m_iPlayEmptySound = false;
 		return 0;
 	}
 	return 0;

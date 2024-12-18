@@ -70,7 +70,7 @@ bool CDisplacer::PlayEmptySound()
 	if (m_iPlayEmptySound)
 	{
 		EMIT_SOUND(m_pPlayer->edict(), CHAN_WEAPON, "buttons/button11.wav", 0.9f, ATTN_NORM);
-		m_iPlayEmptySound = 0;
+		m_iPlayEmptySound = false;
 		return false;
 	}
 	return false;
