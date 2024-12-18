@@ -250,7 +250,6 @@ public:
 	int m_iEnemyType;
 	float m_fireDelay;
 	float m_trackDelay;
-	bool m_tracking;
 	float m_zeroYaw;
 	Vector m_vGunAngle;
 	Vector m_vIdealGunVector;
@@ -281,7 +280,6 @@ TYPEDESCRIPTION	COp4Mortar::m_SaveData[] =
 	DEFINE_FIELD(COp4Mortar, m_iEnemyType, FIELD_INTEGER),
 	DEFINE_FIELD(COp4Mortar, m_fireDelay, FIELD_FLOAT),
 	DEFINE_FIELD(COp4Mortar, m_trackDelay, FIELD_FLOAT),
-	DEFINE_FIELD(COp4Mortar, m_tracking, FIELD_BOOLEAN),
 	DEFINE_FIELD(COp4Mortar, m_zeroYaw, FIELD_FLOAT),
 	DEFINE_FIELD(COp4Mortar, m_vGunAngle, FIELD_VECTOR),
 	DEFINE_FIELD(COp4Mortar, m_vIdealGunVector, FIELD_VECTOR),
@@ -327,8 +325,6 @@ void COp4Mortar::Spawn()
 
 	pev->frame = 0;
 	pev->framerate = 1;
-
-	m_tracking = false;
 
 	if (m_fireDelay < 0.5)
 		m_fireDelay = 5;
