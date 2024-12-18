@@ -2765,7 +2765,7 @@ bool CTriggerTeleport::TeleportToDestination( CBaseEntity *pOther )
 			{
 				pOther->pev->angles.x = pOther->pev->v_angle.x;
 				pOther->pev->angles.z = pOther->pev->v_angle.z = 0;
-				pOther->pev->fixangle = TRUE;
+				pOther->pev->fixangle = 1;
 			}
 
 			// set new velocity
@@ -2821,7 +2821,7 @@ bool CTriggerTeleport::TeleportToDestination( CBaseEntity *pOther )
 				pevToucher->v_angle = pentTarget->v.angles;
 			}
 
-			pevToucher->fixangle = TRUE;
+			pevToucher->fixangle = 1;
 		}
 
 		if (!FBitSet(pev->spawnflags, SF_TELEPORT_KEEPVELOCITY))

@@ -220,7 +220,7 @@ void CDisplacerBall::BallTouch(CBaseEntity *pOther)
 
 			pPlayer->pev->v_angle = pTarget->pev->angles;
 
-			pPlayer->pev->fixangle = TRUE;
+			pPlayer->pev->fixangle = 1;
 
 			pPlayer->pev->velocity = pOther->pev->basevelocity = g_vecZero;
 		}

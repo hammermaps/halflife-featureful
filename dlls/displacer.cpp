@@ -306,7 +306,7 @@ void CDisplacer::Teleport( void )
 
 		m_pPlayer->pev->angles = pDestination->pev->angles;
 		m_pPlayer->pev->v_angle = pDestination->pev->angles;
-		m_pPlayer->pev->fixangle = TRUE;
+		m_pPlayer->pev->fixangle = 1;
 		m_pPlayer->pev->velocity = m_pPlayer->pev->basevelocity = g_vecZero;
 
 		m_flNextPrimaryAttack = m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 2.0f;
