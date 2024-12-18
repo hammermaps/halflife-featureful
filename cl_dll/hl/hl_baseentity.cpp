@@ -196,7 +196,7 @@ int  CBasePlayer::Classify( void ) { return 0; }
 void CBasePlayer::PreThink(void) { }
 void CBasePlayer::CheckTimeBasedDamage()  { }
 void CBasePlayer::CheckSuitUpdate() { }
-void CBasePlayer::SetSuitUpdate( const char *name, int fgroup, int iNoRepeatTime ) { }
+void CBasePlayer::SetSuitUpdate( const char *name, bool fgroup, int iNoRepeatTime ) { }
 void CBasePlayer::PostThink() { }
 void CBasePlayer::Precache( void ) { }
 int CBasePlayer::Save( CSave &save ) { return 0; }

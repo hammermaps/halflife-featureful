@@ -169,7 +169,7 @@ void CSniperrifle::PrimaryAttack()
 
 	if (!m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
 	// HEV suit - indicate out of ammo condition
-	m_pPlayer->SetSuitUpdate("!HEV_AMO0", FALSE, 0);
+	m_pPlayer->SetSuitUpdate("!HEV_AMO0", false, 0);
 
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 68.0f / 38.0f;
 }

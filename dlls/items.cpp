@@ -633,7 +633,7 @@ public:
 				sprintf( szcharge,"!HEV_%1dP", pct );
 
 				//EMIT_SOUND_SUIT( ENT( pev ), szcharge );
-				pPlayer->SetSuitUpdate( szcharge, FALSE, SUIT_NEXT_IN_30SEC);
+				pPlayer->SetSuitUpdate( szcharge, false, SUIT_NEXT_IN_30SEC);
 			}
 
 			return true;
@@ -688,7 +688,7 @@ class CItemAntidote : public CItem
 		{
 			return false;
 		}
-		pPlayer->SetSuitUpdate( "!HEV_DET4", FALSE, SUIT_NEXT_IN_1MIN );
+		pPlayer->SetSuitUpdate( "!HEV_DET4", false, SUIT_NEXT_IN_1MIN );
 
 		pPlayer->m_rgItems[ITEM_ANTIDOTE] += 1;
 
