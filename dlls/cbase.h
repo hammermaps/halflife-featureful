@@ -22,6 +22,7 @@
 #include "visuals.h"
 #include "grapple_target.h"
 #include "classify.h"
+#include <type_traits>
 /*
 
 Class Hierachy
@@ -809,4 +810,110 @@ public:
 
 	static int wallPuffsIndices[4];
 };
+
+namespace detail
+{
+template<typename T, FIELDTYPE ft>
+struct assert_false : public std::false_type {};
+
+template<typename T, size_t N>
+struct array_error_tag : public std::false_type {};
+}
+
+template<typename T, FIELDTYPE ft, typename E = void>
+struct FieldDefiner {
+	static_assert(detail::assert_false<T, ft>::value, "Save-restore data type mismatch. Ensure the provided field type matches the actual C++ data type (including the array size in case it's an array)");
+};
+
+#define DEFINE_FIELD_DEFINER(type, ft) template<> struct FieldDefiner<type, ft> \
+{\
+	static TYPEDESCRIPTION D(const char* name, int offset, short count, short flags)\
+	{\
+		return {ft, name, offset, count, flags};\
+	}\
+};\
+template<size_t N>\
+struct FieldDefiner<type[N], ft>\
+{\
+	static TYPEDESCRIPTION D(const char* name, int offset, short count, short flags)\
+	{\
+		return {ft, name, offset, count, flags};\
+	}\
+}
+
+DEFINE_FIELD_DEFINER(float, FIELD_FLOAT);
+DEFINE_FIELD_DEFINER(string_t, FIELD_STRING);
+DEFINE_FIELD_DEFINER(EOFFSET, FIELD_ENTITY);
+DEFINE_FIELD_DEFINER(EHANDLE, FIELD_EHANDLE);
+DEFINE_FIELD_DEFINER(entvars_t*, FIELD_EVARS);
+DEFINE_FIELD_DEFINER(edict_t*, FIELD_EDICT);
+DEFINE_FIELD_DEFINER(Vector, FIELD_VECTOR);
+DEFINE_FIELD_DEFINER(Vector, FIELD_POSITION_VECTOR);
+DEFINE_FIELD_DEFINER(int, FIELD_INTEGER);
+DEFINE_FIELD_DEFINER(unsigned int, FIELD_INTEGER);
+DEFINE_FIELD_DEFINER(decltype(CBaseEntity::m_pfnThink), FIELD_FUNCTION);
+DEFINE_FIELD_DEFINER(decltype(CBaseEntity::m_pfnTouch), FIELD_FUNCTION);
+DEFINE_FIELD_DEFINER(decltype(CBaseEntity::m_pfnUse), FIELD_FUNCTION);
+DEFINE_FIELD_DEFINER(decltype(CBaseToggle::m_pfnCallWhenMoveDone), FIELD_FUNCTION);
+DEFINE_FIELD_DEFINER(BOOL, FIELD_BOOLEAN);
+DEFINE_FIELD_DEFINER(short, FIELD_SHORT);
+DEFINE_FIELD_DEFINER(char, FIELD_CHARACTER);
+DEFINE_FIELD_DEFINER(unsigned char, FIELD_CHARACTER);
+DEFINE_FIELD_DEFINER(bool, FIELD_CHARACTER);
+DEFINE_FIELD_DEFINER(float, FIELD_TIME);
+DEFINE_FIELD_DEFINER(string_t, FIELD_MODELNAME);
+DEFINE_FIELD_DEFINER(string_t, FIELD_SOUNDNAME);
+DEFINE_FIELD_DEFINER(std::uint64_t, FIELD_INT64);
+
+template<typename T>
+struct FieldDefiner<T*, FIELD_CLASSPTR, typename std::enable_if<
+	std::is_base_of<CBaseEntity, T>::value>::type>
+{
+	static TYPEDESCRIPTION D(const char* name, int offset, short count, short flags)
+	{
+		return {FIELD_CLASSPTR, name, offset, count, flags};
+	}
+};
+
+template<typename T, size_t N>
+struct FieldDefiner<T*[N], FIELD_CLASSPTR, typename std::enable_if<
+	std::is_base_of<CBaseEntity, T>::value>::type>
+{
+	static TYPEDESCRIPTION D(const char* name, int offset, short count, short flags)
+	{
+		return {FIELD_CLASSPTR, name, offset, count, flags};
+	}
+};
+
+template<typename T>
+struct FieldDefiner<T, FIELD_INTEGER, typename std::enable_if<std::is_enum<T>::value && sizeof(T) == sizeof(int)>::type>
+{
+	static TYPEDESCRIPTION D(const char* name, int offset, short count, short flags)
+	{
+		return {FIELD_INTEGER, name, offset, count, flags};
+	}
+};
+
+template<typename T>
+struct FieldDefiner<T, FIELD_CHARACTER, typename std::enable_if<
+	std::is_pod<T>::value && !std::is_array<T>::value && sizeof(T) >= 2>::type>
+{
+	static TYPEDESCRIPTION D(const char* name, int offset, short count, short flags)
+	{
+		return {FIELD_CHARACTER, name, offset, count, flags};
+	}
+};
+
+#define _FIELD_SAFE(T,name,fieldtype,count,flags) FieldDefiner<\
+	std::conditional<\
+		std::is_array<decltype(T::name)>::value && count != std::extent<decltype(T::name)>::value,\
+		detail::array_error_tag<decltype(T::name), count>,\
+		decltype(T::name)>::type, fieldtype>::D(#name, offsetof(T, name), count, flags)
+#define DEFINE_FIELD(type,name,fieldtype)		_FIELD_SAFE(type, name, fieldtype, 1, 0)
+#define DEFINE_ENTITY_FIELD(name,fieldtype)		_FIELD_SAFE(entvars_t, name, fieldtype, 1, 0 )
+#define DEFINE_ENTITY_ARRAY(name, fieldtype, count) _FIELD_SAFE(entvars_t, name, fieldtype, count, 0)
+#define DEFINE_ARRAY(type,name,fieldtype,count)		_FIELD_SAFE(type, name, fieldtype, count, 0)
+#define DEFINE_ENTITY_GLOBAL_FIELD(name,fieldtype)	_FIELD_SAFE(entvars_t, name, fieldtype, 1, FTYPEDESC_GLOBAL )
+#define DEFINE_GLOBAL_FIELD(type,name,fieldtype)		_FIELD_SAFE(type, name, fieldtype, 1, FTYPEDESC_GLOBAL )
+
 #endif
