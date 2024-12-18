@@ -1020,9 +1020,9 @@ void CBasePlayerWeapon::Holster()
 // if  this is a weapon dropped by a dying player, has 0 m_iDefaultAmmo, which means only the ammo in 
 // the weapon clip comes along. 
 //=========================================================
-int CBasePlayerWeapon::ExtractAmmo( CBasePlayerWeapon *pWeapon )
+bool CBasePlayerWeapon::ExtractAmmo( CBasePlayerWeapon *pWeapon )
 {
-	int iReturn = 0;
+	bool iReturn = false;
 
 	if( UsesAmmo() )
 	{
@@ -1043,7 +1043,7 @@ int CBasePlayerWeapon::ExtractAmmo( CBasePlayerWeapon *pWeapon )
 //=========================================================
 // called by the new item's class with the existing item as parameter
 //=========================================================
-int CBasePlayerWeapon::ExtractClipAmmo( CBasePlayerWeapon *pWeapon )
+bool CBasePlayerWeapon::ExtractClipAmmo( CBasePlayerWeapon *pWeapon )
 {
 	int iAmmo;
 
@@ -1056,6 +1056,7 @@ int CBasePlayerWeapon::ExtractClipAmmo( CBasePlayerWeapon *pWeapon )
 		iAmmo = m_iClip;
 	}
 
+	// TODO: figure out what to do if GiveAmmo returns -1
 	return pWeapon->m_pPlayer->GiveAmmo( iAmmo, pszAmmo1() ); // , &m_iPrimaryAmmoType
 }
 	

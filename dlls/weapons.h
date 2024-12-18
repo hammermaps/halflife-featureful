@@ -256,8 +256,8 @@ public:
 	bool AddToPlayerDefault( CBasePlayer *pPlayer );
 	virtual int AddDuplicate( CBasePlayerWeapon *pItem );
 
-	virtual int ExtractAmmo( CBasePlayerWeapon *pWeapon );	// TODO: check the return type usage. Return true if you can add ammo to yourself when picked up
-	virtual int ExtractClipAmmo( CBasePlayerWeapon *pWeapon );	// TODO: check the return type usage. Return true if you can add ammo to yourself when picked up
+	virtual bool ExtractAmmo( CBasePlayerWeapon *pWeapon );	// TODO: check the return type usage. Return true if you can add ammo to yourself when picked up
+	virtual bool ExtractClipAmmo( CBasePlayerWeapon *pWeapon );	// TODO: check the return type usage. Return true if you can add ammo to yourself when picked up
 
 	virtual bool AddWeapon( void ) { ExtractAmmo( this ); return true; }	// Return true if you want to add yourself to the player
 

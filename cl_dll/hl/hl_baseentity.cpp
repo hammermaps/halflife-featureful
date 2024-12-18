@@ -240,7 +240,7 @@ int CBasePlayerWeapon::UpdateClientData( CBasePlayer *pPlayer ) { return 0; }
 bool CBasePlayerWeapon::IsUseable( void ) { return true; }
 int CBasePlayerWeapon::PrimaryAmmoIndex( void ) { return -1; }
 int CBasePlayerWeapon::SecondaryAmmoIndex( void ) { return -1; }
-int CBasePlayerWeapon::ExtractAmmo( CBasePlayerWeapon *pWeapon ) { return 0; }
-int CBasePlayerWeapon::ExtractClipAmmo( CBasePlayerWeapon *pWeapon ) { return 0; }	
+bool CBasePlayerWeapon::ExtractAmmo( CBasePlayerWeapon *pWeapon ) { return false; }
+bool CBasePlayerWeapon::ExtractClipAmmo( CBasePlayerWeapon *pWeapon ) { return false; }
 void CBasePlayerWeapon::RetireWeapon( void ) { }
 void CBasePlayerWeapon::InitDefaultAmmo(int defaultGive) { m_iDefaultAmmo = defaultGive; }
