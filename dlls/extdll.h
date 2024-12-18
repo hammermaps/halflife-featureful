@@ -56,7 +56,6 @@
 #include <cstdarg>
 typedef unsigned int ULONG;
 typedef unsigned char BYTE;
-typedef int BOOL;
 #define MAX_PATH PATH_MAX
 #if !defined(PATH_MAX)
 #define PATH_MAX 4096
