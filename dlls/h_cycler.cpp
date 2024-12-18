@@ -389,7 +389,7 @@ class CWreckage : public CBaseMonster
 	void Precache( void );
 	void Think( void );
 
-	int m_flStartTime;
+	float m_flStartTime;
 
 	static const NamedVisual smokeVisual;
 };
@@ -428,7 +428,7 @@ void CWreckage::Spawn( void )
 	}
 	// pev->scale = 5.0;
 
-	m_flStartTime = (int)gpGlobals->time;
+	m_flStartTime = gpGlobals->time;
 }
 
 void CWreckage::Precache()

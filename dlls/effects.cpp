@@ -1469,8 +1469,8 @@ TYPEDESCRIPTION CEnvModel::m_SaveData[] =
 	DEFINE_FIELD( CEnvModel, m_iszSequence_Off, FIELD_STRING ),
 	DEFINE_FIELD( CEnvModel, m_iAction_On, FIELD_INTEGER ),
 	DEFINE_FIELD( CEnvModel, m_iAction_Off, FIELD_INTEGER ),
-	DEFINE_FIELD( CEnvModel, m_flFramerate_On, FIELD_INTEGER ),
-	DEFINE_FIELD( CEnvModel, m_flFramerate_Off, FIELD_INTEGER ),
+	DEFINE_FIELD( CEnvModel, m_flFramerate_On, FIELD_FLOAT ),
+	DEFINE_FIELD( CEnvModel, m_flFramerate_Off, FIELD_FLOAT ),
 };
 
 IMPLEMENT_SAVERESTORE( CEnvModel, CBaseAnimating )
@@ -4457,8 +4457,8 @@ TYPEDESCRIPTION	CEnvFog::m_SaveData[] =
 {
 	DEFINE_FIELD( CEnvFog, m_iStartDist, FIELD_INTEGER ),
 	DEFINE_FIELD( CEnvFog, m_iEndDist, FIELD_INTEGER ),
-	DEFINE_FIELD( CEnvFog, m_iFadeIn, FIELD_INTEGER ),
-	DEFINE_FIELD( CEnvFog, m_iFadeOut, FIELD_INTEGER ),
+	DEFINE_FIELD( CEnvFog, m_iFadeIn, FIELD_FLOAT ),
+	DEFINE_FIELD( CEnvFog, m_iFadeOut, FIELD_FLOAT ),
 	DEFINE_FIELD( CEnvFog, m_fHoldTime, FIELD_FLOAT ),
 	DEFINE_FIELD( CEnvFog, m_fFadeStart, FIELD_TIME ),
 	DEFINE_FIELD( CEnvFog, m_density, FIELD_FLOAT ),
