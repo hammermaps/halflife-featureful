@@ -783,7 +783,6 @@ private:
 #endif
 	EGON_FIREMODE		m_fireMode;
 	float				m_shakeTime;
-	bool				m_deployed;
 
 	unsigned short m_usEgonFire;
 };

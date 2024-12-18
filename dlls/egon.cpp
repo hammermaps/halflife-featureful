@@ -70,7 +70,6 @@ void CEgon::Precache( void )
 
 bool CEgon::Deploy( void )
 {
-	m_deployed = false;
 	m_fireState = FIRE_OFF;
 	return DefaultDeploy( "models/v_egon.mdl", "models/p_egon.mdl", EGON_DRAW, "egon" );
 }
@@ -477,7 +476,6 @@ void CEgon::WeaponIdle( void )
 	}
 
 	SendWeaponAnim( iAnim );
-	m_deployed = true;
 }
 
 bool CEgon::CanHolster( void )
