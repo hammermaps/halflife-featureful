@@ -130,7 +130,7 @@ void FindHullIntersection( const Vector &vecSrc, TraceResult &tr, float *mins, f
 
 void CCrowbar::PrimaryAttack()
 {
-	if( !Swing( 1 ) )
+	if( !Swing( true ) )
 	{
 #if !CLIENT_DLL
 		SetThink( &CCrowbar::SwingAgain );
@@ -148,12 +148,12 @@ void CCrowbar::Smack()
 
 void CCrowbar::SwingAgain( void )
 {
-	Swing( 0 );
+	Swing( false );
 }
 
-int CCrowbar::Swing( int fFirst )
+bool CCrowbar::Swing(bool fFirst )
 {
-	int fDidHit = FALSE;
+	bool fDidHit = false;
 
 	TraceResult tr;
 
@@ -216,12 +216,12 @@ int CCrowbar::Swing( int fFirst )
 
 #if !CLIENT_DLL
 		// hit
-		fDidHit = TRUE;
+		fDidHit = true;
 		CBaseEntity *pEntity = CBaseEntity::Instance( tr.pHit );
 
 		// play thwack, smack, or dong sound
 		float flVol = 1.0f;
-		int fHitWorld = TRUE;
+		bool fHitWorld = true;
 
 		if( pEntity )
 		{
@@ -266,12 +266,12 @@ int CCrowbar::Swing( int fFirst )
 				if( !pEntity->IsAlive() )
 				{
 					m_flNextPrimaryAttack = GetNextAttackDelay(0.25);
-					return TRUE;
+					return true;
 				}
 				else
 					flVol = 0.1f;
 
-				fHitWorld = FALSE;
+				fHitWorld = false;
 			}
 		}
 

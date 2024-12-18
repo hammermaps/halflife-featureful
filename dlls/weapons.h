@@ -440,7 +440,7 @@ public:
 	int AddToPlayer( CBasePlayer *pPlayer );
 
 	void PrimaryAttack( void );
-	int Swing( int fFirst );
+	bool Swing( bool fFirst );
 	bool Deploy() override;
 	void Holster();
 	void WeaponIdle();
@@ -1041,7 +1041,7 @@ public:
 	void EXPORT SwingAgain(void);
 	void EXPORT Smack(void);
 
-	int Swing(int fFirst);
+	bool Swing(bool fFirst);
 	bool Deploy() override;
 	void WeaponIdle(void);
 	void Holster();
@@ -1383,7 +1383,7 @@ public:
 	void EXPORT SwingAgain(void);
 	void EXPORT Smack(void);
 
-	int Swing(int fFirst);
+	bool Swing(bool fFirst);
 	bool Deploy() override;
 	void WeaponIdle();
 	void Holster();

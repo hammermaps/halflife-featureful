@@ -130,9 +130,9 @@ void CKnife::SwingAgain(void)
 }
 
 
-int CKnife::Swing(int fFirst)
+bool CKnife::Swing(bool fFirst)
 {
-	int fDidHit = FALSE;
+	bool fDidHit = false;
 
 	TraceResult tr;
 
@@ -199,12 +199,12 @@ int CKnife::Swing(int fFirst)
 #if !CLIENT_DLL
 
 		// hit
-		fDidHit = TRUE;
+		fDidHit = true;
 		CBaseEntity *pEntity = CBaseEntity::Instance(tr.pHit);
 
 		// play thwack, smack, or dong sound
 		float flVol = 1.0f;
-		int fHitWorld = TRUE;
+		bool fHitWorld = true;
 
 		if( pEntity )
 		{
@@ -244,12 +244,12 @@ int CKnife::Swing(int fFirst)
 				if( !pEntity->IsAlive() )
 				{
 					m_flNextPrimaryAttack = GetNextAttackDelay(0.25);
-					return TRUE;
+					return true;
 				}
 				else
 					flVol = 0.1f;
 
-				fHitWorld = FALSE;
+				fHitWorld = false;
 			}
 		}
 
@@ -359,7 +359,7 @@ void CKnife::Stab()
 
 		// play thwack, smack, or dong sound
 		float flVol = 1.0f;
-		int fHitWorld = TRUE;
+		bool fHitWorld = true;
 
 		if (pEntity)
 		{

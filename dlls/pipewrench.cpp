@@ -104,7 +104,7 @@ void CPipeWrench::Holster()
 
 void CPipeWrench::PrimaryAttack()
 {
-	if (!m_iSwingMode && !Swing(1))
+	if (!m_iSwingMode && !Swing(true))
 	{
 #if !CLIENT_DLL
 		SetThink(&CPipeWrench::SwingAgain);
@@ -135,12 +135,12 @@ void CPipeWrench::Smack()
 
 void CPipeWrench::SwingAgain(void)
 {
-	Swing(0);
+	Swing(false);
 }
 
-int CPipeWrench::Swing(int fFirst)
+bool CPipeWrench::Swing(bool fFirst)
 {
-	int fDidHit = FALSE;
+	bool fDidHit = false;
 
 	TraceResult tr;
 
@@ -204,12 +204,12 @@ int CPipeWrench::Swing(int fFirst)
 #if !CLIENT_DLL
 
 		// hit
-		fDidHit = TRUE;
+		fDidHit = true;
 		CBaseEntity *pEntity = CBaseEntity::Instance(tr.pHit);
 
 		// play thwack, smack, or dong sound
 		float flVol = 1.0f;
-		int fHitWorld = TRUE;
+		bool fHitWorld = true;
 
 		if( pEntity )
 		{
@@ -250,12 +250,12 @@ int CPipeWrench::Swing(int fFirst)
 				if ( !pEntity->IsAlive() )
 				{
 					m_flNextPrimaryAttack = GetNextAttackDelay(0.5);
-					return TRUE;
+					return true;
 				}
 				else
 					  flVol = 0.1f;
 
-				fHitWorld = FALSE;
+				fHitWorld = false;
 			}
 		}
 
@@ -367,7 +367,7 @@ void CPipeWrench::BigSwing(void)
 
 		// play thwack, smack, or dong sound
 		float flVol = 1.0;
-		int fHitWorld = TRUE;
+		bool fHitWorld = true;
 
 		if (pEntity)
 		{
