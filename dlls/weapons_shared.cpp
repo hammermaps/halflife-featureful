@@ -53,7 +53,7 @@ bool CBasePlayerWeapon::DefaultReload( int iClipSize, int iAnim, float fDelay, i
 	//!!UNDONE -- reload sound goes here !!!
 	SendWeaponAnim( iAnim, body );
 
-	m_fInReload = TRUE;
+	m_fInReload = true;
 
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 3.0f;
 	return true;
@@ -96,7 +96,7 @@ void CBasePlayerWeapon::ItemPostFrame( void )
 		m_iClip += j;
 		m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] -= j;
 
-		m_fInReload = FALSE;
+		m_fInReload = false;
 	}
 
 #ifndef CLIENT_DLL

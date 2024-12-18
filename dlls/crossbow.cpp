@@ -299,7 +299,7 @@ bool CCrossbow::Deploy()
 
 void CCrossbow::Holster()
 {
-	m_fInReload = FALSE;// cancel any reload in progress.
+	m_fInReload = false;// cancel any reload in progress.
 
 	if( InZoom() )
 	{

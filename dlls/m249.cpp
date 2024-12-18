@@ -38,7 +38,7 @@ void CM249::Spawn()
 
 	InitDefaultAmmo(M249_DEFAULT_GIVE);
 
-	m_fInSpecialReload = FALSE;
+	m_fInSpecialReload = 0;
 	m_bAlternatingEject = false;
 
 	FallInit();// get ready to fall down.
@@ -94,14 +94,14 @@ bool CM249::AddToPlayer(CBasePlayer *pPlayer)
 
 bool CM249::Deploy()
 {
-	m_fInSpecialReload = FALSE;
+	m_fInSpecialReload = 0;
 	UpdateTape();
 	return DefaultDeploy("models/v_saw.mdl", "models/p_saw.mdl", M249_DEPLOY, "mp5", pev->body);
 }
 
 void CM249::Holster()
 {
-	m_fInSpecialReload = FALSE;
+	m_fInSpecialReload = 0;
 	CBasePlayerWeapon::Holster();
 }
 
@@ -209,7 +209,7 @@ void CM249::Reload(void)
 		return;
 
 	if (DefaultReload(M249_MAX_CLIP, M249_LAUNCH, 1.33, pev->body)) {
-		m_fInSpecialReload = TRUE;
+		m_fInSpecialReload = 1;
 		m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 3.78;
 		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 3.78;
 	}
@@ -229,7 +229,7 @@ void CM249::ItemPostFrame()
 			m_iVisibleClip = m_iClip + Q_min( maxClip - m_iClip, m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] );
 
 			UpdateTape(m_iVisibleClip);
-			m_fInSpecialReload = FALSE;
+			m_fInSpecialReload = 0;
 			SendWeaponAnim( M249_RELOAD1, pev->body );
 			m_pPlayer->m_flNextAttack = UTIL_WeaponTimeBase() + 2.4;
 		}

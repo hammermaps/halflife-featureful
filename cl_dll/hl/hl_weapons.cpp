@@ -227,7 +227,7 @@ Put away weapon
 */
 void CBasePlayerWeapon::Holster()
 { 
-	m_fInReload = FALSE; // cancel any reload in progress.
+	m_fInReload = false; // cancel any reload in progress.
 	g_irunninggausspred = false;
 	m_pPlayer->pev->viewmodel = 0; 
 }

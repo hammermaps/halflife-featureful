@@ -459,7 +459,7 @@ bool CRpg::CanHolster( void )
 
 void CRpg::Holster()
 {
-	m_fInReload = FALSE;// cancel any reload in progress.
+	m_fInReload = false;// cancel any reload in progress.
 
 	m_pPlayer->m_flNextAttack = UTIL_WeaponTimeBase() + 0.5f;
 

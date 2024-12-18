@@ -89,7 +89,7 @@ bool CEagle::Deploy( )
 
 void CEagle::Holster()
 {
-	m_fInReload = FALSE;// cancel any reload in progress.
+	m_fInReload = false;// cancel any reload in progress.
 	m_pPlayer->m_flNextAttack = UTIL_WeaponTimeBase() + 0.5;
 	SendWeaponAnim( EAGLE_HOLSTER );
 

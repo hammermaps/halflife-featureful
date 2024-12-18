@@ -89,7 +89,7 @@ bool CSniperrifle::AddToPlayer( CBasePlayer *pPlayer )
 
 void CSniperrifle::Holster()
 {
-	m_fInReload = FALSE;// cancel any reload in progress.
+	m_fInReload = false;// cancel any reload in progress.
 	m_pPlayer->m_flNextAttack = UTIL_WeaponTimeBase() + 1.0;
 	SendWeaponAnim( SNIPER_HOLSTER );
 
