@@ -3828,42 +3828,42 @@ bool CBaseMonster::FCheckAITrigger( void )
 // will be sucked into the script no matter what state it is
 // in. ONLY Scripted AI ents should allow this.
 //=========================================================	
-int CBaseMonster::CanPlaySequence( int interruptFlags )
+bool CBaseMonster::CanPlaySequence( int interruptFlags )
 {
 	if( m_pCine )
 	{
 		if ( interruptFlags & SS_INTERRUPT_SCRIPTS )
 		{
-			return TRUE;
+			return true;
 		}
 		else
 		{
 			// monster is already running a scripted sequence or dead!
-			return FALSE;
+			return false;
 		}
 	}
 	else if (!IsFullyAlive() || m_MonsterState == MONSTERSTATE_PRONE)
 	{
-		return FALSE;
+		return false;
 	}
 	
 	if( interruptFlags & SS_INTERRUPT_ANYSTATE )
 	{
 		// ok to go, no matter what the monster state. (scripted AI)
-		return TRUE;
+		return true;
 	}
 
 	if( m_MonsterState == MONSTERSTATE_NONE || m_MonsterState == MONSTERSTATE_IDLE || m_IdealMonsterState == MONSTERSTATE_IDLE )
 	{
 		// ok to go, but only in these states
-		return TRUE;
+		return true;
 	}
 	
 	if( (m_MonsterState == MONSTERSTATE_ALERT || m_MonsterState == MONSTERSTATE_HUNT) && (interruptFlags & SS_INTERRUPT_ALERT) )
-		return TRUE;
+		return true;
 
 	// unknown situation
-	return FALSE;
+	return false;
 }
 
 //=========================================================
