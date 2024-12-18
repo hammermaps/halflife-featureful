@@ -153,7 +153,7 @@ bool CHalfLifeTeamplay::ClientCommand( CBasePlayer *pPlayer, const char *pcmd )
 {
 #if !NO_VOICEGAMEMGR
 	if( g_VoiceGameMgr.ClientCommand( pPlayer, pcmd ) )
-		return TRUE;
+		return true;
 #endif
 	if( FStrEq( pcmd, "menuselect" ) )
 	{

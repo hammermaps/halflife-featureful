@@ -391,7 +391,7 @@ void CHFGrunt :: KeyValue( KeyValueData *pkvd )
 	if (FStrEq(pkvd->szKeyName, "head"))
 	{
 		m_iHead = atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 	{
@@ -1205,7 +1205,7 @@ void CHFGrunt :: GibMonster ( void )
 {
 	if ( GetBodygroup( FG_GUN_GROUP ) != FG_GUN_NONE )
 	{// throw a gun if the grunt has one
-		DropMyItems(TRUE);
+		DropMyItems(true);
 	}
 
 	CTalkMonster::GibMonster();
@@ -2733,17 +2733,17 @@ void CTalkMonsterRepel::KeyValue(KeyValueData *pkvd)
 	if( FStrEq( pkvd->szKeyName, "UseSentence" ) )
 	{
 		m_iszUse = ALLOC_STRING( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "UnUseSentence" ) )
 	{
 		m_iszUnUse = ALLOC_STRING( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq( pkvd->szKeyName, "RefusalSentence" ))
 	{
 		m_iszDecline = ALLOC_STRING( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CHGruntRepel::KeyValue( pkvd );
@@ -2795,7 +2795,7 @@ void CHFGruntRepel::KeyValue(KeyValueData *pkvd)
 	if( FStrEq(pkvd->szKeyName, "head" ) )
 	{
 		m_iGruntHead = atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CTalkMonsterRepel::KeyValue( pkvd );
@@ -2861,7 +2861,7 @@ void CDeadFGrunt::KeyValue( KeyValueData *pkvd )
 	if (FStrEq(pkvd->szKeyName, "head"))
 	{
 		m_iHead = atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CDeadMonster::KeyValue( pkvd );

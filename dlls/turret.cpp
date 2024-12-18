@@ -305,29 +305,29 @@ void CBaseTurret::KeyValue( KeyValueData *pkvd )
 	if( FStrEq( pkvd->szKeyName, "maxsleep" ) )
 	{
 		m_flMaxWait = atof( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "orientation" ) )
 	{
 		m_iOrientation = atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "searchspeed" ) )
 	{
 		m_iSearchSpeed = atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "turnrate" ) )
 	{
 		m_iBaseTurnRate = atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "style" ) ||
 			FStrEq( pkvd->szKeyName, "height" ) ||
 			FStrEq( pkvd->szKeyName, "value1" ) ||
 			FStrEq( pkvd->szKeyName, "value2" ) ||
 			FStrEq( pkvd->szKeyName, "value3" ) )
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	else
 		CBaseMonster::KeyValue( pkvd );
 }
@@ -1426,7 +1426,7 @@ void CBaseDeadTurret::KeyValue( KeyValueData *pkvd )
 	if( FStrEq( pkvd->szKeyName, "orientation" ) )
 	{
 		m_iOrientation = atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CBaseAnimating::KeyValue(pkvd);

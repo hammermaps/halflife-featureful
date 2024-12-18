@@ -32,7 +32,7 @@ int CFlyingMonster::CheckLocalMove( const Vector &vecStart, const Vector &vecEnd
 	if( FBitSet( pev->flags, FL_SWIM ) && ( UTIL_PointContents( vecEnd ) != CONTENTS_WATER ) )
 	{
 		// ALERT( at_aiconsole, "can't swim out of water\n" );
-		return FALSE;
+		return LOCALMOVE_INVALID;
 	}
 
 	TraceResult tr;

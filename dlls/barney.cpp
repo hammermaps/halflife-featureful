@@ -462,7 +462,7 @@ void CBarney::KeyValue(KeyValueData *pkvd)
 	if (FStrEq(pkvd->szKeyName, "bodystate"))
 	{
 		bodystate = atoi(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CTalkMonster::KeyValue( pkvd );
@@ -790,7 +790,7 @@ void COtis::KeyValue( KeyValueData *pkvd )
 	if (FStrEq(pkvd->szKeyName, "head"))
 	{
 		m_iHead = atoi(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CBarney::KeyValue( pkvd );
@@ -877,7 +877,7 @@ void CDeadOtis::KeyValue( KeyValueData *pkvd )
 	if (FStrEq(pkvd->szKeyName, "head"))
 	{
 		head = atoi(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else 
 		CDeadBarney::KeyValue( pkvd );

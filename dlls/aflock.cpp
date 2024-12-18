@@ -104,7 +104,7 @@ public:
 	bool m_fCourseAdjust;// followers set this flag true to override flocking while they avoid something
 	bool m_fPathBlocked;// true if there is an obstacle ahead
 	Vector m_vecReferencePoint;// last place we saw leader
-	Vector m_vecAdjustedVelocity;// adjusted velocity (used when fCourseAdjust is TRUE)
+	Vector m_vecAdjustedVelocity;// adjusted velocity (used when fCourseAdjust is true)
 	float m_flGoalSpeed;
 	float m_flLastBlockedTime;
 	float m_flFakeBlockedTime;
@@ -172,27 +172,27 @@ void CFlockingFlyerFlock::KeyValue( KeyValueData *pkvd )
 	if( FStrEq( pkvd->szKeyName, "iFlockSize" ) )
 	{
 		m_cFlockSize = atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "flFlockRadius" ) )
 	{
 		m_flFlockRadius = atof( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "flySpeed" ) )
 	{
 		m_customFlySpeed = atof( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "turnRate" ) )
 	{
 		m_customTurnRate = atof( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "checkDist" ) )
 	{
 		m_customCheckDist = atof( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CBaseEntity::KeyValue(pkvd);
@@ -543,7 +543,7 @@ void CFlockingFlyer::SpreadFlock2()
 }
 
 //=========================================================
-// FBoidPathBlocked - returns TRUE if there is an obstacle ahead
+// FBoidPathBlocked - returns true if there is an obstacle ahead
 //=========================================================
 bool CFlockingFlyer::FPathBlocked()
 {

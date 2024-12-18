@@ -152,19 +152,19 @@ public:
 	bool AcceptedFollowingState(CBaseMonster* pMonster);
 	virtual void PossessEntity( void );
 
-	inline bool IsAction( void ) { return FClassnameIs(pev, "scripted_action"); }; //LRC
+	inline bool IsAction( void ) { return FClassnameIs(pev, "scripted_action"); } //LRC
 
 	//LRC: Should the monster do a precise attack for this scripted_action?
 	// (Do a precise attack if we'll be turning to face the target, but we haven't just walked to the target.)
 	bool PreciseAttack( void )
 	{
-	//	if (m_fTurnType != 1) { ALERT(at_console,"preciseattack fails check 1\n"); return FALSE; }
-	//	if (m_fMoveTo == 0) { ALERT(at_console,"preciseattack fails check 2\n"); return FALSE; }
-	//	if (m_fMoveTo != 5 && m_iszAttack == 0) { ALERT(at_console,"preciseattack fails check 3\n"); return FALSE; }
+	//	if (m_fTurnType != 1) { ALERT(at_console,"preciseattack fails check 1\n"); return false; }
+	//	if (m_fMoveTo == 0) { ALERT(at_console,"preciseattack fails check 2\n"); return false; }
+	//	if (m_fMoveTo != 5 && m_iszAttack == 0) { ALERT(at_console,"preciseattack fails check 3\n"); return false; }
 	//	ALERT(at_console,"preciseattack passes!\n");
-	//	return TRUE;
+	//	return true;
 		return m_fTurnType == SCRIPT_TURN_FACE && ( m_fMoveTo == SCRIPT_MOVE_FACE || (m_fMoveTo != SCRIPT_MOVE_NO && !FStrEq(STRING(m_iszAttack), STRING(m_iszMoveTarget)) ));
-	};
+	}
 
 
 	void ReleaseEntity( CBaseMonster *pEntity );

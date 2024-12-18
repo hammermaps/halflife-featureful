@@ -683,7 +683,7 @@ void CGeneWorm::Spawn()
 	m_flTakeHitTime = 0;
 	m_flHitTime = 0;
 
-	m_iWasHit = FALSE;
+	m_iWasHit = 0;
 	m_fRightEyeHit = false;
 	m_fLeftEyeHit = false;
 	m_fGetMad = false;

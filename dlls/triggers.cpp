@@ -109,7 +109,7 @@ void CFrictionModifier::KeyValue( KeyValueData *pkvd )
 	if( FStrEq(pkvd->szKeyName, "modifier" ) )
 	{
 		m_frictionFraction = atof( pkvd->szValue ) / 100.0;
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CBaseEntity::KeyValue( pkvd );
@@ -154,7 +154,7 @@ void CAutoTrigger::KeyValue( KeyValueData *pkvd )
 	if( FStrEq( pkvd->szKeyName, "globalstate" ) )
 	{
 		m_globalstate = ALLOC_STRING( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "triggerstate" ) )
 	{
@@ -171,7 +171,7 @@ void CAutoTrigger::KeyValue( KeyValueData *pkvd )
 			triggerType = USE_ON;
 			break;
 		}
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CBaseDelay::KeyValue( pkvd );
@@ -239,12 +239,12 @@ void CTriggerRelay::KeyValue( KeyValueData *pkvd )
 	if( FStrEq( pkvd->szKeyName, "triggerstate" ) )
 	{
 		triggerType = atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "m_flDelayBeforeReset" ) )
 	{
 		m_flDelayBeforeReset = atof( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CBaseDelay::KeyValue( pkvd );
@@ -425,7 +425,7 @@ void CMultiManager::KeyValue( KeyValueData *pkvd )
 	if( FStrEq( pkvd->szKeyName, "wait" ) )
 	{
 		m_flWait = atof( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else // add this field to the target list
 	{
@@ -442,7 +442,7 @@ void CMultiManager::KeyValue( KeyValueData *pkvd )
 			m_flTargetDelay[m_cTargets] = delay;
 			m_iTargetUseType[m_cTargets] = mmUseType;
 			m_cTargets++;
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 	}
 }
@@ -620,7 +620,7 @@ void CMultiTrigger::KeyValue( KeyValueData *pkvd )
 
 		index = num - 1;
 		m_iTargetName[index] = ALLOC_STRING( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if ( strncmp(pkvd->szKeyName, "delay", 5) == 0 && isdigit(pkvd->szKeyName[5]))
 	{
@@ -633,7 +633,7 @@ void CMultiTrigger::KeyValue( KeyValueData *pkvd )
 		ParseMMDelay(pkvd->szValue, delay, mmUseType);
 		m_flTargetDelay[index] = delay;
 		m_iTargetUseType[index] = mmUseType;
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 }
 
@@ -854,7 +854,7 @@ void CRenderFxManager :: KeyValue( KeyValueData *pkvd )
 	if (FStrEq(pkvd->szKeyName, "m_fScale"))
 {
 		pev->scale = atof(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CBaseEntity::KeyValue( pkvd );
@@ -1021,12 +1021,12 @@ void CBaseTrigger::KeyValue( KeyValueData *pkvd )
 	if( FStrEq( pkvd->szKeyName, "damage" ) )
 	{
 		pev->dmg = atof( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "damagetype" ) )
 	{
 		m_bitsDamageInflict = atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CBaseToggle::KeyValue( pkvd );
@@ -1230,7 +1230,7 @@ void CTargetCDAudio::KeyValue( KeyValueData *pkvd )
 	if( FStrEq( pkvd->szKeyName, "radius" ) )
 	{
 		pev->scale = atof( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CPointEntity::KeyValue( pkvd );
@@ -1372,17 +1372,17 @@ void CTriggerHurt::KeyValue(KeyValueData *pkvd)
 	if( FStrEq( pkvd->szKeyName, "untouchable_ent_name" ) )
 	{
 		pev->netname = ALLOC_STRING( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "gib_policy" ) )
 	{
 		pev->impulse = atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq(pkvd->szKeyName, "min_health" ) )
 	{
 		pev->dmg_save = atof( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CBaseTrigger::KeyValue( pkvd );
@@ -1732,7 +1732,7 @@ void CTriggerMultiple::KeyValue( KeyValueData *pkvd )
 	if( FStrEq( pkvd->szKeyName, "usetype" ) )
 	{
 		pev->impulse = atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CBaseTrigger::KeyValue( pkvd );
@@ -1902,7 +1902,7 @@ void CTriggerCounter::KeyValue( KeyValueData *pkvd )
 	if( FStrEq( pkvd->szKeyName, "count" ) )
 	{
 		m_cTriggersLeft = (int)atof( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CBaseTrigger::KeyValue( pkvd );
@@ -2029,24 +2029,24 @@ void CChangeLevel::KeyValue( KeyValueData *pkvd )
 		if( strlen( pkvd->szValue ) >= cchMapNameMost )
 			ALERT( at_error, "Map name '%s' too long (32 chars)\n", pkvd->szValue );
 		strcpy( m_szMapName, pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "landmark" ) )
 	{
 		if( strlen( pkvd->szValue ) >= cchMapNameMost )
 			ALERT( at_error, "Landmark name '%s' too long (32 chars)\n", pkvd->szValue );
 		strcpy( m_szLandmarkName, pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "changetarget" ) )
 	{
 		m_changeTarget = ALLOC_STRING( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "changedelay" ) )
 	{
 		m_changeTargetDelay = atof( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CBaseTrigger::KeyValue( pkvd );
@@ -2535,12 +2535,12 @@ void CTriggerPush::KeyValue( KeyValueData *pkvd )
 	if (FStrEq(pkvd->szKeyName, "m_iszPushSpeed"))
 	{
 		m_iszPushSpeed = ALLOC_STRING( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "m_iszPushVel"))
 	{
 		m_iszPushVel = ALLOC_STRING( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CBaseTrigger::KeyValue( pkvd );
@@ -2696,7 +2696,7 @@ void CTriggerTeleport::KeyValue( KeyValueData *pkvd )
 	if (FStrEq(pkvd->szKeyName, "teleport_start_inactive"))
 	{
 		m_fInactive = atoi(pkvd->szValue) != 0;
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CBaseTrigger::KeyValue( pkvd );
@@ -3028,7 +3028,7 @@ void CTriggerEndSection::KeyValue( KeyValueData *pkvd )
 		//m_iszSectionName = ALLOC_STRING( pkvd->szValue );
 		// Store this in message so we don't have to write save/restore for this ent
 		pev->message = ALLOC_STRING( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CBaseTrigger::KeyValue( pkvd );
@@ -3090,7 +3090,7 @@ void CTriggerChangeTarget::KeyValue( KeyValueData *pkvd )
 	if( FStrEq( pkvd->szKeyName, "m_iszNewTarget" ) )
 	{
 		m_iszNewTarget = ALLOC_STRING( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CBaseDelay::KeyValue( pkvd );
@@ -3176,22 +3176,22 @@ void CTriggerChangeValue::KeyValue( KeyValueData *pkvd )
 	if (FStrEq(pkvd->szKeyName, "m_iszNewValue"))
 	{
 		m_iszNewValue = ALLOC_STRING( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "m_iszValueName"))
 	{
 		pev->netname = ALLOC_STRING( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "m_iszValueType"))
 	{
 		m_iszValueType = atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "value_type"))
 	{
 		pev->impulse = atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CBaseDelay::KeyValue( pkvd );
@@ -3387,7 +3387,7 @@ void CTriggerChangeValue::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, US
 		mypkvd.szClassName = STRING(pTarget->pev->classname);
 		mypkvd.szKeyName = keyName;
 		mypkvd.szValue = newValue;
-		mypkvd.fHandled = FALSE;
+		mypkvd.fHandled = false;
 
 		DispatchKeyValue(pTarget->edict(), &mypkvd);
 	}
@@ -3486,32 +3486,32 @@ void CTriggerCamera::KeyValue( KeyValueData *pkvd )
 	if( FStrEq( pkvd->szKeyName, "wait" ) )
 	{
 		m_flWait = atof( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq(pkvd->szKeyName, "moveto" ) )
 	{
 		m_sPath = ALLOC_STRING( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "acceleration" ) )
 	{
 		m_acceleration = atof( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq(pkvd->szKeyName, "deceleration" ) )
 	{
 		m_deceleration = atof( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if ( FStrEq(pkvd->szKeyName, "stop_by_player_input" ) )
 	{
 		m_stopByPlayerInput = atoi(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if ( FStrEq(pkvd->szKeyName, "m_iszTurnedOffTarget" ) )
 	{
 		m_iszTurnedOffTarget = ALLOC_STRING(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CBaseDelay::KeyValue( pkvd );
@@ -3870,19 +3870,19 @@ void CTriggerRandom::KeyValue( KeyValueData *pkvd )
 		if (m_minDelay < 0) {
 			m_minDelay = 0;
 		}
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	} else if ( FStrEq( pkvd->szKeyName, "max_delay") ) {
 		m_maxDelay = atof( pkvd->szValue );
 		if (m_maxDelay < 0) {
 			m_maxDelay = 0;
 		}
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	} else if ( FStrEq( pkvd->szKeyName, "trigger_number") ) {
 		m_triggerNumberLimit = atoi( pkvd->szValue );
 		if (m_triggerNumberLimit < 0) {
 			m_triggerNumberLimit = 0;
 		}
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	} else if ( FStrEq( pkvd->szKeyName, "target_count" ) ) { // Sven Co-op compatibility
 		m_targetCount = atoi( pkvd->szValue );
 		if (m_targetCount < 0) {
@@ -3890,7 +3890,7 @@ void CTriggerRandom::KeyValue( KeyValueData *pkvd )
 		} else if (m_targetCount > TRIGGER_RANDOM_MAX_COUNT) {
 			m_targetCount = TRIGGER_RANDOM_MAX_COUNT;
 		}
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	} else if ( strncmp(pkvd->szKeyName, "target", 6) == 0 && isdigit(pkvd->szKeyName[6])) {
 		const int num = atoi(pkvd->szKeyName+6);
 		if (num <= 0 || num > TRIGGER_RANDOM_MAX_COUNT)
@@ -3898,16 +3898,16 @@ void CTriggerRandom::KeyValue( KeyValueData *pkvd )
 
 		const int index = num - 1;
 		m_targets[index] = ALLOC_STRING( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	} else if ( FStrEq( pkvd->szKeyName, "trigger_on_limit") ) {
 		m_triggerOnLimit = ALLOC_STRING( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	} else if ( FStrEq( pkvd->szKeyName, "trigger_on_exhaust") ) {
 		m_triggerOnExhaust = ALLOC_STRING( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	} else if ( FStrEq( pkvd->szKeyName, "first_target") ) {
 		m_firstPreferredTarget = atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	} else {
 		CBaseEntity::KeyValue( pkvd );
 	}
@@ -4251,7 +4251,7 @@ void CTriggerPlayerFreeze::KeyValue( KeyValueData *pkvd )
 {
 	if ( FStrEq( pkvd->szKeyName, "use_type") ) {
 		pev->impulse = atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	} else {
 		CPointEntity::KeyValue( pkvd );
 	}
@@ -4480,22 +4480,22 @@ void CTriggerTimer::KeyValue( KeyValueData *pkvd )
 		if (m_minDelay < 0) {
 			m_minDelay = 0;
 		}
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	} else if ( FStrEq( pkvd->szKeyName, "max_delay") ) {
 		m_maxDelay = atof( pkvd->szValue );
 		if (m_maxDelay < 0) {
 			m_maxDelay = 0;
 		}
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	} else if ( FStrEq( pkvd->szKeyName, "trigger_number") ) {
 		m_triggerNumberLimit = atoi( pkvd->szValue );
 		if (m_triggerNumberLimit < 0) {
 			m_triggerNumberLimit = 0;
 		}
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	} else if ( FStrEq( pkvd->szKeyName, "trigger_on_limit") ) {
 		m_triggerOnLimit = ALLOC_STRING( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	} else {
 		CBaseEntity::KeyValue( pkvd );
 	}
@@ -4786,7 +4786,7 @@ void CTriggerSetPatrol::KeyValue( KeyValueData *pkvd )
 	if (FStrEq(pkvd->szKeyName, "m_iszPath"))
 	{
 		m_iszPath = ALLOC_STRING( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CBaseDelay::KeyValue( pkvd );
@@ -4915,42 +4915,42 @@ void CTriggerMotion::KeyValue( KeyValueData *pkvd )
 	if (FStrEq(pkvd->szKeyName, "m_iszPosition"))
 	{
 		m_iszPosition = ALLOC_STRING( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "m_iPosMode"))
 	{
 		m_iPosMode = atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "m_iszAngles"))
 	{
 		m_iszAngles = ALLOC_STRING( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "m_iAngMode"))
 	{
 		m_iAngMode = atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "m_iszVelocity"))
 	{
 		m_iszVelocity = ALLOC_STRING( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "m_iVelMode"))
 	{
 		m_iVelMode = atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "m_iszAVelocity"))
 	{
 		m_iszAVelocity = ALLOC_STRING( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "m_iAVelMode"))
 	{
 		m_iAVelMode = atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CPointEntity::KeyValue( pkvd );
@@ -5358,22 +5358,22 @@ void CMotionManager::KeyValue( KeyValueData *pkvd )
 	if (FStrEq(pkvd->szKeyName, "m_iszPosition"))
 	{
 		m_iszPosition = ALLOC_STRING( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "m_iPosMode"))
 	{
 		m_iPosMode = atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "m_iszFacing"))
 	{
 		m_iszFacing = ALLOC_STRING( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "m_iFaceMode"))
 	{
 		m_iFaceMode = atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CPointEntity::KeyValue( pkvd );
@@ -5543,7 +5543,7 @@ void CTriggerChangeClass::KeyValue(KeyValueData *pkvd)
 	if (FStrEq(pkvd->szKeyName, "classify"))
 	{
 		m_iClass = atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CPointEntity::KeyValue( pkvd );
@@ -5641,32 +5641,32 @@ void CTriggerHurtRemote::KeyValue(KeyValueData *pkvd)
 	if (FStrEq(pkvd->szKeyName, "targetclass"))
 	{
 		pev->netname = ALLOC_STRING( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "delay"))
 	{
 		pev->frags = atof( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "damagetype"))
 	{
 		pev->weapons = atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "gib_policy" ) )
 	{
 		pev->impulse = atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq(pkvd->szKeyName, "min_health" ) )
 	{
 		pev->dmg_save = atof( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "armordmg"))
 	{
 		pev->armorvalue = atof( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CPointEntity::KeyValue( pkvd );
@@ -5837,32 +5837,32 @@ void CTriggerEntityIterator::KeyValue(KeyValueData *pkvd)
 	if (FStrEq(pkvd->szKeyName, "name_filter"))
 	{
 		m_nameFilter = ALLOC_STRING( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	if (FStrEq(pkvd->szKeyName, "classname_filter"))
 	{
 		m_classnameFilter = ALLOC_STRING( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "status_filter"))
 	{
 		m_statusFilter = (short)atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "triggerstate"))
 	{
 		m_triggerState = (short)atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "trigger_after_run"))
 	{
 		m_triggerAfterRun = ALLOC_STRING( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "maximum_runs"))
 	{
 		m_maxRuns = atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CPointEntity::KeyValue( pkvd );
@@ -6036,117 +6036,117 @@ void CTriggerConfigureMonster::KeyValue(KeyValueData *pkvd)
 	if (FStrEq(pkvd->szKeyName, "gag_flag"))
 	{
 		m_gagFlag = (short)atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "monsterclip_flag"))
 	{
 		m_monsterClipFlag = (short)atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "prisoner_flag"))
 	{
 		m_prisonerFlag = (short)atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "predisaster_flag"))
 	{
 		m_predisasterFlag = (short)atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "dont_drop_gun_flag"))
 	{
 		m_dontDropGunFlag = (short)atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "act_out_of_pvs"))
 	{
 		m_actOutOfPVS = (short)atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "soundmask"))
 	{
 		m_soundMask = atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if ( FStrEq( pkvd->szKeyName, "bloodcolor" ) )
 	{
 		m_bloodColor = atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "classify"))
 	{
 		m_iClass = atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "prisonerto"))
 	{
 		m_prisonerTo = atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if ( FStrEq( pkvd->szKeyName, "freeroam" ) )
 	{
 		m_freeRoam = (short)atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if ( FStrEq( pkvd->szKeyName, "size_for_grapple" ) )
 	{
 		m_sizeForGrapple = (short)atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if ( FStrEq( pkvd->szKeyName, "gib_policy" ) )
 	{
 		m_gibPolicy = (short)atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if ( FStrEq( pkvd->szKeyName, "ignoredby" ) )
 	{
 		m_ignoredBy = (short)atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "TriggerTarget" ) )
 	{
 		m_iszTriggerTarget = ALLOC_STRING( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "TriggerCondition" ) )
 	{
 		m_iTriggerCondition = (short)atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "TriggerAltCondition" ) )
 	{
 		m_iTriggerAltCondition = (short)atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "UseSentence" ) )
 	{
 		m_iszUse = ALLOC_STRING( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "UnUseSentence" ) )
 	{
 		m_iszUnUse = ALLOC_STRING( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq( pkvd->szKeyName, "RefusalSentence" ))
 	{
 		m_iszDecline = ALLOC_STRING( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "provoked_state"))
 	{
 		m_provokedState = (short)atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "tolerance"))
 	{
 		m_iTolerance = (short)atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "ignore_push_flag"))
 	{
 		m_ignorePushFlag = (short)atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CBaseEntity::KeyValue( pkvd );
@@ -6309,17 +6309,17 @@ void CTriggerLook::KeyValue(KeyValueData *pkvd)
 	if( FStrEq( pkvd->szKeyName, "field_of_view" ) )
 	{
 		m_flFieldOfView = atof( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "look_time" ) )
 	{
 		m_flLookTime = atof( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "master" ) )
 	{
 		m_sMaster = ALLOC_STRING( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CBaseDelay::KeyValue(pkvd);
@@ -6405,22 +6405,22 @@ public:
 		if(FStrEq(pkvd->szKeyName, "entity"))
 		{
 			m_entity = ALLOC_STRING(pkvd->szValue);
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else if(FStrEq(pkvd->szKeyName, "fire_if_off"))
 		{
 			m_fireIfOff = ALLOC_STRING(pkvd->szValue);
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else if(FStrEq(pkvd->szKeyName, "fire_if_on"))
 		{
 			m_fireIfOn = ALLOC_STRING(pkvd->szValue);
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else if(FStrEq(pkvd->szKeyName, "fire_if_absent"))
 		{
 			m_fireIfAbsent = ALLOC_STRING(pkvd->szValue);
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else
 			CPointEntity::KeyValue(pkvd);
@@ -6487,42 +6487,42 @@ public:
 		if( FStrEq( pkvd->szKeyName, "testtype" ) )
 		{
 			pev->impulse = atoi( pkvd->szValue );
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else if (FStrEq(pkvd->szKeyName, "pass_target"))
 		{
 			m_onComparisonPass = ALLOC_STRING(pkvd->szValue);
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else if (FStrEq(pkvd->szKeyName, "fail_target"))
 		{
 			m_onComparisonFail = ALLOC_STRING(pkvd->szValue);
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else if( FStrEq( pkvd->szKeyName, "trigger_on_equal" ) )
 		{
 			m_onEqual = ALLOC_STRING( pkvd->szValue );
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else if( FStrEq( pkvd->szKeyName, "trigger_on_not_equal" ) )
 		{
 			m_onNotEqual = ALLOC_STRING( pkvd->szValue );
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else if( FStrEq( pkvd->szKeyName, "trigger_on_less" ) )
 		{
 			m_onLessThan = ALLOC_STRING( pkvd->szValue );
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else if( FStrEq( pkvd->szKeyName, "trigger_on_greater" ) )
 		{
 			m_onGreaterThan = ALLOC_STRING( pkvd->szValue );
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else if( FStrEq( pkvd->szKeyName, "trigger_on_fail" ) )
 		{
 			m_onFail = ALLOC_STRING( pkvd->szValue );
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else if( FStrEq( pkvd->szKeyName, "initial_value" ) )
 		{
@@ -6536,7 +6536,7 @@ public:
 				m_valueSource = ALLOC_STRING(pkvd->szValue);
 				m_valueIsNumber = 0;
 			}
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else if( FStrEq( pkvd->szKeyName, "compare_value" ) )
 		{
@@ -6550,7 +6550,7 @@ public:
 				m_compareValueSource = ALLOC_STRING(pkvd->szValue);
 				m_compareValueIsNumber = 0;
 			}
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else
 			CPointEntity::KeyValue( pkvd );
@@ -6755,32 +6755,32 @@ void CTriggerSkillTest::KeyValue(KeyValueData *pkvd)
 	if( FStrEq( pkvd->szKeyName, "testtype" ) )
 	{
 		pev->impulse = atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "comparand" ) )
 	{
 		pev->button = atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "target_on_fail" ) )
 	{
 		pev->message = ALLOC_STRING( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "trigger_on_easy" ) )
 	{
 		m_triggerOnEasy = ALLOC_STRING( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "trigger_on_medium" ) )
 	{
 		m_triggerOnMedium = ALLOC_STRING( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "trigger_on_hard" ) )
 	{
 		m_triggerOnHard = ALLOC_STRING( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CPointEntity::KeyValue( pkvd );

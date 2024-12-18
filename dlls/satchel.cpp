@@ -279,7 +279,7 @@ int CSatchel::AddDuplicate( CBasePlayerWeapon *pOriginal )
 		if( satchelfix.value )
 		{
 			if( !pOriginal->m_pPlayer )
-				return TRUE;
+				return 1;
 
 			nNumSatchels = 0;
 			nSatchelsInPocket = pOriginal->m_pPlayer->m_rgAmmo[pOriginal->PrimaryAmmoIndex()];
@@ -298,7 +298,7 @@ int CSatchel::AddDuplicate( CBasePlayerWeapon *pOriginal )
 		    && ( satchelfix.value && nSatchelsInPocket + nNumSatchels > SATCHEL_MAX_CARRY - 1 ))
 		{
 			// player has some satchels deployed. Refuse to add more.
-			return FALSE;
+			return 0;
 		}
 	}
 #endif

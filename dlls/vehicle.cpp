@@ -67,39 +67,39 @@ void CFuncVehicle::KeyValue( KeyValueData *pkvd )
 	if( FStrEq( pkvd->szKeyName, "length" ))
 	{
 		m_length = atof( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "width" ))
 	{
 		m_width = atof(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "height" ))
 	{
 		m_height = atof(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "startspeed" ))
 	{
 		m_startSpeed = atof(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "sounds" ))
 	{
 		m_sounds = atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "volume" ))
 	{
 		m_flVolume = (float)atoi( pkvd->szValue );
 		m_flVolume *= 0.1f;
 
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "bank" ))
 	{
 		m_flBank = atof( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "acceleration" ))
 	{
@@ -111,7 +111,7 @@ void CFuncVehicle::KeyValue( KeyValueData *pkvd )
 		else if( m_acceleration > 10 )
 			m_acceleration = 10;
 
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CBaseEntity::KeyValue( pkvd );

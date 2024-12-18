@@ -100,7 +100,7 @@ public:
 
 	void ResetSwap()
 	{
-		swapped = FALSE;
+		swapped = false;
 	}
 
 private:

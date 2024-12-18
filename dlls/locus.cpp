@@ -244,71 +244,71 @@ void CLocusBeam::KeyValue( KeyValueData *pkvd )
 	if (FStrEq(pkvd->szKeyName, "m_iszSprite"))
 	{
 		m_iszSprite = ALLOC_STRING(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "m_iszTargetName"))
 	{
 		m_iszTargetName = ALLOC_STRING(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "m_iszStart"))
 	{
 		m_iszStart = ALLOC_STRING(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "m_iszEnd"))
 	{
 		m_iszEnd = ALLOC_STRING(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "m_iWidth"))
 	{
 		m_iWidth = atoi(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "m_iDistortion"))
 	{
 		m_iDistortion = atoi(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "m_fFrame"))
 	{
 		m_fFrame = atof(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "m_iScrollRate"))
 	{
 		m_iScrollRate = atoi(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "m_fDuration"))
 	{
 		m_fDuration = atof(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "m_fDamage"))
 	{
 		m_fDamage = atof(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "m_iDamageType"))
 	{
 		m_iDamageType = atoi(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "m_iStartAttachment"))
 	{
 		m_iStartAttachment = atoi(pkvd->szValue);
 		if (m_iStartAttachment > 4 || m_iStartAttachment < 0)
 			m_iStartAttachment = 0;
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "m_iEndAttachment"))
 	{
 		m_iEndAttachment = atoi(pkvd->szValue);
 		if (m_iEndAttachment > 4 || m_iEndAttachment < 0)
 			m_iEndAttachment = 0;
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CBaseEntity::KeyValue( pkvd );
@@ -654,12 +654,12 @@ void CCalcRatio::KeyValue(KeyValueData *pkvd)
 	if(FStrEq(pkvd->szKeyName, "base_cast_mode"))
 	{
 		m_baseCastMode = atoi(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if(FStrEq(pkvd->szKeyName, "result_cast_mode"))
 	{
 		m_resultCastMode = atoi(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CPointEntity::KeyValue(pkvd);
@@ -739,7 +739,7 @@ public:
 		if (FStrEq(pkvd->szKeyName, "vector_type"))
 		{
 			pev->weapons = atoi(pkvd->szValue);
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else
 			CPointEntity::KeyValue(pkvd);
@@ -800,27 +800,27 @@ public:
 		if (FStrEq(pkvd->szKeyName, "x_value"))
 		{
 			m_xValue = ALLOC_STRING(pkvd->szValue);
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else if (FStrEq(pkvd->szKeyName, "y_value"))
 		{
 			m_yValue = ALLOC_STRING(pkvd->szValue);
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else if (FStrEq(pkvd->szKeyName, "z_value"))
 		{
 			m_zValue = ALLOC_STRING(pkvd->szValue);
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else if (FStrEq(pkvd->szKeyName, "base_vector"))
 		{
 			pev->netname = ALLOC_STRING(pkvd->szValue);
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else if (FStrEq(pkvd->szKeyName, "vector_type"))
 		{
 			pev->weapons = atoi(pkvd->szValue);
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else
 			CPointEntity::KeyValue(pkvd);
@@ -1224,32 +1224,32 @@ void CLocusVariable :: KeyValue( KeyValueData *pkvd )
 	if (FStrEq(pkvd->szKeyName, "m_iszPosition"))
 	{
 		m_iszPosition = ALLOC_STRING(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "m_iszVelocity"))
 	{
 		m_iszVelocity = ALLOC_STRING(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "m_iszRatio"))
 	{
 		m_iszRatio = ALLOC_STRING(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "m_iszTargetName"))
 	{
 		m_iszTargetName = ALLOC_STRING(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "m_iszFireOnSpawn"))
 	{
 		m_iszFireOnSpawn = ALLOC_STRING(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "m_fDuration"))
 	{
 		m_fDuration = atof(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CPointEntity::KeyValue( pkvd );
@@ -1381,72 +1381,72 @@ void CCalcEvalNumber::KeyValue(KeyValueData *pkvd)
 	if(FStrEq(pkvd->szKeyName, "operation"))
 	{
 		m_operation = atoi(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if(FStrEq(pkvd->szKeyName, "left_operand"))
 	{
 		m_left = ALLOC_STRING(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if(FStrEq(pkvd->szKeyName, "right_operand"))
 	{
 		m_right = ALLOC_STRING(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if(FStrEq(pkvd->szKeyName, "third_operand"))
 	{
 		m_third = ALLOC_STRING(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if(FStrEq(pkvd->szKeyName, "store_result"))
 	{
 		m_storeIn = ALLOC_STRING(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if(FStrEq(pkvd->szKeyName, "min_value"))
 	{
 		m_iszMin = ALLOC_STRING(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if(FStrEq(pkvd->szKeyName, "max_value"))
 	{
 		m_iszMax = ALLOC_STRING(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if(FStrEq(pkvd->szKeyName, "clamp_policy"))
 	{
 		m_clampPolicy = atoi(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if(FStrEq(pkvd->szKeyName, "trigger_on_fail"))
 	{
 		m_triggerOnFail = ALLOC_STRING(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if(FStrEq(pkvd->szKeyName, "vector_mode"))
 	{
 		m_vectorMode = atoi(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if(FStrEq(pkvd->szKeyName, "first_cast_mode"))
 	{
 		m_firstCastMode = atoi(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if(FStrEq(pkvd->szKeyName, "second_cast_mode"))
 	{
 		m_secondCastMode = atoi(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if(FStrEq(pkvd->szKeyName, "third_cast_mode"))
 	{
 		m_thirdCastMode = atoi(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if(FStrEq(pkvd->szKeyName, "result_cast_mode"))
 	{
 		m_resultCastMode = atoi(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CPointEntity::KeyValue(pkvd);

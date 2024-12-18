@@ -224,17 +224,17 @@ void CRechargeDecay::KeyValue( KeyValueData *pkvd )
 	if( FStrEq( pkvd->szKeyName, "capacity" ) || FStrEq( pkvd->szKeyName, "CustomJuice" ) )
 	{
 		pev->health = atoi(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "TriggerOnEmpty" ) )
 	{
 		m_triggerOnEmpty = ALLOC_STRING( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "TriggerOnFirstUse" ) )
 	{
 		m_triggerOnFirstUse = ALLOC_STRING( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CBaseAnimating::KeyValue( pkvd );

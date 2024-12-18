@@ -370,12 +370,12 @@ void CTentacle::KeyValue( KeyValueData *pkvd )
 	if( FStrEq( pkvd->szKeyName, "sweeparc" ) )
 	{
 		m_flMaxYaw = atof( pkvd->szValue ) * 0.5f;
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "sound" ) )
 	{
 		m_iTapSound = atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CBaseMonster::KeyValue( pkvd );

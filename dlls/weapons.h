@@ -192,7 +192,7 @@ public:
 #endif
 	virtual int WeaponId() const { return WEAPON_NONE; }
 	bool IsEnabledInMod();
-	virtual bool AddToPlayer( CBasePlayer *pPlayer );	// return TRUE if the item you want the item added to the player inventory
+	virtual bool AddToPlayer( CBasePlayer *pPlayer );	// return true if the item you want the item added to the player inventory
 	void EXPORT DestroyItem( void );
 	void EXPORT DefaultTouch( CBaseEntity *pOther );	// default weapon touch
 	void EXPORT FallThink ( void );// when an item is first spawned, this think is run to determine when the object has hit the ground.
@@ -256,10 +256,10 @@ public:
 	bool AddToPlayerDefault( CBasePlayer *pPlayer );
 	virtual int AddDuplicate( CBasePlayerWeapon *pItem );
 
-	virtual int ExtractAmmo( CBasePlayerWeapon *pWeapon ); //{ return TRUE; };			// Return TRUE if you can add ammo to yourself when picked up
-	virtual int ExtractClipAmmo( CBasePlayerWeapon *pWeapon );// { return TRUE; };			// Return TRUE if you can add ammo to yourself when picked up
+	virtual int ExtractAmmo( CBasePlayerWeapon *pWeapon );	// TODO: check the return type usage. Return true if you can add ammo to yourself when picked up
+	virtual int ExtractClipAmmo( CBasePlayerWeapon *pWeapon );	// TODO: check the return type usage. Return true if you can add ammo to yourself when picked up
 
-	virtual bool AddWeapon( void ) { ExtractAmmo( this ); return true; }	// Return TRUE if you want to add yourself to the player
+	virtual bool AddWeapon( void ) { ExtractAmmo( this ); return true; }	// Return true if you want to add yourself to the player
 
 	// generic "shared" ammo handlers
 	bool AddPrimaryAmmo(int iCount);

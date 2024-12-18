@@ -138,7 +138,7 @@ void CSporelauncher::PrimaryAttack()
 		(int)vecSrc.z,
 		m_iSquidSpitSprite,
 		0,
-		TRUE);
+		1);
 
 
 	if (!m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)

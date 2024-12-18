@@ -69,7 +69,7 @@ void CRuleEntity::KeyValue( KeyValueData *pkvd )
 	if( FStrEq(pkvd->szKeyName, "master" ) )
 	{
 		SetMaster( ALLOC_STRING( pkvd->szValue ) );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CBaseEntity::KeyValue( pkvd );
@@ -155,7 +155,7 @@ void CGameScore::KeyValue( KeyValueData *pkvd )
 	if( FStrEq( pkvd->szKeyName, "points" ) )
 	{
 		SetPoints( atoi( pkvd->szValue ) );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CRulePointEntity::KeyValue( pkvd );
@@ -241,22 +241,22 @@ void CGameText::KeyValue( KeyValueData *pkvd )
 	if( FStrEq( pkvd->szKeyName, "channel" ) )
 	{
 		m_textParms.channel = atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "x" ) )
 	{
 		m_textParms.x = atof( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq(pkvd->szKeyName, "y" ) )
 	{
 		m_textParms.y = atof( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "effect" ) )
 	{
 		m_textParms.effect = atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "color" ) )
 	{
@@ -266,7 +266,7 @@ void CGameText::KeyValue( KeyValueData *pkvd )
 		m_textParms.g1 = color[1];
 		m_textParms.b1 = color[2];
 		m_textParms.a1 = color[3];
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "color2" ) )
 	{
@@ -276,27 +276,27 @@ void CGameText::KeyValue( KeyValueData *pkvd )
 		m_textParms.g2 = color[1];
 		m_textParms.b2 = color[2];
 		m_textParms.a2 = color[3];
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "fadein" ) )
 	{
 		m_textParms.fadeinTime = atof( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "fadeout" ) )
 	{
 		m_textParms.fadeoutTime = atof( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "holdtime" ) )
 	{
 		m_textParms.holdTime = atof( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq(pkvd->szKeyName, "fxtime" ) )
 	{
 		m_textParms.fxTime = atof( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CRulePointEntity::KeyValue( pkvd );
@@ -358,7 +358,7 @@ void CGameTeamMaster::KeyValue( KeyValueData *pkvd )
 	if( FStrEq( pkvd->szKeyName, "teamindex" ) )
 	{
 		m_teamIndex = atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "triggerstate" ) )
 	{
@@ -375,7 +375,7 @@ void CGameTeamMaster::KeyValue( KeyValueData *pkvd )
 			triggerType = USE_ON;
 			break;
 		}
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CRulePointEntity::KeyValue( pkvd );
@@ -508,22 +508,22 @@ void CGamePlayerZone::KeyValue( KeyValueData *pkvd )
 	if( FStrEq(pkvd->szKeyName, "intarget" ) )
 	{
 		m_iszInTarget = ALLOC_STRING( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "outtarget" ) )
 	{
 		m_iszOutTarget = ALLOC_STRING( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "incount" ) )
 	{
 		m_iszInCount = ALLOC_STRING( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "outcount" ) )
 	{
 		m_iszOutCount = ALLOC_STRING( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CRuleBrushEntity::KeyValue( pkvd );
@@ -796,7 +796,7 @@ void CGamePlayerEquip::KeyValue( KeyValueData *pkvd )
 				m_weaponNames[i] = ALLOC_STRING( tmp );
 				m_weaponCount[i] = atoi( pkvd->szValue );
 				m_weaponCount[i] = Q_max( 1, m_weaponCount[i] );
-				pkvd->fHandled = TRUE;
+				pkvd->fHandled = true;
 				break;
 			}
 		}
@@ -1053,12 +1053,12 @@ void CGamePlayerSettings::PreEntvarsKeyvalue( KeyValueData* pkvd )
 	if (FStrEq(pkvd->szKeyName, "health"))
 	{
 		pev->health = ParseValueAndSetting(pkvd->szValue, m_healthSetting);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "armorvalue"))
 	{
 		pev->armorvalue = ParseValueAndSetting(pkvd->szValue, m_armorSetting);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CRulePointEntity::PreEntvarsKeyvalue(pkvd);
@@ -1076,47 +1076,47 @@ void CGamePlayerSettings::KeyValue(KeyValueData *pkvd)
 	if (ammoType)
 	{
 		m_ammoCounts[ammoType->id] = atoi(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "suit"))
 	{
 		m_suit = atoi(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "suitlogon"))
 	{
 		m_suitLogon = atoi(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "suitlight"))
 	{
 		m_suitLight = atoi(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "longjump"))
 	{
 		m_longjump = atoi(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "max_armor"))
 	{
 		pev->armortype = atoi(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "allow_overheal"))
 	{
 		m_allowOverheal = atoi(pkvd->szValue) != 0;
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "allow_overcharge"))
 	{
 		m_allowOvercharge = atoi(pkvd->szValue) != 0;
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "armor_strength"))
 	{
 		m_armorStrength = atof(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (strncmp(pkvd->szKeyName, "weapon_", 7) == 0)
 	{
@@ -1135,7 +1135,7 @@ void CGamePlayerSettings::KeyValue(KeyValueData *pkvd)
 				break;
 			}
 		}
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CRulePointEntity::KeyValue(pkvd);

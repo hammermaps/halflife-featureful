@@ -283,7 +283,7 @@ void CApache::KeyValue(KeyValueData *pkvd)
 	if( FStrEq(pkvd->szKeyName, "rotorvolume" ) )
 	{
 		pev->armorvalue = atof( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CBaseMonster::KeyValue( pkvd );

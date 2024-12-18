@@ -54,7 +54,7 @@ void CBasePlayerAmmo::KeyValue(KeyValueData *pkvd)
 	if (FStrEq(pkvd->szKeyName, "ammo_amount"))
 	{
 		SetCustomAmount(atoi(pkvd->szValue));
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CPickup::KeyValue(pkvd);
@@ -134,16 +134,16 @@ bool CBasePlayerAmmo::AddAmmo(CBaseEntity *pOther)
 {
 	const char* ammoName = AmmoName();
 	if (!ammoName)
-		return FALSE;
+		return false;
 
 	const int amount = MyAmount();
 
 	if ( pOther->GiveAmmo( amount, ammoName ) != -1 )
 	{
 		EmitSoundScript(Items::ammoPickupSoundScript);
-		return TRUE;
+		return true;
 	}
-	return FALSE;
+	return false;
 }
 
 int CBasePlayerAmmo::MyAmount()

@@ -268,22 +268,22 @@ void COsprey::KeyValue(KeyValueData *pkvd)
 	if( FStrEq(pkvd->szKeyName, "rotorvolume" ) )
 	{
 		pev->armorvalue = atof( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq(pkvd->szKeyName, "grunttype" ) )
 	{
 		m_gruntType = (short)atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq(pkvd->szKeyName, "num" ) )
 	{
 		m_gruntNumber = (short)atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq(pkvd->szKeyName, "attenuation" ) )
 	{
 		m_soundAttenuation = atof( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CBaseMonster::KeyValue( pkvd );

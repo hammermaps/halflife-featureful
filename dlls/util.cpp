@@ -1085,17 +1085,17 @@ void UTIL_ShowMessageAll( const char *pString )
 // Overloaded to add IGNORE_GLASS
 void UTIL_TraceLine( const Vector &vecStart, const Vector &vecEnd, IGNORE_MONSTERS igmon, IGNORE_GLASS ignoreGlass, edict_t *pentIgnore, TraceResult *ptr )
 {
-	TRACE_LINE( vecStart, vecEnd, ( igmon == ignore_monsters ? TRUE : FALSE ) | ( ignoreGlass ? 0x100 : 0 ), pentIgnore, ptr );
+	TRACE_LINE( vecStart, vecEnd, ( igmon == ignore_monsters ? 1 : 0 ) | ( ignoreGlass ? 0x100 : 0 ), pentIgnore, ptr );
 }
 
 void UTIL_TraceLine( const Vector &vecStart, const Vector &vecEnd, IGNORE_MONSTERS igmon, edict_t *pentIgnore, TraceResult *ptr )
 {
-	TRACE_LINE( vecStart, vecEnd, ( igmon == ignore_monsters ? TRUE : FALSE ), pentIgnore, ptr );
+	TRACE_LINE( vecStart, vecEnd, ( igmon == ignore_monsters ? 1 : 0 ), pentIgnore, ptr );
 }
 
 void UTIL_TraceHull( const Vector &vecStart, const Vector &vecEnd, IGNORE_MONSTERS igmon, int hullNumber, edict_t *pentIgnore, TraceResult *ptr )
 {
-	TRACE_HULL( vecStart, vecEnd, ( igmon == ignore_monsters ? TRUE : FALSE ), hullNumber, pentIgnore, ptr );
+	TRACE_HULL( vecStart, vecEnd, ( igmon == ignore_monsters ? 1 : 0 ), hullNumber, pentIgnore, ptr );
 }
 
 void UTIL_TraceModel( const Vector &vecStart, const Vector &vecEnd, int hullNumber, edict_t *pentModel, TraceResult *ptr )
@@ -1957,10 +1957,10 @@ unsigned short CSaveRestoreBuffer::TokenHash( const char *pszToken )
 	for( int i = 0; i < m_pdata->tokenCount; i++ )
 	{
 #if _DEBUG
-		static qboolean beentheredonethat = FALSE;
+		static qboolean beentheredonethat = 0;
 		if( i > 50 && !beentheredonethat )
 		{
-			beentheredonethat = TRUE;
+			beentheredonethat = 1;
 			ALERT( at_error, "CSaveRestoreBuffer :: TokenHash() is getting too full!\n" );
 		}
 #endif
@@ -2145,7 +2145,7 @@ void EntvarsKeyvalue( entvars_t *pev, KeyValueData *pkvd )
 				ALERT( at_error, "Bad field in entity!!\n" );
 				break;
 			}
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 			return;
 		}
 	}
@@ -2886,13 +2886,13 @@ void UTIL_AssignOrigin( CBaseEntity *pEntity, const Vector vecOrigin, bool bInit
 				//);
 				if (pChild->pev->movetype != MOVETYPE_PUSH || pChild->pev->velocity == pEntity->pev->velocity) // if the child isn't moving under its own power
 				{
-					UTIL_AssignOrigin( pChild, vecOrigin + pChild->m_vecMoveWithOffset, FALSE );
+					UTIL_AssignOrigin( pChild, vecOrigin + pChild->m_vecMoveWithOffset, false );
 //					ALERT(at_console,"used m_vecMoveWithOffset based on %f %f %f to set %f %f %f\n",pEntity->pev->origin.x,pEntity->pev->origin.y,pEntity->pev->origin.z,pChild->pev->origin.x,pChild->pev->origin.y,pChild->pev->origin.z);
 				}
 				else
 				{
 					vecTemp = vecDiff + pChild->pev->origin;
-					UTIL_AssignOrigin( pChild, vecTemp, FALSE );
+					UTIL_AssignOrigin( pChild, vecTemp, false );
 				}
 				//ALERT(at_console,"  child origin becomes (%f %f %f)\n",pChild->pev->origin.x,pChild->pev->origin.y,pChild->pev->origin.z);
 				//ALERT(at_console,"ent %p has sibling %p\n",pChild,pChild->m_pSiblingMoveWith);
@@ -2931,12 +2931,12 @@ void UTIL_SetAngles( CBaseEntity *pEntity, const Vector vecAngles, bool bInitiat
 		{
 			if (pChild->pev->avelocity == pEntity->pev->avelocity) // if the child isn't turning under its own power
 			{
-				UTIL_SetAngles( pChild, vecAngles + pChild->m_vecRotWithOffset, FALSE );
+				UTIL_SetAngles( pChild, vecAngles + pChild->m_vecRotWithOffset, false );
 			}
 			else
 			{
 				vecTemp = vecDiff + pChild->pev->angles;
-				UTIL_SetAngles( pChild, vecTemp, FALSE );
+				UTIL_SetAngles( pChild, vecTemp, false );
 			}
 			//ALERT(at_console,"  child origin becomes (%f %f %f)\n",pChild->pev->origin.x,pChild->pev->origin.y,pChild->pev->origin.z);
 			//ALERT(at_console,"ent %p has sibling %p\n",pChild,pChild->m_pSiblingMoveWith);

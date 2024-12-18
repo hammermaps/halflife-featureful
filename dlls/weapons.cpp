@@ -455,12 +455,12 @@ void CBasePlayerWeapon::KeyValue(KeyValueData *pkvd)
 	if( FStrEq( pkvd->szKeyName, "initammo" ) )
 	{
 		m_iDefaultAmmo = atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "master"))
 	{
 		m_sMaster = ALLOC_STRING(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CBaseAnimating::KeyValue(pkvd);
@@ -847,7 +847,7 @@ int CBasePlayerWeapon::UpdateClientData( CBasePlayer *pPlayer )
 
 void CBasePlayerWeapon::SendWeaponAnim(int iAnim, int body )
 {
-	const bool skiplocal = !m_ForceSendAnimations && UseDecrement() != FALSE;
+	const bool skiplocal = !m_ForceSendAnimations && UseDecrement();
 
 	m_pPlayer->pev->weaponanim = iAnim;
 
@@ -1156,7 +1156,7 @@ void CWeaponBox::KeyValue( KeyValueData *pkvd )
 			PackAmmo( ALLOC_STRING( pkvd->szKeyName ), atoi( pkvd->szValue ) );
 			m_cAmmoTypes++;// count this new ammo type.
 
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else
 		{

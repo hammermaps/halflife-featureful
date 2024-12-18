@@ -323,7 +323,7 @@ bool CHGrunt::FOkToSpeak( void )
 
 	// if player is not in pvs, don't speak
 	//if( FNullEnt( FIND_CLIENT_IN_PVS( edict() ) ) )
-	//		return FALSE;
+	//		return false;
 
 	return true;
 }
@@ -1027,7 +1027,7 @@ void CHGrunt::KeyValue(KeyValueData *pkvd)
 	if( FStrEq(pkvd->szKeyName, "desired_skin" ) )
 	{
 		m_desiredSkin = atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CFollowingMonster::KeyValue( pkvd );
@@ -2408,7 +2408,7 @@ void CHGruntRepel::KeyValue(KeyValueData *pkvd)
 	if( FStrEq(pkvd->szKeyName, "gruntname" ) )
 	{
 		pev->message = ALLOC_STRING( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CFollowingMonster::KeyValue( pkvd );

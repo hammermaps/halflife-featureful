@@ -137,11 +137,11 @@ int GetEntityAPI( DLL_FUNCTIONS *pFunctionTable, int interfaceVersion )
 {
 	if( !pFunctionTable || interfaceVersion != INTERFACE_VERSION )
 	{
-		return FALSE;
+		return 0;
 	}
 	
 	memcpy( pFunctionTable, &gFunctionTable, sizeof(DLL_FUNCTIONS) );
-	return TRUE;
+	return 1;
 }
 
 int GetEntityAPI2( DLL_FUNCTIONS *pFunctionTable, int *interfaceVersion )
@@ -150,11 +150,11 @@ int GetEntityAPI2( DLL_FUNCTIONS *pFunctionTable, int *interfaceVersion )
 	{
 		// Tell engine what version we had, so it can figure out who is out of date.
 		*interfaceVersion = INTERFACE_VERSION;
-		return FALSE;
+		return 0;
 	}
 
 	memcpy( pFunctionTable, &gFunctionTable, sizeof(DLL_FUNCTIONS) );
-	return TRUE;
+	return 1;
 }
 
 int GetNewDLLFunctions(NEW_DLL_FUNCTIONS* pFunctionTable, int* interfaceVersion)
@@ -174,7 +174,7 @@ int GetNewDLLFunctions(NEW_DLL_FUNCTIONS* pFunctionTable, int* interfaceVersion)
 int Server_GetPhysicsInterface( int version, server_physics_api_t *api, physics_interface_t *interface )
 {
 	g_fIsXash3D = true;
-	return FALSE; // do not tell engine to init physics interface, as we're not using it
+	return 0; // do not tell engine to init physics interface, as we're not using it
 }
 
 #if !XASH_WIN32
@@ -692,15 +692,15 @@ void CBaseEntity::KeyValue(KeyValueData* pkvd)
 {
 	if (FStrEq(pkvd->szKeyName, "soundlist")) {
 		m_soundList = ALLOC_STRING(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	} else if (FStrEq(pkvd->szKeyName, "ent_template")) {
 		m_entTemplate = ALLOC_STRING(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	} else if (FStrEq(pkvd->szKeyName, "objecthint")) {
 		m_objectHint = ALLOC_STRING(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	} else {
-		pkvd->fHandled = FALSE;
+		pkvd->fHandled = false;
 	}
 }
 

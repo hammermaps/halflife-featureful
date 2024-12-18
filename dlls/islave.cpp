@@ -1484,7 +1484,7 @@ void CISlave::KeyValue(KeyValueData *pkvd)
 	if (FStrEq(pkvd->szKeyName, "energy"))
 	{
 		m_freeEnergy = atof(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CFollowingMonster::KeyValue(pkvd);

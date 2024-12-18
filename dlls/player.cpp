@@ -1572,7 +1572,7 @@ void CBasePlayer::WaterMove()
 	}
 }
 
-// TRUE if the player is attached to a ladder
+// true if the player is attached to a ladder
 bool CBasePlayer::IsOnLadder( void )
 { 
 	return ( pev->movetype == MOVETYPE_FLY );
@@ -5001,8 +5001,6 @@ Called every frame by the player PostThink
 */
 void CBasePlayer::ItemPostFrame()
 {
-	//static int fInSelect = FALSE;
-
 	// check if the player is using a tank
 	if( m_pTank != 0 )
 		return;
@@ -5074,7 +5072,7 @@ static void SendParseErrorsToClient(edict_t* client, const std::string& str)
 		offset += sizeof(chunk)-1;
 
 		MESSAGE_BEGIN( MSG_ONE, gmsgParseErrors, NULL, client );
-			WRITE_BYTE( offset >= str.size() ? TRUE : FALSE );
+			WRITE_BYTE( offset >= str.size() ? 1 : 0 );
 			WRITE_STRING( chunk );
 		MESSAGE_END();
 	}
@@ -6591,22 +6589,22 @@ public:
 		if (FStrEq(pkvd->szKeyName, "calc_param"))
 		{
 			pev->impulse = atoi(pkvd->szValue);
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else if (FStrEq(pkvd->szKeyName, "value_notion"))
 		{
 			pev->button = atoi(pkvd->szValue);
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else if (FStrEq(pkvd->szKeyName, "ammo_name"))
 		{
 			pev->message = ALLOC_STRING(pkvd->szValue);
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else if (FStrEq(pkvd->szKeyName, "item_name"))
 		{
 			pev->netname = ALLOC_STRING(pkvd->szValue);
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else
 			CPointEntity::KeyValue(pkvd);
@@ -6741,12 +6739,12 @@ public:
 		if (FStrEq(pkvd->szKeyName, "pass_target"))
 		{
 			m_PassTarget = ALLOC_STRING(pkvd->szValue);
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else if (FStrEq(pkvd->szKeyName, "fail_target"))
 		{
 			m_FailTarget = ALLOC_STRING(pkvd->szValue);
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else
 			CPointEntity::KeyValue(pkvd);
@@ -6812,7 +6810,7 @@ public:
 		if (FStrEq(pkvd->szKeyName, "item_type"))
 		{
 			pev->impulse = atoi(pkvd->szValue);
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else
 			CPlayerHasThing::KeyValue(pkvd);
@@ -6852,7 +6850,7 @@ public:
 		if (FStrEq(pkvd->szKeyName, "weapon_name"))
 		{
 			m_WeaponName = ALLOC_STRING(pkvd->szValue);
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else
 			CPlayerHasThing::KeyValue(pkvd);
@@ -6902,37 +6900,37 @@ public:
 		if (FStrEq(pkvd->szKeyName, "item_name"))
 		{
 			pev->message = ALLOC_STRING(pkvd->szValue);
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else if (FStrEq(pkvd->szKeyName, "operation"))
 		{
 			pev->weapons = atoi(pkvd->szValue);
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else if (FStrEq(pkvd->szKeyName, "count"))
 		{
 			pev->impulse = atoi(pkvd->szValue);
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else if (FStrEq(pkvd->szKeyName, "on_count_change"))
 		{
 			m_fireOnCountChange = ALLOC_STRING(pkvd->szValue);
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else if (FStrEq(pkvd->szKeyName, "on_item_limit"))
 		{
 			m_fireOnItemLimit = ALLOC_STRING(pkvd->szValue);
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else if (FStrEq(pkvd->szKeyName, "on_max_count_limit"))
 		{
 			m_fireOnMaxCountLimit = ALLOC_STRING(pkvd->szValue);
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else if (FStrEq(pkvd->szKeyName, "on_count_overflow"))
 		{
 			m_fireOnCountOverflow = ALLOC_STRING(pkvd->szValue);
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else
 			CPointEntity::KeyValue(pkvd);
@@ -7072,7 +7070,7 @@ public:
 		if (FStrEq(pkvd->szKeyName, "item_name"))
 		{
 			pev->message = ALLOC_STRING(pkvd->szValue);
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else
 			CPlayerHasThing::KeyValue(pkvd);
@@ -7095,7 +7093,7 @@ public:
 		if (FStrEq(pkvd->szKeyName, "weapon_name"))
 		{
 			pev->netname = ALLOC_STRING(pkvd->szValue);
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else
 			CPointEntity::KeyValue(pkvd);
@@ -7143,27 +7141,27 @@ public:
 		if( FStrEq( pkvd->szKeyName, "attack_capability" ) )
 		{
 			m_attackCapability = atoi( pkvd->szValue );
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else if( FStrEq( pkvd->szKeyName, "jump_capability" ) )
 		{
 			m_jumpCapability = atoi( pkvd->szValue );
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else if( FStrEq( pkvd->szKeyName, "duck_capability" ) )
 		{
 			m_duckCapability = atoi( pkvd->szValue );
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else if( FStrEq( pkvd->szKeyName, "use_capability" ) )
 		{
 			m_useCapability = atoi( pkvd->szValue );
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else if( FStrEq( pkvd->szKeyName, "stepsound_capability" ) )
 		{
 			m_stepSoundCapability = atoi( pkvd->szValue );
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else
 			CPointEntity::KeyValue(pkvd);
@@ -7241,7 +7239,7 @@ public:
 		{
 			// pev->maxspeed is not saved by default. Use some other float variable
 			pev->health = atof( pkvd->szValue );
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else
 			CPointEntity::KeyValue(pkvd);
@@ -7297,22 +7295,22 @@ void CRevertSaved::KeyValue( KeyValueData *pkvd )
 	if( FStrEq( pkvd->szKeyName, "duration" ) )
 	{
 		SetDuration( atof( pkvd->szValue ) );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "holdtime" ) )
 	{
 		SetHoldTime( atof( pkvd->szValue ) );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "messagetime" ) )
 	{
 		SetMessageTime( atof( pkvd->szValue ) );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "loadtime" ) )
 	{
 		SetLoadTime( atof( pkvd->szValue ) );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CPointEntity::KeyValue( pkvd );

@@ -30,7 +30,7 @@
 #include "game.h"
 
 //=========================================================
-// FHaveSchedule - Returns TRUE if monster's m_pSchedule
+// FHaveSchedule - Returns true if monster's m_pSchedule
 // is anything other than NULL.
 //=========================================================
 bool CBaseMonster::FHaveSchedule( void )
@@ -52,7 +52,7 @@ void CBaseMonster::ClearSchedule( void )
 }
 
 //=========================================================
-// FScheduleDone - Returns TRUE if the caller is on the
+// FScheduleDone - Returns true if the caller is on the
 // last task in the schedule
 //=========================================================
 bool CBaseMonster::FScheduleDone( void )
@@ -173,7 +173,7 @@ int CBaseMonster::IScheduleFlags( void )
 }
 
 //=========================================================
-// FScheduleValid - returns TRUE as long as the current
+// FScheduleValid - returns true as long as the current
 // schedule is still the proper schedule to be executing,
 // taking into account all conditions
 //=========================================================

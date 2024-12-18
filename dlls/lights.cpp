@@ -59,17 +59,17 @@ void CLight::KeyValue( KeyValueData* pkvd )
 	if( FStrEq(pkvd->szKeyName, "style" ) )
 	{
 		m_iStyle = atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq(pkvd->szKeyName, "pitch" ) )
 	{
 		pev->angles.x = atof( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq(pkvd->szKeyName, "pattern" ) )
 	{
 		m_iszPattern = ALLOC_STRING( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 	{
@@ -166,7 +166,7 @@ void CEnvLight::KeyValue( KeyValueData* pkvd )
 		g = (int)( pow( g / 114.0f, 0.6f ) * 264.0f );
 		b = (int)( pow( b / 114.0f, 0.6f ) * 264.0f );
 
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 		sprintf( szColor, "%d", r );
 		CVAR_SET_STRING( "sv_skycolor_r", szColor );
 		sprintf( szColor, "%d", g );

@@ -48,7 +48,7 @@ void CWorldItem::KeyValue( KeyValueData *pkvd )
 	if( FStrEq( pkvd->szKeyName, "type" ) )
 	{
 		m_iType = atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CBaseEntity::KeyValue( pkvd );
@@ -105,7 +105,7 @@ void CItemRandomProxy::KeyValue( KeyValueData *pkvd )
 	if (FStrEq(pkvd->szKeyName, "template"))
 	{
 		pev->message = ALLOC_STRING(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CBaseEntity::KeyValue( pkvd );
@@ -214,7 +214,7 @@ void CItemRandom::KeyValue(KeyValueData *pkvd)
 			m_itemProbabilities[m_itemCount] = probability;
 			m_itemCount++;
 		}
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 	{
@@ -321,7 +321,7 @@ void CPickup::KeyValue(KeyValueData *pkvd)
 	if (FStrEq(pkvd->szKeyName, "master"))
 	{
 		m_sMaster = ALLOC_STRING(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CBaseDelay::KeyValue(pkvd);
@@ -723,7 +723,7 @@ class CItemSecurity : public CItem
 		if (FStrEq(pkvd->szKeyName, "hudname"))
 		{
 			pev->netname = ALLOC_STRING(pkvd->szValue);
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else
 			CItem::KeyValue(pkvd);
@@ -748,7 +748,7 @@ class CItemSecurity : public CItem
 		if (!FStringNull(pev->message))
 			UTIL_ShowMessage( STRING( pev->message ), pPlayer );
 
-		return TRUE;
+		return true;
 	}
 };
 
@@ -779,12 +779,12 @@ class CItemPickup : public CItem
 		if (FStrEq(pkvd->szKeyName, "item_name"))
 		{
 			pev->netname = ALLOC_STRING(pkvd->szValue);
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else if (FStrEq(pkvd->szKeyName, "count"))
 		{
 			pev->impulse = atoi(pkvd->szValue);
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else
 			CItem::KeyValue(pkvd);
@@ -1047,7 +1047,7 @@ void CItemGeneric::KeyValue(KeyValueData* pkvd)
 	if (FStrEq(pkvd->szKeyName, "sequencename"))
 	{
 		m_iszSequenceName = ALLOC_STRING(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CBaseAnimating::KeyValue(pkvd);
@@ -1206,37 +1206,37 @@ void CEyeScanner::KeyValue(KeyValueData *pkvd)
 	if (FStrEq(pkvd->szKeyName, "unlocked_target"))
 	{
 		m_unlockedTarget = ALLOC_STRING(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "locked_target"))
 	{
 		m_lockedTarget = ALLOC_STRING(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "unlockersname"))
 	{
 		m_unlockerName = ALLOC_STRING(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "granted_sentence"))
 	{
 		m_grantedSentence = ALLOC_STRING(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "denied_sentence"))
 	{
 		m_deniedSentence = ALLOC_STRING(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "sentence_delay"))
 	{
 		m_sentenceDelay = atof(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "reset_delay")) // Dunno if it affects anything in PC version of Decay
 	{
 		//m_flWait = atof(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CBaseAnimating::KeyValue( pkvd );

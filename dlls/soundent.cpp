@@ -49,7 +49,7 @@ void CSound::Reset( void )
 }
 
 //=========================================================
-// FIsSound - returns TRUE if the sound is an Audible sound
+// FIsSound - returns true if the sound is an Audible sound
 //=========================================================
 bool CSound::FIsSound( void )
 {
@@ -62,7 +62,7 @@ bool CSound::FIsSound( void )
 }
 
 //=========================================================
-// FIsScent - returns TRUE if the sound is actually a scent
+// FIsScent - returns true if the sound is actually a scent
 //=========================================================
 bool CSound::FIsScent( void )
 {
@@ -258,11 +258,11 @@ void CSoundEnt::Initialize( void )
 
 	if( CVAR_GET_FLOAT( "displaysoundlist" ) == 1 )
 	{
-		m_fShowReport = TRUE;
+		m_fShowReport = true;
 	}
 	else
 	{
-		m_fShowReport = FALSE;
+		m_fShowReport = false;
 	}
 }
 

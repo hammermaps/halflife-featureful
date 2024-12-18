@@ -187,7 +187,7 @@ public:
 	virtual void Spawn( void ) { return; }
 	virtual void Precache( void ) { return; }
 	virtual bool IsEnabledInMod() { return true; }
-	virtual void PreEntvarsKeyvalue( KeyValueData* pkvd ) { pkvd->fHandled = FALSE; }
+	virtual void PreEntvarsKeyvalue( KeyValueData* pkvd ) { pkvd->fHandled = false; }
 	virtual void KeyValue( KeyValueData* pkvd );
 	virtual int Save( CSave &save );
 	virtual int Restore( CRestore &restore );

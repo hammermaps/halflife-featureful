@@ -1481,7 +1481,7 @@ void CPitwormGibShooter::KeyValue( KeyValueData *pkvd )
 	if( FStrEq( pkvd->szKeyName, "m_flVelocity" ) )
 	{
 		m_flGibVelocity = atof( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 	{

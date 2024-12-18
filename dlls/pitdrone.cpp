@@ -295,7 +295,7 @@ void CPitdrone::KeyValue(KeyValueData *pkvd)
 	if (FStrEq(pkvd->szKeyName, "initammo"))
 	{
 		m_iInitialAmmo = atoi(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CFollowingMonster::KeyValue(pkvd);

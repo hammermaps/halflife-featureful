@@ -247,12 +247,12 @@ int CGraph::HandleLinkEnt( int iNode, entvars_t *pevLinkEnt, int afCapMask, NODE
 #if 0
 //=========================================================
 // FindNearestLink - finds the connection (line) nearest
-// the given point. Returns FALSE if fails, or TRUE if it
+// the given point. Returns false if fails, or true if it
 // has stuffed the index into the nearest link pool connection
-// into the passed int pointer, and a BOOL telling whether or 
+// into the passed int pointer, and a bool telling whether or
 // not the point is along the line into the passed BOOL pointer.
 //=========================================================
-int CGraph::FindNearestLink( const Vector &vecTestPoint, int *piNearestLink, BOOL *pfAlongLine )
+bool CGraph::FindNearestLink( const Vector &vecTestPoint, int *piNearestLink, bool *pfAlongLine )
 {
 	int i, j;// loops
 
@@ -260,8 +260,8 @@ int CGraph::FindNearestLink( const Vector &vecTestPoint, int *piNearestLink, BOO
 	float flMinDist;// the distance of of the nearest case so far
 	float flDistToLine;// the distance of the current test case
 
-	BOOL fCurrentAlongLine;
-	BOOL fSuccess;
+	bool fCurrentAlongLine;
+	bool fSuccess;
 
 	//float flConstant;// line constant
 	Vector vecSpot1, vecSpot2;
@@ -272,7 +272,7 @@ int CGraph::FindNearestLink( const Vector &vecTestPoint, int *piNearestLink, BOO
 	TraceResult tr;
 
 	iNearestLink = -1;// prepare for failure
-	fSuccess = FALSE;
+	fSuccess = false;
 
 	flMinDist = 9999;// anything will be closer than this
 
@@ -338,19 +338,19 @@ int CGraph::FindNearestLink( const Vector &vecTestPoint, int *piNearestLink, BOO
 			{
 				// point outside of line
 				flDistToLine = ( vec2TestPoint - vec2Spot1 ).Length();
-				fCurrentAlongLine = FALSE;
+				fCurrentAlongLine = false;
 			}
 			else if( DotProduct( vec2Line, ( vec2TestPoint - vec2Spot2 ) ) < 0 )
 			{
 				// point outside of line
 				flDistToLine = ( vec2TestPoint - vec2Spot2 ).Length();
-				fCurrentAlongLine = FALSE;
+				fCurrentAlongLine = false;
 			}
 			else
 			{
 				// point inside line
 				flDistToLine = fabs( DotProduct( vec2TestPoint - vec2Spot2, vec2Normal ) );
-				fCurrentAlongLine = TRUE;
+				fCurrentAlongLine = true;
 			}
 
 			if( flDistToLine < flMinDist )
@@ -369,7 +369,7 @@ int CGraph::FindNearestLink( const Vector &vecTestPoint, int *piNearestLink, BOO
 					}
 				}
 
-				fSuccess = TRUE;// we know there will be something to return.
+				fSuccess = true;// we know there will be something to return.
 				flMinDist = flDistToLine;
 				iNearestLink = m_pNodes[i].m_iFirstLink + j;
 				*piNearestLink = m_pNodes[i].m_iFirstLink + j;
@@ -547,14 +547,14 @@ int CGraph::FindShortestPath(int *piPath, int pathSize, int iStart, int iDest, i
 	{
 		// protect us in the case that the node graph isn't available or built
 		ALERT( at_aiconsole, "FindShortestPath: Graph not ready!\n" );
-		return FALSE;
+		return 0;
 	}
 
 	if( iStart < 0 || iStart > m_cNodes )
 	{
 		// The start node is bad?
 		ALERT( at_aiconsole, "Can't build a path, iStart is %d!\n", iStart );
-		return FALSE;
+		return 0;
 	}
 
 	if( iStart == iDest )
@@ -1176,7 +1176,7 @@ int CGraph::LinkVisibleNodes( CLink *pLinkPool, FILE *file, int *piBadNode )
 	if( m_cNodes <= 0 )
 	{
 		ALERT( at_aiconsole, "No Nodes!\n" );
-		return FALSE;
+		return 0;
 	}
 
 	// if the file pointer is bad, don't blow up, just don't write the
@@ -1322,7 +1322,7 @@ int CGraph::LinkVisibleNodes( CLink *pLinkPool, FILE *file, int *piBadNode )
 				*piBadNode = i;
 
 				ResetMonsterclip();
-				return FALSE;
+				return 0;
 			}
 			else if( cTotalLinks > MAX_NODE_INITIAL_LINKS * m_cNodes )
 			{
@@ -1331,7 +1331,7 @@ int CGraph::LinkVisibleNodes( CLink *pLinkPool, FILE *file, int *piBadNode )
 				*piBadNode = i;
 
 				ResetMonsterclip();
-				return FALSE;
+				return 0;
 			}
 
 			if( cLinksThisNode == 0 )
@@ -1537,13 +1537,13 @@ void CNodeEnt::KeyValue( KeyValueData *pkvd )
 	if( FStrEq( pkvd->szKeyName, "hinttype" ) )
 	{
 		m_sHintType = (short)atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 
 	if( FStrEq( pkvd->szKeyName, "activity" ) )
 	{
 		m_sHintActivity = (short)atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CBaseEntity::KeyValue( pkvd );
@@ -2696,7 +2696,7 @@ bool CGraph::FSetGraphPointers( void )
 // ssociated .NOD file. If the NOD file is not present, or 
 // is older than the BSP file, we rebuild it.
 //
-// returns FALSE if the .NOD file doesn't qualify and needs
+// returns false if the .NOD file doesn't qualify and needs
 // to be rebuilt.
 //
 // !!!BUGBUG - the file times we get back are 20 hours ahead!

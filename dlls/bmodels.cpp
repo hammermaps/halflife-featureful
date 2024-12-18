@@ -227,7 +227,7 @@ void CFuncIllusionary::KeyValue( KeyValueData *pkvd )
 	if( FStrEq( pkvd->szKeyName, "skin" ) )//skin is used for content type
 	{
 		pev->skin = atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CBaseToggle::KeyValue( pkvd );
@@ -358,7 +358,7 @@ void CFuncRotating::KeyValue( KeyValueData* pkvd )
 	if( FStrEq( pkvd->szKeyName, "fanfriction" ) )
 	{
 		m_flFanFriction = atof( pkvd->szValue ) * 0.01f;
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "Volume" ) )
 	{
@@ -368,7 +368,7 @@ void CFuncRotating::KeyValue( KeyValueData* pkvd )
 			m_flVolume = 1.0f;
 		if( m_flVolume < 0.0f )
 			m_flVolume = 0.0f;
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "spawnorigin" ) )
 	{
@@ -380,7 +380,7 @@ void CFuncRotating::KeyValue( KeyValueData* pkvd )
 	else if( FStrEq( pkvd->szKeyName, "sounds" ) )
 	{
 		m_sounds = atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else 
 		CBaseEntity::KeyValue( pkvd );
@@ -782,12 +782,12 @@ void CPendulum::KeyValue( KeyValueData *pkvd )
 	if( FStrEq( pkvd->szKeyName, "distance" ) )
 	{
 		m_distance = atof( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "damp" ) )
 	{
 		m_damp = atof( pkvd->szValue ) * 0.001f;
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else 
 		CBaseEntity::KeyValue( pkvd );

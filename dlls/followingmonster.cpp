@@ -280,12 +280,12 @@ void CFollowingMonster::KeyValue( KeyValueData *pkvd )
 	if( FStrEq( pkvd->szKeyName, "followfailpolicy" ) )
 	{
 		m_followFailPolicy = (short)atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "followage_policy" ) )
 	{
 		m_followagePolicy = (short)atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CSquadMonster::KeyValue( pkvd );

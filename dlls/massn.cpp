@@ -217,7 +217,7 @@ void CMassn::KeyValue(KeyValueData *pkvd)
 	if( FStrEq(pkvd->szKeyName, "head" ) )
 	{
 		m_iHead = atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CFollowingMonster::KeyValue( pkvd );
@@ -426,7 +426,7 @@ void CAssassinRepel::KeyValue(KeyValueData *pkvd)
 	if( FStrEq(pkvd->szKeyName, "head" ) )
 	{
 		head = atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CHGruntRepel::KeyValue( pkvd );
@@ -470,7 +470,7 @@ void CDeadMassn::KeyValue( KeyValueData *pkvd )
 	if (FStrEq(pkvd->szKeyName, "head"))
 	{
 		m_iHead = atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CDeadMonster::KeyValue( pkvd );

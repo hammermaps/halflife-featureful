@@ -195,7 +195,7 @@ void CStompShooter::KeyValue(KeyValueData *pkvd)
 	if( FStrEq(pkvd->szKeyName, "attenuation" ) )
 	{
 		pev->armortype = atof( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CPointEntity::KeyValue( pkvd );
@@ -1767,22 +1767,22 @@ void CSmoker::KeyValue(KeyValueData *pkvd)
 	if (FStrEq(pkvd->szKeyName, "scale_speed"))
 	{
 		pev->armorvalue = atof(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "scale_unit_type"))
 	{
 		pev->impulse = atoi(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "position"))
 	{
 		m_iszPosition = ALLOC_STRING(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "direction"))
 	{
 		m_iszDirection = ALLOC_STRING(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CBaseEntity::KeyValue( pkvd );

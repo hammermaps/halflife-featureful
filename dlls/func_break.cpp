@@ -102,7 +102,7 @@ void CBreakable::KeyValue( KeyValueData* pkvd )
 			m_Explosion = expDirected;
 		}
 
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "material" ) )
 	{
@@ -115,51 +115,51 @@ void CBreakable::KeyValue( KeyValueData* pkvd )
 		else
 			m_Material = (Materials)i;
 
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "deadmodel" ) )
 	{
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "shards" ) )
 	{
 			//m_iShards = atof( pkvd->szValue );
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "gibmodel" ) )
 	{
 		m_iszGibModel = ALLOC_STRING( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "spawnobject" ) )
 	{
 		int object = atoi( pkvd->szValue );
 		if( object > 0 && object < (int)ARRAYSIZE( pSpawnObjects ) )
 			m_iszSpawnObject = MAKE_STRING( pSpawnObjects[object] );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if ( FStrEq( pkvd->szKeyName, "randomitem_template" ) )
 	{
 		pev->message = ALLOC_STRING(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "explodemagnitude" ) )
 	{
 		ExplosionSetMagnitude( atoi( pkvd->szValue ) );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "target_activator" ) )
 	{
 		m_targetActivator = (short)atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if ( FStrEq( pkvd->szKeyName, "m_iGibs") )
 	{
 		m_iGibs = atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "lip" ) )
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	else
 		CBaseDelay::KeyValue( pkvd );
 }
@@ -1019,7 +1019,7 @@ void CPushable::KeyValue( KeyValueData *pkvd )
 	if( FStrEq( pkvd->szKeyName, "size" ) )
 	{
 		int bbox = atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 
 		switch( bbox )
 		{
@@ -1045,7 +1045,7 @@ void CPushable::KeyValue( KeyValueData *pkvd )
 	else if( FStrEq( pkvd->szKeyName, "buoyancy" ) )
 	{
 		pev->skin = atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CBreakable::KeyValue( pkvd );
@@ -1254,17 +1254,17 @@ void CFuncBreakableEffect::KeyValue( KeyValueData* pkvd )
 		else
 			m_Material = (Materials)i;
 
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "gibmodel" ) )
 	{
 		m_iszGibModel = ALLOC_STRING( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if ( FStrEq( pkvd->szKeyName, "m_iGibs") )
 	{
 		m_iGibs = atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CBaseEntity::KeyValue( pkvd );

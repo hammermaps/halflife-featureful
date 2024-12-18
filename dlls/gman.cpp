@@ -222,7 +222,7 @@ int CGMan::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float fl
 	{
 		SetConditions( bits_COND_HEAVY_DAMAGE );
 	}
-	return TRUE;
+	return 1;
 }
 
 void CGMan::TraceAttack( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType)

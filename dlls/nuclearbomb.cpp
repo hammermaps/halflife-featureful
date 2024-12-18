@@ -57,8 +57,8 @@ void CNuclearBombTimer::Spawn()
 		return;
 	}
 	pev->skin = 0;
-	bPlayBombSound = FALSE;
-	bBombSoundPlaying = FALSE;
+	bPlayBombSound = false;
+	bBombSoundPlaying = false;
 }
 
 void CNuclearBombTimer::NuclearBombTimerThink()
@@ -70,7 +70,7 @@ void CNuclearBombTimer::NuclearBombTimerThink()
 	if (bPlayBombSound)
 	{
 		EMIT_SOUND(ENT(pev), CHAN_BODY, "common/nuke_ticking.wav", 0.75, ATTN_IDLE);
-		bBombSoundPlaying = TRUE;
+		bBombSoundPlaying = true;
 	}
 	pev->nextthink = gpGlobals->time + 0.1;
 }
@@ -81,7 +81,7 @@ void CNuclearBombTimer::SetNuclearBombTimer(bool on)
 	{
 		SetThink(&CNuclearBombTimer::NuclearBombTimerThink);
 		pev->nextthink = gpGlobals->time;
-		bPlayBombSound = TRUE;
+		bPlayBombSound = true;
 	}
 	else
 	{
@@ -91,7 +91,7 @@ void CNuclearBombTimer::SetNuclearBombTimer(bool on)
 		if (bBombSoundPlaying)
 		{
 			EMIT_SOUND_DYN(ENT(pev), CHAN_BODY, "common/nuke_ticking.wav", 0.0, 0.0, SND_STOP, PITCH_NORM);
-			bBombSoundPlaying = FALSE;
+			bBombSoundPlaying = false;
 		}
 	}
 }
@@ -205,12 +205,12 @@ void CNuclearBomb::KeyValue(KeyValueData *pkvd)
 	if( FStrEq( pkvd->szKeyName, "initialstate" ) )
 	{
 		m_fOn = atoi( pkvd->szValue ) != 0;
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "wait" ) )
 	{
 		m_flWait = atof( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CBaseToggle::KeyValue(pkvd);

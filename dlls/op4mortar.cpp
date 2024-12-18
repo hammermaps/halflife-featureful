@@ -624,37 +624,37 @@ void COp4Mortar::KeyValue(KeyValueData *pvkd)
 	if(FStrEq(pvkd->szKeyName, "h_max"))
 	{
 		m_hmax = atoi(pvkd->szValue);
-		pvkd->fHandled = TRUE;
+		pvkd->fHandled = true;
 	}
 	else if(FStrEq(pvkd->szKeyName, "h_min"))
 	{
 		m_hmin = atoi(pvkd->szValue);
-		pvkd->fHandled = TRUE;
+		pvkd->fHandled = true;
 	}
 	else if(FStrEq(pvkd->szKeyName, "mortar_velocity"))
 	{
 		m_velocity = atoi(pvkd->szValue);
-		pvkd->fHandled = TRUE;
+		pvkd->fHandled = true;
 	}
 	else if(FStrEq(pvkd->szKeyName, "mindist"))
 	{
 		m_minRange = atoi(pvkd->szValue);
-		pvkd->fHandled = TRUE;
+		pvkd->fHandled = true;
 	}
 	else if(FStrEq(pvkd->szKeyName, "maxdist"))
 	{
 		m_maxRange = atoi(pvkd->szValue);
-		pvkd->fHandled = TRUE;
+		pvkd->fHandled = true;
 	}
 	else if(FStrEq(pvkd->szKeyName, "enemytype"))
 	{
 		m_iEnemyType = atoi(pvkd->szValue);
-		pvkd->fHandled = TRUE;
+		pvkd->fHandled = true;
 	}
 	else if(FStrEq(pvkd->szKeyName, "firedelay"))
 	{
 		m_fireDelay = atoi(pvkd->szValue);
-		pvkd->fHandled = TRUE;
+		pvkd->fHandled = true;
 	}
 	else
 	{
@@ -833,7 +833,7 @@ void COp4MortarController::KeyValue(KeyValueData *pvkd)
 	if(FStrEq(pvkd->szKeyName, "mortar_axis"))
 	{
 		m_controller = atoi(pvkd->szValue);
-		pvkd->fHandled = TRUE;
+		pvkd->fHandled = true;
 	}
 	else
 		CBaseToggle::KeyValue(pvkd);

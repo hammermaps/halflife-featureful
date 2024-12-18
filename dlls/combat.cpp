@@ -609,7 +609,7 @@ Activity CBaseMonster::GetSmallFlinchActivity( void )
 	// BOOL		fTriedDirection;
 	//float		flDot;
 
-	// fTriedDirection = FALSE;
+	// fTriedDirection = false;
 	UTIL_MakeVectors( pev->angles );
 	//flDot = DotProduct( gpGlobals->v_forward, g_vecAttackDir * -1.0f );
 

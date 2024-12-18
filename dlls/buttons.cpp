@@ -98,7 +98,7 @@ LINK_ENTITY_TO_CLASS( env_global, CEnvGlobal )
 
 void CEnvGlobal::KeyValue( KeyValueData *pkvd )
 {
-	pkvd->fHandled = TRUE;
+	pkvd->fHandled = true;
 
 	if( FStrEq( pkvd->szKeyName, "globalstate" ) )		// State name
 		m_globalstate = ALLOC_STRING( pkvd->szValue );
@@ -279,17 +279,17 @@ void CEnvState::KeyValue( KeyValueData *pkvd )
 	if ( FStrEq(pkvd->szKeyName, "turnontime") )
 	{
 		m_fTurnOnTime = atof( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if ( FStrEq(pkvd->szKeyName, "turnofftime") )
 	{
 		m_fTurnOffTime = atof( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if ( FStrEq(pkvd->szKeyName, "master") )
 	{
 		m_sMaster = ALLOC_STRING( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CPointEntity::KeyValue( pkvd );
@@ -507,37 +507,37 @@ void CCalcState::KeyValue(KeyValueData *pkvd)
 	if(strcmp(pkvd->szKeyName, "operation") == 0)
 	{
 		m_operation = atoi(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if(strcmp(pkvd->szKeyName, "left_operand") == 0)
 	{
 		m_left = ALLOC_STRING(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if(strcmp(pkvd->szKeyName, "right_operand") == 0)
 	{
 		m_right = ALLOC_STRING(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if(strcmp(pkvd->szKeyName, "left_fallback") == 0)
 	{
 		m_leftFallback = (byte)atoi(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if(strcmp(pkvd->szKeyName, "right_fallback") == 0)
 	{
 		m_rightFallback = (byte)atoi(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if(strcmp(pkvd->szKeyName, "fire_when_false") == 0)
 	{
 		m_fireWhenFalse = ALLOC_STRING(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if(strcmp(pkvd->szKeyName, "fire_when_true") == 0)
 	{
 		m_fireWhenTrue = ALLOC_STRING(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CPointEntity::KeyValue(pkvd);
@@ -702,11 +702,11 @@ void CMultiSource::KeyValue( KeyValueData *pkvd )
 				FStrEq( pkvd->szKeyName, "value1" ) ||
 				FStrEq( pkvd->szKeyName, "value2" ) ||
 				FStrEq( pkvd->szKeyName, "value3" ) )
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	else if( FStrEq( pkvd->szKeyName, "globalstate" ) )
 	{
 		m_globalstate = ALLOC_STRING( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CPointEntity::KeyValue( pkvd );
@@ -1065,82 +1065,82 @@ void CBaseButton::KeyValue( KeyValueData *pkvd )
 	if( FStrEq( pkvd->szKeyName, "changetarget" ) )
 	{
 		m_strChangeTarget = ALLOC_STRING( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}	
 	else if( FStrEq( pkvd->szKeyName, "locked_sound" ) )
 	{
 		m_bLockedSound = atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "locked_sentence" ) )
 	{
 		m_bLockedSentence = atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "unlocked_sound" ) )
 	{
 		m_bUnlockedSound = atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "unlocked_sentence" ) )
 	{
 		m_bUnlockedSentence = atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "sounds" ) )
 	{
 		m_sounds = atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "target_on_locked" ) )
 	{
 		m_targetOnLocked = ALLOC_STRING( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "locked_sound_override" ) )
 	{
 		m_lockedSoundOverride = ALLOC_STRING( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "unlocked_sound_override" ) )
 	{
 		m_unlockedSoundOverride = ALLOC_STRING( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "locked_sentence_override" ) )
 	{
 		m_lockedSentenceOverride = ALLOC_STRING( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "unlocked_sentence_override" ) )
 	{
 		m_unlockedSentenceOverride = ALLOC_STRING( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "trigger_on_return" ) )
 	{
 		m_triggerOnReturn = ALLOC_STRING( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "trigger_before_move" ) )
 	{
 		m_triggerBeforeMove = ALLOC_STRING( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "wait_toggle" ) )
 	{
 		m_waitBeforeToggleAgain = atof( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "directuse"))
 	{
 		m_iDirectUse = atoi(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "usetype" ) )
 	{
 		pev->impulse = atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else 
 		CBaseToggle::KeyValue( pkvd );
@@ -1866,12 +1866,12 @@ void CMomentaryRotButton::KeyValue( KeyValueData *pkvd )
 	if( FStrEq( pkvd->szKeyName, "returnspeed" ) )
 	{
 		m_returnSpeed = atof( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "sounds" ) )
 	{
 		m_sounds = atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CBaseToggle::KeyValue( pkvd );
@@ -2146,48 +2146,48 @@ void CEnvSpark::KeyValue( KeyValueData *pkvd )
 	if( FStrEq( pkvd->szKeyName, "MaxDelay" ) )
 	{
 		m_flDelay = atof( pkvd->szValue );
-		pkvd->fHandled = TRUE;	
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "soundradius" ) )
 	{
 		m_soundRadius = (short)atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "streak_count" ) )
 	{
 		m_streakCount = atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "streak_velocity" ) )
 	{
 		m_streakVelocity = atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "spark_duration" ) )
 	{
 		m_sparkDuration = atof( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "spark_scale_min" ) )
 	{
 		m_sparkScaleMin = atof( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "spark_scale_max" ) )
 	{
 		m_sparkScaleMax = atof( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if ( FStrEq( pkvd->szKeyName, "spark_volume" ) )
 	{
 		m_volume = atof( pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if ( FStrEq( pkvd->szKeyName, "spark_silent" ) )
 	{
 		m_silent = atoi( pkvd->szValue) != 0;
 		SetSilent(m_silent);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "style" ) ||
 				FStrEq( pkvd->szKeyName, "height" ) ||
@@ -2195,7 +2195,7 @@ void CEnvSpark::KeyValue( KeyValueData *pkvd )
 				FStrEq( pkvd->szKeyName, "value1" ) ||
 				FStrEq( pkvd->szKeyName, "value2" ) ||
 				FStrEq( pkvd->szKeyName, "value3" ) )
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	else
 		CBaseEntity::KeyValue( pkvd );
 }

@@ -680,7 +680,7 @@ void CBaseMonster::RouteNew( void )
 }
 
 //=========================================================
-// FRouteClear - returns TRUE is the Route is cleared out
+// FRouteClear - returns true is the Route is cleared out
 // ( invalid )
 //=========================================================
 bool CBaseMonster::FRouteClear( void )
@@ -1127,7 +1127,7 @@ bool CBaseMonster::FCanCheckAttacks( void )
 //=========================================================
 // CheckEnemy - part of the Condition collection process,
 // gets and stores data and conditions pertaining to a monster's
-// enemy. Returns TRUE if Enemy LKP was updated.
+// enemy. Returns true if Enemy LKP was updated.
 //=========================================================
 bool CBaseMonster::CheckEnemy( CBaseEntity *pEnemy )
 {
@@ -1447,7 +1447,7 @@ void CBaseMonster::SetSequenceByName( const char *szSequence )
 }
 
 //=========================================================
-// CheckLocalMove - returns TRUE if the caller can walk a 
+// CheckLocalMove - returns true if the caller can walk a
 // straight line from its current origin to the given 
 // location. If so, don't use the node graph!
 //
@@ -1495,7 +1495,7 @@ int CBaseMonster::CheckLocalMove( const Vector &vecStart, const Vector &vecEnd, 
 
 		// since we've actually moved the monster during the check, undo the move.
 		pev->origin = vecStartPos;
-		return FALSE;
+		return false;
 	}
 */
 	// this loop takes single steps to the goal.
@@ -1525,7 +1525,7 @@ int CBaseMonster::CheckLocalMove( const Vector &vecStart, const Vector &vecEnd, 
 			{
 				// If we're going toward an entity, and we're almost getting there, it's OK.
 				//if( pTarget && fabs( flDist - iStep ) < LOCAL_STEP_SIZE )
-				//	fReturn = TRUE;
+				//	fReturn = true;
 				//else
 				iReturn = LOCALMOVE_INVALID;
 				break;
@@ -2749,7 +2749,7 @@ bool CBaseMonster::FindSpotAway(Vector vecThreat, Vector vecViewOffset, float fl
 	{
 		// ALERT( at_aiconsole, "%s - Threat has no nearest node!\n", displayName );
 		iThreatNode = iMyNode;
-		// return FALSE;
+		// return false;
 	}
 
 	vecLookersOffset = vecThreat + vecViewOffset;// calculate location of enemy's eyes
@@ -3233,8 +3233,8 @@ Vector CBaseMonster::GetGunPosition()
 // FGetNodeRoute - tries to build an entire node path from
 // the callers origin to the passed vector. If this is 
 // possible, ROUTE_SIZE waypoints will be copied into the
-// callers m_Route. TRUE is returned if the operation 
-// succeeds (path is valid) or FALSE if failed (no path 
+// callers m_Route. true is returned if the operation
+// succeeds (path is valid) or false if failed (no path
 // exists )
 //=========================================================
 bool CBaseMonster::FGetNodeRoute( Vector vecDest )
@@ -3280,14 +3280,14 @@ bool CBaseMonster::FGetNodeRoute( Vector vecDest )
 		ALERT( at_aiconsole, "No Path from %d to %d!\n", iSrcNode, iDestNode );
 		return false;
 #else
-		BOOL bRoutingSave = WorldGraph.m_fRoutingComplete;
-		WorldGraph.m_fRoutingComplete = FALSE;
+		qboolean bRoutingSave = WorldGraph.m_fRoutingComplete;
+		WorldGraph.m_fRoutingComplete = 0;
 		iResult = WorldGraph.FindShortestPath( iPath, iSrcNode, iDestNode, iNodeHull, m_afCapability );
 		WorldGraph.m_fRoutingComplete = bRoutingSave;
 		if( !iResult )
 		{
 			ALERT( at_aiconsole, "No Path from %d to %d!\n", iSrcNode, iDestNode );
-			return FALSE;
+			return false;
 		}
 		else
 		{
@@ -3589,17 +3589,17 @@ void CBaseMonster::KeyValue( KeyValueData *pkvd )
 	if( FStrEq( pkvd->szKeyName, "TriggerTarget" ) )
 	{
 		m_iszTriggerTarget = ALLOC_STRING( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "TriggerCondition" ) )
 	{
 		m_iTriggerCondition = (short)atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "TriggerAltCondition" ) )
 	{
 		m_iTriggerAltCondition = (short)atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if ( FStrEq( pkvd->szKeyName, "bloodcolor" ) )
 	{
@@ -3609,7 +3609,7 @@ void CBaseMonster::KeyValue( KeyValueData *pkvd )
 			m_bloodColor = BLOOD_COLOR_RED;
 		else if (m_bloodColor == 2)
 			m_bloodColor = BLOOD_COLOR_YELLOW;
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if ( FStrEq( pkvd->szKeyName, "field_of_view" ) )
 	{
@@ -3618,72 +3618,72 @@ void CBaseMonster::KeyValue( KeyValueData *pkvd )
 			ALERT(at_warning, "Invalid field of view for monster %s: %3.1f\n", STRING(pev->classname), m_flFieldOfView);
 			m_flFieldOfView = 0.0f;
 		}
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if ( FStrEq( pkvd->szKeyName, "classify" ) )
 	{
 		m_iClass = atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if ( FStrEq( pkvd->szKeyName , "gibmodel" ) || FStrEq( pkvd->szKeyName, "m_iszGibModel" ) )
 	{
 		m_gibModel = ALLOC_STRING( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if ( FStrEq( pkvd->szKeyName, "is_player_ally" ) )
 	{
 		m_reverseRelationship = atoi( pkvd->szValue ) != 0;
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if ( FStrEq( pkvd->szKeyName, "displayname" ) )
 	{
 		m_displayName = ALLOC_STRING( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if ( FStrEq( pkvd->szKeyName, "minhullsize" ) )
 	{
 		UTIL_StringToVector((float*)m_minHullSize, pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if ( FStrEq( pkvd->szKeyName, "maxhullsize" ) )
 	{
 		UTIL_StringToVector((float*)m_maxHullSize, pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if ( FStrEq( pkvd->szKeyName, "soundmask" ) )
 	{
 		m_customSoundMask = atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if ( FStrEq( pkvd->szKeyName, "prisonerto" ) )
 	{
 		m_prisonerTo = (short)atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if ( FStrEq( pkvd->szKeyName, "ignoredby" ) )
 	{
 		m_ignoredBy = (short)atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if ( FStrEq( pkvd->szKeyName, "freeroam" ) )
 	{
 		m_freeRoam = (short)atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if ( FStrEq( pkvd->szKeyName, "active_alert" ) )
 	{
 		m_activeAfterCombat = (short)atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if ( FStrEq( pkvd->szKeyName, "size_for_grapple" ) )
 	{
 		m_sizeForGrapple = (short)atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if ( FStrEq( pkvd->szKeyName, "gib_policy" ) )
 	{
 		m_gibPolicy = (short)atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 	{
@@ -3717,7 +3717,7 @@ void CBaseMonster::SetMySize(const Vector &vecMin, const Vector &vecMax)
 // if there is a condition, then checks to see if condition is 
 // met. If yes, the monster's TriggerTarget is fired.
 //
-// Returns TRUE if the target is fired.
+// Returns true if the target is fired.
 //=========================================================
 bool CBaseMonster::FCheckAITrigger( short condition )
 {
@@ -4075,7 +4075,7 @@ bool CBaseMonster::FCanActiveIdle( void )
 	/*
 	if( m_MonsterState == MONSTERSTATE_IDLE && m_IdealMonsterState == MONSTERSTATE_IDLE && !IsMoving() )
 	{
-		return TRUE;
+		return true;
 	}
 	*/
 	return false;
@@ -4477,7 +4477,7 @@ void CDeadMonster::KeyValue( KeyValueData *pkvd )
 	if (FStrEq(pkvd->szKeyName, "pose"))
 	{
 		m_iPose = atoi(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else 
 		CBaseMonster::KeyValue( pkvd );

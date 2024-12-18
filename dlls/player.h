@@ -76,9 +76,6 @@ enum
 //-----------------------------------------------------
 #define CSUITPLAYLIST	4		// max of 4 suit sentences queued up at any time
 
-#define SUIT_GROUP			TRUE
-#define	SUIT_SENTENCE		FALSE
-
 #define	SUIT_REPEAT_OK		0
 #define SUIT_NEXT_IN_30SEC	30
 #define SUIT_NEXT_IN_1MIN	60
@@ -205,7 +202,7 @@ public:
 	bool				m_fInitHUD;				// True when deferred HUD restart msg needs to be sent
 	bool				m_fGameHUDInitialized;
 	int					m_iTrain;				// Train control position
-	bool				m_fWeapon;				// Set this to FALSE to force a reset of the current weapon HUD info
+	bool				m_fWeapon;				// Set this to false to force a reset of the current weapon HUD info
 
 	EHANDLE				m_pTank;				// the tank which the player is currently controlling,  NULL if no tank
 	EHANDLE				m_hViewEntity;			// The view entity being used, or null if the player is using itself as the view entity
@@ -276,10 +273,10 @@ public:
 	virtual Vector BodyTarget( const Vector &posSrc ) { return Center( ) + pev->view_ofs * RANDOM_FLOAT( 0.5, 1.1 ); };		// position to shoot at
 	virtual bool IsAlive( void ) override { return IsFullyAlive(); }
 	virtual bool ShouldFadeOnDeath( void ) override { return false; }
-	virtual	bool IsPlayer( void ) override { return true; }			// Spectators should return FALSE for this, they aren't "players" as far as game logic is concerned
+	virtual	bool IsPlayer( void ) override { return true; }			// Spectators should return false for this, they aren't "players" as far as game logic is concerned
 
-	virtual bool IsNetClient( void ) override { return true; }		// Bots should return FALSE for this, they can't receive NET messages
-															// Spectators should return TRUE for this
+	virtual bool IsNetClient( void ) override { return true; }		// Bots should return false for this, they can't receive NET messages
+															// Spectators should return true for this
 	virtual const char *TeamID( void );
 
 	virtual int		Save( CSave &save );

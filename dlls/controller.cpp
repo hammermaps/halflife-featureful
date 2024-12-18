@@ -1596,12 +1596,12 @@ void CZapBallTrap::KeyValue( KeyValueData *pkvd )
 	if (FStrEq(pkvd->szKeyName, "wait"))
 	{
 		pev->dmg_take = atof(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "radius"))
 	{
 		pev->health = atof(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CBaseEntity::KeyValue( pkvd );
