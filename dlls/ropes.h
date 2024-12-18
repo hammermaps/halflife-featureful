@@ -280,10 +280,6 @@ private:
 
 	int m_NumSamples;
 
-	bool mSpringsInitialized;
-
-	int m_BeamOffset;
-
 	bool mObjectAttached;
 
 	int mAttachedObjectsSegment;
