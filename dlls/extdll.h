@@ -46,12 +46,6 @@
 #include <windows.h>
 #undef HSPRITE
 #else // _WIN32
-#if !defined(FALSE)
-#define FALSE 0
-#endif
-#if !defined(TRUE)
-#define TRUE (!FALSE)
-#endif
 #include <climits>
 #include <cstdarg>
 typedef unsigned int ULONG;
