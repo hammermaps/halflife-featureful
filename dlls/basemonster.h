@@ -230,7 +230,7 @@ public:
 	virtual void ReportAIState( ALERT_TYPE level );
 
 	void CheckAttacks( CBaseEntity *pTarget, float flDist, float flMeleeDist );
-	virtual int CheckEnemy( CBaseEntity *pEnemy );
+	virtual bool CheckEnemy( CBaseEntity *pEnemy );
 	void SetEnemy( CBaseEntity* pEnemy );
 	void PushEnemy(CBaseEntity *pEnemy, const Vector &vecLastKnownPos );
 	bool PopEnemy( void );

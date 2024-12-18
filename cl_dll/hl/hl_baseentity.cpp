@@ -108,7 +108,7 @@ bool CBaseMonster::CheckRangeAttack2( float flDot, float flDist ) { return false
 bool CBaseMonster::CheckMeleeAttack1( float flDot, float flDist ) { return false; }
 bool CBaseMonster::CheckMeleeAttack2( float flDot, float flDist ) { return false; }
 bool CBaseMonster::FCanCheckAttacks( void ) { return false; }
-int CBaseMonster::CheckEnemy( CBaseEntity *pEnemy ) { return 0; }
+bool CBaseMonster::CheckEnemy( CBaseEntity *pEnemy ) { return false; }
 void CBaseMonster::SetActivity( Activity NewActivity ) { }
 int CBaseMonster::CheckLocalMove( const Vector &vecStart, const Vector &vecEnd, CBaseEntity *pTarget, float *pflDist ) { return 0; }
 void CBaseMonster::Move( float flInterval ) { }

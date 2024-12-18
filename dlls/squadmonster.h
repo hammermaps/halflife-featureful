@@ -74,7 +74,7 @@ public:
 	virtual bool	ReadyToHeal() {return false;}
 	virtual void	StartFollowingHealTarget(CBaseEntity* pTarget) {}
 
-	int CheckEnemy( CBaseEntity *pEnemy );
+	bool CheckEnemy( CBaseEntity *pEnemy ) override;
 	void StartMonster( void );
 	void VacateSlot( void );
 	void ScheduleChange( void );

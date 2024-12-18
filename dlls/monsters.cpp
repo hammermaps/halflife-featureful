@@ -1129,12 +1129,12 @@ bool CBaseMonster::FCanCheckAttacks( void )
 // gets and stores data and conditions pertaining to a monster's
 // enemy. Returns TRUE if Enemy LKP was updated.
 //=========================================================
-int CBaseMonster::CheckEnemy( CBaseEntity *pEnemy )
+bool CBaseMonster::CheckEnemy( CBaseEntity *pEnemy )
 {
 	float	flDistToEnemy;
-	int	iUpdatedLKP;// set this to TRUE if you update the EnemyLKP in this function.
+	bool iUpdatedLKP;// set this to true if you update the EnemyLKP in this function.
 
-	iUpdatedLKP = FALSE;
+	iUpdatedLKP = false;
 	ClearConditions( bits_COND_ENEMY_FACING_ME | bits_COND_ENEMY_LOST );
 
 	if( !FVisible( pEnemy ) )
@@ -1151,7 +1151,7 @@ int CBaseMonster::CheckEnemy( CBaseEntity *pEnemy )
 	{
 		SetConditions( bits_COND_ENEMY_DEAD );
 		ClearConditions( bits_COND_SEE_ENEMY | bits_COND_ENEMY_OCCLUDED );
-		return FALSE;
+		return false;
 	}
 
 	// My enemy is not actually my enemy anymore or I became prisoner (e.g. via trigger_configure_monster)
@@ -1178,7 +1178,7 @@ int CBaseMonster::CheckEnemy( CBaseEntity *pEnemy )
 	{
 		SetConditions(bits_COND_ENEMY_LOST);
 		ClearConditions( bits_COND_SEE_ENEMY | bits_COND_ENEMY_OCCLUDED );
-		return FALSE;
+		return false;
 	}
 
 	Vector vecEnemyPos = pEnemy->pev->origin;
@@ -1219,7 +1219,7 @@ int CBaseMonster::CheckEnemy( CBaseEntity *pEnemy )
 	{
 		CBaseMonster *pEnemyMonster;
 
-		iUpdatedLKP = TRUE;
+		iUpdatedLKP = true;
 		m_vecEnemyLKP = pEnemy->pev->origin;
 		m_flLastTimeObservedEnemy = gpGlobals->time;
 
@@ -1250,7 +1250,7 @@ int CBaseMonster::CheckEnemy( CBaseEntity *pEnemy )
 		// if the enemy is not occluded, and unseen, that means it is behind or beside the monster.
 		// if the enemy is near enough the monster, we go ahead and let the monster know where the
 		// enemy is. 
-		iUpdatedLKP = TRUE;
+		iUpdatedLKP = true;
 		m_vecEnemyLKP = pEnemy->pev->origin;
 		m_flLastTimeObservedEnemy = gpGlobals->time;
 	}
@@ -1261,7 +1261,7 @@ int CBaseMonster::CheckEnemy( CBaseEntity *pEnemy )
 		{
 			SetConditions( bits_COND_ENEMY_LOST );
 			ClearConditions( bits_COND_ENEMY_OCCLUDED );
-			return FALSE;
+			return false;
 		}
 	}
 
