@@ -432,7 +432,7 @@ int CRpg::GetItemInfo( ItemInfo *p )
 	return 1;
 }
 
-int CRpg::AddToPlayer( CBasePlayer *pPlayer )
+bool CRpg::AddToPlayer( CBasePlayer *pPlayer )
 {
 	return AddToPlayerDefault(pPlayer);
 }

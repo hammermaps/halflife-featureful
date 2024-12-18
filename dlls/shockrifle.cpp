@@ -69,7 +69,7 @@ void CShockrifle::Precache(void)
 	UTIL_PrecacheOther("shock_beam");
 }
 
-int CShockrifle::AddToPlayer(CBasePlayer *pPlayer)
+bool CShockrifle::AddToPlayer(CBasePlayer *pPlayer)
 {
 	if (CBasePlayerWeapon::AddToPlayer(pPlayer))
 	{
@@ -85,9 +85,9 @@ int CShockrifle::AddToPlayer(CBasePlayer *pPlayer)
 		MESSAGE_BEGIN(MSG_ONE, gmsgWeapPickup, NULL, pPlayer->pev);
 		WRITE_BYTE(WeaponId());
 		MESSAGE_END();
-		return TRUE;
+		return true;
 	}
-	return FALSE;
+	return false;
 }
 
 int CShockrifle::GetItemInfo(ItemInfo *p)

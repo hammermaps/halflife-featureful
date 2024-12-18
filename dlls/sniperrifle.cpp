@@ -82,7 +82,7 @@ bool CSniperrifle::Deploy( )
 	return DefaultDeploy( "models/v_m40a1.mdl", "models/p_m40a1.mdl", SNIPER_DRAW, "bow", 0 );
 }
 
-int CSniperrifle::AddToPlayer( CBasePlayer *pPlayer )
+bool CSniperrifle::AddToPlayer( CBasePlayer *pPlayer )
 {
 	return AddToPlayerDefault(pPlayer);
 }

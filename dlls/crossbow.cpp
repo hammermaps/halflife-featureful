@@ -254,7 +254,7 @@ void CCrossbow::Spawn()
 	FallInit();// get ready to fall down.
 }
 
-int CCrossbow::AddToPlayer( CBasePlayer *pPlayer )
+bool CCrossbow::AddToPlayer( CBasePlayer *pPlayer )
 {
 	return AddToPlayerDefault(pPlayer);
 }

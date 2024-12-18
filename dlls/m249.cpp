@@ -87,7 +87,7 @@ int CM249::GetItemInfo(ItemInfo *p)
 	return 1;
 }
 
-int CM249::AddToPlayer(CBasePlayer *pPlayer)
+bool CM249::AddToPlayer(CBasePlayer *pPlayer)
 {
 	return AddToPlayerDefault(pPlayer);
 }

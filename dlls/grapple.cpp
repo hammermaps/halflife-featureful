@@ -287,7 +287,7 @@ int CBarnacleGrapple::GetItemInfo(ItemInfo *p)
 	return 1;
 }
 
-int CBarnacleGrapple::AddToPlayer( CBasePlayer* pPlayer )
+bool CBarnacleGrapple::AddToPlayer( CBasePlayer* pPlayer )
 {
 	return AddToPlayerDefault(pPlayer);
 }

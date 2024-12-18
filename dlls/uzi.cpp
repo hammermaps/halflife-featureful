@@ -83,7 +83,7 @@ int CUzi::GetItemInfo( ItemInfo *p )
 	return 1;
 }
 
-int CUzi::AddToPlayer( CBasePlayer *pPlayer )
+bool CUzi::AddToPlayer( CBasePlayer *pPlayer )
 {
 	return AddToPlayerDefault(pPlayer);
 }

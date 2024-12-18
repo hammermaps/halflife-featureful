@@ -192,7 +192,7 @@ public:
 #endif
 	virtual int WeaponId() const { return WEAPON_NONE; }
 	bool IsEnabledInMod();
-	virtual int AddToPlayer( CBasePlayer *pPlayer );	// return TRUE if the item you want the item added to the player inventory
+	virtual bool AddToPlayer( CBasePlayer *pPlayer );	// return TRUE if the item you want the item added to the player inventory
 	void EXPORT DestroyItem( void );
 	void EXPORT DefaultTouch( CBaseEntity *pOther );	// default weapon touch
 	void EXPORT FallThink ( void );// when an item is first spawned, this think is run to determine when the object has hit the ground.
@@ -253,13 +253,13 @@ public:
 
 	virtual const char* MyWModel() { return 0; }
 
-	int AddToPlayerDefault( CBasePlayer *pPlayer );
+	bool AddToPlayerDefault( CBasePlayer *pPlayer );
 	virtual int AddDuplicate( CBasePlayerWeapon *pItem );
 
 	virtual int ExtractAmmo( CBasePlayerWeapon *pWeapon ); //{ return TRUE; };			// Return TRUE if you can add ammo to yourself when picked up
 	virtual int ExtractClipAmmo( CBasePlayerWeapon *pWeapon );// { return TRUE; };			// Return TRUE if you can add ammo to yourself when picked up
 
-	virtual int AddWeapon( void ) { ExtractAmmo( this ); return TRUE; }	// Return TRUE if you want to add yourself to the player
+	virtual bool AddWeapon( void ) { ExtractAmmo( this ); return true; }	// Return TRUE if you want to add yourself to the player
 
 	// generic "shared" ammo handlers
 	bool AddPrimaryAmmo(int iCount);
@@ -401,7 +401,7 @@ public:
 	void Precache( void );
 	int WeaponId() const override { return WEAPON_GLOCK; }
 	int GetItemInfo( ItemInfo *p );
-	int AddToPlayer( CBasePlayer *pPlayer );
+	bool AddToPlayer( CBasePlayer *pPlayer ) override;
 
 	void PrimaryAttack( void );
 	void SecondaryAttack( void );
@@ -437,7 +437,7 @@ public:
 	void EXPORT SwingAgain( void );
 	void EXPORT Smack( void );
 	int GetItemInfo( ItemInfo *p );
-	int AddToPlayer( CBasePlayer *pPlayer );
+	bool AddToPlayer( CBasePlayer *pPlayer ) override;
 
 	void PrimaryAttack( void );
 	bool Swing( bool fFirst );
@@ -469,7 +469,7 @@ public:
 	void Precache( void );
 	int WeaponId() const override { return WEAPON_PYTHON; }
 	int GetItemInfo(ItemInfo *p);
-	int AddToPlayer( CBasePlayer *pPlayer );
+	bool AddToPlayer( CBasePlayer *pPlayer ) override;
 	void PrimaryAttack( void );
 	void SecondaryAttack( void );
 	bool Deploy() override;
@@ -499,7 +499,7 @@ public:
 	void Precache( void );
 	int WeaponId() const override { return WEAPON_MP5; }
 	int GetItemInfo(ItemInfo *p);
-	int AddToPlayer( CBasePlayer *pPlayer );
+	bool AddToPlayer( CBasePlayer *pPlayer ) override;
 
 	void PrimaryAttack( void );
 	void SecondaryAttack( void );
@@ -537,7 +537,7 @@ public:
 	void FireSniperBolt( void );
 	void PrimaryAttack( void );
 	void SecondaryAttack( void );
-	int AddToPlayer( CBasePlayer *pPlayer );
+	bool AddToPlayer( CBasePlayer *pPlayer ) override;
 	bool Deploy() override;
 	void Holster();
 	void Reload( void );
@@ -571,7 +571,7 @@ public:
 	void Precache( void );
 	int WeaponId() const override { return WEAPON_SHOTGUN; }
 	int GetItemInfo(ItemInfo *p);
-	int AddToPlayer( CBasePlayer *pPlayer );
+	bool AddToPlayer( CBasePlayer *pPlayer ) override;
 
 	void PrimaryAttack( void );
 	void SecondaryAttack( void );
@@ -628,7 +628,7 @@ public:
 	int WeaponId() const override { return WEAPON_RPG; }
 	void Reload( void );
 	int GetItemInfo(ItemInfo *p);
-	int AddToPlayer( CBasePlayer *pPlayer );
+	bool AddToPlayer( CBasePlayer *pPlayer ) override;
 
 	bool Deploy() override;
 	bool CanHolster() override;
@@ -675,7 +675,7 @@ public:
 	void Precache( void );
 	int WeaponId() const override { return WEAPON_GAUSS; }
 	int GetItemInfo(ItemInfo *p);
-	int AddToPlayer( CBasePlayer *pPlayer );
+	bool AddToPlayer( CBasePlayer *pPlayer ) override;
 
 	bool Deploy() override;
 	void Holster();
@@ -727,7 +727,7 @@ public:
 	void Precache( void );
 	int WeaponId() const override { return WEAPON_EGON; }
 	int GetItemInfo(ItemInfo *p);
-	int AddToPlayer( CBasePlayer *pPlayer );
+	bool AddToPlayer( CBasePlayer *pPlayer ) override;
 
 	bool Deploy() override;
 	bool CanHolster() override;
@@ -800,7 +800,7 @@ public:
 	void Precache( void );
 	int WeaponId() const override { return WEAPON_HORNETGUN; }
 	int GetItemInfo(ItemInfo *p);
-	int AddToPlayer( CBasePlayer *pPlayer );
+	bool AddToPlayer( CBasePlayer *pPlayer ) override;
 
 	void PrimaryAttack( void );
 	void SecondaryAttack( void );
@@ -871,7 +871,7 @@ public:
 	void Precache( void );
 	int WeaponId() const override { return WEAPON_SATCHEL; }
 	int GetItemInfo(ItemInfo *p);
-	int AddToPlayer( CBasePlayer *pPlayer );
+	bool AddToPlayer( CBasePlayer *pPlayer ) override;
 	void PrimaryAttack( void );
 	void SecondaryAttack( void );
 	int AddDuplicate(CBasePlayerWeapon *pOriginal );
@@ -987,7 +987,7 @@ public:
 	void Precache( void );
 	int WeaponId() const override { return WEAPON_EAGLE; }
 	int GetItemInfo( ItemInfo *p );
-	int AddToPlayer( CBasePlayer *pPlayer );
+	bool AddToPlayer( CBasePlayer *pPlayer ) override;
 
 	void PrimaryAttack( void );
 	void SecondaryAttack( void );
@@ -1034,7 +1034,7 @@ public:
 	void Precache(void);
 	int WeaponId() const override { return WEAPON_PIPEWRENCH; }
 	int GetItemInfo(ItemInfo *p);
-	int AddToPlayer(CBasePlayer *pPlayer);
+	bool AddToPlayer(CBasePlayer *pPlayer) override;
 
 	void PrimaryAttack(void);
 	void SecondaryAttack(void);
@@ -1084,7 +1084,7 @@ public:
 	void Precache(void);
 	int WeaponId() const override { return WEAPON_MEDKIT; }
 	int GetItemInfo(ItemInfo *p);
-	int AddToPlayer(CBasePlayer *pPlayer);
+	bool AddToPlayer(CBasePlayer *pPlayer) override;
 
 	void PrimaryAttack(void);
 	void SecondaryAttack(void);
@@ -1140,7 +1140,7 @@ public:
 	void EndAttack( void );
 
 	int GetItemInfo(ItemInfo *p);
-	int AddToPlayer( CBasePlayer* pPlayer );
+	bool AddToPlayer( CBasePlayer* pPlayer ) override;
 	bool Deploy() override;
 	void Holster();
 	void WeaponIdle( void );
@@ -1192,7 +1192,7 @@ public:
 	void Precache(void);
 	int WeaponId() const override { return WEAPON_M249; }
 	int GetItemInfo(ItemInfo *p);
-	int AddToPlayer(CBasePlayer *pPlayer);
+	bool AddToPlayer(CBasePlayer *pPlayer) override;
 
 	void PrimaryAttack(void);
 	bool Deploy() override;
@@ -1247,7 +1247,7 @@ public:
 	int WeaponId() const override { return WEAPON_SNIPERRIFLE; }
 
 	int GetItemInfo(ItemInfo *p);
-	int AddToPlayer(CBasePlayer *pPlayer);
+	bool AddToPlayer(CBasePlayer *pPlayer) override;
 	void PrimaryAttack(void);
 	void SecondaryAttack(void);
 	bool Deploy() override;
@@ -1286,7 +1286,7 @@ public:
 	int WeaponId() const override { return WEAPON_DISPLACER; }
 
 	int GetItemInfo( ItemInfo *p );
-	int AddToPlayer( CBasePlayer *pPlayer );
+	bool AddToPlayer( CBasePlayer *pPlayer ) override;
 	void PrimaryAttack( void );
 	void SecondaryAttack( void );
 	bool Deploy() override;
@@ -1334,7 +1334,7 @@ public:
 	int WeaponId() const override { return WEAPON_SHOCKRIFLE; }
 
 	int GetItemInfo(ItemInfo *p);
-	int AddToPlayer(CBasePlayer *pPlayer);
+	bool AddToPlayer(CBasePlayer *pPlayer) override;
 
 	void PrimaryAttack(void);
 	void SecondaryAttack(void);
@@ -1376,7 +1376,7 @@ public:
 	void Precache(void);
 	int WeaponId() const override { return WEAPON_KNIFE; }
 	int GetItemInfo(ItemInfo *p);
-	int AddToPlayer( CBasePlayer *pPlayer );
+	bool AddToPlayer( CBasePlayer *pPlayer ) override;
 
 	void PrimaryAttack(void);
 	void SecondaryAttack(void);
@@ -1437,7 +1437,7 @@ public:
 	int WeaponId() const override { return WEAPON_SPORELAUNCHER; }
 
 	int GetItemInfo( ItemInfo *p );
-	int AddToPlayer( CBasePlayer *pPlayer );
+	bool AddToPlayer( CBasePlayer *pPlayer ) override;
 
 	void PrimaryAttack( void );
 	void SecondaryAttack( void );
@@ -1471,7 +1471,7 @@ public:
 	void Precache( void );
 	int WeaponId() const override { return WEAPON_UZI; }
 	int GetItemInfo(ItemInfo *p);
-	int AddToPlayer( CBasePlayer *pPlayer );
+	bool AddToPlayer( CBasePlayer *pPlayer ) override;
 
 	void PrimaryAttack( void );
 	bool Deploy() override;

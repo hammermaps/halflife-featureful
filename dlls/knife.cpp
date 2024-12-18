@@ -75,7 +75,7 @@ int CKnife::GetItemInfo(ItemInfo *p)
 	return 1;
 }
 
-int CKnife::AddToPlayer( CBasePlayer *pPlayer )
+bool CKnife::AddToPlayer( CBasePlayer *pPlayer )
 {
 	return AddToPlayerDefault(pPlayer);
 }

@@ -89,7 +89,7 @@ int CMP5::GetItemInfo( ItemInfo *p )
 	return 1;
 }
 
-int CMP5::AddToPlayer( CBasePlayer *pPlayer )
+bool CMP5::AddToPlayer( CBasePlayer *pPlayer )
 {
 	return AddToPlayerDefault(pPlayer);
 }

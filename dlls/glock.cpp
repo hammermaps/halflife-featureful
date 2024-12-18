@@ -70,7 +70,7 @@ int CGlock::GetItemInfo( ItemInfo *p )
 	return 1;
 }
 
-int CGlock::AddToPlayer( CBasePlayer *pPlayer )
+bool CGlock::AddToPlayer( CBasePlayer *pPlayer )
 {
 	return AddToPlayerDefault(pPlayer);
 }

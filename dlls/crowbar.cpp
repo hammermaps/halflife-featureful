@@ -68,7 +68,7 @@ int CCrowbar::GetItemInfo( ItemInfo *p )
 	return 1;
 }
 
-int CCrowbar::AddToPlayer( CBasePlayer *pPlayer )
+bool CCrowbar::AddToPlayer( CBasePlayer *pPlayer )
 {
 	return AddToPlayerDefault(pPlayer);
 }

@@ -63,7 +63,7 @@ void CSporelauncher::Precache(void)
 	m_usSporeFire = PRECACHE_EVENT(1, "events/spore.sc");
 }
 
-int CSporelauncher::AddToPlayer(CBasePlayer *pPlayer)
+bool CSporelauncher::AddToPlayer(CBasePlayer *pPlayer)
 {
 	return AddToPlayerDefault(pPlayer);
 }

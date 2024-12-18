@@ -124,7 +124,7 @@ int CMedkit::GetItemInfo(ItemInfo *p)
 	return 1;
 }
 
-int CMedkit::AddToPlayer(CBasePlayer *pPlayer)
+bool CMedkit::AddToPlayer(CBasePlayer *pPlayer)
 {
 	return AddToPlayerDefault(pPlayer);
 }

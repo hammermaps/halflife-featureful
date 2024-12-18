@@ -307,7 +307,7 @@ int CSatchel::AddDuplicate( CBasePlayerWeapon *pOriginal )
 
 //=========================================================
 //=========================================================
-int CSatchel::AddToPlayer( CBasePlayer *pPlayer )
+bool CSatchel::AddToPlayer( CBasePlayer *pPlayer )
 {
 	int bResult = CBasePlayerWeapon::AddToPlayer( pPlayer );
 
@@ -318,7 +318,7 @@ int CSatchel::AddToPlayer( CBasePlayer *pPlayer )
 	{
 		return AddWeapon();
 	}
-	return FALSE;
+	return false;
 }
 
 void CSatchel::Spawn()

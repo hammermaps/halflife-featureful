@@ -67,7 +67,7 @@ void CHgun::Precache( void )
 	PRECACHE_SOUND( "agrunt/ag_fire3.wav" );
 }
 
-int CHgun::AddToPlayer( CBasePlayer *pPlayer )
+bool CHgun::AddToPlayer( CBasePlayer *pPlayer )
 {
 	if( CBasePlayerWeapon::AddToPlayer( pPlayer ) )
 	{
@@ -81,9 +81,9 @@ int CHgun::AddToPlayer( CBasePlayer *pPlayer )
 		MESSAGE_BEGIN( MSG_ONE, gmsgWeapPickup, NULL, pPlayer->pev );
 			WRITE_BYTE( WeaponId() );
 		MESSAGE_END();
-		return TRUE;
+		return true;
 	}
-	return FALSE;
+	return false;
 }
 
 int CHgun::GetItemInfo( ItemInfo *p )

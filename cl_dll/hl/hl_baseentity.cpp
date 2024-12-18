@@ -228,14 +228,14 @@ CBaseEntity *CBasePlayerWeapon::Respawn( void ) { return NULL; }
 void CBasePlayerWeapon::DefaultTouch( CBaseEntity *pOther ) { }
 void CBasePlayerWeapon::DestroyItem( void ) { }
 bool CBasePlayerWeapon::IsEnabledInMod() { return true; }
-int CBasePlayerWeapon::AddToPlayer( CBasePlayer *pPlayer ) { return TRUE; }
+bool CBasePlayerWeapon::AddToPlayer( CBasePlayer *pPlayer ) { return true; }
 void CBasePlayerWeapon::Drop( void ) { }
 void CBasePlayerWeapon::Kill( void ) { }
 void CBasePlayerWeapon::AttachToPlayer ( CBasePlayer *pPlayer ) { }
 void CBasePlayerWeapon::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value) {}
 int CBasePlayerWeapon::ObjectCaps() {return 0;}
 int CBasePlayerWeapon::AddDuplicate( CBasePlayerWeapon *pOriginal ) { return 0; }
-int CBasePlayerWeapon::AddToPlayerDefault( CBasePlayer *pPlayer ) { return FALSE; }
+bool CBasePlayerWeapon::AddToPlayerDefault( CBasePlayer *pPlayer ) { return false; }
 int CBasePlayerWeapon::UpdateClientData( CBasePlayer *pPlayer ) { return 0; }
 bool CBasePlayerWeapon::IsUseable( void ) { return true; }
 int CBasePlayerWeapon::PrimaryAmmoIndex( void ) { return -1; }

@@ -60,7 +60,7 @@ void CEagle::Precache( void )
 	m_usEagle = PRECACHE_EVENT( 1, "events/eagle.sc" );
 }
 
-int CEagle::AddToPlayer(CBasePlayer *pPlayer)
+bool CEagle::AddToPlayer(CBasePlayer *pPlayer)
 {
 	return AddToPlayerDefault(pPlayer);
 }

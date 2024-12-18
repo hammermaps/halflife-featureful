@@ -767,7 +767,7 @@ bool CBasePlayerWeapon::IsEnabledInMod()
 	return g_modFeatures.IsWeaponEnabled(WeaponId());
 }
 
-int CBasePlayerWeapon::AddToPlayer( CBasePlayer *pPlayer )
+bool CBasePlayerWeapon::AddToPlayer( CBasePlayer *pPlayer )
 {
 	m_pPlayer = pPlayer;
 
@@ -784,16 +784,16 @@ int CBasePlayerWeapon::AddToPlayer( CBasePlayer *pPlayer )
 	return AddWeapon();
 }
 
-int CBasePlayerWeapon::AddToPlayerDefault( CBasePlayer *pPlayer )
+bool CBasePlayerWeapon::AddToPlayerDefault( CBasePlayer *pPlayer )
 {
 	if( CBasePlayerWeapon::AddToPlayer( pPlayer ) )
 	{
 		MESSAGE_BEGIN( MSG_ONE, gmsgWeapPickup, NULL, pPlayer->pev );
 			WRITE_BYTE( WeaponId() );
 		MESSAGE_END();
-		return TRUE;
+		return true;
 	}
-	return FALSE;
+	return false;
 }
 
 int CBasePlayerWeapon::UpdateClientData( CBasePlayer *pPlayer )

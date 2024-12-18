@@ -76,7 +76,7 @@ void CGauss::Precache( void )
 	m_usGaussSpin = PRECACHE_EVENT( 1, "events/gaussspin.sc" );
 }
 
-int CGauss::AddToPlayer( CBasePlayer *pPlayer )
+bool CGauss::AddToPlayer( CBasePlayer *pPlayer )
 {
 	return AddToPlayerDefault(pPlayer);
 }

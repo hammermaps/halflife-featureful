@@ -60,7 +60,7 @@ int CDisplacer::GetItemInfo(ItemInfo *p)
 	return 1;
 }
 
-int CDisplacer::AddToPlayer(CBasePlayer *pPlayer)
+bool CDisplacer::AddToPlayer(CBasePlayer *pPlayer)
 {
 	return AddToPlayerDefault(pPlayer);
 }

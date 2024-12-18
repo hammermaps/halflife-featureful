@@ -65,7 +65,7 @@ void CShotgun::Precache( void )
 	m_usDoubleFire = PRECACHE_EVENT( 1, "events/shotgun2.sc" );
 }
 
-int CShotgun::AddToPlayer( CBasePlayer *pPlayer )
+bool CShotgun::AddToPlayer( CBasePlayer *pPlayer )
 {
 	return AddToPlayerDefault(pPlayer);
 }

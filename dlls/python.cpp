@@ -44,7 +44,7 @@ int CPython::GetItemInfo( ItemInfo *p )
 	return 1;
 }
 
-int CPython::AddToPlayer( CBasePlayer *pPlayer )
+bool CPython::AddToPlayer( CBasePlayer *pPlayer )
 {
 	return AddToPlayerDefault(pPlayer);
 }

@@ -84,7 +84,7 @@ int CPipeWrench::GetItemInfo(ItemInfo *p)
 	return 1;
 }
 
-int CPipeWrench::AddToPlayer( CBasePlayer *pPlayer )
+bool CPipeWrench::AddToPlayer( CBasePlayer *pPlayer )
 {
 	return AddToPlayerDefault(pPlayer);
 }
