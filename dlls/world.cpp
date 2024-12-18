@@ -43,7 +43,7 @@ extern CSoundEnt *pSoundEnt;
 extern CBaseEntity				*g_pLastSpawn;
 DLL_GLOBAL edict_t				*g_pBodyQueueHead;
 CGlobalState					gGlobalState;
-extern DLL_GLOBAL int				gDisplayTitle;
+extern DLL_GLOBAL bool				gDisplayTitle;
 
 extern void W_Precache( CBaseEntity* pWorld );
 
