@@ -858,16 +858,37 @@ void CVoltigore::Precache()
 		PRECACHE_SOUND("voltigore/voltigore_footstep2.wav");
 		PRECACHE_SOUND("voltigore/voltigore_footstep3.wav");
 
+		PRECACHE_SOUND("voltigore/voltigore_alert1.wav");
+		PRECACHE_SOUND("voltigore/voltigore_alert2.wav");
+		PRECACHE_SOUND("voltigore/voltigore_alert3.wav");
+
+		PRECACHE_SOUND("voltigore/voltigore_idle1.wav");
+		PRECACHE_SOUND("voltigore/voltigore_idle2.wav");
+		PRECACHE_SOUND("voltigore/voltigore_idle3.wav");
+		
 		PRECACHE_SOUND("voltigore/voltigore_run_grunt1.wav");
 		PRECACHE_SOUND("voltigore/voltigore_run_grunt2.wav");
+		
 		PRECACHE_SOUND("voltigore/voltigore_attack_melee1.wav");
 		PRECACHE_SOUND("voltigore/voltigore_attack_melee2.wav");
+		
 		PRECACHE_SOUND("voltigore/voltigore_eat.wav");
 		PRECACHE_SOUND("voltigore/voltigore_attack_shock.wav");
-		PRECACHE_SOUND("voltigore/voltigore_communicate3.wav");
 
+		PRECACHE_SOUND("voltigore/voltigore_communicate1.wav");
+		PRECACHE_SOUND("voltigore/voltigore_communicate2.wav");
+		PRECACHE_SOUND("voltigore/voltigore_communicate3.wav");
+	
 		PRECACHE_SOUND("voltigore/voltigore_pain1.wav");
 		PRECACHE_SOUND("voltigore/voltigore_pain2.wav");
+		PRECACHE_SOUND("voltigore/voltigore_pain3.wav");
+		PRECACHE_SOUND("voltigore/voltigore_pain4.wav");
+		
+		PRECACHE_SOUND("voltigore/voltigore_die1.wav");
+		PRECACHE_SOUND("voltigore/voltigore_die2.wav");
+		PRECACHE_SOUND("voltigore/voltigore_die3.wav");
+
+		PRECACHE_SOUND("debris/beamstart2.wav");
 	}
 
 	RegisterVisual(chargeBeamVisual);
