@@ -39,20 +39,20 @@
 class CZombie : public CBaseMonster
 {
 public:
-	void Spawn( void );
-	void Precache( void );
-	void SetYawSpeed( void );
-	int DefaultClassify( void );
-	const char* DefaultDisplayName() { return "Zombie"; }
-	void HandleAnimEvent( MonsterEvent_t *pEvent );
-	int IgnoreConditions( void );
-	Schedule_t* GetScheduleOfType(int Type);
+	void Spawn( void ) override;
+	void Precache( void ) override;
+	void SetYawSpeed( void ) override;
+	int DefaultClassify( void ) override;
+	const char* DefaultDisplayName() override { return "Zombie"; }
+	void HandleAnimEvent( MonsterEvent_t *pEvent ) override;
+	int IgnoreConditions( void ) override;
+	Schedule_t* GetScheduleOfType(int Type) override;
 
 	float m_flNextFlinch;
 
-	void PainSound( void );
-	void AlertSound( void );
-	void IdleSound( void );
+	void PainSound( void ) override;
+	void AlertSound( void ) override;
+	void IdleSound( void ) override;
 	void AttackSound( void );
 
 	static const NamedSoundScript idleSoundScript;
@@ -65,12 +65,12 @@ public:
 	// No range attacks
 	bool CheckRangeAttack1( float flDot, float flDist ) override { return false; }
 	bool CheckRangeAttack2( float flDot, float flDist ) override { return false; }
-	int TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType );
+	int TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType ) override;
 
-	virtual int DefaultSizeForGrapple() { return GRAPPLE_MEDIUM; }
-	bool IsDisplaceable() { return true; }
-	Vector DefaultMinHullSize() { return VEC_HUMAN_HULL_MIN; }
-	Vector DefaultMaxHullSize() { return VEC_HUMAN_HULL_MAX; }
+	virtual int DefaultSizeForGrapple() override { return GRAPPLE_MEDIUM; }
+	bool IsDisplaceable() override { return true; }
+	Vector DefaultMinHullSize() override { return VEC_HUMAN_HULL_MIN; }
+	Vector DefaultMaxHullSize() override { return VEC_HUMAN_HULL_MAX; }
 	virtual float OneSlashDamage() { return gSkillData.zombieDmgOneSlash; }
 	virtual float BothSlashDamage() { return gSkillData.zombieDmgBothSlash; }
 protected:
