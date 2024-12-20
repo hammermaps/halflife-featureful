@@ -25,6 +25,9 @@
 #include "pm_defs.h"
 #include "pmtrace.h"
 
+#include <cstring> // Add this line
+#include <cstdint> // Add this line
+
 extern const Vector g_vecZero;
 
 void CBaseParticle::InitializeSprite(Vector org, Vector normal, model_s* sprite, float size, float brightness)
