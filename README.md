@@ -4,6 +4,8 @@ Half-Life SDK for GoldSource & Xash3D with some bugfixes and features that can b
 
 See [Documentation](https://freeslave.github.io/halflife-featureful/).
 
+**📊 Optimization Recommendations**: Check out [OPTIMIZATION_RECOMMENDATIONS.md](OPTIMIZATION_RECOMMENDATIONS.md) (German) or [OPTIMIZATION_RECOMMENDATIONS_EN.md](OPTIMIZATION_RECOMMENDATIONS_EN.md) (English) for a comprehensive list of 50+ optimization opportunities for build system, performance, code quality, and security improvements.
+
 # Obtaining source code
 
 Either clone the repository via [git](`https://git-scm.com/downloads`) or just download ZIP via **Code** button on github. The first option is more preferable as it also allows you to search through the repo history, switch between branches and clone the vgui submodule.
