@@ -2,16 +2,18 @@
 
 This documentation lists possible optimizations for the Half-Life Featureful SDK project, categorized by different areas.
 
+> **Note**: Line number references may change over time. Use them as a guide, but verify against current code.
+
 ## 1. Build System Optimizations
 
 ### 1.1 Compiler Optimizations
 - **Link-Time Optimization (LTO)**: Already available as option (`-DLTO=ON`), but disabled by default. Could be enabled by default for Release builds
   - Benefit: 5-15% performance improvement, smaller binaries
-  - Location: `CMakeLists.txt` line 50, 186-193
+  - Location: `CMakeLists.txt` line ~50, ~186-193
   
 - **Polly Optimizations**: Already available as option (`-DPOLLY=ON`), but disabled by default
   - Benefit: Advanced loop optimizations for better performance
-  - Location: `CMakeLists.txt` line 51, 224-230
+  - Location: `CMakeLists.txt` line ~51, ~224-230
   
 - **Extended Compiler Flags**:
   - `-O3` for maximum optimization instead of `-O2`
