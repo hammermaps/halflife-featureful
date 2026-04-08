@@ -2,7 +2,30 @@
 
 Diese Dokumentation listet mögliche Optimierungen für das Half-Life Featureful SDK-Projekt auf, kategorisiert nach verschiedenen Bereichen.
 
+> **Stand**: April 2026 – automatisch aktualisiert auf Basis der aktuellen Codebase-Analyse.
+>
 > **Hinweis**: Zeilennummern-Referenzen können sich mit der Zeit ändern. Verwenden Sie sie als Anhaltspunkt, aber überprüfen Sie den aktuellen Code.
+
+### Aktuelle Projektstatistiken
+
+| Metrik | Wert |
+|--------|------|
+| Gesamte Quellcodedateien (.cpp/.h/.c) | 594 |
+| Lines of Code (ohne external/) | ~270.000 |
+| C++ Standard | C++11 (C++14 für einige Targets) |
+| TODO-Marker | 94 |
+| FIXME-Marker | 27 |
+| HACK/HACKHACK-Marker | 62 |
+| BUGBUG-Marker | 31 |
+| Gesamt Code-Marker | 214 (ohne DEBUG-Referenzen) |
+| Unsichere `strcpy` Aufrufe | 106 |
+| Unsichere `strcat` Aufrufe | 59 |
+| Unsichere `sprintf` Aufrufe | 126 |
+| Gesamt unsichere String-Operationen | 291 |
+| Raw `malloc`/`calloc`/`realloc` (ohne external/) | 42 |
+| Header mit `#pragma once` | 226 |
+| Header ohne `#pragma once` | 40 |
+| Unit-Tests | 16 Testdateien in `tests/` |
 
 ## 1. Build-System-Optimierungen
 
@@ -40,16 +63,19 @@ Diese Dokumentation listet mögliche Optimierungen für das Half-Life Featureful
 ## 2. Code-Qualität und Sicherheit
 
 ### 2.1 Unsafe String Operations ersetzen
-- **Problem**: 286 Vorkommen von unsicheren String-Funktionen (`strcpy`, `strcat`, `sprintf`)
+- **Problem**: 291 Vorkommen von unsicheren String-Funktionen
+  - `strcpy`: 106 Aufrufe (58 in `dlls/`, 43 in `cl_dll/`, 1 in `pm_shared/`, 1 in `game_shared/`, 3 in `utils/`)
+  - `strcat`: 59 Aufrufe (39 in `dlls/`, 15 in `cl_dll/`, 3 in `game_shared/`)
+  - `sprintf`: 126 Aufrufe (45 in `dlls/`, 78 in `cl_dll/`, 3 in `utils/`)
   - Ersetzen durch: `strncpy`, `strncat`, `snprintf`, oder besser: `strlcpy`, `strlcat` (bereits verfügbar)
   - Vorteil: Vermeidung von Buffer-Overflow-Schwachstellen
   - Location: Verteilt über alle `.cpp` Dateien
 
 ### 2.2 Memory Management modernisieren
-- **Raw malloc/calloc/realloc ersetzen**: Gefunden in `dlls/nodes.cpp`
+- **Raw malloc/calloc/realloc ersetzen**: 42 Vorkommen in der Codebase (ohne external/)
+  - Hauptsächlich in: `dlls/nodes.cpp` (26), `dlls/world.cpp` (1), `dlls/visuals.cpp` (1), `game_shared/` (2), `cl_dll/` (4)
   - Ersetzen durch: C++ `new`/`delete` oder besser Smart Pointers (`std::unique_ptr`, `std::shared_ptr`)
   - Vorteil: Automatische Speicherverwaltung, keine Memory Leaks
-  - Location: `dlls/nodes.cpp`
 
 ### 2.3 Compiler Warnings aktivieren
 - **Mehr Warning-Flags aktivieren**: Derzeit sind einige auskommentiert
@@ -93,10 +119,10 @@ Diese Dokumentation listet mögliche Optimierungen für das Half-Life Featureful
   - Besonders für Projektile, Partikel, temporäre Entities
 
 ### 3.4 Virtual Function Optimization
-- **Virtual Function Overhead reduzieren**: 35 Dateien mit virtuellen Funktionen
+- **Virtual Function Overhead reduzieren**: 800+ virtuelle Funktionen in 80+ Dateien
   - devirtualization wo möglich
-  - `final` Keyword für Leaf-Klassen
-  - Location: Verschiedene `.cpp` Dateien
+  - `final` Keyword für Leaf-Klassen (z.B. spezifische Monster-Klassen, Waffen)
+  - Location: Besonders `dlls/gamerules.h` (69), `dlls/weapons.h` (42), `dlls/cbase.h` (105), `dlls/basemonster.h` (84)
 
 ## 4. Parallelisierung
 
@@ -219,7 +245,7 @@ Diese Dokumentation listet mögliche Optimierungen für das Half-Life Featureful
 ### 11.1 Header-Optimierung
 - **Forward Declarations**: Include-Abhängigkeiten reduzieren
 - **Pimpl-Idiom**: Implementierungs-Details verstecken
-- **Include Guards**: Consistent Include Guards oder `#pragma once`
+- **Include Guards**: 226 Header mit `#pragma once`, aber 40 Header noch ohne – Konsistenz herstellen
 
 ### 11.2 Module-System (C++20)
 - **Migration zu Modules**: Ersetzen von Headers durch Module
@@ -235,10 +261,11 @@ Diese Dokumentation listet mögliche Optimierungen für das Half-Life Featureful
 ## 12. Spezifische Code-Verbesserungen
 
 ### 12.1 TODO/FIXME/HACK Analysis
-- **160+ Code-Marker**: TODO, FIXME, HACK, XXX, BUG in Codebase
+- **214 Code-Marker** (ohne DEBUG-Referenzen): TODO (94), FIXME (27), HACK (62), BUGBUG (31)
+  - Verteilung: `dlls/` (128), `cl_dll/` (48), `pm_shared/` (8), `utils/` (29), `game_shared/` (1)
   - Systematische Bearbeitung dieser Marker
   - Priorisierung nach Wichtigkeit
-  - Location: Siehe grep-Ergebnis oben
+  - Details: Siehe [goldsource.md](goldsource.md)
 
 ### 12.2 Dead Code Elimination
 - **Unreachable Code entfernen**: Static Analysis Tools nutzen
@@ -284,8 +311,8 @@ Diese Dokumentation listet mögliche Optimierungen für das Half-Life Featureful
 - **Ziel**: 10-20% FPS-Verbesserung (LTO, optimierte Builds)
 
 ### Code-Qualität
-- **Aktuell**: 286 unsafe string operations, 160+ TODOs
-- **Ziel**: 0 unsafe operations, 50% weniger TODOs
+- **Aktuell**: 291 unsafe string operations, 214 Code-Marker (TODO/FIXME/HACK/BUGBUG), 42 raw mallocs
+- **Ziel**: 0 unsafe operations, 50% weniger Code-Marker, kein raw malloc
 
 ### Sicherheit
 - **Aktuell**: Potenzielle Buffer Overflows

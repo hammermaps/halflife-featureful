@@ -37,6 +37,7 @@ Weitere Details: [README.md](README.md)
 
 - [OPTIMIZATION_RECOMMENDATIONS.md](OPTIMIZATION_RECOMMENDATIONS.md) – Deutsch
 - [OPTIMIZATION_RECOMMENDATIONS_EN.md](OPTIMIZATION_RECOMMENDATIONS_EN.md) – Englisch
+- [goldsource.md](goldsource.md) – Vollständige TODO-Inventur & Modernisierungsplan
 
 ## Dokumentation
 
