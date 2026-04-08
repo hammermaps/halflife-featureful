@@ -44,6 +44,7 @@
 #include "cl_dll.h"
 #include "ammo.h"
 #include "dlight.h"
+#include "fake_mirror.h"
 #include "template_property_types.h"
 #include "fixed_vector.h"
 
@@ -51,6 +52,8 @@
 #include "inventory_hud.h"
 #include "objecthint_manager.h"
 #include "message_strings.h"
+#include "window_geometry.h"
+#include "displaynames.h"
 #include "journal_config.h"
 
 #include <array>
@@ -244,17 +247,24 @@ public:
 	void Reset() override;
 
 	bool HandleMOTDMessage( const char *pszName, int iSize, void *pbuf );
-	void Scroll( int dir );
-	void Scroll( float amount );
-	float scroll;
+	int MaxTextWidth();
+
+	bool HandleKeyDown(int keynum);
+	void ScrollUp();
+	void ScrollDown();
+	void PageUp();
+	void PageDown();
+
 	bool m_bShow;
 
 	char m_szMOTD[MAX_MOTD_LENGTH];
+	std::vector<std::pair<int, int>> m_lineOffsets;
 protected:
 	static int MOTD_DISPLAY_TIME;
 
-	int m_iLines;
 	int m_iMaxLength;
+	int m_iMaxRowsPerWindow;
+	int m_scrollLines;
 };
 
 class CHudErrorCollection : public CHudBase
@@ -265,6 +275,7 @@ public:
 	void Reset() override;
 	int Draw(float flTime) override;
 	int MsgFunc_ParseErrors( const char *pszName, int iSize, void *pbuf );
+	int MsgFunc_Deprecation( const char *pszName, int iSize, void *pbuf );
 	void SetClientErrors(const std::string& str);
 
 private:
@@ -272,6 +283,9 @@ private:
 
 	std::string m_clientErrorString;
 	std::string m_serverErrorString;
+	std::vector<std::string> m_deprecationMessages;
+
+	cvar_t* m_pCvarShowDeprecations;
 };
 
 struct CaptionProfile_t
@@ -355,13 +369,11 @@ class CHudJournal : public CHudBase
 		const char* headerMessage = nullptr;
 		MessageStrings::ID messageId;
 		const char* messageText = nullptr;
-		fixed_vector<std::pair<int, int>, 10> lineOffsets;
+		std::vector<std::pair<int, int>> lineOffsets;
 
 		const char* notificationMessage = nullptr;
 		const char* notificationMessageRight = nullptr;
 		const char* notificationSound = nullptr;
-
-		void UpdateLineOffsets();
 	};
 
 	struct Notification
@@ -565,6 +577,9 @@ public:
 	void GetPainColor( int &r, int &g, int &b );
 	float m_fFade;
 
+	int m_HUD_suit_empty;
+	int m_HUD_suit_full;
+
 private:
 	HSPRITE m_hSprite;
 	HSPRITE m_hDamage;
@@ -572,14 +587,9 @@ private:
 	DAMAGE_IMAGE m_dmg[NUM_DMG_TYPES];
 	int m_bitsDamage;
 
-	HSPRITE m_ArmorSprite1;
-	HSPRITE m_ArmorSprite2;
-	const wrect_t *m_prc1;
-	const wrect_t *m_prc2;
 	int m_iBat;
 	int m_iMaxBat;
 	float m_fArmorFade;
-	int m_iHeight;		// width of the battery innards
 
 	int DrawHealth(bool drawSeparator);
 	void DrawArmor(int startX);
@@ -610,11 +620,11 @@ private:
 	HSPRITE m_hSprite3;
 	HSPRITE m_hSprite4;
 	HSPRITE m_hBeam;
-	wrect_t *m_prc1;
-	wrect_t *m_prc2;
-	wrect_t *m_prcBeam;
-	wrect_t *m_prc3;
-	wrect_t *m_prc4;
+	const wrect_t *m_prc1;
+	const wrect_t *m_prc2;
+	const wrect_t *m_prcBeam;
+	const wrect_t *m_prc3;
+	const wrect_t *m_prc4;
 	float m_flBat;	
 	int m_iBat;	
 	int m_fOn;
@@ -745,6 +755,7 @@ private:
 	bool isMonster;
 	bool isPlayer;
 	bool isAlly;
+	bool isMachine;
 };
 
 //
@@ -821,10 +832,10 @@ private:
 	HSPRITE m_hSpriteRun;
 	HSPRITE m_hSpriteCrouch;
 	HSPRITE m_hSpriteJump;
-	wrect_t *m_prcStand;
-	wrect_t *m_prcRun;
-	wrect_t *m_prcCrouch;
-	wrect_t *m_prcJump;
+	const wrect_t *m_prcStand;
+	const wrect_t *m_prcRun;
+	const wrect_t *m_prcCrouch;
+	const wrect_t *m_prcJump;
 	short m_movementState;
 };
 
@@ -846,6 +857,37 @@ public:
 	int MsgFunc_SoundVolume( const char *pszName,  int iSize, void *pbuf );
 
 	void UpdateSpeed(const float velocity[2]);
+};
+
+struct MessageBoxData
+{
+	int messageBoxId;
+	std::string message;
+	std::vector<std::pair<int, int>> lineOffsets;
+	float showTime;
+	int scrollLines = 0;
+};
+
+class CHudMessageBox : public CHudBase
+{
+public:
+	int Init() override;
+	int VidInit() override;
+	int Draw(float time) override;
+
+	WindowGeometry GetWindowGeometry();
+	int MsgFunc_MessageBox(const char *pszName,  int iSize, void *pbuf);
+
+	bool HandleClientInput();
+	bool HandleKeyDown(int keynum);
+	bool HasActiveMessageBoxes();
+	void ScrollUp();
+	void ScrollDown();
+	void PageUp();
+	void PageDown();
+private:
+	std::vector<MessageBoxData> messageBoxes;
+	int m_iMaxRowsPerWindow;
 };
 
 struct FogProperties
@@ -1078,6 +1120,8 @@ public:
 		static int LineWidth( const char *szString, int length = -1 );
 		static int WidestCharacterWidth();
 		static int LineHeight();
+		static int DrawMultiLineString(const char* str, int xpos, int ypos, int xmax, const int LineHeight, int r, int g, int b);
+		static std::vector<std::pair<int, int>> CalcLineOffsets(const char* str, int maxwidth);
 	};
 
 	struct AdditiveText
@@ -1161,12 +1205,13 @@ public:
 		return ( index < 0 ) ? 0 : m_rghSprites[index];
 	}
 
-	wrect_t& GetSpriteRect( int index )
+	const wrect_t& GetSpriteRect( int index )
 	{
-		return m_rgrcRects[index];
+		static wrect_t empty{0,0,0,0};
+		return (index < 0) ? empty : m_rgrcRects[index];
 	}
 
-	wrect_t* GetSpriteRectPointer( int index )
+	const wrect_t* GetSpriteRectPointer( int index )
 	{
 		if (index < 0 || index >= m_iSpriteCount)
 			return NULL;
@@ -1205,6 +1250,7 @@ public:
 	CHudCaption		m_Caption;
 	CHudMonsterInfo		m_MonsterInfo;
 	CHudMeter	m_Meter;
+	CHudMessageBox	m_MessageBox;
 
 	void ParseModConfigs();
 	bool IsDeveloperModeOn();
@@ -1237,6 +1283,7 @@ public:
 	int _cdecl MsgFunc_SoundScript( const char *pszName, int iSize, void *pbuf );
 	int _cdecl MsgFunc_Capability( const char *pszName, int iSize, void *pbuf );
 	int _cdecl MsgFunc_OnRope( const char *pszName, int iSize, void *pbuf );
+	int _cdecl MsgFunc_Mirror( const char *pszName, int iSize, void *pbuf );
 
 	// Screen information
 	SCREENINFO	m_scrinfo;
@@ -1268,19 +1315,25 @@ public:
 
 	InventoryHudSpec m_inventorySpec;
 	MessageStrings m_messageStrings;
+	DisplayNames m_displayNames;
 	JournalConfig m_journalConfig;
 	ObjectHintManager objectHintManager;
 	KeyedDLightManager keyedDlightManager;
 
+	fixed_vector<FakeMirror, 32> fakeMirrors;
+	bool HasActiveFakeMirrors() const;
+
 	HudSpriteRenderer hudRenderer;
 	bool hasHudScaleInEngine;
-
-	static bool ShouldUseConsoleFont();
 
 	bool CanDrawStatusIcons();
 	int TopRightInventoryCoordinate();
 	bool UseVguiMOTD();
 	bool UseVguiScoreBoard();
+
+	bool HandleClientButton(int button);
+	bool HandleKeyDown(int keynum);
+	bool TopLevelWindowIsActive();
 };
 
 extern CHud gHUD;

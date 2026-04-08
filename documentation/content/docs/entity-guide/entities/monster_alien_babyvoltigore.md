@@ -16,6 +16,10 @@ Baby version of [monster_alien_voltigore]({{< ref monster_alien_voltigore >}}). 
 
 `Race X Shock`
 
+### Default display name
+
+`Baby Voltigore`
+
 ### Soundscripts
 
 * **BabyVoltigore.Idle** - idle sounds. Derived from **Voltigore.Idle**
@@ -54,7 +58,8 @@ The [check melee]({{< ref "entity-templates/#check_melee_attack1" >}}) rules and
                 "spawn_blood": true,
                 "damage_info": {
                     "type": ["club"],
-                }
+                },
+                "height": "*1"
             },
             "13": {
                 "distance": 64,
@@ -69,7 +74,8 @@ The [check melee]({{< ref "entity-templates/#check_melee_attack1" >}}) rules and
                 "spawn_blood": true,
                 "damage_info": {
                     "type": ["club"],
-                }
+                },
+                "height": "*1"
             }
         }
     }

@@ -43,9 +43,6 @@ public:
 	int WeaponId() const override { return WEAPON_KNIFE; }
 	bool GetItemInfo(ItemInfo *p) override;
 	WeaponParameters GetDefaultParameters() const override;
-
-	DamageInfo MeleeDamageInfo() override;
-	DamageInfo MeleeWindDamageInfo() override;
 };
 
 LINK_WEAPON_TO_CLASS(weapon_knife, CKnife)
@@ -79,6 +76,8 @@ WeaponParameters CKnife::GetDefaultParameters() const
 
 	// Primary attack
 	params.fire.fireType = WeaponParameters::Fire::MELEE;
+	params.fire.damage = ::GetSkillValueRange("plr_knife");
+	params.fire.subsequentSwingFactor = 1.0f;
 	params.fire.anims = {KNIFE_ATTACK1MISS, KNIFE_ATTACK2, KNIFE_ATTACK3};
 	params.fire.hitAnims = {KNIFE_ATTACK2HIT, KNIFE_ATTACK3HIT};
 
@@ -90,7 +89,8 @@ WeaponParameters CKnife::GetDefaultParameters() const
 		PITCH_NORM
 	};
 	params.fire.cycleTime = 0.5f;
-	params.fire.idleDelay = 0.5f;
+	params.fire.hitCycleTime = 0.25f;
+	params.fire.idleDelay = 5.0f;
 	params.fire.hitBodySound = {
 		CHAN_ITEM,
 		{"weapons/knife_hit_flesh1.wav", "weapons/knife_hit_flesh2.wav"},
@@ -108,12 +108,18 @@ WeaponParameters CKnife::GetDefaultParameters() const
 	//
 
 	// Alt attack
-	params.fire.fireType.alt = WeaponParameters::Fire::MELEE_WIND;
+	params.fire.fireType.alt = WeaponParameters::Fire::MELEE;
+	params.fire.damage.alt = ::GetSkillValueRange("plr_knife_stab_base");
+	params.fire.damageChargedFactor.alt = ::GetSkillValueRange("plr_knife_stab_factor");
+	params.fire.damageChargedMax.alt = ::GetSkillValueRange("plr_knife_stab_max");
+	params.fire.chargedAttack.alt = true;
 	params.fire.anims.alt = {KNIFE_STAB};
 	params.fire.hitAnims.alt = WeaponParameters::FireAnimArray{};
 	params.fire.chargeAnims.alt = {KNIFE_CHARGE};
 	params.fire.chargeTime.alt = 0.8f;
 	params.fire.cycleTime.alt = 0.9f;
+	params.fire.smackDelay.alt = 0.13f;
+	params.fire.hitDecal.alt = false;
 	//
 
 	params.secondaryFireType = SecondaryFireType::ALTERNATIVE_FIRE;
@@ -122,18 +128,4 @@ WeaponParameters CKnife::GetDefaultParameters() const
 	params.holster.attackDelay = 0.5f;
 
 	return params;
-}
-
-DamageInfo CKnife::MeleeDamageInfo()
-{
-	return DamageInfo{gSkillData.plrDmgKnife, DMG_CLUB};
-}
-
-DamageInfo CKnife::MeleeWindDamageInfo()
-{
-	float flDamage = (gpGlobals->time - m_flBigSwingStart) * gSkillData.plrDmgKnife + gSkillData.plrDmgKnife*2.0f;
-	if (flDamage > 100.0f) {
-		flDamage = 100.0f;
-	}
-	return DamageInfo(flDamage, DMG_CLUB).SetGibPolicy(GIB_NEVER);
 }

@@ -283,10 +283,10 @@ extern void			UTIL_ScreenShakeToClient( edict_t* entity, float amplitude, float 
 extern void			UTIL_ScreenShakeAll		( const Vector &center, float amplitude, float frequency, float duration );
 extern void			UTIL_ShowMessage		( const char *pString, CBaseEntity *pPlayer, bool skipMissing = false );
 extern void			UTIL_ShowMessageAll		( const char *pString );
-extern void			UTIL_ScreenFadeAll		( const Vector &color, float fadeTime, float holdTime, int alpha, int flags );
-extern void			UTIL_ScreenFadeAll		( const Vector& fadeSource, const Vector &color, float fadeTime, float holdTime, int alpha, int flags );
-extern void			UTIL_ScreenFade			( CBaseEntity *pEntity, const Vector &color, float fadeTime, float fadeHold, int alpha, int flags );
-extern void			UTIL_ScreenFade			( const Vector& fadeSource, CBaseEntity *pEntity, const Vector &color, float fadeTime, float fadeHold, int alpha, int flags );
+extern void			UTIL_ScreenFadeAll		( const Vector &color, float fadeTime, float holdTime, int alpha, int flags, bool save = false );
+extern void			UTIL_ScreenFadeAll		( const Vector& fadeSource, const Vector &color, float fadeTime, float holdTime, int alpha, int flags, bool save = false );
+extern void			UTIL_ScreenFade			( CBaseEntity *pEntity, const Vector &color, float fadeTime, float fadeHold, int alpha, int flags, bool save = false );
+extern void			UTIL_ScreenFade			( const Vector& fadeSource, CBaseEntity *pEntity, const Vector &color, float fadeTime, float fadeHold, int alpha, int flags, bool save = false );
 
 typedef enum
 {
@@ -573,7 +573,10 @@ void UTIL_CleanSpawnPoint( Vector origin, float dist );
 void UTIL_DynamicLight( const Vector& vecSrc, float flRadius, byte r, byte g, byte b, float flTime, float flDecay );
 void UTIL_MuzzleLight( const Vector& vecSrc );
 
-char *memfgets( byte *pMemFile, int fileSize, int &filePos, char *pBuffer, int bufferSize );
+inline bool IsProbablyPickupClassname(const char* name)
+{
+	return name && (strncmp(name, "ammo_", 5) == 0 || strncmp(name, "item_", 5) == 0 || strncmp(name, "weapon_", 7) == 0);
+}
 
 inline bool LineOfSightSeparatedByWaterSurface(int lookerWaterlevel, int targetWaterlevel)
 {

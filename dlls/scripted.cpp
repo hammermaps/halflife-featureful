@@ -241,6 +241,21 @@ void CCineMonster::KeyValue( KeyValueData *pkvd )
 		m_sMaster = ALLOC_STRING( pkvd->szValue );
 		pkvd->fHandled = true;
 	}
+	else if (FStrEq(pkvd->szKeyName, "initial_search_delay"))
+	{
+		m_initialSearchDelay = atof( pkvd->szValue );
+		pkvd->fHandled = true;
+	}
+	else if (FStrEq(pkvd->szKeyName, "search_delay"))
+	{
+		m_searchDelay = atof( pkvd->szValue );
+		pkvd->fHandled = true;
+	}
+	else if ( FStrEq( pkvd->szKeyName, "m_playFramerate" ) )
+	{
+		m_playFramerate = atof( pkvd->szValue );
+		pkvd->fHandled = true;
+	}
 	else
 	{
 		CBaseDelay::KeyValue( pkvd );
@@ -291,6 +306,10 @@ TYPEDESCRIPTION	CCineMonster::m_SaveData[] =
 	DEFINE_FIELD( CCineMonster, m_takeDamagePolicy, FIELD_SHORT ),
 
 	DEFINE_FIELD( CCineMonster, m_sMaster, FIELD_STRING ),
+	DEFINE_FIELD( CCineMonster, m_initialSearchDelay, FIELD_FLOAT ),
+	DEFINE_FIELD( CCineMonster, m_searchDelay, FIELD_FLOAT ),
+
+	DEFINE_FIELD( CCineMonster, m_playFramerate, FIELD_FLOAT ),
 };
 
 IMPLEMENT_SAVERESTORE( CCineMonster, CBaseDelay )
@@ -306,13 +325,17 @@ void CCineMonster::Spawn()
 	// UTIL_SetSize( pev, Vector( -8, -8, -8 ), Vector( 8, 8, 8 ) );
 	pev->solid = SOLID_NOT;
 
+	const bool isAutoSearch = IsAutoSearch();
+	const bool hasIdleAnim = !FStringNull(m_iszIdle);
+
 	// if no targetname, start now
-	if( IsAutoSearch() || !FStringNull( m_iszIdle ) )
+	if (isAutoSearch || hasIdleAnim)
 	{
 		SetThink( &CCineMonster::CineThink );
-		pev->nextthink = gpGlobals->time + 1.0f;
+		const float delay = m_initialSearchDelay > 0.0f ? m_initialSearchDelay : 1.0f;
+		pev->nextthink = gpGlobals->time + delay;
 		// Wait to be used?
-		if( !IsAutoSearch() )
+		if (!isAutoSearch)
 			m_startTime = gpGlobals->time + (float)1E6;
 	}
 	if( ForcedNoInterruptions() )
@@ -658,7 +681,8 @@ void CCineMonster::CineThink()
 {
 	if (IsLockedByMaster() || !TryFindAndPossessEntity())
 	{
-		pev->nextthink = gpGlobals->time + 1.0f;
+		const float delay = m_searchDelay > 0.0f ? m_searchDelay : 0.0f;
+		pev->nextthink = gpGlobals->time + delay;
 	}
 }
 
@@ -772,6 +796,8 @@ bool CCineMonster::StartSequence(CBaseMonster *pTarget, string_t iszSeq, bool co
 #endif
 	pTarget->pev->frame = 0;
 	pTarget->ResetSequenceInfo();
+	if (m_playFramerate && iszSeq == m_iszPlay)
+		pTarget->pev->framerate = m_playFramerate;
 	return true;
 }
 

@@ -241,7 +241,8 @@ const NamedVisual CHoundeye::waveVisual = BuildVisual("Houndeye.WaveBase")
 		.Model("sprites/shockwave.spr")
 		.Life(0.2f)
 		.BeamParams(16, 0)
-		.Alpha(255);
+		.Alpha(255)
+		.WaveType(Visual::WAVETYPE_CYLINDER);
 
 const NamedVisual CHoundeye::wave1Visual = BuildVisual("Houndeye.Wave1")
 		.RenderColor(188, 220, 255)
@@ -453,7 +454,7 @@ void CHoundeye::Spawn()
 	pev->movetype		= MOVETYPE_STEP;
 	SetMyBloodColor( BLOOD_COLOR_YELLOW );
 	pev->effects		= 0;
-	SetMyHealth( gSkillData.houndeyeHealth );
+	SetMyHealth( GetSkillValue("houndeye_health") );
 	pev->yaw_speed		= 5;//!!! should we put this in the monster's changeanim function since turn rates may vary with state/anim?
 	SetMyFieldOfView(0.5f);// indicates the width of this monster's forward view cone ( as a dotproduct result )
 	m_MonsterState		= MONSTERSTATE_NONE;
@@ -580,25 +581,17 @@ void CHoundeye::SonicAttack()
 
 	const Vector blastOrigin = pev->origin + Vector(0, 0, 16.0f);
 	// blast circles
-	MESSAGE_BEGIN( MSG_PAS, SVC_TEMPENTITY, pev->origin );
-		WRITE_BYTE( TE_BEAMCYLINDER );
-		WRITE_CIRCLE( blastOrigin, HOUNDEYE_MAX_ATTACK_RADIUS / 0.2f );
-		WriteBeamVisual(visual);
-	MESSAGE_END();
+	SendBeamWave(blastOrigin, HOUNDEYE_MAX_ATTACK_RADIUS / 0.2f, visual, MSG_PAS, pev->origin);
 
-	MESSAGE_BEGIN( MSG_PAS, SVC_TEMPENTITY, pev->origin );
-		WRITE_BYTE( TE_BEAMCYLINDER );
-		WRITE_CIRCLE( blastOrigin, ( HOUNDEYE_MAX_ATTACK_RADIUS / 2.0f ) / 0.2f );
-		WriteBeamVisual(visual);
-	MESSAGE_END();
+	SendBeamWave(blastOrigin, ( HOUNDEYE_MAX_ATTACK_RADIUS / 2.0f ) / 0.2f, visual, MSG_PAS, pev->origin);
 
 	const int squadCount = SquadCount();
 
-	float flDamage = gSkillData.houndeyeDmgBlast;
+	float flDamage = GetSkillValue("houndeye_dmg_blast");
 	if( squadCount > 1 )
 	{
 		// squad gets attack bonus.
-		flDamage = gSkillData.houndeyeDmgBlast + gSkillData.houndeyeDmgBlast * ( HOUNDEYE_SQUAD_BONUS * ( squadCount - 1 ) );
+		flDamage += flDamage * GetSkillValue("houndeye_squad_bonus_factor") * ( squadCount - 1 );
 	}
 
 	::RadiusDamage(this, pev->origin, pev, pev, DamageInfo(flDamage, DMG_SONIC).SetGibPolicy(GIB_ALWAYS),
@@ -1473,25 +1466,94 @@ void CHoundeye::UseSleeping(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_T
 	SetUse( &CBaseMonster::MonsterUse );
 }
 
+#define HOUNDEYE_DEAD_MODEL "models/houndeye_dead.mdl"
+
 class CDeadHoundeye : public CDeadMonster
 {
+	static bool g_hasHoundeyeDeadModel;
+	static bool g_checkedHoundeyeDeadModel;
+
 public:
+	void Precache() override;
 	void Spawn() override;
-	const char* DefaultModel() override { return "models/houndeye_dead.mdl"; }
+	const char* DefaultModel() override { return g_hasHoundeyeDeadModel && WantsOpforModel() ? HOUNDEYE_DEAD_MODEL : "models/houndeye.mdl"; }
 	int	DefaultClassify() override { return CLASS_ALIEN_MONSTER; }
 
 	const char* getPos(int pos) const override;
+	static const char *m_szPoses[6];
+
+private:
+	bool WantsOpforModel() {
+		return strcmp(getPos(m_iPose), "dead") == 0;
+	}
 };
+
+const char *CDeadHoundeye::m_szPoses[] = { "dead", "die", "die1", "die2", "die3", "die_crumple" };
 
 const char* CDeadHoundeye::getPos(int pos) const
 {
-	return "dead";
+	return m_szPoses[pos % ARRAYSIZE(m_szPoses)];
 }
 
 LINK_ENTITY_TO_CLASS( monster_houndeye_dead, CDeadHoundeye )
 
+bool CDeadHoundeye::g_hasHoundeyeDeadModel = false;
+bool CDeadHoundeye::g_checkedHoundeyeDeadModel = false;
+
+void CDeadHoundeye::Precache()
+{
+	bool usesDefaultModel = false;
+	if (FStringNull(pev->model))
+	{
+		const Visual* ownVisual = MyOwnVisual();
+		if (!ownVisual || !ownVisual->model)
+		{
+			usesDefaultModel = true;
+		}
+	}
+
+	if (usesDefaultModel)
+	{
+		if (!g_checkedHoundeyeDeadModel)
+		{
+			int fileSize;
+			byte* pMemFile = g_engfuncs.pfnLoadFileForMe(HOUNDEYE_DEAD_MODEL, &fileSize);
+			if (pMemFile)
+			{
+				g_hasHoundeyeDeadModel = true;
+				g_engfuncs.pfnFreeFile(pMemFile);
+			}
+			g_checkedHoundeyeDeadModel = true;
+
+			ALERT(at_aiconsole, "%s model %s\n", HOUNDEYE_DEAD_MODEL, g_hasHoundeyeDeadModel ? "exists" : "doesn't exist");
+		}
+
+		if (g_hasHoundeyeDeadModel)
+			PRECACHE_MODEL(HOUNDEYE_DEAD_MODEL);
+		PRECACHE_MODEL("models/houndeye.mdl");
+		PrecacheMyGibModel();
+	}
+	else
+	{
+		CDeadMonster::Precache();
+	}
+}
+
 void CDeadHoundeye::Spawn()
 {
+	Precache();
+
+	bool shouldForceLastFrame = m_iPose != 0;
 	SpawnHelper(BLOOD_COLOR_YELLOW);
+	if (pev->sequence == -1)
+	{
+		if (WantsOpforModel())
+		{
+			pev->sequence = LookupSequence("die");
+			shouldForceLastFrame = true;
+		}
+	}
 	MonsterInitDead();
+	if (shouldForceLastFrame)
+		pev->frame = 255;
 }

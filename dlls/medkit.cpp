@@ -41,16 +41,13 @@ public:
 	void SecondaryAttack() override;
 	bool Deploy() override;
 	void Holster() override;
-	void Reload() override;
+	void ItemPostFrame();
 	void WeaponIdle() override;
-	bool ShouldWeaponIdle() override { return true; }
 	CBaseEntity* FindHealTarget(bool increasedRadius = false);
 
 	float	m_flSoundDelay;
 	bool	m_secondaryAttack;
 
-protected:
-	bool CanRecharge();
 private:
 	unsigned short m_usMedkitFire;
 };
@@ -103,7 +100,7 @@ CBaseEntity* CMedkit::FindHealTarget(bool increasedRadius)
 			else
 			{
 				CBaseMonster* monster = pEntity->MyMonsterPointer();
-				if (monster && monster->IDefaultRelationship(m_pPlayer) == R_AL) {
+				if (monster && monster->IDefaultRelationship(m_pPlayer) == R_AL && monster->HasFlesh()) {
 					foundTarget = pEntity;
 				}
 			}
@@ -169,6 +166,11 @@ WeaponParameters CMedkit::GetDefaultParameters() const
 	params.holster.animIndex = MEDKIT_HOLSTER;
 	params.holster.attackDelay = 0.5f;
 
+	if (bIsMultiplayer())
+	{
+		params.recharge.interval = ::GetSkillValue("plr_medkittime");
+	}
+
 	return params;
 }
 
@@ -181,18 +183,15 @@ bool CMedkit::Deploy()
 void CMedkit::Holster()
 {
 	m_flSoundDelay = 0;
-
-	//HACKHACK - can't select medkit if it's empty! no way to get ammo for it, either
-	if( CanRecharge() && !HasAmmoToFire() ) {
-		m_pPlayer->m_rgAmmo[PrimaryAmmoIndex()] = 1;
-	}
-
 	CConfigurableWeapon::Holster();
 }
 
 void CMedkit::PrimaryAttack()
 {
-	Reload();
+	if (CanRechargeAmmo())
+	{
+		Reload();
+	}
 
 	CBaseEntity* healTarget;
 	if (HasAmmoToFire() && (healTarget = FindHealTarget()) ) {
@@ -215,7 +214,10 @@ void CMedkit::PrimaryAttack()
 
 void CMedkit::SecondaryAttack()
 {
-	Reload();
+	if (CanRechargeAmmo())
+	{
+		Reload();
+	}
 
 	if (!HasAmmoToFire() || m_pPlayer->pev->health >= m_pPlayer->pev->max_health) {
 		PlayEmptySound(true);
@@ -234,30 +236,25 @@ void CMedkit::SecondaryAttack()
 	m_flSoundDelay = gpGlobals->time + 1;
 }
 
-void CMedkit::Reload()
+void CMedkit::ItemPostFrame()
 {
-	if( m_pPlayer->m_rgAmmo[PrimaryAmmoIndex()] >= MEDKIT_MAX_CARRY )
-		return;
-	if( CanRecharge() && m_flRechargeTime < gpGlobals->time )
-	{
-		m_pPlayer->m_rgAmmo[PrimaryAmmoIndex()]++;
-		m_flRechargeTime = gpGlobals->time + gSkillData.plrMedkitTime;
-	}
-}
-
-void CMedkit::WeaponIdle()
-{
-	Reload();
-	ResetEmptySound();
-
 	if (HasAmmoToFire() && m_flSoundDelay != 0 && m_flSoundDelay <= gpGlobals->time)
 	{
-		const int maxHeal = Q_min((int)gSkillData.plrDmgMedkit, m_pPlayer->m_rgAmmo[PrimaryAmmoIndex()]);
+		const float medkitShot = GetSkillValue("plr_medkitshot");
+		int maxHeal = (int)medkitShot;
+		if (UsesClip())
+		{
+			maxHeal = Q_min(maxHeal, m_iClip);
+		}
+		else if (UsesAmmo())
+		{
+			maxHeal = Q_min(maxHeal, m_pPlayer->m_rgAmmo[PrimaryAmmoIndex()]);
+		}
 		if (m_secondaryAttack) {
 			const int diff = (int)ceil(m_pPlayer->pev->max_health - m_pPlayer->pev->health);
 			const int healResult = m_pPlayer->TakeHealth(m_pPlayer, Q_min(maxHeal, diff), DMG_GENERIC);
 			SpendAmmo(healResult);
-			EMIT_SOUND_DYN(ENT(pev), CHAN_WEAPON, "items/medshot5.wav", 1.0, ATTN_NORM, 0, 100);
+			EMIT_SOUND_DYN(m_pPlayer->edict(), CHAN_WEAPON, "items/medshot5.wav", 1.0, ATTN_NORM, 0, 100);
 		} else {
 			m_pPlayer->SetAnimation(PLAYER_ATTACK1);
 
@@ -267,26 +264,26 @@ void CMedkit::WeaponIdle()
 				const int diff = (int)ceil(healTarget->pev->max_health - healTarget->pev->health);
 				const int healResult = healTarget->TakeHealth(m_pPlayer, Q_min(maxHeal, diff), DMG_GENERIC);
 				SpendAmmo(healResult);
-				EMIT_SOUND_DYN(ENT(pev), CHAN_WEAPON, "items/medshot4.wav", 1.0, ATTN_NORM, 0, 100);
+				EMIT_SOUND_DYN(m_pPlayer->edict(), CHAN_WEAPON, "items/medshot4.wav", 1.0, ATTN_NORM, 0, 100);
 			}
 		}
 		m_flSoundDelay = 0;
 	}
 
+	CBasePlayerWeapon::ItemPostFrame();
+}
+
+void CMedkit::WeaponIdle()
+{
+	if (CanRechargeAmmo())
+	{
+		Reload();
+	}
+
+	ResetEmptySound();
+
 	if (m_flTimeWeaponIdle > UTIL_WeaponTimeBase())
 		return;
 
 	SendIdleAnimation();
-}
-
-bool CMedkit::CanRecharge()
-{
-	if( bIsMultiplayer() )
-	{
-		return gSkillData.plrMedkitTime != 0;
-	}
-	else
-	{
-		return false;
-	}
 }

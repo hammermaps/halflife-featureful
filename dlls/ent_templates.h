@@ -13,6 +13,7 @@
 
 #include <map>
 #include <string>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 
@@ -41,7 +42,7 @@ struct PainSoundRule
 	bool allowWhenDying = false;
 };
 
-enum class DamageTypeMatch
+enum class FlagSetMatch
 {
 	INVALID = -1,
 	ONE = 0,
@@ -49,6 +50,8 @@ enum class DamageTypeMatch
 	NONE,
 	EXACT
 };
+
+bool MatchFlagSet(int flagSet, int matchedFlagSet, FlagSetMatch matchType);
 
 enum class ValueComparison
 {
@@ -100,6 +103,21 @@ struct DropItemSet
 	static DropItemSet FromJSON(const rapidjson::Value& value);
 };
 
+struct EquipmentItem
+{
+	enum
+	{
+		POS_GUN = 0,
+		POS_BODY = 1,
+	};
+
+	optional<int> weapons;
+	FlagSetMatch weaponsMatch{FlagSetMatch::ONE};
+	std::string classname;
+	std::string entTemplate;
+	int position{POS_GUN};
+};
+
 struct ChildVariant
 {
 	std::string classname;
@@ -112,6 +130,23 @@ struct ChildVariant
 struct ChildrenInfo
 {
 	std::vector<ChildVariant> variants;
+};
+
+struct SkillReplacement
+{
+	enum
+	{
+		STRING,
+		COMMON,
+		DIFFICULTIES,
+		MULTIPLIER
+	};
+
+	std::string replacement;
+	FloatRange easy{0.0f};
+	FloatRange medium{0.0f};
+	FloatRange hard{0.0f};
+	int type{STRING};
 };
 
 struct EntTemplate
@@ -144,7 +179,7 @@ public:
 	struct DamageConditions
 	{
 		optional<int> dmgType;
-		DamageTypeMatch dmgTypeMatch = DamageTypeMatch::ONE;
+		FlagSetMatch dmgTypeMatch = FlagSetMatch::ONE;
 		float dmg = 0.0f;
 		ValueComparison dmgComparison = ValueComparison::UNKNOWN;
 		optional<EntityFilter> inflictorFilter;
@@ -176,6 +211,11 @@ public:
 		optional<int> gibPolicy;
 
 		void UpdateFromJSON(const rapidjson::Value& value);
+	};
+
+	struct Projectile
+	{
+		optional<int> effects;
 	};
 
 	static int DamageTypeFromJSON(const rapidjson::Value& value);
@@ -483,6 +523,13 @@ public:
 		_lootDrop = dropItemSet;
 	}
 
+	const optional<std::vector<EquipmentItem>>& GetEquipmentDrop() const {
+		return _equipmentDrop;
+	}
+	void SetEquipmentDrop(std::vector<EquipmentItem>&& equipmentDrop) {
+		_equipmentDrop = equipmentDrop;
+	}
+
 	PainSoundRule GetPainSoundRule() const {
 		return _painSoundRule;
 	}
@@ -490,6 +537,27 @@ public:
 		_painSoundRule = rule;
 	}
 	void UpdatePainSoundRule(::PainSoundRule& rule) const;
+
+	void SetSkillReplacement(const char* name, const SkillReplacement& replacement);
+	const SkillReplacement* GetSkillReplacement(const char* name) const;
+
+	void SetDisplayName(std::string&& name);
+	void SetDisplayName(const char* name);
+	const char* GetDisplayName() const;
+
+	void SetProjectileParams(const Projectile& projectileParams) {
+		_projectile = projectileParams;
+	}
+	const Projectile& GetProjectileParams() const {
+		return _projectile;
+	}
+
+	void SetPickupHudSprite(const char* name) {
+		_pickupHudSprite = name;
+	}
+	const char* GetPickupHudSprite() const {
+		return _pickupHudSprite.empty() ? nullptr : _pickupHudSprite.c_str();
+	}
 private:
 	static int ParseDamageType(const char* type);
 	static int ParseGibPolicy(const char* gibPolicyName);
@@ -532,8 +600,17 @@ private:
 	ChildrenInfo _childrenInfo;
 
 	DropItemSet _lootDrop;
+	optional<std::vector<EquipmentItem>> _equipmentDrop;
 
 	PainSoundRule _painSoundRule;
+
+	std::unordered_map<std::string, SkillReplacement> _skillReplacements;
+
+	std::string _displayName;
+
+	Projectile _projectile;
+
+	std::string _pickupHudSprite;
 };
 
 class EntTemplateSystem : public JSONConfig

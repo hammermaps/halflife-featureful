@@ -31,8 +31,6 @@ public:
 
 	bool CanHolster() override;
 
-	bool ShouldWeaponIdle() override { return true; }
-
 	void GetWeaponData(weapon_data_t& data) override;
 	void SetWeaponData(const weapon_data_t& data) override;
 };
@@ -131,6 +129,7 @@ TYPEDESCRIPTION	CRpgRocket::m_SaveData[] =
 	DEFINE_FIELD( CRpgRocket, m_flIgniteTime, FIELD_TIME ),
 	DEFINE_FIELD( CRpgRocket, m_hLauncher, FIELD_EHANDLE ),
 	DEFINE_FIELD( CRpgRocket, m_straight, FIELD_BOOLEAN ),
+	DEFINE_FIELD( CRpgRocket, m_soundStarted, FIELD_BOOLEAN ),
 };
 
 IMPLEMENT_SAVERESTORE( CRpgRocket, CGrenade )
@@ -204,7 +203,7 @@ void CRpgRocket::Spawn()
 
 	pev->nextthink = gpGlobals->time + 0.4f;
 
-	SetDefaultProjectileDamage(gSkillData.plrDmgRPG);
+	SetDefaultProjectileDamage(GetSkillValue("plr_rpg"));
 }
 
 //=========================================================
@@ -251,21 +250,14 @@ void CRpgRocket::IgniteThink()
 	// pev->movetype = MOVETYPE_TOSS;
 
 	pev->movetype = MOVETYPE_FLY;
-	pev->effects |= EF_LIGHT;
+	SetMyProjectileEffectFlags(EF_LIGHT);
 
 	// make rocket sound
+	m_soundStarted = true;
 	EmitSoundScript(rocketIgniteSoundScript);
 
 	// rocket trail
-	const Visual* visual = GetVisual(trailVisual);
-	if (visual->modelIndex)
-	{
-		MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
-			WRITE_BYTE( TE_BEAMFOLLOW );
-			WRITE_SHORT( entindex() );	// entity
-			WriteBeamFollowVisual( visual );
-		MESSAGE_END();  // move PHS/PVS data sending into here (SEND_ALL, SEND_PVS, SEND_PHS)
-	}
+	SendBeamFollow(entindex(), GetVisual(trailVisual));
 
 	m_flIgniteTime = gpGlobals->time;
 
@@ -326,9 +318,10 @@ void CRpgRocket::FollowThink()
 	}
 	else
 	{
-		if( pev->effects & EF_LIGHT )
+		pev->effects = 0;
+		if (m_soundStarted)
 		{
-			pev->effects = 0;
+			m_soundStarted = false;
 			StopSoundScript(rocketIgniteSoundScript);
 		}
 		pev->velocity = pev->velocity * 0.2f + vecTarget * flSpeed * 0.798f;

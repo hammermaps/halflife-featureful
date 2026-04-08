@@ -7,6 +7,10 @@ bookToC: false
 
 [TWHL](https://twhl.info/wiki/page/monster_headcrab)
 
+### Changes
+
+* The jump height now has an upper limit like in Half-Life 2 and Half-Life: Source (120 units). In original Half-Life headcrabs didn't have vertical limit on jump.
+
 ### Skill variables
 
 * **sk_headcrab_health** - monster's health.
@@ -15,6 +19,10 @@ bookToC: false
 ### Default classification
 
 `Alien Prey`
+
+### Default display name
+
+`Headcrab`
 
 ### Soundscripts
 
@@ -41,6 +49,8 @@ bookToC: false
         "own_visual": {
             "model": "models/chicken.mdl"
         },
+        "blood": "red",
+        "classify": "Alien Monster",
         "soundscripts": {
             "Headcrab.Idle": {
                 "waves": ["chicken/ch_idle1.wav", "chicken/ch_idle2.wav"]
@@ -57,8 +67,30 @@ bookToC: false
             "Headcrab.Attack": {
                 "waves": ["chicken/ch_attack1.wav", "chicken/ch_attack2.wav"]
             }
+        }
+    }
+}
+```
+{{% /tab %}}
+
+{{% tab "The Hand from They Hunger" %}}
+```json
+{
+    "thehand": {
+        "own_visual": {
+            "model": "models/thehand.mdl"
         },
-        "classify": "Alien Monster"
+        "blood": "red",
+        "classify": "Alien Monster",
+        "skill": {
+            "headcrab_health": "*2",
+            "headcrab_dmg_bite": "*2"
+        },
+        "soundscripts": {
+            "Headcrab.Attack": {
+                "waves": ["thehand/hc_attack1.wav"]
+            }
+        }
     }
 }
 ```

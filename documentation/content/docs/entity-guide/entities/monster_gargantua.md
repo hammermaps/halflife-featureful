@@ -7,14 +7,24 @@ bookToC: false
 
 [TWHL](https://twhl.info/wiki/page/monster_gargantua)
 
+### Changes
+
+* Fixed Gargantua not using the stomp attack if he loses the sight on enemy too often.
+* Fixed Gargantua not being able to attack its enemy with stomp attack when enemy is hiding in some niche in the wall so Garg can't see it.
+
 ### Skill variables
 
 * **sk_gargantua_health** - monster's health.
 * **sk_gargantua_dmg_slash** - melee damage.
 * **sk_gargantua_dmg_fire** - fire damage (per 0.1 seconds).
 * **sk_gargantua_dmg_stomp** - stomp damage (per 0.1 seconds).
+* **sk_gargantua_stomp_initial_speed** - initial stomp speed. Default value is 0.
 
 ### Default classification
+
+`Gargantua`
+
+### Default display name
 
 `Gargantua`
 

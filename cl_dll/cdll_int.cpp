@@ -50,6 +50,11 @@
 
 #include "environment.h"
 
+#include "cmdkeys.h"
+#include "keydefs.h"
+#include "logger.h"
+#include "parsetext.h"
+
 IParticleMan *g_pParticleMan = NULL;
 
 void CL_LoadParticleMan();
@@ -133,6 +138,7 @@ void* LoadLibFunc(void* lib, const char *name)
 
 cl_enginefunc_t gEngfuncs;
 CHud gHUD;
+CmdKeys g_DefaultCmdKeys;
 #if USE_VGUI
 TeamFortressViewport *gViewPort = NULL;
 #endif
@@ -250,6 +256,156 @@ int __MsgFunc_SaveDisable( const char *pszName, int iSize, void *pbuf )
 		}
 	}
 	return 1;
+}
+
+extern bool g_checkingBindings;
+extern std::set<int> g_boundKeynums;
+bool g_bindingsChecked = false;
+
+static CmdKeys::CommandToKeysMap ReadConfigBindings(const char* pfile, int fileSize)
+{
+	CmdKeys cmdKeys;
+
+	int i = 0;
+	while (i < fileSize)
+	{
+		if (IsSpaceCharacter(pfile[i]))
+		{
+			++i;
+		}
+		else if (pfile[i] == '/')
+		{
+			++i;
+			ConsumeLine(pfile, i, fileSize);
+		}
+		else
+		{
+			int tokenStart = i;
+			ConsumeNonSpaceCharacters(pfile, i, fileSize);
+			int tokenLength = i - tokenStart;
+
+			if (tokenLength > 0 && strncmp(pfile + tokenStart, "bind", tokenLength) == 0)
+			{
+				SkipSpacesAndTabs(pfile, i, fileSize);
+				int keyStart, keyEnd;
+				if (ConsumePossiblyQuotedString(pfile, i, fileSize, keyStart, keyEnd))
+				{
+					SkipSpacesAndTabs(pfile, i, fileSize);
+					int commandStart, commandEnd;
+					if (ConsumePossiblyQuotedString(pfile, i, fileSize, commandStart, commandEnd))
+					{
+						std::string key{pfile + keyStart, pfile + keyEnd};
+						std::string command{pfile + commandStart, pfile + commandEnd};
+
+						cmdKeys.AddDefaultKeyNumForCommand(command, key.c_str());
+					}
+					else
+					{
+						ConsumeLine(pfile, i, fileSize);
+					}
+				}
+				else
+				{
+					ConsumeLine(pfile, i, fileSize);
+				}
+			}
+			else
+			{
+				ConsumeLine(pfile, i, fileSize);
+			}
+		}
+	}
+
+	return cmdKeys.MoveMap();
+}
+
+static CmdKeys::CommandToKeysMap ReadConfigBindings()
+{
+	int fileSize = 0;
+	char* pfile = (char *)gEngfuncs.COM_LoadFile("config.cfg", 5, &fileSize);
+	if (!pfile)
+		return CmdKeys::CommandToKeysMap();
+
+	CmdKeys::CommandToKeysMap result = ReadConfigBindings(pfile, fileSize);
+	gEngfuncs.COM_FreeFile(pfile);
+	return result;
+}
+
+static void ApplyDefaultKeyBindings()
+{
+	std::set<int> keynumsToCheck;
+	CmdKeys::CommandToKeysMap commandsMissingKeys;
+
+	if (!g_DefaultCmdKeys.empty())
+	{
+		CmdKeys::CommandToKeysMap configBindings = ReadConfigBindings();
+
+		for (const auto& ck : g_DefaultCmdKeys)
+		{
+			//gEngfuncs.Con_DPrintf("Checking %s\n", ck.first.c_str());
+
+			auto it = configBindings.find(ck.first);
+			if (it == configBindings.end())
+			{
+				gEngfuncs.Con_DPrintf("The command %s is not bound to anything. Going to search a free keynum\n", ck.first.c_str());
+				commandsMissingKeys.insert(ck);
+
+				for (int k : ck.second.keynums)
+				{
+					if (k > 0)
+						keynumsToCheck.insert(k);
+					else
+						break;
+				}
+			}
+		}
+	}
+
+	if (!commandsMissingKeys.empty())
+	{
+		g_checkingBindings = true;
+		for (int k : keynumsToCheck)
+		{
+			gEngfuncs.Key_Event(k, 1);
+			gEngfuncs.Key_Event(k, 0);
+		}
+		g_checkingBindings = false;
+
+		for (const auto& ck : commandsMissingKeys)
+		{
+			for (int k : ck.second.keynums)
+			{
+				if (k <= 0)
+					break;
+
+				if (g_boundKeynums.find(k) == g_boundKeynums.end())
+				{
+					char commandBuf[128] = {0};
+
+					const char* keyString = SpecialKeynumToString(k);
+					if (keyString)
+					{
+						safe_snprintf(commandBuf, sizeof(commandBuf), "bind \"%s\" \"%s\"\n", keyString, ck.first.c_str());
+					}
+					else if (isprint(k))
+					{
+						safe_snprintf(commandBuf, sizeof(commandBuf), "bind \"%c\" \"%s\"\n", k, ck.first.c_str());
+					}
+
+					if (*commandBuf)
+					{
+						gEngfuncs.Con_DPrintf("Running %s", commandBuf);
+						gEngfuncs.pfnClientCmd(commandBuf);
+						break;
+					}
+				}
+			}
+		}
+	}
+
+	// No need for these anymore
+	g_boundKeynums.clear();
+	g_DefaultCmdKeys.Clear();
 }
 
 /*
@@ -452,6 +608,12 @@ extern void HUD_ResetClientWeaponData();
 
 int DLLEXPORT HUD_VidInit()
 {
+	if (!g_bindingsChecked && IsAnyXash())
+	{
+		g_bindingsChecked = true;
+		ApplyDefaultKeyBindings();
+	}
+
 	manualSaveIsDisabled = false;
 	gHUD.m_iHardwareMode = IEngineStudio.IsHardware() != 0;
 	HUD_ResetClientWeaponData();
@@ -527,6 +689,95 @@ int DLLEXPORT HUD_VidInit()
 	return 1;
 }
 
+bool ParseDefaultShortcuts(CmdKeys& cmdKeys, const char* pfile, int fileSize, const char* fileName)
+{
+	int i = 0;
+	while (i < fileSize)
+	{
+		if (IsSpaceCharacter(pfile[i]))
+		{
+			++i;
+		}
+		else if (pfile[i] == '/')
+		{
+			++i;
+			ConsumeLine(pfile, i, fileSize);
+		}
+		else
+		{
+			int commandNameStart, commandNameEnd;
+			if (!ConsumePossiblyQuotedString(pfile, i, fileSize, commandNameStart, commandNameEnd))
+			{
+				LOG_ERROR("%s: incomplete quoting or empty quoted string\n", fileName);
+				ConsumeLine(pfile, i, fileSize);
+				continue;
+			}
+			const int commandNameLength = commandNameEnd - commandNameStart;
+			if (commandNameLength == 0)
+			{
+				ConsumeLine(pfile, i, fileSize);
+				continue;
+			}
+
+			SkipSpacesAndTabs(pfile, i, fileSize);
+
+			int keyNameStart, keyNameEnd;
+			if (!ConsumePossiblyQuotedString(pfile, i, fileSize, keyNameStart, keyNameEnd))
+			{
+				LOG_ERROR("%s: incomplete quoting or empty quoted string\n", fileName);
+				ConsumeLine(pfile, i, fileSize);
+				continue;
+			}
+			const int keyNameLength = keyNameEnd - keyNameStart;
+			if (keyNameLength == 0)
+			{
+				ConsumeLine(pfile, i, fileSize);
+				continue;
+			}
+
+			SkipSpacesAndTabs(pfile, i, fileSize);
+			if (i == fileSize || (pfile[i] != '\n' && pfile[i] != '\r' && pfile[i] != '/'))
+			{
+				LOG_ERROR("%s: wrong format: more than two strings on the same line\n", fileName);
+				ConsumeLine(pfile, i, fileSize);
+				continue;
+			}
+
+			std::string commandName(pfile + commandNameStart, pfile + commandNameEnd);
+			std::string keyName(pfile + keyNameStart, pfile + keyNameEnd);
+			int result = cmdKeys.AddDefaultKeyNumForCommand(commandName, keyName.c_str());
+			switch(result)
+			{
+			case COMMANDKEY_SUCCESS:
+				break;
+			case COMMANDKEY_UNKNOWNKEY:
+				LOG_ERROR("%s: unknown key name %s\n", fileName, keyName.c_str());
+				break;
+			case COMMANDKEY_OUTOFBOUNDS:
+				LOG_ERROR("%s: keynum is out of bounds for key name %s\n", fileName, keyName.c_str());
+				break;
+			case COMMANDKEY_TOOMANYKEYS:
+				LOG_ERROR("%s: too many keys for the command %s\n", fileName, commandName.c_str());
+				break;
+			}
+		}
+	}
+
+	return true;
+}
+
+bool ParseDefaultShortcuts(CmdKeys& cmdKeys, const char* fileName)
+{
+	int fileSize = 0;
+	char* pfile = (char *)gEngfuncs.COM_LoadFile(fileName, 5, &fileSize);
+	if (!pfile)
+		return false;
+
+	bool result = ParseDefaultShortcuts(cmdKeys, pfile, fileSize, fileName);
+	gEngfuncs.COM_FreeFile(pfile);
+	return result;
+}
+
 /*
 ==========================
 	HUD_Init
@@ -541,6 +792,7 @@ void DLLEXPORT HUD_Init()
 {
 	HookClientCommands();
 	InitInput();
+	ParseDefaultShortcuts(g_DefaultCmdKeys, "default_keys.cfg");
 	gHUD.Init();
 #if USE_VGUI
 	Scheme_Init();
@@ -615,6 +867,12 @@ Called by engine every frame that client .dll is loaded
 
 void DLLEXPORT HUD_Frame( double time )
 {
+	if (!g_bindingsChecked && !IsAnyXash())
+	{
+		g_bindingsChecked = true;
+		ApplyDefaultKeyBindings();
+	}
+
 #if USE_VGUI
 	GetClientVoiceMgr()->Frame(time);
 #elif USE_FAKE_VGUI

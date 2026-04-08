@@ -181,7 +181,7 @@ int CBaseMonster::IScheduleFlags()
 	return m_afConditions & m_pSchedule->iInterruptMask;
 }
 
-static std::pair<int, const char*> g_ConditionsNames[] = {
+static const std::pair<int, const char*> g_ConditionsNames[] = {
 	{bits_COND_NO_AMMO_LOADED, "No ammo loaded"},
 	{bits_COND_SEE_HATE, "Sees someone who they hate"},
 	{bits_COND_SEE_FEAR, "Sees someone who they fear"},
@@ -212,16 +212,6 @@ static std::pair<int, const char*> g_ConditionsNames[] = {
 	{bits_COND_SPECIAL2, "Special conditlion 2"},
 	{bits_COND_TASK_FAILED, "Task failed"},
 	{bits_COND_SCHEDULE_DONE, "Schedule done"},
-};
-
-static std::pair<int, const char*> g_SoundNames[] = {
-	{bits_SOUND_COMBAT, "Combat"},
-	{bits_SOUND_WORLD, "World"},
-	{bits_SOUND_PLAYER, "Player"},
-	{bits_SOUND_CARCASS, "Carcass"},
-	{bits_SOUND_MEAT, "Meat"},
-	{bits_SOUND_DANGER, "Danger"},
-	{bits_SOUND_GARBAGE, "Garbage"},
 };
 
 //=========================================================
@@ -379,7 +369,7 @@ void CBaseMonster::MaintainSchedule()
 				else
 					pNewSchedule = GetScheduleOfType( SCHED_FAIL );
 
-				ChangeSchedule( pNewSchedule );
+				ChangeSchedule( pNewSchedule, FBitSet(m_suggestedScheduleFlags, SUGGEST_SCHEDULE_FLAG_ON_FAIL) );
 			}
 			else
 			{
@@ -645,7 +635,8 @@ void CBaseMonster::RunTask( Task_t *pTask )
 				else
 				{
 					// body is gonna be around for a while, so have it stink for a bit.
-					CSoundEnt::InsertSound( bits_SOUND_CARCASS, pev->origin, 384, 30 );
+					if (BloodColor() != DONT_BLEED)
+						InsertAISound( bits_SOUND_CARCASS, 384, 30 );
 				}
 			}
 			break;
@@ -700,6 +691,7 @@ void CBaseMonster::RunTask( Task_t *pTask )
 				if( m_pCine->m_iDelay <= 0 && gpGlobals->time >= m_pCine->m_startTime )
 				{
 					TaskComplete();
+					bool startedSequence = false;
 					if (m_pCine->IsAction())
 					{
 						switch( m_pCine->m_fAction )
@@ -732,11 +724,12 @@ void CBaseMonster::RunTask( Task_t *pTask )
 					}
 					else
 					{
-						m_pCine->StartSequence( (CBaseMonster *)this, m_pCine->m_iszPlay, true );
+						startedSequence = m_pCine->StartSequence( (CBaseMonster *)this, m_pCine->m_iszPlay, true );
 						if( m_fSequenceFinished )
 							ClearSchedule();
 					}
-					pev->framerate = 1.0;
+					if (!startedSequence)
+						pev->framerate = 1.0f; // TODO: not sure if this is needed at all. Just preserving the original behavior
 					//ALERT( at_aiconsole, "Script %s has begun for %s\n", STRING( m_pCine->m_iszPlay ), STRING( pev->classname ) );
 				}
 				else if ( FBitSet(m_pCine->pev->spawnflags, SF_SCRIPT_FORCE_IDLE_LOOPING) && !FStringNull( m_pCine->m_iszIdle) && !m_pCine->IsAction() )

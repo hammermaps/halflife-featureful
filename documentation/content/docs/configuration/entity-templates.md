@@ -13,6 +13,14 @@ This is where Entity templates come to the rescue. You define the template with 
 
 The Entity templates are configured via **templates/entities.json**. Each template has a name that is used by entities to refer to the template.
 
+{{% hint info %}}
+Entity templates can become hard to maintain when they grow in size and count. Ensure you studied the [JSON]({{< ref json >}}) format and use the proper software to view and edit **.json** files.
+{{% /hint %}}
+
+{{% hint warning %}}
+When editing the entity templates ensure to run the mod in the developer mod to see the errors on the screen and allow re-parsing the configuration on the save-reload or the map restart. See [Recommendations]({{< ref "developing-the-mod/#recommendations" >}}).
+{{% /hint %}}
+
 ## Examples
 
 Here's a list of some useful example to give you the idea of what templates are capable of.
@@ -103,10 +111,19 @@ Let's say your want a friendly vortigaunt variation in the mod, with a different
             "Vortigaunt.ArmBeamColor": {
                 "color": [128, 16, 96]
             }
+        },
+        "skill": {
+            "islave_health": 50,
+            "islave_dmg_claw": 10,
+            "islave_dmg_zap": 12,
+            "islave_zap_rate": 1.25,
+            "islave_revival": 1
         }
     }
 }
 ```
+
+We also set skill values the way so friendly vortigaunts have the same stats across all difficulties.
 
 {{% /details %}}
 
@@ -573,9 +590,19 @@ The property keys must be stringified numbers equal to the animation event indic
     - `"up"` - upwards velocity.
     - `"player_only"` - whether the knockback is applied to player only.
 * `"damage_info"` - [damage info](#damage_info). This allows to change the damage type of the attack and other damage characteristics.
-* `"spawn_blood"` - a boolean denoting whether melee attack should make the hit target bleed if damage has been dealt.
+* `"spawn_blood"` - a boolean denoting whether melee attack should make the hit target bleed (if it can) if damage has been dealt.
 * `"hit_soundscript"` - soundscript to play if trace hull attack hit something. Must be either the name of the soundscript from **sound/soundscripts.json** or the object defining the soundscript. You should prefer replacing the monster's soundscript via [soundscripts](#soundscripts) when possible.
 * `"miss_soundscript"` - soundscript to play if trace hull attack didn't hit anything. Must be either the name of the soundscript from **sound/soundscripts.json** or the object defining the soundscript. You should prefer replacing the monster's soundscript via [soundscripts](#soundscripts) when possible.
+
+{{% hint warning %}}
+The distance must be large enough for the checking hull to leave the monster's geometry.
+
+The distance value must also be in agreement with the `check_melee_attack1` and `check_melee_attack2` conditions to avoid situations when monster thinks they can hit their target but the trace hull attack doesn't propagate far enough to actually hit the target.
+{{% /hint %}}
+
+{{% hint warning %}}
+The resulting height value (whether it's defined as a constant or as a multiplier for the monster's height) must be at least 18 units for the land monsters. Otherwise the hull check will stop at the ground level (as the monster's origin of the land monsters is at their feet).
+{{% /hint %}}
 
 The provided parameters are getting merged with the predefined parameters in-game (depending on the monster). For example, if the attack has the forward knock by default and your definition doesn't mention it, the forward knock is still preserved. You'll need to manually set it to 0 if you don't want it.
 
@@ -764,7 +791,7 @@ An object consisting of the following properties:
 * `"skip_damage"` - when set to true, makes entity completely skip taking the damage.
 * `"no_blood"` - when set to true, prevents entity from spawning blood.
 * `"gib"` - change the gibbing rule.
-    - `"normal"` - set normal gibbing rule (gib if the incoming damage in much higher than the current health).
+    - `"normal"` - set normal gibbing rule (gib if the incoming damage is much higher than the current health).
     - `"always"` - force gibbing.
     - `"never"` - don't gib the monster even on high damage.
 
@@ -962,6 +989,7 @@ Here it's using the array form again, with equal chances for each monster type t
 
 The list of monsters who is capable of spawning children:
 
+* [monster_alien_slave]({{< ref monster_alien_slave >}}) - spawns [monster_snark]({{< ref monster_snark >}}) or [monster_headcrab]({{< ref monster_headcrab >}}) (depends on the chosen weapon).
 * [monster_alien_tor]({{< ref monster_alien_tor >}}) - spawns [monster_alien_grunt]({{< ref monster_alien_grunt >}}).
 * [monster_bigmomma]({{< ref monster_bigmomma >}}) - spawns [monster_babycrab]({{< ref monster_babycrab >}}).
 * [monster_osprey]({{< ref monster_osprey >}}) - spawns [monster_human_grunt]({{< ref monster_human_grunt >}}) or [monster_human_grunt_ally]({{<  ref monster_human_grunt_ally>}}) depending on the Grunt Type parameter.
@@ -969,12 +997,93 @@ The list of monsters who is capable of spawning children:
 * [monster_shocktrooper]({{< ref monster_shocktrooper >}}) - drops [monster_shockroach]({{< ref monster_shockroach >}}) on death.
 * [monster_geneworm]({{< ref monster_geneworm >}}) - spawns [monster_shocktrooper]({{< ref monster_shocktrooper >}}) after taking enough damage.
 
+### equipment_drop
+
+An array that defines the item drop from the monster depending on monster's `weapons` value. This allows, for example, to make `monster_human_grunt` drop something else instead of [weapon_9mmAR]({{< ref weapon_9mmAR >}}) or [weapon_shotgun]({{< ref weapon_shotgun >}}).
+
+Example:
+
+```json
+{
+    "monster_human_grunt": {
+        "equipment_drop": [
+            {
+                "weapons": 1,
+                "classname": "weapon_smg"
+            },
+            {
+                "weapons": 8,
+                "classname": "weapon_shotgun"
+            },
+            {
+                "weapons": 4,
+                "classname": "ammo_ARgrenades",
+                "at_position": "body"
+            }
+        ]
+    },
+    "monster_male_assassin": {
+        "equipment_drop": [
+            {
+                "weapons": 1,
+                "classname": "weapon_rifle"
+            },
+            {
+                "weapons": 8,
+                "classname": "weapon_sniperrifle"
+            },
+            {
+                "weapons": 4,
+                "classname": "ammo_ARgrenades",
+                "at_position": "body"
+            }
+        ]
+    }
+}
+```
+
+This makes human grunts and male assassins drop [weapon_smg]({{< ref weapon_smg >}}) and [weapon_rifle]({{< ref weapon_rifle >}}) instead of `weapon_9mmAR`.
+
+Currently this property affects only the following monsters:
+
+* [monster_barney]({{< ref monster_barney >}})
+* [monster_barniel]({{< ref monster_barniel >}})
+* [monster_human_grunt]({{< ref monster_human_grunt >}})
+* [monster_human_grunt_ally]({{< ref monster_human_grunt_ally >}})
+* [monster_human_grunt_medic]({{< ref monster_human_medic_ally >}})
+* [monster_human_grunt_torch]({{< ref monster_human_torch_ally >}})
+* [monster_kate]({{< ref monster_kate >}})
+* [monster_male_assassin]({{< ref monster_male_assassin >}})
+* [monster_otis]({{< ref monster_otis >}})
+* [monster_robogrunt]({{< ref monster_robogrunt >}})
+
+Behavior details:
+
+* Each check is independent of others.
+* Defining the `equipment_drop` completely replaces the item drop rules for the monster. I.e. you can't just replace one weapon drop with another - you must define the full list.
+* Even if the list doesn't contain a weapon, the monster will still change the model to non-weapon body on death.
+* Setting an *empty* array (`[]`) removes the item drop, but the change to non-weapon body is still applied on monster's death.
+
+Each array item can have the following properties:
+
+* `"weapons"` - the value of `weapons` parameter to check against. This is usually a power of 2 number (1, 2, 4, 8, etc.), but in general you can think of it as of a bit flag. This property is optional - if it's not defined, the drop is unconditional (you can also use [loot_drop](#loot_drop) for the drop that doesn't depend on the `weapons` parameter).
+* `"weapons_match"` - the type of `weapons` match. Optional. Possible values:
+    - `"one"` - at least one bit must match. This is the default option.
+    - `"all"` - the monster's `weapons` parameter must contain all the bits from the `weapons` property of the array item.
+    - `"none"` - none of the bits must match.
+    - `"exact"` - the exact equality is expected. Use this if you want to check for the `0` value.
+* `"classname"` - the classname of the dropped item. This is a required property.
+* `"ent_template"` - the entity template for the dropped item. Optional.
+* `"at_position"` - the position to spawn the dropped item at. Optional. Possible values:
+    - `"gun"` - at gun position (depends on the monster's usually an attachment on the hand). This is the default value.
+    - `"body"` - at *body* position, usually somewhere between the monster's center and the head. This suits for non-weapon drops (otherwise it would look weird to drop an item from the same place as a weapon).
+
 ### loot_drop
 
-Defines additional items dropped from monster when it dies.
+Defines additional items dropped from monster when it dies or [func_breakable]({{< ref func_breakable >}}) when it gets destroyed.
 
 {{% hint info %}}
-Loot drop doesn't interfere with weapons the monster drops by default (e.g. `monster_human_grunt` dropping his weapon). Loot drops are extra items.
+Loot drop doesn't interfere with weapons and items the monster drops by default (e.g. `monster_human_grunt` dropping his weapon). Loot drops are extra items. To modify the 'native' drop use [equipment_drop](#equipment_drop).
 {{% /hint %}}
 
 Loot can be defined in 2 forms: as an array and as an object.
@@ -1081,6 +1190,113 @@ If some property is omitted the default one for the monster class will be used.
 }
 ```
 {{% /details %}}
+
+### skill
+
+An object that allows to override the skill values for the entity template. See also: [Skill variables]({{< ref "skill-variables" >}}).
+
+```json
+{
+    "custom_vort": {
+        "skill": {
+            "islave_health": "barney_health",
+            "islave_zap_rate": "*1.5",
+            "islave_dmg_zap": 40,
+            "islave_dmg_claw": [10, 15, 20]
+        }
+    }
+}
+```
+
+Each object property represents an override. The keys are the difficulty-independent names of skill variables you want to override (with or without *sk_* prefix). The values can come in various forms:
+
+* As a string - the name of another skill variable (with or without *sk_* prefix). If the replacement variable doesn't exist, the warning is printed in the console and the original is used.
+* As a string starting with `*` followed by a number - the number works as a multiplier for the original skill value.
+* As a number - the same value will be used on all difficulties.
+* As an array of three numbers - values for easy, medium and hard difficulties.
+
+{{% hint info %}}
+Skill values are replaced as whole - it's not possible to replace skill value for a specific difficulty only.
+{{% /hint %}}
+
+{{% hint warning %}}
+Using multiplier replacements (like `"*1.5"`) don't work with skill variables that fallback to other skill variables values.
+{{% /hint %}}
+
+### displayname
+
+Allows to change a default [display name]({{< ref displaynames >}}) for the entity.
+
+```json
+{
+    "monster_alien_slave": {
+        "displayname": "Vortigaunt"
+    }
+}
+```
+
+### pickup
+
+An object that defines pickup-related properties.
+
+#### hud_sprite
+
+The name of the custom HUD sprite to show when the item is picked up. By default the item classname (e.g. `item_battery`) is used as a HUD sprite name.
+
+This property affects only the following items:
+
+* [item_battery]({{< ref item_battery >}})
+* [item_healthkit]({{< ref item_healthkit >}})
+* [item_longjump]({{< ref item_longjump >}})
+* [item_antidote]({{< ref item_antidote >}})
+* [item_security]({{< ref item_security >}})
+* [item_flashlight]({{< ref item_flashlight >}})
+* [item_nvgs]({{< ref item_nvgs >}})
+* [item_helmet]({{< ref item_helmet >}})
+* [item_armorvest]({{< ref item_armorvest >}})
+
+```json
+{
+    "custom_healthkit": {
+        "pickup": {
+            "hud_sprite": "my_healthkit"
+        }
+    },
+    "custom_battery": {
+        "pickup": {
+            "hud_sprite": "my_battery"
+        }
+    },
+}
+```
+
+### projectile
+
+An object that defines projectile-related properties.
+
+#### effects_flags
+
+An array of pre-defined effect-flags recognized by the engine. Possible item values:
+
+* `"rocketflare"` - a rocket flare effect (used by [rpg_rocket]({{< ref rpg_rocket >}}) and [hvr_rocket]({{< ref hvr_rocket >}}) by default). This produces a white sprite of randomized scale attached to the projectile as well as the small dynamic light.
+* `"brightlight"` - a bright light effect - a large dynamic light attached to the projectile.
+
+Set the empty array to override the default effect flags (e.g. to remove the rocket flare from the `rpg_rocket`).
+
+```json
+{
+    "rpg_rocket": {
+        "projectile": {
+            "effect_flags": []
+        }
+    },
+    "crossbow_bolt": {
+        "projectile": {
+            "effect_flags": ["rocketflare"]
+        }
+    }
+}
+```
 
 ## Inheriting templates
 

@@ -14,6 +14,7 @@
 #define GUN_MINIGUN 0
 #define GUN_NONE 1
 
+#define HWGRUNT_AE_SHOOT_PISTOL 1
 #define HWGRUNT_AE_DROP_GUN 11
 
 enum
@@ -46,6 +47,7 @@ public:
 	const char* ReverseRelationshipModel() override { return "models/hwgruntf.mdl"; }
 	int DefaultISoundMask() override;
 	void HandleAnimEvent( MonsterEvent_t *pEvent ) override;
+	int LookupActivity(int activity) override;
 	void SetActivity( Activity NewActivity ) override;
 	void CheckAmmo() override;
 	bool CheckMeleeAttack1( float flDot, float flDist ) override {
@@ -83,6 +85,8 @@ public:
 	void GibMonster() override;
 	void DropMyItems(bool isGibbed);
 
+	void DetectModelType();
+
 	int Save( CSave &save ) override;
 	int Restore( CRestore &restore ) override;
 	static TYPEDESCRIPTION m_SaveData[];
@@ -91,6 +95,7 @@ public:
 
 	EHANDLE m_lastOccluder;
 	bool m_firing;
+	bool m_sc5Model;
 
 	int		m_iM249Shell;
 	int		m_iM249Link;
@@ -138,13 +143,14 @@ void CHWGrunt::Spawn()
 	Precache();
 
 	SetMyModel( "models/hwgrunt.mdl" );
+	DetectModelType();
 	SetMySize();
 
 	pev->solid		= SOLID_SLIDEBOX;
 	pev->movetype		= MOVETYPE_STEP;
 	SetMyBloodColor( BLOOD_COLOR_RED );
 	pev->effects		= 0;
-	SetMyHealth( gSkillData.hwgruntHealth );
+	SetMyHealth( GetSkillValue("hwgrunt_health") );
 	SetMyFieldOfView(0.2);// indicates the width of this monster's forward view cone ( as a dotproduct result )
 	m_MonsterState		= MONSTERSTATE_NONE;
 	m_flNextPainTime	= gpGlobals->time;
@@ -175,6 +181,9 @@ void CHWGrunt::Precache()
 
 	RegisterAndPrecacheSoundScript(useSoundScript, CHGrunt::useSoundScript);
 	RegisterAndPrecacheSoundScript(unuseSoundScript, CHGrunt::unuseSoundScript);
+
+	if (pev->modelindex)
+		DetectModelType();
 
 	m_iM249Shell = PRECACHE_MODEL ("models/saw_shell.mdl");// saw shell
 	m_iM249Link = PRECACHE_MODEL ("models/saw_link.mdl");// saw link
@@ -226,6 +235,9 @@ void CHWGrunt::HandleAnimEvent( MonsterEvent_t *pEvent )
 {
 	switch(pEvent->event)
 	{
+	case HWGRUNT_AE_SHOOT_PISTOL:
+		// TODO: Not supported yet
+		break;
 	case HWGRUNT_AE_DROP_GUN:
 		if (GetBodygroup(GUN_GROUP) != GUN_NONE)
 			DropMyItems(false);
@@ -234,6 +246,31 @@ void CHWGrunt::HandleAnimEvent( MonsterEvent_t *pEvent )
 		CFollowingMonster::HandleAnimEvent(pEvent);
 		break;
 	}
+}
+
+int CHWGrunt::LookupActivity(int activity)
+{
+	if (m_sc5Model)
+	{
+		int iSequence = -1;
+		switch(activity)
+		{
+		case ACT_WALK:
+			iSequence = LookupSequence("creeping_walk");
+			break;
+		case ACT_RUN:
+			iSequence = LookupSequence("run");
+			break;
+		case ACT_RANGE_ATTACK1:
+			iSequence = LookupSequence("attack");
+			break;
+		default:
+			break;
+		}
+		if (iSequence != -1)
+			return iSequence;
+	}
+	return CFollowingMonster::LookupActivity(activity);
 }
 
 void CHWGrunt::SetActivity( Activity NewActivity )
@@ -428,7 +465,7 @@ void CHWGrunt::Shoot()
 
 	EjectBrass ( vecShootOrigin - vecShootDir * 24, vecShellVelocity, pev->angles.y, m_iM249Link, TE_BOUNCE_SHELL);
 
-	FireBullets(1, vecShootOrigin, vecShootDir, VECTOR_CONE_6DEGREES, 2048, gSkillData.monDmg556 ); // shoot +-5 degrees
+	FireBullets(1, vecShootOrigin, vecShootDir, VECTOR_CONE_6DEGREES, 2048, GetSkillValue("556_bullet") ); // shoot +-5 degrees
 
 	pev->effects |= EF_MUZZLEFLASH;
 
@@ -752,6 +789,11 @@ void CHWGrunt::DropMyItems(bool isGibbed)
 			}
 		}
 	}
+}
+
+void CHWGrunt::DetectModelType()
+{
+	m_sc5Model = LookupSequence("pistol_shoot") != -1;
 }
 
 class CHWGruntRepel : public CHGruntRepel

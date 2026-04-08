@@ -245,11 +245,12 @@ const NamedVisual COsprey::blastCircleVisual = BuildVisual("Osprey.BlastCircle")
 		.Life(0.4f)
 		.BeamParams(32, 0)
 		.RenderColor(255, 255, 192)
-		.Alpha(128);
+		.Alpha(128)
+		.WaveType(Visual::WAVETYPE_CYLINDER);
 
 void COsprey::Spawn()
 {
-	SpawnImpl("models/osprey.mdl", gSkillData.ospreyHealth);
+	SpawnImpl("models/osprey.mdl", GetSkillValue("osprey"));
 }
 
 void COsprey::SpawnImpl(const char* modelName, const float defaultHealth)
@@ -534,7 +535,7 @@ void COsprey::DeployThink()
 
 	TraceResult tr;
 	UTIL_TraceLine( pev->origin, pev->origin + Vector( 0.0f, 0.0f, -4096.0f ), ignore_monsters, ENT( pev ), &tr );
-	CSoundEnt::InsertSound( bits_SOUND_DANGER, tr.vecEndPos, 400, 0.3f );
+	InsertAISound( bits_SOUND_DANGER, tr.vecEndPos, 400, 0.3f );
 
 	if (!FStringNull(m_triggerOnDeploy))
 	{
@@ -959,12 +960,18 @@ KilledResult COsprey::Killed( entvars_t *pevInflictor, entvars_t *pevAttacker, i
 void COsprey::CrashTouch( CBaseEntity *pOther )
 {
 	// only crash if we hit something solid
-	if( pOther->pev->solid == SOLID_BSP )
+	switch(pOther->pev->solid)
 	{
+	case SOLID_BBOX:
+	case SOLID_SLIDEBOX:
+	case SOLID_BSP:
 		SetTouch( NULL );
 		m_startTime = gpGlobals->time;
 		pev->nextthink = gpGlobals->time;
 		m_velocity = pev->velocity;
+		break;
+	default:
+		break;
 	}
 }
 
@@ -1071,15 +1078,11 @@ void COsprey::DyingThink()
 		*/
 
 		// blast circle
-		MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, pev->origin );
-			WRITE_BYTE( TE_BEAMCYLINDER );
-			WRITE_CIRCLE( pev->origin, 2000 );
-			WriteBeamVisual(GetVisual(blastCircleVisual));
-		MESSAGE_END();
+		SendBeamWave(pev->origin, 2000, GetVisual(blastCircleVisual), MSG_PVS, pev->origin);
 
 		EmitSoundScript(crashSoundScript);
 
-		RadiusDamage( pev->origin, pev, pev, DamageInfo{300, DMG_BLAST}, CLASS_NONE );
+		RadiusDamage( pev->origin, pev, pev, DamageInfo{GetSkillValue("osprey_dmg_blast"), DMG_BLAST}, CLASS_NONE );
 
 		// gibs
 		vecSpot = pev->origin + ( pev->mins + pev->maxs ) * 0.5f;
@@ -1224,7 +1227,7 @@ LINK_ENTITY_TO_CLASS( monster_blkop_osprey, CBlkopOsprey )
 
 void CBlkopOsprey::Spawn()
 {
-	SpawnImpl("models/blkop_osprey.mdl", gSkillData.blackopsOspreyHealth);
+	SpawnImpl("models/blkop_osprey.mdl", GetSkillValue("blkopsosprey"));
 }
 
 void CBlkopOsprey::Precache()

@@ -1,7 +1,9 @@
 #include "hud.h"
 #include "cl_util.h"
+#include "monsterinfo.h"
 #include "parsemsg.h"
 #include "string_utils.h"
+#include "util_shared.h"
 
 DECLARE_MESSAGE( m_MonsterInfo, MonsterInfo )
 
@@ -73,37 +75,69 @@ int CHudMonsterInfo::MsgFunc_MonsterInfo(const char *pszName, int iSize, void *p
 {
 	BEGIN_READ(pbuf, iSize);
 
-	const char* name = READ_STRING();
+	const int update = READ_BYTE();
 
-	if (!*name)
+	if (update == MONSTERINFO_CLEAR)
 	{
 		Reset();
 		return 1;
 	}
 
+	const char* name = nullptr;
+
+	if (update == MONSTERINFO_FULLUPDATE)
+	{
+		name = READ_STRING();
+
+		if(!(m_iFlags & HUD_ACTIVE))
+			m_iFlags |= HUD_ACTIVE;
+	}
+
 	health = READ_SHORT();
 	maxHealth = READ_SHORT();
 	armor = READ_SHORT();
-	isMonster = READ_BYTE() ? true : false;
-	isPlayer = READ_BYTE() ? true : false;
-	isAlly = READ_BYTE() ? true : false;
 
-	if(!(m_iFlags & HUD_ACTIVE))
-		m_iFlags |= HUD_ACTIVE;
+	const int monsterInfoFlags = READ_BYTE();
 
-	strncpyEnsureTermination(displayName, name);
+	isMonster = FBitSet(monsterInfoFlags, MONSTERINFO_FLAG_MONSTER);
+	isPlayer = FBitSet(monsterInfoFlags, MONSTERINFO_FLAG_PLAYER);
+	isAlly = FBitSet(monsterInfoFlags, MONSTERINFO_FLAG_ALLY);
+	isMachine = FBitSet(monsterInfoFlags, MONSTERINFO_FLAG_MACHINE);
+
+	if (name)
+	{
+		const char* localizedName = nullptr;
+		if (!isPlayer) // don't localize player's names
+		{
+			localizedName = gHUD.m_displayNames.GetDisplayName(name);
+		}
+
+		if (localizedName)
+			strncpyEnsureTermination(displayName, localizedName);
+		else
+			strncpyEnsureTermination(displayName, name);
+	}
+
+	const char* healthString = isMachine ? gHUD.m_messageStrings.GetText("__SHOWINFO_STRENGTH", "Strength") : gHUD.m_messageStrings.GetText("__SHOWINFO_HEALTH", "Health");
+
 	if (isPlayer)
 	{
-		safe_snprintf(healthDisplay, sizeof(healthDisplay), "Health: %d", health);
-		safe_snprintf(armorDisplay, sizeof(armorDisplay), "Armor: %d", armor);
+		const char* armorString = gHUD.m_messageStrings.GetText("__SHOWINFO_ARMOR", "Armor");
+
+		safe_snprintf(healthDisplay, sizeof(healthDisplay), "%s: %d", healthString, health);
+		safe_snprintf(armorDisplay, sizeof(armorDisplay), "%s: %d", armorString, armor);
 	}
 	else if (isMonster)
 	{
-		safe_snprintf(healthDisplay, sizeof(healthDisplay), "Health: %d/%d", health, maxHealth);
+		if (health > 0)
+			safe_snprintf(healthDisplay, sizeof(healthDisplay), "%s: %d/%d", healthString, health, maxHealth);
+		else
+			safe_snprintf(healthDisplay, sizeof(healthDisplay), "%s: %d", healthString, health);
 	}
 	else
 	{
-		safe_snprintf(healthDisplay, sizeof(healthDisplay), "Strength: %d", health);
+		const char* strengthString = gHUD.m_messageStrings.GetText("__SHOWINFO_STRENGTH", "Strength");
+		safe_snprintf(healthDisplay, sizeof(healthDisplay), "%s: %d", strengthString, health);
 	}
 
 	return 1;

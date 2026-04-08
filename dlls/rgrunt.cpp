@@ -150,7 +150,7 @@ const char* CRGrunt::SentenceByNumber(int sentence)
 
 void CRGrunt::Spawn()
 {
-	SpawnHelper("models/rgrunt.mdl", gSkillData.hgruntHealth, DONT_BLEED);
+	SpawnHelper("models/rgrunt.mdl", GetSkillValue("hgrunt_health"), DONT_BLEED);
 	if( pev->weapons == 0 )
 	{
 		pev->weapons = HGRUNT_9MMAR | HGRUNT_HANDGRENADE;
@@ -177,6 +177,8 @@ void CRGrunt::Precache()
 	PrecacheMyModel("models/rgrunt.mdl");
 	PrecacheMyGibModel(DefaultGibModel());
 	RegisterAndPrecacheSoundScript(NPC::swishSoundScript);
+
+	PrecacheEquipmentDrop();
 
 	RegisterAndPrecacheSoundScript(dieSoundScript);
 	RegisterAndPrecacheSoundScript(painSoundScript);
@@ -247,7 +249,7 @@ void CRGrunt::StartTask(Task_t *pTask)
 	{
 	case TASK_DIE:
 	{
-		CSoundEnt::InsertSound( bits_SOUND_DANGER, pev->origin, 400, 2 );
+		InsertAISound( bits_SOUND_DANGER, 400, 2 );
 
 		if( UTIL_PointContents( pev->origin ) == CONTENTS_WATER )
 		{
@@ -315,7 +317,7 @@ void CRGrunt::Explode()
 	TraceResult tr;
 	UTIL_TraceLine( pev->origin, pev->origin + Vector( 0, 0, -32 ), ignore_monsters, ENT( pev ), & tr );
 
-	pev->dmg = gSkillData.rgruntExplode;
+	pev->dmg = GetSkillValue("rgrunt_explode");
 	int iContents = UTIL_PointContents( pev->origin );
 
 	MESSAGE_BEGIN( MSG_PAS, SVC_TEMPENTITY, pev->origin );
@@ -334,7 +336,7 @@ void CRGrunt::Explode()
 		WRITE_BYTE( TE_EXPLFLAG_NONE );
 	MESSAGE_END();
 
-	CSoundEnt::InsertSound( bits_SOUND_COMBAT, pev->origin, NORMAL_EXPLOSION_VOLUME, 3.0 );
+	InsertAISound( bits_SOUND_COMBAT, NORMAL_EXPLOSION_VOLUME, 3.0 );
 
 	RadiusDamage( pev, pev, DamageInfo{pev->dmg, DMG_BLAST}, CLASS_NONE );
 

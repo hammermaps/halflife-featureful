@@ -49,10 +49,6 @@ struct ModFeatures
 	const char* M249DropName() const;
 	const char* DeadHazModel() const;
 
-	bool DisplacerBallEnabled() const;
-	bool ShockBeamEnabled() const;
-	bool SporesEnabled() const;
-
 	void EnableMonster(const char* name);
 	bool IsMonsterEnabled(const char* name) const;
 
@@ -67,6 +63,8 @@ struct ModFeatures
 	bool DoorsRecheckWhenBlocked() const;
 	bool DoorsFadeCorpsesWhenBlocked() const;
 	bool FixPlayerAndCorpseCollisionBug() const;
+	bool ShouldIgnoreTinyCreatures(int policy) const;
+	bool ShouldCrushTinyCreatures(int policy) const;
 
 	int suit_light;
 	bool suit_light_allow_both;
@@ -102,29 +100,19 @@ struct ModFeatures
 
 	int scientist_random_heads;
 
-	bool vortigaunt_coil_attack;
-	bool vortigaunt_idle_effects;
-	bool vortigaunt_arm_boost;
-	bool vortigaunt_selfheal;
-	bool vortigaunt_heal;
-	bool vortigaunt_revive;
-	bool vortigaunt_armor_charge;
-
 	bool sentry_retract;
 
 	bool bigmomma_wait_fix;
 	bool bigmomma_lastnode_fix;
 
-	bool gonome_lock_player;
-
 	bool doors_open_in_move_direction;
 	bool doors_blocked_recheck;
 	bool doors_blocked_fade_corpses;
 	bool door_rotating_starts_open_fix;
+	int handle_tiny_creatures;
 
 	bool env_spark_transit;
 
-	bool skill_opfor;
 	bool opfor_deadhaz;
 	bool tentacle_opfor_height;
 private:

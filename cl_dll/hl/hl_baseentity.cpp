@@ -29,6 +29,7 @@ This file contains "stubs" of class member implementations so that we can predic
 #include	"weapons.h"
 #include	"nodes.h"
 #include	"skill.h"
+#include	"event_api.h"
 
 // Globals used by game logic
 const Vector g_vecZero = Vector( 0, 0, 0 );
@@ -57,7 +58,9 @@ bool CBaseEntity::IsInWorld() { return true; }
 int CBaseEntity::DamageDecal( int bitsDamageType ) { return -1; }
 void CBaseEntity::UpdateOnRemove() { }
 int CBaseEntity::IRelationship( CBaseEntity *pTarget ) { return 0; }
+void CBaseEntity::SetMyModel(const char* defaultModel) {}
 int CBaseEntity::PRECACHE_SOUND(const char *soundName) { return 0; }
+float CBaseEntity::GetSkillValue(const char* name) { return 0.0f; }
 
 // CBaseDelay Stubs
 void CBaseDelay::KeyValue( struct KeyValueData_s * ) { }
@@ -77,7 +80,10 @@ bool UTIL_PrecacheOther( const char *szClassname, EntityOverrides entityOverride
 void UTIL_BloodDrips( const Vector &origin, const Vector &direction, int color, int amount ) { }
 void UTIL_DecalTrace( TraceResult *pTrace, int decalNumber ) { }
 void UTIL_GunshotDecalTrace( TraceResult *pTrace, int decalNumber ) { }
-void UTIL_MakeVectors( const Vector &vecAngles ) { }
+void UTIL_MakeVectors( const Vector &vecAngles )
+{
+	gEngfuncs.pfnAngleVectors( vecAngles, gpGlobals->v_forward, gpGlobals->v_right, gpGlobals->v_up );
+}
 void UTIL_SetOrigin( entvars_t *, const Vector &org ) { }
 void UTIL_LogPrintf(char *,...) { }
 void UTIL_ClientPrintAll( int,char const *,char const *,char const *,char const *,char const *) { }
@@ -89,7 +95,6 @@ int CBaseToggle::Save( class CSave & ) { return 1; }
 void CBaseToggle::KeyValue( struct KeyValueData_s * ) { }
 
 void UTIL_Remove( CBaseEntity *pEntity ){ }
-struct skilldata_t gSkillData;
 void UTIL_SetSize( entvars_t *pev, const Vector &vecMin, const Vector &vecMax ){ }
 CBaseEntity *UTIL_FindEntityInSphere( CBaseEntity *pStartEntity, const Vector &vecCenter, float flRadius ){ return 0;}
 
@@ -183,6 +188,8 @@ int CBaseMonster::SizeForGrapple() { return GRAPPLE_NOT_A_TARGET; }
 bool CBaseMonster::HandleBlocker(CBaseEntity* pBlocker, bool duringMovement) { return false; }
 bool CBaseMonster::CanBeMadeMoveAway(CBaseEntity* pPusher) { return false; }
 bool CBaseMonster::HandleDoorBlockage(CBaseEntity* pDoor) { return false; }
+void CBaseMonster::AskMoveAwayFromSpot(CBaseEntity* pSpotEntity, float minDist, bool run) {}
+
 
 void CBasePlayer::DeathSound() { }
 int CBasePlayer::TakeHealth( CBaseEntity* pHealer, float flHealth, int bitsDamageType ) { return 0; }
@@ -220,7 +227,15 @@ Vector CBasePlayer::GetAutoaimVector( float flDelta ) { return g_vecZero; }
 Vector CBasePlayer::GetAutoaimVectorFromPoint( const Vector& vecSrc, float flDelta ) { return g_vecZero; }
 Vector CBasePlayer::AutoaimDeflection( const Vector &vecSrc, float flDist, float flDelta  ) { return g_vecZero; }
 void CBasePlayer::ResetAutoaim() { }
-Vector CBasePlayer::GetGunPosition() { return g_vecZero; }
+Vector CBasePlayer::GetGunPosition()
+{
+	Vector origin = pev->origin;
+	Vector view_ofs;
+
+	gEngfuncs.pEventAPI->EV_LocalPlayerViewheight(view_ofs);
+
+	return origin + view_ofs;
+}
 const char *CBasePlayer::TeamID() { return ""; }
 int CBasePlayer::GiveAmmo( int iCount, const char *szName ) { return 0; }
 void CBasePlayer::AddPoints( int score, bool bAllowNegativeScore ) { }

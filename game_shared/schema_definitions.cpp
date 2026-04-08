@@ -36,6 +36,28 @@ const char* const json_schemas::definitions = R"(
 		"minItems": 2,
 		"maxItems": 2
 	},
+	"range_non_negative": {
+		"type": ["string", "object", "number", "array"],
+		"minimum": 0,
+		"pattern": "^[0-9]+(\\.[0-9]+)?(,[0-9]+(\\.[0-9]+)?)?$",
+		"properties": {
+			"min": {
+				"type": "number",
+				"minimum": 0
+			},
+			"max": {
+				"type": "number",
+				"minimum": 0
+			}
+		},
+		"additionalProperties": false,
+		"items": {
+			"type": "number",
+			"minimum": 0
+		},
+		"minItems": 2,
+		"maxItems": 2
+	},
 	"range_int": {
 		"type": ["string", "object", "integer", "array"],
 		"pattern": "^[0-9]+(,[0-9]+)?$",
@@ -167,7 +189,7 @@ const char* const json_schemas::definitions = R"(
 				"maximum": 255.0
 			},
 			"amplitude": {
-				"type": "number",
+				"type": "integer",
 				"minimum": 0,
 				"maximum": 16
 			}
@@ -199,8 +221,8 @@ const char* const json_schemas::definitions = R"(
 		},
 		"additionalProperties": false
 	},
-	"visual": {
-		"type": ["object", "string"],
+	"visual_object": {
+		"type": "object",
 		"properties": {
 			"model": {
 				"type": "string"
@@ -296,9 +318,33 @@ const char* const json_schemas::definitions = R"(
 			},
 			"decay": {
 				"type": "number"
+			},
+			"wave": {
+				"enum": [
+					"Torus",
+					"torus",
+					"Disk",
+					"disk",
+					"Cylinder",
+					"cylinder"
+				]
 			}
 		},
-		"additionalProperties": false
+		"additionalProperties": false,
+		"dependencies": {
+			"sprite": { "not": { "required": ["model"] } }
+		}
+	},
+	"visual": {
+		"oneOf": [
+			{
+				"type": "string",
+				"minLength": 1
+			},
+			{
+				"$ref": "#/visual_object"
+			}
+		]
 	},
 	"body_filter": {
 		"type": ["integer", "object"],
@@ -878,6 +924,33 @@ R"(
 					}
 				]
 			},
+			"equipment_drop": {
+				"type": "array",
+				"items": {
+					"type": "object",
+					"properties": {
+						"weapons": {
+							"type": "integer",
+							"minimum": 0
+						},
+						"weapons_match": {
+							"enum": ["one", "all", "none", "exact"]
+						},
+						"classname": {
+							"type": "string",
+							"minLength": 1
+						},
+						"ent_template": {
+							"type": "string"
+						},
+						"at_position": {
+							"enum": ["gun", "body"]
+						}
+					},
+					"required": ["classname"],
+					"additionalProperties": false
+				}
+			},
 			"children": {
 				"oneOf": [
 					{
@@ -902,6 +975,42 @@ R"(
 					},
 					"allow_when_dying": {
 						"type": "boolean"
+					}
+				},
+				"additionalProperties": false
+			},
+			"skill": {
+				"type": "object",
+				"additionalProperties": {
+					"type": ["string", "number", "array"],
+					"minLength": 1,
+					"minItems": 3,
+					"maxItems": 3,
+					"items": {
+						"type": "number"
+					}
+				}
+			},
+			"displayname": {
+				"type": "string"
+			},
+			"projectile": {
+				"type": "object",
+				"properties": {
+					"effect_flags": {
+						"type": "array",
+						"items": {
+							"enum": ["rocketflare", "brightlight"]
+						}
+					}
+				},
+				"additionalProperties": false
+			},
+			"pickup": {
+				"type": "object",
+				"properties": {
+					"hud_sprite": {
+						"type": "string"
 					}
 				},
 				"additionalProperties": false

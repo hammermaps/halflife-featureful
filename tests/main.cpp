@@ -60,6 +60,59 @@ TEST(NumberRange, Equal) {
 	EXPECT_EQ(s, 7);
 	EXPECT_EQ(s.min, 7);
 	EXPECT_EQ(s.max, 7);
+
+	FloatRange f{0.25f, 1.4f};
+	FloatRange m{0.75f};
+	EXPECT_EQ(f, FloatRange(0.25f, 1.4f));
+	EXPECT_EQ(f.min, 0.25f);
+	EXPECT_EQ(f.max, 1.4f);
+
+	EXPECT_EQ(m, 0.75f);
+	EXPECT_EQ(m.min, 0.75f);
+	EXPECT_EQ(m.max, 0.75f);
+}
+
+TEST(NumberRange, Multiply) {
+	FloatRange f{0.4f, 1.2f};
+	f *= 2;
+	EXPECT_EQ(f.min, 0.8f);
+	EXPECT_EQ(f.max, 2.4f);
+
+	FloatRange m = f * 0.5f;
+	EXPECT_EQ(m.min, 0.4f);
+	EXPECT_EQ(m.max, 1.2f);
+
+	IntRange r{2, 5};
+	r *= 2;
+	EXPECT_EQ(r.min, 4);
+	EXPECT_EQ(r.max, 10);
+
+	FloatRange rf = r * 0.5f;
+	EXPECT_EQ(rf.min, 2.0f);
+	EXPECT_EQ(rf.max, 5.0f);
+}
+
+TEST(NumberRange, Sum) {
+	FloatRange s1 = 5.0f;
+	FloatRange s2 = 6.0f;
+
+	FloatRange sSum = RangeSum(s1, s2);
+	EXPECT_EQ(sSum.min, 11.0f);
+	EXPECT_LE(sSum.max, sSum.min);
+
+	FloatRange r1{4.0, 6.0f};
+	FloatRange rsSum = RangeSum(r1, s2);
+	EXPECT_EQ(rsSum.min, 10.0f);
+	EXPECT_EQ(rsSum.max, 12.0f);
+
+	EXPECT_EQ(rsSum, RangeSum(s2, r1));
+
+	FloatRange r2{2.0, 3.0f};
+	FloatRange rSum = RangeSum(r1, r2);
+	EXPECT_EQ(rSum.min, 6.0f);
+	EXPECT_EQ(rSum.max, 9.0f);
+
+	EXPECT_EQ(rSum, RangeSum(r2, r1));
 }
 
 TEST(Random, Int) {

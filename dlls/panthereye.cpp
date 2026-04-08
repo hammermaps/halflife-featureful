@@ -5,6 +5,7 @@
 #include	"squadmonster.h"
 #include	"game.h"
 #include	"common_soundscripts.h"
+#include	"clamp.h"
 
 #define PANTHEREYE_AE_STRIKE_LEFT			( 1 )
 #define PANTHEREYE_AE_STRIKE_RIGHT_LOW				( 2 )
@@ -41,7 +42,7 @@ public:
 	bool IsEnabledInMod() override { return g_modFeatures.IsMonsterEnabled("panthereye"); }
 	void SetYawSpeed() override;
 	int  DefaultClassify() override;
-	const char* DefaultDisplayName() override { return "Panther Eye"; }
+	const char* DefaultDisplayName() override { return "Panthereye"; }
 
 	void HandleAnimEvent( MonsterEvent_t *pEvent ) override;
 	Schedule_t* GetScheduleOfType(int Type) override;
@@ -147,7 +148,7 @@ void CPantherEye::Spawn()
 	pev->solid = SOLID_SLIDEBOX;
 	pev->movetype = MOVETYPE_STEP;
 	SetMyBloodColor(BLOOD_COLOR_YELLOW);
-	SetMyHealth(gSkillData.panthereyeHealth);
+	SetMyHealth(GetSkillValue("panthereye_health"));
 	SetMyFieldOfView(0.5f);
 	m_MonsterState = MONSTERSTATE_NONE;
 	SetMySquadCapabilities(bits_CAP_SQUAD|bits_CAP_SQUAD_SAME_CLASSNAME);
@@ -203,7 +204,7 @@ void CPantherEye::HandleAnimEvent( MonsterEvent_t *pEvent )
 			params.knockRight = 100.0f;
 			params.knockForward = -50.0f;
 			params.knockUp = 50.0f;
-			params.damageInfo.damage = gSkillData.panthereyeDmgClaw;
+			params.damageInfo.damage = GetSkillValue("panthereye_dmg_claw");
 			params.hitSoundScript = attackHitSoundScript;
 			params.missSoundScript = attackMissSoundScript;
 			SetTraceHullAttackParamsFromTemplate(pEvent->event, params);
@@ -221,7 +222,7 @@ void CPantherEye::HandleAnimEvent( MonsterEvent_t *pEvent )
 			params.knockRight = -25.0f;
 			params.knockForward = -25.0f;
 			params.knockUp = 25.0f;
-			params.damageInfo.damage = gSkillData.panthereyeDmgClaw;
+			params.damageInfo.damage = GetSkillValue("panthereye_dmg_claw");
 			params.hitSoundScript = attackHitSoundScript;
 			params.missSoundScript = attackMissSoundScript;
 			SetTraceHullAttackParamsFromTemplate(pEvent->event, params);
@@ -239,7 +240,7 @@ void CPantherEye::HandleAnimEvent( MonsterEvent_t *pEvent )
 			params.knockRight = -100.0f;
 			params.knockForward = -50.0f;
 			params.knockUp = 50.0f;
-			params.damageInfo.damage = gSkillData.panthereyeDmgClaw;
+			params.damageInfo.damage = GetSkillValue("panthereye_dmg_claw");
 			params.hitSoundScript = attackHitSoundScript;
 			params.missSoundScript = attackMissSoundScript;
 			SetTraceHullAttackParamsFromTemplate(pEvent->event, params);
@@ -306,8 +307,7 @@ void CPantherEye::RunTask(Task_t *pTask)
 
 				// How fast does the panther need to travel to reach that height given gravity?
 				float height = m_hEnemy->pev->origin.z + m_hEnemy->pev->view_ofs.z - pev->origin.z;
-				if( height < 16 )
-					height = 16;
+				height = clamp(height, 16.0f, 120.0f);
 				float speed = sqrt( 2 * gravity * height );
 				float time = speed / gravity;
 
@@ -355,7 +355,7 @@ void CPantherEye::LeapTouch( CBaseEntity *pOther )
 	EmitSoundScript(attackHitSoundScript);
 
 	TouchAttackParams params;
-	params.damageInfo = DamageInfo(gSkillData.panthereyeDmgClaw, DMG_SLASH);
+	params.damageInfo = DamageInfo(GetSkillValue("panthereye_dmg_claw"), DMG_SLASH);
 	SetTouchAttackFromTemplate(params);
 	PerformTouchAttack(params, pOther);
 
@@ -365,7 +365,8 @@ void CPantherEye::LeapTouch( CBaseEntity *pOther )
 		pOther->pev->punchangle.z = RANDOM_LONG(0, 1) ? 15.0f : -15.0f;
 	}
 
-	pev->velocity *= 0.5f;
+	pev->velocity.x *= 0.5f;
+	pev->velocity.y *= 0.5f;
 
 	SetTouch(nullptr);
 }

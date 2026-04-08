@@ -295,7 +295,8 @@ const NamedVisual CRoboCop::shockWaveBaseVisual = BuildVisual("RoboCop.ShockWave
 		.Framerate(10)
 		.Life(0.2f)
 		.BeamWidth(32)
-		.Alpha(255);
+		.Alpha(255)
+		.WaveType(Visual::WAVETYPE_CYLINDER);
 
 const NamedVisual CRoboCop::shockWave1Visual = BuildVisual("RoboCop.ShockWave1")
 		.RenderColor(101, 133, 221)
@@ -388,29 +389,18 @@ void CRoboCop::FistAttack()
 	Vector vecSrc = pev->origin + 12 * gpGlobals->v_right + 95 * gpGlobals->v_forward;
 
 	const Visual* waveVisuals[] = {GetVisual(shockWave1Visual), GetVisual(shockWave2Visual), GetVisual(shockWave3Visual)};
+	const float shockWaveRadius = GetSkillValue("robocop_sw_radius");
 
 	for( size_t i = 0; i < ARRAYSIZE(waveVisuals); i++ )
 	{
-		if (waveVisuals[i] && waveVisuals[i]->modelIndex)
-		{
-			// blast circles
-			MESSAGE_BEGIN( MSG_PAS, SVC_TEMPENTITY, pev->origin );
-				WRITE_BYTE( TE_BEAMCYLINDER );
-				WRITE_COORD( vecSrc.x );
-				WRITE_COORD( vecSrc.y );
-				WRITE_COORD( vecSrc.z + 16 );
-				WRITE_COORD( vecSrc.x );
-				WRITE_COORD( vecSrc.y );
-				WRITE_COORD( vecSrc.z + gSkillData.robocopSWRadius / ( ( i + 1 ) * 0.2f ) ); // reach damage radius over .3 seconds
-				WriteBeamVisual(waveVisuals[i]);
-			MESSAGE_END();
-		}
+		// blast circles
+		SendBeamWave(vecSrc + Vector(0,0,16), shockWaveRadius / ( ( i + 1 ) * 0.2f ), waveVisuals[i], MSG_PAS, pev->origin);
 	}
 
 	CBaseEntity *pEntity = NULL;
 
 	// iterate on all entities in the vicinity.
-	while( ( pEntity = UTIL_FindEntityInSphere( pEntity, pev->origin, gSkillData.robocopSWRadius ) ) != NULL )
+	while( ( pEntity = UTIL_FindEntityInSphere( pEntity, pev->origin, shockWaveRadius ) ) != NULL )
 	{
 		if( pEntity->pev->takedamage != DAMAGE_NO )
 		{
@@ -418,9 +408,9 @@ void CRoboCop::FistAttack()
 			if( pEntity != this )
 			{
 				vecDist = pEntity->Center() - vecSrc;
-				flDist = Q_max( 0, gSkillData.robocopSWRadius - vecDist.Length() );
+				flDist = Q_max( 0, shockWaveRadius - vecDist.Length() );
 
-				flDist = flDist / gSkillData.robocopSWRadius;
+				flDist = flDist / shockWaveRadius;
 
 				if( !FVisible( pEntity ) )
 				{
@@ -438,7 +428,7 @@ void CRoboCop::FistAttack()
 					}
 				}
 
-				flAdjustedDamage = gSkillData.robocopDmgFist * flDist;
+				flAdjustedDamage = GetSkillValue("robocop_dmg_fist") * flDist;
 
 				if( flAdjustedDamage > 0 )
 				{
@@ -633,7 +623,7 @@ void CRoboCop::Spawn()
 	pev->solid		= SOLID_SLIDEBOX;
 	pev->movetype		= MOVETYPE_STEP;
 	SetMyBloodColor(DONT_BLEED);
-	SetMyHealth(gSkillData.robocopHealth);
+	SetMyHealth(GetSkillValue("robocop_health"));
 	SetMyFieldOfView(VIEW_FIELD_WIDE);
 	m_MonsterState		= MONSTERSTATE_NONE;
 	SetMyCanOpenDoors(false);
@@ -750,7 +740,7 @@ bool CRoboCop::CheckMeleeAttack1( float flDot, float flDist )
 	{
 		CheckMeleeAttackParams params;
 		params.dot = 0.8f;
-		params.distance = gSkillData.robocopSWRadius;
+		params.distance = GetSkillValue("robocop_sw_radius");
 		return CheckMeleeAttackImpl(flDot, flDist, params, false);
 	}
 	return false;
@@ -760,7 +750,7 @@ bool CRoboCop::CheckRangeAttack1( float flDot, float flDist )
 {
 	if( m_flLaserTime <= gpGlobals->time )
 	{
-		if( flDot >= 0.8f && flDist > gSkillData.robocopSWRadius )
+		if( flDot >= 0.8f && flDist > GetSkillValue("robocop_sw_radius") )
 		{
 			if( flDist < 4096.0f )
 				return true;
@@ -844,7 +834,7 @@ void CRoboCop::StartTask( Task_t *pTask )
 
 	case TASK_ROBOCOP_MORTAR_SPAWN:
 		{
-			ExplosionCreate(m_vecAimPos, g_vecZero, edict(), gSkillData.robocopDmgMortar, true, pev);
+			ExplosionCreate(m_vecAimPos, g_vecZero, edict(), GetSkillValue("robocop_dmg_mortar"), true, pev);
 			UTIL_ScreenShake( tr.vecEndPos, 25.0f, 150.0f, 1.0f, 750 );
 			m_flWaitFinished = gpGlobals->time + pTask->flData; 
 		}

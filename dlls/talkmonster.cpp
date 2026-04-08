@@ -760,7 +760,7 @@ float CTalkMonster::TargetDistance()
 	if( m_hTargetEnt == 0 || !m_hTargetEnt->IsFullyAlive() )
 		return 1e6;
 
-	return ( m_hTargetEnt->pev->origin - pev->origin ).Length();
+	return ( m_hTargetEnt->Center() - Center() ).Length();
 }
 
 //=========================================================
@@ -1630,8 +1630,12 @@ void CTalkMonster::TrySmellTalk()
 int CTalkMonster::IRelationship( CBaseEntity *pTarget )
 {
 	if( pTarget->IsPlayer() )
-		if( m_afMemory & bits_MEMORY_PROVOKED )
+	{
+		if (m_fStartSuspicious)
+			return R_DL;
+		if( HasMemory( bits_MEMORY_PROVOKED ) )
 			return R_HT;
+	}
 	return CFollowingMonster::IRelationship( pTarget );
 }
 

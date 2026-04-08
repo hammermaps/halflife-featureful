@@ -102,6 +102,7 @@ set (SVDLL_SOURCES
 	gonome.cpp
 	graphic_debug.cpp
 	grapple.cpp
+	grenadelauncher.cpp
 	h_ai.cpp
 	h_battery.cpp
 	h_cine.cpp
@@ -120,6 +121,7 @@ set (SVDLL_SOURCES
 	inventory.cpp
 	islave.cpp
 	items.cpp
+	kingpin.cpp
 	knife.cpp
 	leech.cpp
 	lights.cpp
@@ -173,6 +175,7 @@ set (SVDLL_SOURCES
 	shotgun.cpp
 	singleplay_gamerules.cpp
 	skill.cpp
+	skilldata.cpp
 	sniperrifle.cpp
 	sound.cpp
 	soundent.cpp
@@ -217,6 +220,7 @@ set (SVDLL_SOURCES
 	../game_shared/schema_weapons.cpp
 	../game_shared/sound_channel.cpp
 	../game_shared/soundscripts.cpp
+	../game_shared/visual_object.cpp
 	../game_shared/unicode.cpp
 	../game_shared/util_shared.cpp
 	../game_shared/weapon_parameters.cpp

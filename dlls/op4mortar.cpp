@@ -92,7 +92,7 @@ void CMortarShell::Spawn()
 
 	pev->gravity = 1;
 
-	SetDefaultProjectileDamage(gSkillData.op4mortarDmg);
+	SetDefaultProjectileDamage(GetSkillValue("op4mortar"));
 
 	pev->nextthink = gpGlobals->time + 0.01f;
 	m_flIgniteTime = gpGlobals->time;
@@ -142,7 +142,7 @@ void CMortarShell::FlyThink()
 
 	if (m_dangerSoundTime <= gpGlobals->time)
 	{
-		CSoundEnt::InsertSound( bits_SOUND_DANGER, pev->origin + pev->velocity * 0.5f, GetProjectileDamage() * DEFAULT_EXPLOSION_RADIUS_MULTIPLIER, 0.2f );
+		InsertAISound( bits_SOUND_DANGER, pev->origin + pev->velocity * 0.5f, GetProjectileDamage() * DEFAULT_EXPLOSION_RADIUS_MULTIPLIER, 0.2f );
 		m_dangerSoundTime = gpGlobals->time + 0.2f;
 	}
 
@@ -164,6 +164,8 @@ void CMortarShell::LaunchAsProjectile(const ProjectileParameters &params)
 		pev->angles = UTIL_VecToAngles(pev->velocity);
 		pev->angles.x -= 90.0f;
 	}
+
+	SetMyProjectileEffectFlags();
 }
 
 #define SF_MORTAR_ACTIVE (1 << 0)

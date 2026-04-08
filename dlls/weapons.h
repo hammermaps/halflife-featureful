@@ -254,6 +254,7 @@ public:
 	const char* DetonatorViewModelToDeploy(const char* viewModel);
 	bool DefaultReload( int iClipSize, int iAnim, float fDelay, int body = 0 );
 	bool DefaultClipReload(int iAnim, float fDelay, int body = 0);
+	void ReloadClipNow(int ammoCountPerReload);
 	void PrecachePModel(const char* name);
 
 	virtual void ItemPostFrame();	// called each frame by the player PostThink
@@ -270,7 +271,6 @@ public:
 	virtual void ResetWeaponData() {}
 
 	virtual void RetireWeapon();
-	virtual bool ShouldWeaponIdle() { return false; }
 	virtual void Holster();
 	virtual bool UseDecrement()
 	{
@@ -302,6 +302,7 @@ public:
 	virtual int ViewModelBody() { return 0; }
 	virtual float GetMaxSpeed() { return 0.0f; }
 	virtual void OnPlayerAttackCapabilityChanged(bool enabled) {}
+	virtual void ResetOnRemoveAsActive() {}
 	float GetNextAttackDelay( float delay );
 
 	int		m_fInSpecialReload;									// Are we in the middle of a reload for the shotguns
@@ -333,6 +334,8 @@ public:
 
 	float m_packedTime;
 
+	bool m_inAltMode;
+
 	bool UsesClip();
 	bool HasAmmoToFire(int ammo = 1);
 	bool IsOutOfAmmo();
@@ -340,8 +343,12 @@ public:
 	void CheckOutOfSecondaryAmmo();
 	void SpendAmmo(int ammo = 1);
 	bool Emptied();
+	bool InAltMode() const {
+		return m_inAltMode;
+	}
 
 	void PlayWeaponSoundScript(const WeaponSoundScript& soundScript, float volumeFactor = 1.0f);
+	void SetWorldModelProps();
 };
 
 enum class SwitchModeReason
@@ -378,26 +385,23 @@ public:
 	void SecondaryAttack() override;
 	bool PerformReload();
 	void Reload() override;
-	virtual void OnIdleAnimation(int anim) {}
 	void SendIdleAnimation();
 	void WeaponIdle() override;
 	void Holster() override;
-	int ViewModelBody() override { return pev->body; }
+	int ViewModelBody() override;
 	void SetBody(int body);
 
 	void ProjectileAttack(bool altMode);
 	virtual void NativeAttack(bool altMode) { return; }
-	virtual void OnSpendAmmo() { return; }
-	virtual void OnEndReload() { return; }
+	virtual bool HandleAttackSubstitution(bool altMode) { return false; }
 	virtual int GetPlaybackEvent(bool altModeFire) const { return m_usFire; }
 
 	bool PerformDeploy();
 
-	bool InAltMode() const {
-		return m_inAltMode;
-	}
 	void UpdateAutoAim();
 	void UpdateSpot();
+	void ToggleLaserSpot(bool playDeactivationSound = false);
+	void SetChargingAttack(bool charging);
 	void SetZoom(int fov);
 	void ResetZoom(SwitchModeReason reason = SwitchModeReason::Regular);
 	void KickBack(const WeaponKickBack& kickBack);
@@ -412,18 +416,18 @@ public:
 	bool Swing(bool fFirst);
 	void BigSwing();
 
-	virtual DamageInfo MeleeDamageInfo() { return DamageInfo{10.0f, DMG_CLUB}; }
-	virtual DamageInfo MeleeWindDamageInfo() {
-		float damage = Q_max(100.0f, (gpGlobals->time - m_flBigSwingStart) * 10.0f);
-		return DamageInfo{damage, DMG_CLUB};
-	}
-
 	bool CanRechargeAmmo();
 	void UpdateRechargeTime(bool altMode);
 
 	float GetMaxSpeed() override;
 	void OnPlayerAttackCapabilityChanged(bool enabled) override;
+	void ResetOnRemoveAsActive() override;
 	CConfigurableWeapon *MyConfigurableWeaponPointer() override { return this; }
+
+	void UpdateTape();
+	void UpdateTape(int clip);
+	int BodyFromClip();
+	int BodyFromClip(int clip);
 
 #ifndef CLIENT_DLL
 	int Save(CSave &save) override;
@@ -431,10 +435,10 @@ public:
 	static TYPEDESCRIPTION m_SaveData[];
 #endif
 
+	int PackIParam1(bool altMode, bool emptied);
 	int PackIParam2();
 	void PrecacheCommonEvent();
 
-	bool m_inAltMode;
 	bool m_wasEmptyReload;
 	bool m_switchingBody;
 	bool m_wasInAltModeBeforeSwitchingBody;
@@ -478,7 +482,6 @@ public:
 	int m_iSwing;
 	TraceResult m_trHit;
 	int m_iSwingMode;
-	float m_flBigSwingStart;
 	bool m_swingIsAltAttack;
 
 	// recharge
@@ -488,6 +491,7 @@ public:
 	bool m_chargingAttack;
 	bool m_chargingAltFire;
 	bool m_shouldPlayCooldown;
+	float m_chargeStartTime;
 
 	// tool
 	float m_toolTriggerTime;
@@ -502,6 +506,8 @@ public:
 
 	// Common event
 	int m_usFire;
+
+	int m_iVisibleClip;
 };
 
 //=========================================================

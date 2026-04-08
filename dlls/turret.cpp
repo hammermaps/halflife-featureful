@@ -63,7 +63,7 @@ public:
 	TakeDamageResult TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, const DamageInfo& damageInfo ) override;
 	int Classify() override;
 	int DefaultClassify() override;
-	int RealClassify();
+	int AwakeClassify() override;
 
 	int BloodColor() override { return DONT_BLEED; }
 	void GibMonster() override {}	// UNDONE: Throw turret gibs?
@@ -292,7 +292,7 @@ public:
 	void Spawn() override;
 	void Precache() override;
 	// other functions
-	const char* DefaultDisplayName() override { return "Miniturret"; }
+	const char* DefaultDisplayName() override { return "Mini-Turret"; }
 	void Shoot( Vector &vecSrc, Vector &vecDirToEnemy ) override;
 
 	static constexpr const char* shootSoundScript = "MiniTurret.Shoot";
@@ -360,7 +360,7 @@ void CBaseTurret::SpawnHelper()
 	SetOrientation();
 	// m_flSightRange = TURRET_RANGE;
 
-	InitRandomSeeds();
+	InitLootRandomSeed();
 }
 
 void CBaseTurret::SetOrientation()
@@ -402,7 +402,7 @@ void CTurret::Spawn()
 {
 	Precache();
 	SetMyModel( "models/turret.mdl" );
-	SetMyHealth( gSkillData.turretHealth );
+	SetMyHealth( GetSkillValue("turret_health") );
 	m_HackedGunPos		= Vector( 0, 0, 12.75 );
 	m_flMaxSpin		= TURRET_MAXSPIN;
 	pev->view_ofs.z		= 12.75;
@@ -442,7 +442,7 @@ void CMiniTurret::Spawn()
 {
 	Precache();
 	SetMyModel( "models/miniturret.mdl" );
-	SetMyHealth( gSkillData.miniturretHealth );
+	SetMyHealth( GetSkillValue("miniturret_health") );
 	m_HackedGunPos = Vector( 0.0f, 0.0f, 12.75f );
 	m_flMaxSpin = 0;
 	pev->view_ofs.z = 12.75f;
@@ -725,14 +725,14 @@ void CBaseTurret::ActiveThink()
 
 void CTurret::Shoot( Vector &vecSrc, Vector &vecDirToEnemy )
 {
-	FireBullets( 1, vecSrc, vecDirToEnemy, TURRET_SPREAD, TURRET_RANGE, gSkillData.monDmg12MM, 1 );
+	FireBullets( 1, vecSrc, vecDirToEnemy, TURRET_SPREAD, TURRET_RANGE, GetSkillValue("12mm_bullet"), 1 );
 	EmitSoundScript(shootSoundScript);
 	pev->effects = pev->effects | EF_MUZZLEFLASH;
 }
 
 void CMiniTurret::Shoot( Vector &vecSrc, Vector &vecDirToEnemy )
 {
-	FireBullets( 1, vecSrc, vecDirToEnemy, TURRET_SPREAD, TURRET_RANGE, gSkillData.monDmg9MM, 1 );
+	FireBullets( 1, vecSrc, vecDirToEnemy, TURRET_SPREAD, TURRET_RANGE, GetSkillValue("9mm_bullet"), 1 );
 	EmitSoundScript(shootSoundScript);
 	pev->effects = pev->effects | EF_MUZZLEFLASH;
 }
@@ -1269,7 +1269,7 @@ int CBaseTurret::Classify()
 	return CLASS_NONE;
 }
 
-int CBaseTurret::RealClassify()
+int CBaseTurret::AwakeClassify()
 {
 	return CBaseMonster::Classify();
 }
@@ -1320,7 +1320,7 @@ void CSentry::Spawn()
 {
 	Precache();
 	SetMyModel( "models/sentry.mdl" );
-	SetMyHealth( gSkillData.sentryHealth );
+	SetMyHealth( GetSkillValue("sentry_health") );
 	m_HackedGunPos = Vector( 0, 0, 48 );
 	pev->view_ofs.z = 48;
 	if (!g_modFeatures.sentry_retract)
@@ -1340,7 +1340,7 @@ void CSentry::Spawn()
 
 void CSentry::Shoot( Vector &vecSrc, Vector &vecDirToEnemy )
 {
-	FireBullets( 1, vecSrc, vecDirToEnemy, TURRET_SPREAD, TURRET_RANGE, gSkillData.monDmgMP5, 1 );
+	FireBullets( 1, vecSrc, vecDirToEnemy, TURRET_SPREAD, TURRET_RANGE, GetSkillValue("9mmAR_bullet"), 1 );
 	EmitSoundScript(shootSoundScript);
 	pev->effects = pev->effects | EF_MUZZLEFLASH;
 }
@@ -1400,7 +1400,7 @@ TakeDamageResult CSentry::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAtt
 
 void CSentry::SentryTouch( CBaseEntity *pOther )
 {
-	if( pOther && ( pOther->IsPlayer() || ( pOther->pev->flags & FL_MONSTER ) ) && IDefaultRelationship(RealClassify(), pOther->Classify()) >= R_DL )
+	if( pOther && ( pOther->IsPlayer() || ( pOther->pev->flags & FL_MONSTER ) ) && IDefaultRelationship(AwakeClassify(), pOther->Classify()) >= R_DL )
 	{
 		TakeDamage( pOther->pev, pOther->pev, DamageInfo{} );
 	}

@@ -4,7 +4,11 @@ title: "Weapon templates (presets)"
 
 # {{% param "title" %}}
 
-The sample mod includes some premade [weapon templates]({{< ref "weapon-templates" >}}) to simulate weapons from other mods.
+The sample mod includes some premade [weapon templates]({{< ref "weapon-templates" >}}) to simulate weapons from other mods. These can be used as references or a basis for further changes. Or you might want to straight up borrow a weapon from another mod.
+
+{{% hint info %}}
+Testing out the weapons from another mod requires copying all required resources from the said mod. We try listing all models and sounds required for the weapon.
+{{% /hint %}}
 
 {{% hint info %}}
 If not stated otherwise, the weapon template can be applied to any fully configurable weapon, replacing its behavior (via [from_scratch]({{< ref "weapon-templates#from_scratch" >}}) property).
@@ -827,10 +831,6 @@ Delta Particles changes the way some HL weapons behave as well as adds its own w
 
 Glock from Delta Particles with burst fire and shells ejecting to the left side.
 
-{{% hint warning %}}
-This template is designed specifically for `weapon_9mmhandgun`, it won't work properly for other weapons without modifications.
-{{% /hint %}}
-
 Required model:
 
 * **v_9mmhandgun.mdl** (custom model from Delta Particles)
@@ -854,10 +854,6 @@ Required sounds:
 ```
 
 Python with a scope ability and a laser spot when unscoped.
-
-{{% hint warning %}}
-This template is designed specifically for `weapon_357`, it won't work properly for other weapons without modifications.
-{{% /hint %}}
 
 Required model:
 
@@ -969,10 +965,6 @@ Required sounds:
 ```
 
 {{% hint warning %}}
-This template is designed specifically for `weapon_shotgun`, it won't work properly for other weapons without modifications.
-{{% /hint %}}
-
-{{% hint warning %}}
 Delta Particles uses custom animation events and attachment point for shell ejection. This is not implemented in Featureful SDK. Instead, the ejection delay and shell offset are provided as constant value in the weapon template file.
 {{% /hint %}}
 
@@ -1018,9 +1010,121 @@ Required sounds:
 * **weapons/sniper_bolt3.wav**
 {{% /details_header %}}
 
+## Half-Life
+
+Full written configurations for some standard Half-Life weapons are stored in the **templates/weapons/hl** directory. These can be used as a reference. Or you can copy the configuration for your custom weapon and change it a bit if you want a weapon similar to the standard Half-Life one.
+
+{{% details_header title="Crowbar" %}}
+```json
+{
+    "weapon_melee": "hl/crowbar"
+}
+```
+{{% /details_header %}}
+
+{{% details_header title="9mm Handgun (Glock)" %}}
+```json
+{
+    "weapon_pistol": "hl/9mmhandgun"
+}
+```
+{{% /details_header %}}
+
+{{% details_header title="357 Python" %}}
+```json
+{
+    "weapon_pistol2": "hl/357"
+}
+```
+{{% /details_header %}}
+
+{{% details_header title="9mm AR (MP5)" %}}
+```json
+{
+    "weapon_smg": "hl/9mmAR"
+}
+```
+{{% /details_header %}}
+
+{{% details_header title="SPAS Shotgun" %}}
+```json
+{
+    "weapon_shotgun2": "hl/shotgun"
+}
+```
+{{% /details_header %}}
+
+{{% details_header title="Crossbow" %}}
+```json
+{
+    "weapon_sniperrifle2": "hl/crossbow"
+}
+```
+{{% /details_header %}}
+
+{{% details_header title="Hornetgun" %}}
+```json
+{
+    "weapon_rifle": "hl/hornetgun"
+}
+```
+{{% /details_header %}}
+
+## Opposing Force
+
+Full written configurations for some standard Opposing Force weapons are stored in the **templates/weapons/op4** directory. These can be used as a reference. Or you can copy the configuration for your custom weapon and change it a bit if you want a weapon similar to the standard Opposing Force one.
+
+{{% details_header title="Pipe Wrench" %}}
+```json
+{
+    "weapon_melee": "op4/pipewrench"
+}
+```
+{{% /details_header %}}
+
+{{% details_header title="Knife" %}}
+```json
+{
+    "weapon_melee": "op4/knife"
+}
+```
+{{% /details_header %}}
+
+{{% details_header title="Desert Eagle" %}}
+```json
+{
+    "weapon_pistol": "op4/eagle"
+}
+```
+{{% /details_header %}}
+
+{{% details_header title="M249" %}}
+```json
+{
+    "weapon_rifle": "op4/m249"
+}
+```
+{{% /details_header %}}
+
+{{% details_header title="M40A1" %}}
+```json
+{
+    "weapon_sniperrifle2": "op4/sniperrifle"
+}
+```
+{{% /details_header %}}
+
+{{% details_header title="Spore Launcher" %}}
+```json
+{
+    "weapon_shotgun2": "op4/sporelauncher"
+}
+```
+{{% /details_header %}}
+
 ## Poke646
 
-The templates for Poke646 weapons are store in the **templates/weapons/poke646/** directory. Not all weapons are implemented yet.
+The templates for Poke646 weapons are stored in the **templates/weapons/poke646/** directory. Not all weapons are implemented yet.
 
 {{% details "Example" open %}}
 ```json
@@ -1107,9 +1211,156 @@ This weapon template uses the same model and sound paths as a Half-Life shotgun 
 
 ## Team Fortress Classic
 
+The templates for Team Fortress Classic weapons are stored in the **templates/weapons/tfc/** directory. Not all weapons are implemented yet.
+
+{{% details "Example" open %}}
+```json
+{
+    "weapon_shotgun": "tfc/shotgun",
+    "weapon_shotgun2": "tfc/supershotgun",
+    "weapon_smg": "tfc/nailgun",
+    "weapon_smg2": "tfc/supernailgun",
+    "weapon_rifle": "tfc/autorifle",
+    "weapon_sniperrifle": "tfc/sniperrifle",
+    "weapon_minigun": "tfc/assaultcannon"
+}
+```
+{{% /details %}}
+
 {{% hint warning %}}
 Team Fortress Classic doesn't have world models for weapons. You may need to provide custom world models yourself.
 {{% /hint %}}
+
+{{% details_header title="Single-barrel shotgun" %}}
+```json
+{
+    "weapon_shotgun": "tfc/shotgun"
+}
+```
+
+A weapon used by various TFC classes.
+
+Unlike Half-Life shotgun, it can fire underwater.
+
+Required models:
+
+* **v_tfc_12gauge.mdl**
+* **p_smallshotgun.mdl**
+
+{{% /details_header %}}
+
+{{% details_header title="Double-barrel shotgun" %}}
+```json
+{
+    "weapon_shotgun2": "tfc/supershotgun"
+}
+```
+
+A weapon used by various TFC classes.
+
+Unlike Half-Life shotgun, it can fire underwater.
+
+Required models:
+
+* **v_tfc_shotgun.mdl**
+* **p_shotgun.mdl**
+
+Required sounds:
+
+* **weapons/shotgn2.wav**
+
+{{% /details_header %}}
+
+{{% details_header title="Nailgun" %}}
+```json
+{
+    "weapon_smg": "tfc/nailgun"
+}
+```
+
+A weapon used by various TFC classes.
+
+{{% hint info %}}
+This is basically the same as [weapon_nailgun]({{< ref weapon_nailgun >}}) that is already implemented in Featureful SDK. This weapon template preset can be used as a reference.
+{{% /hint %}}
+
+Required models:
+
+* **v_tfc_nailgun.mdl**
+* **p_nailgun.mdl**
+
+Required sounds:
+
+* **weapons/airgun_1.wav**
+
+{{% /details_header %}}
+
+{{% details_header title="Super Nailgun" %}}
+```json
+{
+    "weapon_smg2": "tfc/supernailgun"
+}
+```
+
+A weapon used by Medic class.
+
+Required models:
+
+* **v_tfc_supernailgun.mdl**
+* **p_snailgun.mdl**
+
+Required sounds:
+
+* **weapons/spike2.wav**
+
+{{% /details_header %}}
+
+{{% details_header title="Autorifle" %}}
+```json
+{
+    "weapon_rifle": "tfc/autorifle"
+}
+```
+
+A weapon used by the Sniper class. It uses `buckshot` ammo.
+
+Required models:
+
+* **v_tfc_sniper.mdl**
+* **p_sniper.mdl**
+
+Required sounds:
+
+* **weapons/sniper.wav**
+
+{{% /details_header %}}
+
+{{% details_header title="Sniper rifle" %}}
+```json
+{
+    "weapon_sniperrifle": "tfc/sniperrifle"
+}
+```
+
+A weapon used by the Sniper class. It uses `buckshot` ammo.
+
+Required models:
+
+* **v_tfc_sniper.mdl**
+* **p_sniper.mdl**
+
+Required sounds:
+
+* **ambience/rifle1.wav** (this is a Half-Life sound)
+
+{{% hint warning %}}
+Some behavior aspects of TFC sniperrifle are not implemented yet, namely:
+
+* In TFC player can't start charging the shot unless they move slow enough. In this configuration player can start charging the shot anytime (but the slowness will be applied automatically).
+* In TFC player can't perform the shot while in air (not on the ground). This configuration doesn't impose such limitation.
+{{% /hint %}}
+
+{{% /details_header %}}
 
 {{% details_header title="Assault Cannon" %}}
 ```json
@@ -1118,10 +1369,10 @@ Team Fortress Classic doesn't have world models for weapons. You may need to pro
 }
 ```
 
-A weapon used by the Heavy Weapon Guy class. This doesn't prevent jumping and uses `buckshot` ammo.
+A weapon used by the Heavy Weapon Guy class. It uses `buckshot` ammo.
 
-{{% hint warning %}}
-This template is designed specifically for [weapon_minigun]({{< ref weapon_minigun >}}), it won't work properly for other weapons without modifications.
+{{% hint info %}}
+In TFC this weapon doesn't produce any kickback while firing. This is probably due to Heavy Weapons Guy being a really strong man. You can add some kickback by setting the [kickback rules]({{< ref "weapon-templates/#kickback" >}}) or [client_punch_pitch]({{< ref "weapon-templates/#client_punch_pitch" >}}) and [client_punch_yaw]({{< ref "weapon-templates/#client_punch_yaw" >}}).
 {{% /hint %}}
 
 Required models:

@@ -7,6 +7,133 @@ toc_start_level: 1
 
 Weapon templates allow to configure some aspects of weapon behavior via **templates/weapons.json** file. This includes fire rate, sounds, deploy and reload delays, animation indices and more.
 
+{{% hint info %}}
+Weapon templates can become hard to maintain when they grow in size and count. Ensure you studied the [JSON]({{< ref json >}}) format and use the proper software to view and edit **.json** files.
+{{% /hint %}}
+
+{{% hint warning %}}
+When editing the weapon templates ensure to run the mod in the developer mode to see the errors on the screen and allow re-parsing the configuration on the save-reload or the map restart. See [Recommendations]({{< ref "developing-the-mod/#recommendations" >}}).
+{{% /hint %}}
+
+{{% details_header title="Quick example" %}}
+
+Let's say you want to do two things:
+
+* Add a burst attack to the Glock in place of its secondary attack.
+* Add a new gun which behaves exactly like Python but with a scope (like in a multiplayer) and you want to preserve the original Python untouched.
+
+Let's do it step by step.
+
+First, create a **templates/weapons.json** file in your mod directory (create **templates/** subdirectory if doesn't exist). Read [JSON editing]({{< ref "JSON/#editing" >}}). Open the file and put the following contents:
+
+```json
+{
+    "weapon_9mmhandgun": {
+        "alt_fire": {
+            "cycle_time": 0.5,
+            "burst": 3,
+            "burst_interval": 0.1,
+            "spread": 0.03
+        }
+    },
+    "weapon_pistol": "python_custom"
+}
+```
+
+As you can see there're some custom options for `weapon_9mmhandgun` - in this example they change how the secondary fire of the weapon works without touching other bits.
+
+Now, we also want a new weapon. The way how GoldSource works doesn't allow us to create new classnames on the fly, so instead Featureful SDK provides some predefined classnames for [additional weapons](#additional-weapons). The `weapon_pistol` is one of them, so we use it. While we were able to afford making minor changes to `weapon_9mmhandgun` because the Glock already has an established behavior, we want a completely custom behavior for the `weapon_pistol`. We could define its full configuration in the same file, but it quickly becomes lengthy and ugly espeically if you add more custom weapons later. To overcome this problem the weapon template system allows to define a weapon template in a separate file which should be located in **templates/weapons/** subdirectory.
+
+* Create the **templates/weapons/** subdirectory.
+* Create the **templates/weapons/python_custom.json** file.
+* Put the following contents in the **templates/weapons/python_custom.json** (I told you, it's pretty long!):
+```json
+{
+    "from_scratch": true,
+    "world_model": "models/w_357.mdl",
+    "view_model": "models/v_357.mdl",
+    "player_model": "models/p_357.mdl",
+    "player_anim_ext": "python",
+    "ammo_name": "357",
+    "ammo_amount": 6,
+    "max_clip": 6,
+    "priority": 15,
+    "deploy": {
+        "anim": 5
+    },
+    "idle": [
+        {
+            "anim": 0,
+            "chance": 0.5,
+            "duration": 2.333
+        },
+        {
+            "anim": 6,
+            "chance": 0.2,
+            "duration": 2
+        },
+        {
+            "anim": 7,
+            "chance": 0.2,
+            "duration": 2.933
+        },
+        {
+            "anim": 1,
+            "chance": 0.1,
+            "duration": 5.667
+        }
+    ],
+    "fire": {
+        "type": "bullet",
+        "damage": "plr_357_bullet",
+        "anims": [2],
+        "sound": {
+            "waves": ["weapons/357_shot1.wav", "weapons/357_shot2.wav"],
+            "volume": [0.8, 0.9]
+        },
+        "spread": "1degrees",
+        "autoaim": "10degrees",
+        "cycle_time": 0.75,
+        "allow_underwater": false,
+        "muzzleflash": true,
+        "weapon_volume": "loud",
+        "weapon_flash": "bright",
+        "client_punch_pitch": -10
+    },
+    "secondary_attack": "switch_mode",
+    "switch_mode": {
+        "attack_delay": 0.5
+    },
+    "viewmodel_body": 1,
+    "zoom": {
+        "fov": 40
+    },
+    "reload": {
+        "anim": 3,
+        "duration": 2
+    }
+}
+```
+
+We're almost there, just few more details:
+
+* Being a non-standard weapon the `weapon_pistol` is not enabled by default. Go to **features/featureful_weapons.cfg** and enable `pistol` there.
+* Make sure the **sprites/weapon_pistol.txt** exists and configured to your liking.
+* You can configure the weapon position in the weapon list by editing the **features/hud_weapon_layout.cfg** file.
+
+Now, launch your mod and acquire the new weapon by using the `give weapon_pistol` or `impulse 101` cheat command (or put this entity on your map and pick it up). Enjoy the new weapon and don't forget to test the new Glock secondary attack.
+
+So, to reiterate:
+
+* Customizing a weapon via templates requires **templates/weapons.json** file.
+* Weapon templates can be defined either right in the **templates/weapons.json** file or in a separate file located in the **templates/weapons** subdirectory.
+* Weapon templates allow to change some aspects of the existing weapons with minimal configuration.
+* Adding a new weapon would require to create a full configuration.
+* Using the classname of the non-standard weapon might require changes to the **features/featureful_weapons.cfg** in order to enable this weapon.
+* The HUD .txt file must be provided in **sprites/** for the weapon classname for the correct display of the weapon in HUD.
+
+{{% /details_header %}}
+
 # Format of templates/weapons.json
 
 The document is an object where each property presents a weapon template. The keys must be weapon entity names, case sensitive (e.g. `"weapon_9mmhandgun"`). The value must either be a weapon template or a string referring to the .json file under **templates/weapons/** directory (**.json** extension can be omitted) and in its turn this file must contain a document representing a single weapon template.
@@ -46,6 +173,8 @@ These properties are available for all weapons:
 * [player_model](#player_model)
 * [player_anim_ext](#player_anim_ext)
 * [priority](#priority)
+* [world_model_animated](#world_model_animated)
+* [world_model_sequence](#world_model_sequence)
 * [model_sounds](#model_sounds)
 * [max_clip](#max_clip)
 * [ammo_name](#ammo_name)
@@ -85,6 +214,7 @@ Some weapon classnames have been added specifically to be configured (so the dev
 * [weapon_rifle2]({{< ref weapon_rifle2 >}})
 * [weapon_shotgun2]({{< ref weapon_shotgun2 >}})
 * [weapon_sniperrifle2]({{< ref weapon_sniperrifle2 >}})
+* [weapon_tool]({{< ref weapon_tool >}})
 
 {{% hint info %}}
 A technical limitation in GoldSource engine prevents creation of new classnames dynamically (i.e. without code modifications). So we have to resort to this trick of providing the predefined classnames that can be utilized by the SDK user.
@@ -123,9 +253,12 @@ The following weapons have only partial support for configuration:
 * [weapon_medkit]({{< ref weapon_medkit >}})
     * idle animations
     * deploy animation
+    * `"recharge"` properties
 * [weapon_tripmine]({{< ref weapon_tripmine >}})
     * idle animations
     * deploy animation
+* [weapon_grapple]
+    * `"weapon_volume"` for `"fire"`
 
 # Weapon template properties
 
@@ -169,7 +302,7 @@ Allows to change the ammo amount the weapon comes with by default. This might be
 
 ## ammo_name
 
-Allows to change the primary ammo the weapon is using. This only works for weapons that use ammo.
+Allows to change the primary ammo the weapon is using.
 
 ```json
 {
@@ -178,36 +311,19 @@ Allows to change the primary ammo the weapon is using. This only works for weapo
     },
     "weapon_crossbow": {
         "ammo_name": "uranium"
+    },
+    "weapon_9mmhandgun": {
+        "ammo_name": null
     }
 }
 ```
 
-Possible ammo names:
+See [ammo types]({{< ref ammo-types >}}) for the list of possible ammo names.
 
-* `"buckshot"`
-* `"9mm"`
-* `"ARgrenades"`
-* `"357"`
-* `"uranium"`
-* `"rockets"`
-* `"bolts"`
-* `"Trip Mine"`
-* `"Satchel Charge"`
-* `"Hand Grenade"`
-* `"Snarks"`
-* `"Hornets"`
-* `"Medicine"`
-* `"Penguins"`
-* `"556"`
-* `"762"`
-* `"Shocks"`
-* `"spores"`
-* `"45acp"`
-* `"57mm"`
-* `"nails"`
+Setting `"ammo_name"` to `null` makes weapon to not require the ammo. [max_clip](#max_clip) still can be set on such weapon to require reloads from the 'infinite' ammo reserve (think of Left 4 Dead pistols, for example). In this case the HUD will show the max clip in place of the ammo reserve.
 
 {{% hint warning %}}
-You still need to change the ammo sprite in the weapon hud .txt file to match the actual ammo type.
+You need to change the ammo sprite in the weapon hud .txt file to match the actual ammo type.
 {{% /hint %}}
 
 {{% hint info %}}
@@ -260,6 +376,14 @@ The player animation extension (suffix) that defines how the weapon is carried i
 
 The weapon deploy priority. The weapon with the highest priority will be deployed at the start if players gets weapons via the [map config]({{< ref "map-config" >}}) or via [game_player_settings]({{< ref game_player_settings >}}). This also defines whether player will switch to the newly picked weapon in multiplayer automatically.
 
+## world_model_animated
+
+A boolean - whether the weapon's world model should be animated. Used by [weapon_snark]({{< ref weapon_snark >}}), [weapon_shockrifle]({{< ref weapon_shockrifle >}}) and [weapon_sporelauncher]({{< ref weapon_sporelauncher >}}).
+
+## world_model_sequence
+
+The world model default sequence index. The entity parameters still can override this (e.g. crossbow tilted placement). Used by [weapon_snark]({{< ref weapon_snark >}}) and [weapon_tripmine]({{< ref weapon_tripmine >}}).
+
 ## model_sounds
 
 An array of sounds used in the view model animation events (event 5004). These sounds will be precached by the server.
@@ -277,9 +401,11 @@ An array of sounds used in the view model animation events (event 5004). These s
 }
 ```
 
+Setting the `"model_sounds"` to the empty array disables the weapon precaching its default model sounds.
+
 ## from_scratch
 
-A boolean defining whether the weapon configuration should start from scratch, i.e. from the default weapon template. This preserves only the following properties:
+A boolean defining whether the weapon configuration should start from scratch, i.e. from the default weapon template which doesn't have any attacks set. This preserves only the following properties:
 
 * `"world_model"`
 * `"view_model"`
@@ -397,6 +523,10 @@ Delay before repicking the idle animation. This is usually duration of the anima
 
 Chance that this animation will be picked (in relation to the sum of chances of all idle animations). The chances are used only when there're multiple idle animations.
 
+### sound
+
+[Weapon soundscript](#weapon-soundscript) to play along the idle animation. This is not needed if the sound is played by the event in the model. This is used by [weapon_sporelauncher]({{< ref weapon_sporelauncher >}}) on fidget animation.
+
 ## idle_empty
 
 Same as [idle](#idle), but when weapon clip is empty.
@@ -439,7 +569,7 @@ Set `null` to remove the native weapon rules.
 
 ## fire
 
-Customize weapon firing options like delay between shots, fire spread and recoil.
+Customize weapon firing options like delay between shots, fire spread and recoil. See [alt_fire](#alt_fire) for alternative fire.
 
 ```json
 {
@@ -463,7 +593,7 @@ The attack type. Current supported values are:
 
 * `"bullet"` or `"bullets"` (these are synonyms) - used by most firearms.
 * `"melee"` - used by melee weapons.
-* `"projectile"` - the weapon fires projectiles. This requires [projectile]({#projectile}) to be defined.
+* `"projectile"` - the weapon fires projectiles. This requires [projectile](#projectile) to be defined.
 * Note: configuration of laser attacks will come later.
 
 ### allow_underwater
@@ -472,9 +602,13 @@ A boolean defining whether the weapon can fire underwater.
 
 ### ammo_per_fire
 
-Ammo spent per fire. E.g. [weapon_shotgun]({{< ref weapon_shotgun >}}) uses two shells on the secondary attack.
+Ammo spent per fire. E.g. [weapon_shotgun]({{< ref weapon_shotgun >}}) uses two shells on the secondary attack. Default value is 1.
 
-Note: this has nothing to do with the number of bullets fired. It's just how much ammo is used.
+{{% hint info %}}
+This has nothing to do with the number of bullets fired. It's just how much ammo is used. See [bullet_count](#bullet_count).
+
+For example shotgun uses one shell (ammo) to fire multiple pellets (bullets).
+{{% /hint %}}
 
 ### anims
 
@@ -490,6 +624,10 @@ Same as [anims](#anims), but used when weapon becomes out of ammo (primary or se
 * [weapon_sniperrifle]({{< ref weapon_sniperrifle >}})
 
 Set it to `null` to remove the defaults and let the weapon always use [anims](#anims).
+
+### hit_anims
+
+The array of animation indices. The random animation is picked when melee weapon hits something. Used by melee weapons to distinguish between hit and miss.
 
 ### autoaim
 
@@ -527,9 +665,24 @@ The maximum number of shots for the burst fire. I.e. player presses the attack b
 
 Example of a weapon using the burst fire: Counter Strike FAMAS in the burst mode.
 
+{{% hint warning %}}
+Currently the burst mode works only for the `bullet` and `projectile` attack types.
+{{% /hint %}}
+
+```json
+{
+    "weapon_nailgun": {
+        "fire": {
+            "burst": 3,
+            "cycle_time": 0.5
+        }
+    }
+}
+```
+
 ### burst_interval
 
-The interval between shots in burst fire. Ideally the [cycle_time](#cycle_time) must be higher than this multiplied by the [burst](#burst) value.
+The interval between shots in burst fire. Ideally the [cycle_time](#cycle_time) must be higher than this multiplied by the [burst](#burst) value. The default value is 0.1.
 
 ### charge_anims
 
@@ -543,7 +696,27 @@ See also: [shared_charge_and_cooldown](#shared_charge_and_cooldown).
 
 ### charge_time
 
-The time in seconds after the weapon starts firing after initial charge. Used by [weapon_minigun]({{< ref weapon_minigun >}}). This is also the minimum time before melee weapons do their swing attack (e.g. [weapon_pipewrench]({{< ref weapon_pipewrench >}})).
+The time in seconds after the weapon starts firing after initial charge. Used by [weapon_minigun]({{< ref weapon_minigun >}}). This is also the minimum charge time for the winding attack of melee weapons (e.g. [weapon_pipewrench]({{< ref weapon_pipewrench >}})).
+
+### charged_attack
+
+A boolean - whether the attack is charged. I.e. the longer it's charged the more damage it will deal. This is used by [weapon_pipewrench]({{< ref weapon_pipewrench >}}) and [weapon_knife]({{< ref weapon_knife >}}) secondary attacks.
+
+{{% hint warning %}}
+Currently the charged attack is implemented for the `"melee"` and `"bullet"` fire types only.
+{{% /hint %}}
+
+The charged attack expects the following properties to be defined:
+
+* [charge_time](#charge_time)
+* [damage_charged_factor](#damage_charged_factor)
+* [damage_charged_max](#damage_charged_max)
+
+The resulting damage is calculated by formula:
+
+```
+MIN(damage + damage_charged_factor * time_since_charge_start, damage_charged_max)
+```
 
 ### cooldown_anims
 
@@ -573,19 +746,25 @@ Same as [client_punch_pitch](#client_punch_pitch) but for lateral punch. Use neg
 
 The delay between shots, in seconds. This defines the rate of fire: the less the value, the higher the rate.
 
+For melee attacks this is the delay between 'miss' swings (when it didn't hit anything). Use [hit_cycle_time](#hit_cycle_time) to define delay between hits.
+
 ### cycle_time_last_shot
 
 The delay before next shot after the ammo depletion. This makes sense only for weapons that use different ammo types for primary and secondary attacks. This is 0 by default. If it's 0 the value of `cycle_time` is used for the last shot.
 
+### hit_cycle_time
+
+The delay before the next melee swing after hitting something. This is usually less than `"cycle_time"`. E.g. crowbar has `"cycle_time"` set to 0.5, but `"hit_cycle_time"` set to 0.25.
+
+If this is set to 0 the cycle time for hits is evaluated as: `min(cycle_time * 0.5, cycle_time - 0.25)`.
+
 ### damage
 
-The amount of damage the weapon deals per bullet.
+The amount of damage the weapon deals per bullet, melee hit or the amount of damage the fired projectile can deal.
 
-This can be either a number (e.g. `8`) or the name of the skill cvar (e.g. `"sk_plr_357_bullet"`). Currently it's not possible to register new skill variables, so you can just use a constant number (player's damage values are usually not affected by difficulty anyway).
+This can be either a number (e.g. `8`), the name of a [skill variable]({{< ref "skill-variables" >}}) (e.g. `"sk_plr_357_bullet"`) or [range]({{< ref "json/#range" >}}) (e.g. `[10,15]` - in this case the damage will be randomized on each fire).
 
 {{% hint warning %}}
-This currently can configure damage values only for bullets and projectiles.
-
 For [projectile](#projectile) weapons the exact meaning of damage value depends on the projectile type: for some it's an impact damage, for some it's a damage of explosion, meaning some damage values can't be set yet - for example hand grenade direct impact damage or voltigore's charged bolt damage dealt to surrounding entities over its flight.
 {{% /hint %}}
 
@@ -594,6 +773,14 @@ The custom projectile damage needs to be provided explicitly for both primary an
 
 If damage is not provided the default value for the projectile will be used.
 {{% /hint %}}
+
+### damage_charged_factor
+
+The amount of damage added to the [charged attack](#charged_attack) per second. If it's not defined or 0, the [damage](#damage) will be used instead.
+
+### damage_charged_max
+
+The maximum damage the [charged attack](#charged_attack) can reach. If it's not defined or 0, the [damage](#damage) multiplied by 2 will be used instead.
 
 ### delay_after_empty
 
@@ -655,6 +842,10 @@ Type of AI sound. This can be a single string value or an array. Possible values
 #### time
 
 Duration of sound. This is 0.2 by default.
+
+### hit_decal
+
+A boolean. Whether the melee attack should leave a decal on the wall. This is `true` by default.
 
 ### idle_delay
 
@@ -788,6 +979,14 @@ Notes:
 * The maximum number of rules is **4**.
 * The conditions can be used together (e.g. if you want to check whether player is both ducking and moving).
 
+### kickback_on_hit_only
+
+A boolean - whether the [kickback](#kickback) should apply only when melee attack hits something. Default value is `false` (apply kickback even on melee misses). This is `true` for [weapon_pipewrench]({{< ref weapon_pipewrench >}}) secondary attack by default.
+
+### laser_spot_on_charge
+
+A boolean - whether the laser spot is drawn while the [charged_attack](#charged_attack) shot is getting charged. This is used by Team Fortress Classic sniper rifle.
+
 ### laser_suspend_time
 
 Hide the laser spot (if there's any) for the specified amount of time (in seconds) upon firing.
@@ -823,6 +1022,10 @@ Use upper level [player_maxspeed](#player_maxspeed) parameter to change the play
 In order to disable player's movement for the attack duration it's better to use [prevent_movement](#prevent_movement).
 {{% /hint %}}
 
+### player_maxspeed_on_charge
+
+Set the player's maximum speed while [charged_attack](#charged_attack) is being charged. Similar to [player_maxspeed](#fire-player_maxspeed).
+
 ### prevent_movement
 
 A boolean defining whether player can't move during firing. This is used by [weapon_camera]({{< ref weapon_camera >}}) and [weapon_radio]({{< ref weapon_radio >}}).
@@ -844,6 +1047,7 @@ The name of the projectile type. Technically is can be any existing entity class
 * [controller_energy_ball]({{< ref controller_energy_ball >}})
 * [crossbow_bolt]({{< ref crossbow_bolt >}})
 * [displacer_ball]({{< ref displacer_ball >}})
+* [env_genewormcloud]({{< ref env_genewormcloud >}})
 * [grenade]({{< ref grenade >}}) - AR grenade.
 * [hornet]({{< ref hornet >}}) - tracking hornet.
 * [hvr_rocket]({{< ref hvr_rocket >}})
@@ -1080,6 +1284,10 @@ An object defining screen shake properties. The shake is played on each fire.
 * `"frequency"` - shake frequency (between 0 and 255). Default value is 160.
 * `"amplitude"` - shake amplitude (between 0 and 16). Default value is 6.
 
+### hit_shake
+
+Same as `"shake"` but plays only when melee attack hits something.
+
 ### shell
 
 An object that defines properties related to shell ejection on bullet fire.
@@ -1191,11 +1399,15 @@ Example:
 }
 ```
 
+### smack_delay
+
+The delay (in seconds) before the decal appears on the wall after melee hit. This is 0.2 by default.
+
 ### sound
 
 [Weapon soundscript](#weapon-soundscript) to play on fire. This is played on the player's weapon channel by default.
 
-For melee weapons it's the "miss" sound (when weapon doesn't hit anything).
+For melee weapons it's a "swing" sound. See also: [hit_body_sound](#hit_body_sound) and [hit_wall_sound](#hit_wall_sound).
 
 ### sound_additional
 
@@ -1208,6 +1420,69 @@ For melee weapons it's the "miss" sound (when weapon doesn't hit anything).
 ### hit_wall_sound
 
 [Weapon soundscript](#weapon-soundscript) to play when melee attack hits the wall.
+
+### spray
+
+Configure spray effect played upon firing a weapon. The spray is a number of sprites fired roughly in the shooting direction. This is used by [weapon_sporelauncher]({{< ref weapon_sporelauncher >}}) by default and it's similar to the spray effect of bullsquid's spit.
+
+```json
+{
+    "weapon_shotgun": {
+        "fire": {
+            "spray": {
+                "offset": {
+                    "up": -20,
+                    "side": 8,
+                    "forward": 16
+                },
+                "visual": {
+                    "sprite": "sprites/flare6.spr",
+                    "alpha": 255,
+                    "rendermode": "additive",
+                    "framerate": 10,
+                    "scale": 0.5
+                },
+                "flags": ["animated", "fadeout"],
+                "count": 6,
+                "speed": 300,
+                "spread": 0.5
+            }
+        }
+    }
+}
+```
+
+#### offset {#spray-offset}
+
+An offset object. The values are relative to the player's **origin** (not the head).
+
+* `"forward"` - forward offset (how far from the player's camera).
+* `"side"` - offset to the right side. Make it negative to offset to the left side.
+* `"up"` - vertical offset. It's usually a negative value since weapons are drawn at the bottom. The default value is `-24`.
+
+#### visual {#spray-visual}
+
+A [visual]({{< ref visuals >}}) object that defines the appearance of the spray particle.
+
+#### count {#spray-count}
+
+The count of spray particles. The default value is `8`.
+
+#### speed {#spray-speed}
+
+The base speed of spray particles. The default value is `210`.
+
+#### spread {#spray-spread}
+
+The value of direction randomness. The default value is `0.25`.
+
+#### flags {#spray-flags}
+
+The array of spray flags. Possible item values:
+
+* `"collideworld"` - whether the spray particles should collide with world.
+* `"animate"` - whether the spray particles should be animated.
+* `"fadeout"` - whether the spray particles should fade out.
 
 ### spread
 
@@ -1402,6 +1677,14 @@ Properties:
     * `"factor"` - how much of inaccuracy is translated to the extra spread. This property is required.
     * `"conditions"` (only if array) - an object that defines player movement conditions to check against when choosing the spread rule.
 
+### subsequent_swing_dmg_factor
+
+The multiplier for the subsequent melee attacks (i.e. every swing after the first one in the sequence of swings). This is 1.0 by default.
+
+[weapon_crowbar]({{< ref weapon_crowbar >}}) and [weapon_pipewrench]({{< ref weapon_pipewrench >}}) use the value 0.5 by default.
+
+[weapon_knife]({{< ref weapon_knife >}}) uses the value 1.0 by default.
+
 ### use_secondary_ammo
 
 Whether firing a weapon should use a secondary ammo. The only weapon that uses a secondary ammo by default is [weapon_9mmAR]({{< ref weapon_9mmAR >}}). For others you must explicitly provide `"secondary_ammo_name"`.
@@ -1426,7 +1709,7 @@ The amount of illumination the player gets upon firing. Higher values also mean 
 
 ## alt_fire
 
-Same as [fire](#fire), but it defines settings for the secondary attack or for the primary attack in the alternative mode (depending on how the weapon works).
+Same as [fire](#fire), but it defines settings for the secondary attack or for the primary attack in the alternative mode (depending on the [secondary_attack](#secondary_attack)).
 
 If some setting for alternative fire is missing from default weapon configuration **and** custom configuration doesn't define it either, it reuses the value from primary attack configuration. This allows to easily change the properties for both primary and secondary attacks by editing the `"fire"` object only. On other hand this may cause the confusion if both attacks are drastically different, requiring the developer to ensure that the `"alt_fire"` doesn't inherit something it doesn't need from the `"fire"`.
 
@@ -1614,7 +1897,7 @@ Custom delay before weapon can fire again after the reload has started. If this 
 
 ### idle_delay
 
-Delay before weapon can play idle animations after the reload has started.
+Delay before weapon can play idle animations after the reload has started. This can be [range]({{< ref "JSON/#range" >}}) for randomized delays.
 
 For [manual_reload](#manual_reload) weapons it becomes a delay between ammo transfers from the inventory into the weapon clip.
 
@@ -1629,6 +1912,18 @@ A boolean. Don't allow reloading until the weapon's [cycle_time](#cycle_time) ha
 ### laser_suspend_time
 
 A boolean. Hide the laser spot (if any) for this amount of time (in seconds).
+
+### ammo_count
+
+Ammo to add to the clip per reload. For non-manual reload it means the player might need to push the perform several reloads. By default weapon loads as much ammo as possible on reload, or 1 for [manual_reload](#manual_reload). Use it with weapons that rely on [manual_reload](#manual_reload) to allow reloading of more than 1 ammo per action.
+
+Example: TFC shotgun reloads 2 shells per reload action.
+
+### ammo_count_min
+
+The minimum ammo count in the player's inventory that allows starting the reload. Default value is 1. Set the same value as in [ammo_per_fire](#ammo_per_fire) and [ammo_count](#ammo_count) if you want to make sure the weapon clip contains the ammo amount which is a multiple of some particular value (e.g. only even values).
+
+Example: TFC shotgun won't reload if there's only 1 shell left in player's inventory.
 
 ## reload_empty
 
@@ -1778,7 +2073,7 @@ Index of animation to play when starting switching the mode. If this is omitted 
 
 ### body_switch_delay
 
-Delay before the view model switches its body from `"viewmodel_body"` to `"viewmodel_body_alt"` or back if the weapon is in alternative mode.
+Delay before the view model switches its body from [viewmodel_body](#viewmodel_body) to [viewmodel_body_alt](#viewmodel_body_alt) or back if the weapon is in alternative mode.
 
 ### mode_switch_delay
 
@@ -1808,13 +2103,38 @@ A boolean defining whether pressing the secondary attack should toggle the laser
 
 An object defining tool-related properties used in [trigger_usetool]({{< ref trigger_usetool >}}).
 
+Example:
+
+```json
+{
+    "weapon_tool": {
+        "tool": {
+            "icon": "icon_tool",
+            "trigger_delay": 0.4,
+            "deny_sound": {
+                "waves": ["buttons/button10.wav"]
+            },
+            "delay_after_deny": 0.5
+        }
+    }
+}
+```
+
 ### icon
 
 The sprite icon to show when player is in the tool zone. This must be defined in **sprites/hud.txt**.
 
 ### trigger_delay
 
-When tool is used in the designated area, fire the tool target with this delay. If the weapon gets holstered, the target won't be fired.
+When tool is used in the designated area, fire the tool target with this delay. If the weapon gets holstered (e.g. the player selected a different weapon during this time), the target won't be fired.
+
+### deny_sound
+
+[Weapon soundscript](#weapon-soundscript) to play when player is trying to use the tool out of the designated area.
+
+### delay_after_deny
+
+Delay before the weapon is usable again after the out of bounds usage attempt.
 
 ## viewmodel_body
 
@@ -1823,6 +2143,29 @@ The view model body. Should be an integer.
 ## viewmodel_body_alt
 
 The view model body to use in the alternative mode.
+
+## ammo_to_viewmodel_body
+
+The mapping between amount of ammo in the clip (or in the ammo reserve if the weapon doesn't use clip) and the viewmodel body. This is used by [weapon_m249]({{< ref weapon_m249 >}}).
+
+The key names must be integer numbers enclosed in quotes (as required by JSON format).
+
+Example:
+
+```json
+{
+    "weapon_357": {
+        "viewmodel_body": 0,
+        "ammo_to_viewmodel_body": {
+            "4": 1,
+            "5": 1,
+            "6": 1,
+        }
+    }
+}
+```
+
+This makes `weapon_357` show the body `1` if the current clip has from 4 to 6 ammo, and the body `0` otherwise.
 
 ## zoom
 

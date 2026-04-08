@@ -7,10 +7,9 @@
 #include "weapon_parameters.h"
 #include "sound_channel.h"
 #include "soundent_bits.h"
+#include "fx_flags.h"
 
-#if SERVER_DLL
 #include "skill.h"
-#endif
 
 #include "rapidjson/writer.h"
 #include "rapidjson/ostreamwrapper.h"
@@ -207,6 +206,8 @@ void WeaponTemplateSystem::ParseWeaponTemplate(WeaponParameters& params, const r
 			fromScratchParams.idleAnims.main = params.idleAnims.main;
 			fromScratchParams.deploy.animIndex.main = params.deploy.animIndex.main;
 
+			fromScratchParams.modelSoundsDefined = true;
+
 			params = std::move(fromScratchParams);
 		}
 	}
@@ -261,6 +262,8 @@ void WeaponTemplateSystem::ParseWeaponTemplate(WeaponParameters& params, const r
 	UpdatePropertyFromJson(params.playerModel, value, "player_model");
 	UpdatePropertyFromJson(params.playerAnimExt, value, "player_anim_ext");
 	UpdatePropertyFromJson(params.priority, value, "priority");
+	UpdatePropertyFromJson(params.worldModelAnimated, value, "world_model_animated");
+	UpdatePropertyFromJson(params.worldModelSequence, value, "world_model_sequence");
 
 	auto HandleDeploy = [&](const char* propName, bool altMode, bool emptied)
 	{
@@ -309,6 +312,11 @@ void WeaponTemplateSystem::ParseWeaponTemplate(WeaponParameters& params, const r
 					UpdatePropertyFromJson(anim.animIndex, item, "anim");
 					UpdatePropertyFromJson(anim.chance, item, "chance");
 					UpdatePropertyFromJson(anim.duration, item, "duration");
+
+					HandleJSONMember(item, "sound", [&](const Value& value) {
+						ParseWeaponSoundScript(anim.sound, value);
+					});
+
 					v.push_back(anim);
 				}
 			}
@@ -321,6 +329,11 @@ void WeaponTemplateSystem::ParseWeaponTemplate(WeaponParameters& params, const r
 				anim.chance = 1.0f;
 				UpdatePropertyFromJson(anim.animIndex, value, "anim");
 				UpdatePropertyFromJson(anim.duration, value, "duration");
+
+				HandleJSONMember(value, "sound", [&](const Value& value) {
+					ParseWeaponSoundScript(anim.sound, value);
+				});
+
 				v.push_back(anim);
 			}
 		});
@@ -369,18 +382,41 @@ void WeaponTemplateSystem::ParseWeaponTemplate(WeaponParameters& params, const r
 				}
 			});
 
-			HandleJSONMember(value, "damage", [&](const Value& value) {
-				if (value.IsNumber())
+			auto ParseWeaponDamage = [&](const Value& value)
+			{
+				FloatRange result;
+				if (value.IsNumber() || value.IsArray() || value.IsObject())
 				{
-					fire.damage.Materialize(altMode) = value.GetFloat();
+					result = FloatRangeFromJSON(value);
 				}
-#if SERVER_DLL
 				else if (value.IsString())
 				{
-					fire.damage.Materialize(altMode) = GetSkillCvar(value.GetString());
+					const char* str = value.GetString();
+					if (strchr(str, ',') != nullptr)
+					{
+						result = FloatRangeFromJSON(value);
+					}
+					else
+					{
+						result = GetSkillValueRange(value.GetString());
+					}
 				}
-#endif
+				return result;
+			};
+
+			HandleJSONMember(value, "damage", [&](const Value& value) {
+				fire.damage.Materialize(altMode) = ParseWeaponDamage(value);
 			});
+
+			HandleJSONMember(value, "damage_charged_factor", [&](const Value& value) {
+				fire.damageChargedFactor.Materialize(altMode) = ParseWeaponDamage(value);
+			});
+
+			HandleJSONMember(value, "damage_charged_max", [&](const Value& value) {
+				fire.damageChargedMax.Materialize(altMode) = ParseWeaponDamage(value);
+			});
+
+			UpdatePropertyFromJson(fire.subsequentSwingFactor, value, "subsequent_swing_dmg_factor", altMode);
 
 			auto HandleFireAnimArray = [](Value::ConstArray& animArr, WeaponParameters::FireAnimArray& v)
 			{
@@ -410,6 +446,12 @@ void WeaponTemplateSystem::ParseWeaponTemplate(WeaponParameters& params, const r
 				}
 			});
 
+			HandleJSONMember(value, "hit_anims", [&](const Value& value) {
+				Value::ConstArray animArr = value.GetArray();
+				auto& v = fire.hitAnims.Materialize(altMode);
+				HandleFireAnimArray(animArr, v);
+			});
+
 			HandleJSONMember(value, "charge_anims", [&](const Value& value) {
 				Value::ConstArray animArr = value.GetArray();
 				auto& v = fire.chargeAnims.Materialize(altMode);
@@ -420,6 +462,8 @@ void WeaponTemplateSystem::ParseWeaponTemplate(WeaponParameters& params, const r
 				WeaponSoundScript& soundScript = fire.chargeSound.Materialize(altMode);
 				ParseWeaponSoundScript(soundScript, value);
 			});
+			UpdatePropertyFromJson(fire.chargedAttack, value, "charged_attack", altMode);
+			UpdatePropertyFromJson(fire.laserSpotOnCharge, value, "laser_spot_on_charge", altMode);
 
 			HandleJSONMember(value, "cooldown_anims", [&](const Value& value) {
 				Value::ConstArray animArr = value.GetArray();
@@ -623,6 +667,7 @@ void WeaponTemplateSystem::ParseWeaponTemplate(WeaponParameters& params, const r
 
 			UpdatePropertyFromJson(fire.cycleTime, value, "cycle_time", altMode);
 			UpdatePropertyFromJson(fire.cycleTimeLastShot, value, "cycle_time_last_shot", altMode);
+			UpdatePropertyFromJson(fire.hitCycleTime, value, "hit_cycle_time", altMode);
 			UpdatePropertyFromJson(fire.idleDelay, value, "idle_delay", altMode, false);
 			UpdatePropertyFromJson(fire.idleDelay, value, "idle_delay_empty", altMode, true);
 			UpdatePropertyFromJson(fire.ammoPerFire, value, "ammo_per_fire", altMode);
@@ -821,6 +866,8 @@ void WeaponTemplateSystem::ParseWeaponTemplate(WeaponParameters& params, const r
 				}
 			});
 
+			UpdatePropertyFromJson(fire.kickBackOnHitOnly, value, "kickback_on_hit_only", altMode);
+
 			UpdatePropertyFromJson(fire.pushbackForce, value, "pushback_force", altMode);
 			UpdatePropertyFromJson(fire.pushbackVertical, value, "pushback_vertical", altMode);
 
@@ -828,10 +875,21 @@ void WeaponTemplateSystem::ParseWeaponTemplate(WeaponParameters& params, const r
 				UpdatePlayerShake(fire.shake.Materialize(altMode), value);
 			});
 
+			HandleJSONMember(value, "hit_shake", [&](const Value& value) {
+				UpdatePlayerShake(fire.hitShake.Materialize(altMode), value);
+			});
+
+			UpdatePropertyFromJson(fire.smackDelay, value, "smack_delay", altMode);
+			UpdatePropertyFromJson(fire.hitDecal, value, "hit_decal", altMode);
+
 			UpdatePropertyFromJson(fire.preventMovement, value, "prevent_movement", altMode);
 
 			HandleJSONMember(value, "player_maxspeed", [&](const Value& value) {
 				fire.playerMaxSpeed.Materialize(altMode) = ParsePlayerSpeed(value);
+			});
+
+			HandleJSONMember(value, "player_maxspeed_on_charge", [&](const Value& value) {
+				fire.playerMaxSpeedOnCharge.Materialize(altMode) = ParsePlayerSpeed(value);
 			});
 
 			HandleJSONMember(value, "projectile", [&](const Value& value) {
@@ -958,6 +1016,40 @@ void WeaponTemplateSystem::ParseWeaponTemplate(WeaponParameters& params, const r
 				});
 			});
 
+			HandleJSONMember(value, "spray", [&](const Value& value) {
+				HandleJSONMember(value, "offset", [&](const Value& value) {
+					UpdatePropertyFromJson(fire.sprayOffsetUp, value, "up", altMode);
+					UpdatePropertyFromJson(fire.sprayOffsetSide, value, "side", altMode);
+					UpdatePropertyFromJson(fire.sprayOffsetForward, value, "forward", altMode);
+				});
+				HandleJSONMember(value, "visual", [&](const Value& value) {
+					Visual visual = ParseVisualFromJSON(value, [this](const char* str){ return this->MakeConstantString(str); });
+					visual.CompleteFrom(fire.sprayVisual.Materialize(altMode));
+					fire.sprayVisual.Materialize(altMode) = visual;
+				});
+				UpdatePropertyFromJson(fire.sprayCount, value, "count", altMode);
+				UpdatePropertyFromJson(fire.spraySpeed, value, "speed", altMode);
+				UpdatePropertyFromJson(fire.spraySpread, value, "spread", altMode);
+				HandleJSONMember(value, "flags", [&](const Value& value) {
+					Value::ConstArray arr = value.GetArray();
+					for (const auto& item : arr)
+					{
+						if (strcmp(item.GetString(), "collideworld") == 0)
+						{
+							fire.sprayFlags.Materialize(altMode) |= SPRAY_FLAG_COLLIDEWORLD;
+						}
+						else if (strcmp(item.GetString(), "animate") == 0 || strcmp(item.GetString(), "animated") == 0)
+						{
+							fire.sprayFlags.Materialize(altMode) |= SPRAY_FLAG_ANIMATE;
+						}
+						else if (strcmp(item.GetString(), "fadeout") == 0)
+						{
+							fire.sprayFlags.Materialize(altMode) |= SPRAY_FLAG_FADEOUT;
+						}
+					}
+				});
+			});
+
 			HandleJSONMember(value, "extra_ai_sound", [&](const Value& value) {
 				HandleJSONMember(value, "type", [&](const Value& value) {
 					auto parseAISoundType = [](const char* str)
@@ -1062,6 +1154,19 @@ void WeaponTemplateSystem::ParseWeaponTemplate(WeaponParameters& params, const r
 	UpdatePropertyFromJson(params.viewModelBody, value, "viewmodel_body", false);
 	UpdatePropertyFromJson(params.viewModelBody, value, "viewmodel_body_alt", true);
 
+	HandleJSONMember(value, "ammo_to_viewmodel_body", [&](const Value& value) {
+		for (auto it = value.MemberBegin(); it != value.MemberEnd(); ++it)
+		{
+			const char* ammoAmountStr = it->name.GetString();
+			const int ammoAmount = atoi(ammoAmountStr);
+			const Value& bodyValue = it->value;
+			if (bodyValue.IsInt())
+			{
+				params.ammoToBody.push_back(std::make_pair(ammoAmount, bodyValue.GetInt()));
+			}
+		}
+	});
+
 	HandleJSONMember(value, "player_maxspeed", [&](const Value& value) {
 		params.playerMaxSpeed.Materialize(false) = ParsePlayerSpeed(value);
 	});
@@ -1082,6 +1187,8 @@ void WeaponTemplateSystem::ParseWeaponTemplate(WeaponParameters& params, const r
 				reload.waitForRecoil.Reset(altMode, emptied);
 				reload.suspendLaserSpotTime.Reset(altMode, emptied);
 				reload.sound.Reset(altMode, emptied);
+				reload.ammoCount.Reset(altMode, emptied);
+				reload.ammoCountMin.Reset(altMode, emptied);
 			}
 			else
 			{
@@ -1096,6 +1203,9 @@ void WeaponTemplateSystem::ParseWeaponTemplate(WeaponParameters& params, const r
 					WeaponSoundScript& soundScript = reload.sound.Materialize(altMode, emptied);
 					ParseWeaponSoundScript(soundScript, value);
 				});
+
+				UpdatePropertyFromJson(reload.ammoCount, value, "ammo_count", altMode, emptied);
+				UpdatePropertyFromJson(reload.ammoCountMin, value, "ammo_count_min", altMode, emptied);
 			}
 		});
 	};
@@ -1189,6 +1299,7 @@ void WeaponTemplateSystem::ParseWeaponTemplate(WeaponParameters& params, const r
 
 	HandleJSONMember(value, "model_sounds", [&](const Value& value) {
 		Value::ConstArray arr = value.GetArray();
+		params.modelSoundsDefined = true;
 		for (auto& item : arr)
 		{
 			params.modelSounds.push_back(item.GetString());
@@ -1198,6 +1309,11 @@ void WeaponTemplateSystem::ParseWeaponTemplate(WeaponParameters& params, const r
 	HandleJSONMember(value, "tool", [&](const Value& value) {
 		UpdatePropertyFromJson(params.toolIcon, value, "icon");
 		UpdatePropertyFromJson(params.toolTriggerDelay, value, "trigger_delay");
+
+		HandleJSONMember(value, "deny_sound", [&](const Value& value) {
+			ParseWeaponSoundScript(params.toolDenySound, value);
+		});
+		UpdatePropertyFromJson(params.toolDelayAfterDeny, value, "delay_after_deny");
 	});
 }
 

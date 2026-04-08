@@ -53,12 +53,9 @@ public:
 	}
 	void LaunchAsProjectile(const ProjectileParameters& params) override;
 
-	void SetAttachment(CBaseAnimating* pAttachEnt, int iAttachIdx);
-
 	void ArmBeam(int side);
 
-	void EXPORT AttachThink();
-
+	void EXPORT Animate();
 	void EXPORT FlyThink();
 	void EXPORT PreShutdownThink();
 	void DoRadiusDamage(float dmg, float radius);
@@ -71,10 +68,11 @@ public:
 
 	EHANDLE m_pBeam[VOLTIGORE_BEAM_COUNT];
 	int m_iBeams;
-	CBaseAnimating* m_pAttachEnt;
-	int m_iAttachIdx;
 	float m_shutdownTime;
 	float m_radiusCheckTime;
+
+	int m_maxFrame;
+	float m_lastTime;
 
 	static const NamedVisual spriteVisual;
 	static const NamedVisual beamVisual;
@@ -87,9 +85,9 @@ TYPEDESCRIPTION CChargedBolt::m_SaveData[] =
 {
 	DEFINE_ARRAY(CChargedBolt, m_pBeam, FIELD_EHANDLE, VOLTIGORE_BEAM_COUNT),
 	DEFINE_FIELD(CChargedBolt, m_iBeams, FIELD_INTEGER),
-	DEFINE_FIELD(CChargedBolt, m_pAttachEnt, FIELD_CLASSPTR),
-	DEFINE_FIELD(CChargedBolt, m_iAttachIdx, FIELD_INTEGER),
 	DEFINE_FIELD(CChargedBolt, m_shutdownTime, FIELD_TIME),
+	DEFINE_FIELD(CChargedBolt, m_maxFrame, FIELD_INTEGER),
+	DEFINE_FIELD(CChargedBolt, m_lastTime, FIELD_TIME),
 };
 
 IMPLEMENT_SAVERESTORE(CChargedBolt, CBaseEntity);
@@ -133,9 +131,13 @@ void CChargedBolt::Spawn()
 	UTIL_SetOrigin(pev, pev->origin);
 	UTIL_SetSize(pev, g_vecZero, g_vecZero);
 
+	m_maxFrame = MODEL_FRAMES( pev->modelindex ) - 1;
+	m_lastTime = gpGlobals->time;
+	SetThink(&CChargedBolt::Animate);
+
 	InitBeams();
 
-	SetDefaultProjectileDamage(gSkillData.voltigoreDmgBeam);
+	SetDefaultProjectileDamage(GetSkillValue("voltigore_dmg_beam"));
 }
 
 void CChargedBolt::InitBeams()
@@ -171,28 +173,12 @@ void CChargedBolt::ShutdownChargedBolt()
 void CChargedBolt::LaunchAsProjectile(const ProjectileParameters &params)
 {
 	LaunchAsProjectileImpl(CHARGEDBOLT_SPEED, params);
+	SetMyProjectileEffectFlags();
 
 	SetTouch(&CChargedBolt::ChargedBoltTouch);
 	SetThink(&CChargedBolt::FlyThink);
 
 	m_radiusCheckTime = pev->nextthink = gpGlobals->time + 0.15f;
-}
-
-void CChargedBolt::SetAttachment(CBaseAnimating* pAttachEnt, int iAttachIdx)
-{
-	Vector vecOrigin;
-	Vector vecAngles;
-
-	m_iAttachIdx = iAttachIdx;
-	m_pAttachEnt = pAttachEnt;
-
-	pAttachEnt->GetAttachment(iAttachIdx, vecOrigin, vecAngles);
-
-	UTIL_SetOrigin(pev, vecOrigin);
-
-	SetThink(&CChargedBolt::AttachThink);
-
-	pev->nextthink = gpGlobals->time + 0.05;
 }
 
 void CChargedBolt::ArmBeam(int side)
@@ -261,15 +247,10 @@ void CChargedBolt::ArmBeam(int side)
 	++m_iBeams;
 }
 
-void CChargedBolt::AttachThink()
+void CChargedBolt::Animate()
 {
-	Vector vecOrigin;
-	Vector vecAngles;
-
-	m_pAttachEnt->GetAttachment(m_iAttachIdx, vecOrigin, vecAngles);
-	UTIL_SetOrigin(pev, vecOrigin);
-
-	pev->nextthink = gpGlobals->time + 0.05;
+	pev->nextthink = gpGlobals->time + 0.1f;
+	pev->frame = AnimateWithFramerate(pev->frame, m_maxFrame, pev->framerate, &m_lastTime);
 }
 
 void CChargedBolt::FlyThink()
@@ -277,6 +258,8 @@ void CChargedBolt::FlyThink()
 	ArmBeam(-1);
 	ArmBeam(1);
 	pev->nextthink = gpGlobals->time + 0.05f;
+
+	pev->frame = AnimateWithFramerate(pev->frame, m_maxFrame, pev->framerate, &m_lastTime);
 
 	if (m_radiusCheckTime <= gpGlobals->time)
 	{
@@ -288,6 +271,7 @@ void CChargedBolt::FlyThink()
 void CChargedBolt::PreShutdownThink()
 {
 	pev->nextthink = gpGlobals->time + 0.1f;
+	pev->frame = AnimateWithFramerate(pev->frame, m_maxFrame, pev->framerate, &m_lastTime);
 	DoRadiusDamage(GetProjectileDamage() * 0.2f, 32);
 
 	if (m_shutdownTime <= gpGlobals->time)
@@ -606,8 +590,9 @@ void CVoltigore::DeathGibThink()
 			pBeam->pev->nextthink = gpGlobals->time + 0.6;
 		}
 
-		const float attackRadius = Q_max(Q_min(gSkillData.voltigoreDmgExplode * 2.0f, 200.0f), 160.0f);
-		::RadiusDamage(pev->origin, pev, pev, DamageInfo{gSkillData.voltigoreDmgExplode, DMG_SHOCK}, attackRadius, CLASS_NONE);
+		const float dmgExplode = GetSkillValue("voltigore_dmg_explode");
+		const float attackRadius = Q_max(Q_min(dmgExplode * 2.0f, 200.0f), 160.0f);
+		::RadiusDamage(pev->origin, pev, pev, DamageInfo{dmgExplode, DMG_SHOCK}, attackRadius, CLASS_NONE);
 	}
 }
 
@@ -733,7 +718,7 @@ void CVoltigore::HandleAnimEvent(MonsterEvent_t *pEvent)
 		params.punchAngle.x = 15;
 		params.knockRight = -150;
 		params.knockUp = 100;
-		params.damageInfo.damage = gSkillData.voltigoreDmgPunch;
+		params.damageInfo.damage = GetSkillValue("voltigore_dmg_punch");
 		params.damageInfo.type = DMG_CLUB;
 		params.spawnBlood = true;
 		params.bloodOrigin = vecArmPos;
@@ -757,7 +742,7 @@ void CVoltigore::HandleAnimEvent(MonsterEvent_t *pEvent)
 		params.punchAngle.x = 20;
 		params.knockForward = 150;
 		params.knockUp = 100;
-		params.damageInfo.damage = gSkillData.voltigoreDmgPunch;
+		params.damageInfo.damage = GetSkillValue("voltigore_dmg_punch");
 		params.damageInfo.type = DMG_CLUB;
 		params.spawnBlood = true;
 		params.bloodOrigin = vecArmPos;
@@ -795,7 +780,7 @@ void CVoltigore::Spawn()
 	pev->movetype		= MOVETYPE_STEP;
 	SetMyBloodColor(BLOOD_COLOR_GREEN);
 	pev->effects		= 0;
-	SetMyHealth(gSkillData.voltigoreHealth);
+	SetMyHealth(GetSkillValue("voltigore_health"));
 	SetMyFieldOfView(0.2f);// indicates the width of this monster's forward view cone ( as a dotproduct result )
 	m_MonsterState		= MONSTERSTATE_NONE;
 	m_afCapability = bits_CAP_TURN_HEAD;
@@ -1163,7 +1148,7 @@ void CBabyVoltigore::Spawn()
 	pev->movetype		= MOVETYPE_STEP;
 	SetMyBloodColor(BLOOD_COLOR_GREEN);
 	pev->effects		= 0;
-	SetMyHealth(gSkillData.babyVoltigoreHealth);
+	SetMyHealth(GetSkillValue("babyvoltigore_health"));
 	SetMyFieldOfView(0.2f);// indicates the width of this monster's forward view cone ( as a dotproduct result )
 	m_MonsterState		= MONSTERSTATE_NONE;
 	m_afCapability = bits_CAP_TURN_HEAD;
@@ -1217,7 +1202,7 @@ void CBabyVoltigore::HandleAnimEvent(MonsterEvent_t* pEvent)
 		params.punchAngle.x = 10;
 		params.knockRight = -100;
 		params.knockUp = 50;
-		params.damageInfo.damage = gSkillData.babyVoltigoreDmgPunch;
+		params.damageInfo.damage = GetSkillValue("babyvoltigore_dmg_punch");
 		params.damageInfo.type = DMG_CLUB;
 		params.spawnBlood = true;
 		params.bloodOrigin = vecArmPos;
@@ -1240,7 +1225,7 @@ void CBabyVoltigore::HandleAnimEvent(MonsterEvent_t* pEvent)
 		params.punchAngle.x = 15;
 		params.knockForward = 100;
 		params.knockUp = 50;
-		params.damageInfo.damage = gSkillData.babyVoltigoreDmgPunch;
+		params.damageInfo.damage = GetSkillValue("babyvoltigore_dmg_punch");
 		params.damageInfo.type = DMG_CLUB;
 		params.spawnBlood = true;
 		params.bloodOrigin = vecArmPos;

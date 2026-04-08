@@ -11,9 +11,9 @@ So, you want to create a new mod or port an existing one using Featureful SDK.
 
 1. Grab the archive with the mod sample from the [Releases](https://github.com/FreeSlave/halflife-featureful/releases) (download the associated halflife_featureful zip asset). Install it like you install other mods, i.e. unpack the archive into your Half-Life directory, so the **featureful** directory ends up being a subdirectory of Half-Life directory.
 2. Create a directory for your own mod (if you haven't done that yet). See also: [TWHL article on setting up a mod](https://twhl.info/wiki/page/Tutorial:_Setting_up_a_Mod:_Part_1_-_Mod_directory_and_liblist.gam_(Steam))
-3. Copy **cl_dlls/**, **dlls/**, **delta.lst** and optionally **events/**, **features/** and **templates/** from the **featureful** directory to your mod directory.
+3. Copy **cl_dlls/**, **dlls/**, **delta.lst** and optionally **events/** and **features/** from the **featureful** directory to your mod directory. You may copy **templates/** as well, but it contains many configuration files that serve mostly as examples so you don't need them.
 4. Copy **liblist.gam** as well and edit it to give a different `game` name. If you have previously created liblist.gam in your mod directory, make sure `gamedll` refers to `dlls/hl.dll`.
-5. Alternatively, if you're starting from scratch, instead of doing 2-3 you can just rename the **featureful** directory to something else and edit **liblist.gam** afterwards. Note that the sample mod includes some resources you may not need, so it's better to start with your own mod directory and then copy only necessary things.
+5. Alternatively, instead of doing 2-3 you can just rename the **featureful** directory to something else and edit **liblist.gam** afterwards. Note that the sample mod includes some resources and configuration files you may not need, so it's better to start with your own mod directory and then copy only necessary things.
 6. In your mod directory go to the **features/** subdirectory and start adjusting features as described below.
 
 {{% hint warning %}}
@@ -34,8 +34,8 @@ Decide which of the available weapons you want to include in your mod. Based on 
 * HUD sprites and .txt file describing the weapon hud (e.g. weapon_eagle.txt)
 * Projectile sprites and models (for some weapons, e.g. shock rifle, spore launcher)
 * Sounds
-* `events/*.sc` file (the Grapple doesn't need `.sc` file)
-* Additional skill cvars in skill.cfg.
+* `events/*.sc` file (currently needed by displacer, medkit and penguin).
+* Additional skill variables in skill.cfg.
 
 Open **features/featureful_weapons.cfg** in your mod directory and configure the list of enabled custom weapons.
 
@@ -54,10 +54,12 @@ shockrifle
 penguin
 uzi
 minigun
+nailgun
 
 camera
 radio
 
+melee
 pistol
 pistol2
 smg

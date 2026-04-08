@@ -67,6 +67,13 @@ enum
 	PLAYER_USE_POLICY_VISIBLE,
 };
 
+enum
+{
+	HANDLE_TINY_CREATURES_DEFAULT = 0,
+	HANDLE_TINY_CREATURES_CRUSH,
+	HANDLE_TINY_CREATURES_DONTCOLLIDE,
+};
+
 #include "saverestore.h"
 #include "schedule.h"
 
@@ -145,6 +152,7 @@ struct DamageInfo
 	bool noPlayerPush = false; // don't push player
 	bool noPunch = false; // don't make a smalle punch on player's camera
 	bool noBlood = false; // used in TraceAttack. Force not to bleed.
+	bool ignoreTransform = false;
 
 	bool mustSkip = false;
 
@@ -174,6 +182,10 @@ struct DamageInfo
 	}
 	DamageInfo& SetNoBlood(bool enable = true) {
 		noBlood = enable;
+		return *this;
+	}
+	DamageInfo& SetIgnoreTransform(bool enable = true) {
+		ignoreTransform = enable;
 		return *this;
 	}
 };
@@ -279,6 +291,7 @@ struct ProjectileParameters
 	CBaseEntity* pLauncher = nullptr;
 	float time{0.0f};
 	float damageOverride{0.0f};
+	Vector up{0.0f, 0.0f, 1.0f};
 };
 
 #define SF_ITEM_TOUCH_ONLY 128
@@ -432,8 +445,13 @@ public:
 			( this->*m_pfnUse )( pActivator, pCaller, useType, value );
 	}
 	virtual void Blocked( CBaseEntity *pOther ) { if( m_pfnBlocked ) ( this->*m_pfnBlocked )( pOther ); }
-	virtual bool ShouldCollide(CBaseEntity* pOther) { return true; }
+	virtual bool ShouldCollide(CBaseEntity* pOther) {
+		if (IsTinyCreature())
+			return pOther->ShouldCollideWithTinyCreatures();
+		return true;
+	}
 	virtual bool ShouldCollideWithCorpses() { return true; }
+	virtual bool ShouldCollideWithTinyCreatures() { return true; }
 
 	string_t m_entTemplate;
 	string_t m_ownerEntTemplate;
@@ -534,7 +552,7 @@ public:
 	void EXPORT SUB_CallUseToggle() { this->Use( this, this, USE_TOGGLE, 0 ); }
 	bool ShouldToggle( USE_TYPE useType, bool currentState );
 	void FireBullets( unsigned int cShots, Vector  vecSrc, Vector	vecDirShooting,	Vector	vecSpread, float flDistance, float flDamage, int iTracerFreq = 4, entvars_t *pevAttacker = NULL  );
-	Vector FireBulletsPlayer( unsigned int cShots, Vector  vecSrc, Vector	vecDirShooting,	Vector	vecSpread, float flDistance, float flDamage, float flRangeModifier, int iTracerFreq = 4, entvars_t *pevAttacker = NULL, int shared_rand = 0 );
+	Vector FireBulletsPlayer( unsigned int cShots, Vector  vecSrc, Vector vecDirShooting, Vector vecSpread, float flDistance, const FloatRange& flDamageRange, float flRangeModifier, int iTracerFreq = 4, entvars_t *pevAttacker = NULL, int shared_rand = 0 );
 
 	virtual CBaseEntity *Respawn() { return NULL; }
 
@@ -677,6 +695,8 @@ public:
 	virtual bool IsLockedByMaster() { return false; }
 	virtual bool PlaysItsOwnHitSounds() const { return false; }
 	virtual bool MustAddToFullPack(unsigned char *pSet) { return false; }
+	virtual bool IsCorpse() { return pev->deadflag == DEAD_DEAD; }
+	virtual bool IsTinyCreature() { return false; }
 
 	inline void SetDefaultProjectileDamage(float damage) {
 		if (!pev->dmg)
@@ -695,6 +715,24 @@ public:
 		pev->velocity = params.direction * speed;
 	}
 	virtual void LaunchAsProjectile(const ProjectileParameters& params) {}
+	void SetMyProjectileEffectFlags(int defaultEffects = 0);
+
+	FloatRange GetSkillValueRange(const char* name);
+	float GetSkillValue(const char* name);
+
+	void InsertAISound(int iType, const Vector &vecOrigin, int iVolume, float flDuration);
+	void InsertAISound(int iType, int iVolume, float flDuration);
+
+	void MarkAsNonBlockerForPlayer();
+
+	void InitLootRandomSeed();
+	float SharedLootRandomFloat(float low, float high);
+	void DropLoot(bool gibbed);
+
+	bool DropEquipment(const Vector& gunPos, const Vector& angles, bool extraVelocity);
+	void PrecacheEquipmentDrop();
+
+	int m_lootRandomSeed;
 };
 
 // Ugly technique to override base member functions
@@ -971,11 +1009,6 @@ bool CheckTakeDamageConditions(const EntTemplate::DamageConditions& conditions, 
 ApplyTakeDamageModifierResult ApplyTakeDamageModifier(const EntTemplate::DamageInfoModifier& modifier, DamageInfo& damageInfo, CBaseEntity* pTarget);
 
 //
-// Weapons 
-//
-#define	BAD_WEAPON 0x00007FFF
-
-//
 // Converts a entvars_t * to a class pointer
 // It will allocate the class and entity if necessary
 //
@@ -998,31 +1031,6 @@ template <class T> T * GetClassPtr( T *a )
 	}
 	return a;
 }
-
-/*
-bit_PUSHBRUSH_DATA | bit_TOGGLE_DATA
-bit_MONSTER_DATA
-bit_DELAY_DATA
-bit_TOGGLE_DATA | bit_DELAY_DATA | bit_MONSTER_DATA
-bit_PLAYER_DATA | bit_MONSTER_DATA
-bit_MONSTER_DATA | CYCLER_DATA
-bit_LIGHT_DATA
-path_corner_data
-bit_MONSTER_DATA | wildcard_data
-bit_MONSTER_DATA | bit_GROUP_DATA
-boid_flock_data
-boid_data
-CYCLER_DATA
-bit_ITEM_DATA
-bit_ITEM_DATA | func_hud_data
-bit_TOGGLE_DATA | bit_ITEM_DATA
-EOFFSET
-env_sound_data
-env_sound_data
-push_trigger_data
-*/
-
-#define TRACER_FREQ		4			// Tracers fire every 4 bullets
 
 typedef struct _SelAmmo
 {

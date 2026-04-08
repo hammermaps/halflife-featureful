@@ -72,11 +72,11 @@ void CNail::Spawn()
 
 	if (!FNullEnt(pev->owner) && FBitSet(pev->owner->v.flags, FL_CLIENT))
 	{
-		SetDefaultProjectileDamage(gSkillData.plrDmgNail);
+		SetDefaultProjectileDamage(GetSkillValue("plr_nail"));
 	}
 	else
 	{
-		SetDefaultProjectileDamage(gSkillData.monDmgNail);
+		SetDefaultProjectileDamage(GetSkillValue("nail"));
 	}
 }
 
@@ -117,6 +117,7 @@ void CNail::NailTouch(CBaseEntity *pOther)
 void CNail::LaunchAsProjectile(const ProjectileParameters& params)
 {
 	LaunchAsProjectileImpl(1000.0f, params);
+	SetMyProjectileEffectFlags();
 }
 
 #endif
@@ -165,10 +166,10 @@ WeaponParameters CNailgun::GetDefaultParameters() const
 
 	params.fire.sound = {
 		CHAN_WEAPON,
-		{"weapons/spike2.wav"},
-		1.0f,
+		{"weapons/airgun_1.wav"},
+		FloatRange(0.95f, 1.0f),
 		ATTN_NORM,
-		IntRange(94, 109)
+		IntRange(93, 124)
 	};
 	params.fire.cycleTime = 0.1f;
 	params.fire.allowUnderwater = true;

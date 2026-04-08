@@ -49,13 +49,13 @@
 #include "locus.h"
 #include "ropes.h"
 #include "mod_features.h"
+#include "monsterinfo.h"
 #include "player_capabilities.h"
 
 // #define DUCKFIX
 
 extern DLL_GLOBAL bool g_fGameOver;
 bool gEvilImpulse101;
-extern DLL_GLOBAL int g_iSkillLevel;
 extern DLL_GLOBAL bool gDisplayTitle;
 
 bool gInitHUD = true;
@@ -160,6 +160,17 @@ TYPEDESCRIPTION	CBasePlayer::m_playerSaveData[] =
 
 	DEFINE_FIELD(CBasePlayer, m_playerTemplateName, FIELD_STRING),
 
+	DEFINE_FIELD(CBasePlayer, m_fadeStarted, FIELD_TIME),
+	DEFINE_FIELD(CBasePlayer, m_fadeDuration, FIELD_FLOAT),
+	DEFINE_FIELD(CBasePlayer, m_fadeHoldTime, FIELD_FLOAT),
+	DEFINE_FIELD(CBasePlayer, m_fadeColor, FIELD_INTEGER),
+	DEFINE_FIELD(CBasePlayer, m_fadeAlpha, FIELD_SHORT),
+	DEFINE_FIELD(CBasePlayer, m_fadeFlags, FIELD_SHORT),
+
+	DEFINE_ARRAY(CBasePlayer, m_messageBoxEnts, FIELD_EHANDLE, MAX_MESSAGE_BOXES),
+	DEFINE_ARRAY(CBasePlayer, m_messageBoxOrigins, FIELD_POSITION_VECTOR, MAX_MESSAGE_BOXES),
+	DEFINE_ARRAY(CBasePlayer, m_messageBoxDistances, FIELD_FLOAT, MAX_MESSAGE_BOXES),
+
 	//DEFINE_FIELD( CBasePlayer, m_fDeadTime, FIELD_FLOAT ), // only used in multiplayer games
 	//DEFINE_FIELD( CBasePlayer, m_fGameHUDInitialized, FIELD_INTEGER ), // only used in multiplayer games
 	//DEFINE_FIELD( CBasePlayer, m_flStopExtraSoundTime, FIELD_TIME ),
@@ -215,6 +226,7 @@ int gmsgTeamScore = 0;
 int gmsgGameMode = 0;
 int gmsgMOTD = 0;
 int gmsgParseErrors = 0;
+int gmsgDeprecation = 0;
 int gmsgServerName = 0;
 int gmsgAmmoPickup = 0;
 int gmsgWeapPickup = 0;
@@ -274,6 +286,10 @@ int gmsgOnRope = 0;
 int gmsgWeaponTool = 0;
 int gmsgToolState = 0;
 
+int gmsgMessageBox = 0;
+
+int gmsgMirror = 0;
+
 static CFollowingMonster* CanRecruit(CBaseEntity* pFriend, CBasePlayer* player)
 {
 	if (!pFriend->IsFullyAlive())
@@ -303,7 +319,7 @@ void LinkUserMessages()
 	}
 
 	gmsgSelAmmo = REG_USER_MSG( "SelAmmo", sizeof(SelAmmo) );
-	gmsgCurWeapon = REG_USER_MSG( "CurWeapon", 4 );
+	gmsgCurWeapon = REG_USER_MSG( "CurWeapon", 6 );
 	gmsgGeigerRange = REG_USER_MSG( "Geiger", 1 );
 	gmsgFlashlight = REG_USER_MSG( "Flashlight", 2 );
 	gmsgFlashBattery = REG_USER_MSG( "FlashBat", 1 );
@@ -331,6 +347,7 @@ void LinkUserMessages()
 	gmsgGameMode = REG_USER_MSG( "GameMode", 1 );
 	gmsgMOTD = REG_USER_MSG( "MOTD", -1 );
 	gmsgParseErrors = REG_USER_MSG( "ParseErrors", -1 );
+	gmsgDeprecation = REG_USER_MSG( "Deprecation", -1 );
 	gmsgServerName = REG_USER_MSG( "ServerName", -1 );
 	gmsgAmmoPickup = REG_USER_MSG( "AmmoPickup", 3 );
 	gmsgWeapPickup = REG_USER_MSG( "WeapPickup", 1 );
@@ -386,6 +403,9 @@ void LinkUserMessages()
 
 	gmsgWeaponTool = REG_USER_MSG("WeaponTool", 2);
 	gmsgToolState = REG_USER_MSG("ToolState", 8);
+
+	gmsgMessageBox = REG_USER_MSG("MessageBox", -1);
+	gmsgMirror = REG_USER_MSG("Mirror", 10);
 }
 
 LINK_ENTITY_TO_CLASS( player, CBasePlayer )
@@ -535,10 +555,13 @@ int CBasePlayer::TakeHealth( CBaseEntity* pHealer, float flHealth, int bitsDamag
 
 				if (flHealth > 1)
 				{
-					MESSAGE_BEGIN( MSG_ONE, gmsgAmmoPickup, NULL, pev );
-						WRITE_BYTE( medAmmoIndex );		// ammo ID
-						WRITE_SHORT( toAdd );		// amount
-					MESSAGE_END();
+					if (!m_hidePickups)
+					{
+						MESSAGE_BEGIN( MSG_ONE, gmsgAmmoPickup, NULL, pev );
+							WRITE_BYTE( medAmmoIndex );		// ammo ID
+							WRITE_SHORT( toAdd );		// amount
+						MESSAGE_END();
+					}
 
 					if (healed == 0) {
 						EmitSoundScript(Items::ammoPickupSoundScript);
@@ -625,7 +648,7 @@ float CBasePlayer::ArmorStrength()
 {
 	if (m_armorStrength > 0)
 		return m_armorStrength;
-	return gSkillData.plrArmorStrength;
+	return GetSkillValue("plr_armor_strength");
 }
 
 Vector CBasePlayer::GetGunPosition()
@@ -666,21 +689,21 @@ void CBasePlayer::TraceAttack( entvars_t *pevInflictor, entvars_t *pevAttacker, 
 		case HITGROUP_GENERIC:
 			break;
 		case HITGROUP_HEAD:
-			dmgInfo.damage *= gSkillData.plrHead;
+			dmgInfo.damage *= GetSkillValue("player_head");
 			break;
 		case HITGROUP_CHEST:
-			dmgInfo.damage *= gSkillData.plrChest;
+			dmgInfo.damage *= GetSkillValue("player_chest");
 			break;
 		case HITGROUP_STOMACH:
-			dmgInfo.damage *= gSkillData.plrStomach;
+			dmgInfo.damage *= GetSkillValue("player_stomach");
 			break;
 		case HITGROUP_LEFTARM:
 		case HITGROUP_RIGHTARM:
-			dmgInfo.damage *= gSkillData.plrArm;
+			dmgInfo.damage *= GetSkillValue("player_arm");
 			break;
 		case HITGROUP_LEFTLEG:
 		case HITGROUP_RIGHTLEG:
-			dmgInfo.damage *= gSkillData.plrLeg;
+			dmgInfo.damage *= GetSkillValue("player_leg");
 			break;
 		default:
 			break;
@@ -1074,7 +1097,7 @@ void CBasePlayer::PackDeadPlayerItems()
 
 			if( rgpPackWeapons[iPW] )
 			{
-				if (rgpPackWeapons[iPW]->UsesClip())
+				if (rgpPackWeapons[iPW]->UsesClip() && rgpPackWeapons[iPW]->UsesAmmo())
 				{
 					// complete the reload.
 					// TODO: make it depend on the game rules
@@ -2411,7 +2434,7 @@ void CBasePlayer::UpdateStatusBar()
 
 			const bool isPlayer = pEntity->IsPlayer();
 			const bool isFriendPlayer = isPlayer && g_pGameRules->PlayerRelationship(this, pEntity) == GR_TEAMMATE;
-			const bool isFriendMonster = (pMonster && pMonster->IDefaultRelationship(this) == R_AL);
+			const bool isFriendMonster = (pMonster && CBaseMonster::IDefaultRelationship(pMonster->AwakeClassify(), Classify()) == R_AL);
 			showMonsterInfo = isFriendPlayer || (allowMonsterInfoValue == 1 && !isPlayer) ||
 							  (allowMonsterInfoValue == 2 && isFriendMonster) ||
 							  (allowMonsterInfoValue == 3 && isFriendMonster && m_pActiveItem != 0 && m_pActiveItem->WeaponId() == WEAPON_MEDKIT);
@@ -2462,16 +2485,26 @@ void CBasePlayer::UpdateStatusBar()
 							displayName = className;
 					}
 				}
+
+				int monsterInfoFlags = MONSTERINFO_FLAG_NO;
+				if (pMonster)
+					monsterInfoFlags |= MONSTERINFO_FLAG_MONSTER;
+				if (isPlayer)
+					monsterInfoFlags |= MONSTERINFO_FLAG_PLAYER;
+				if (isFriendMonster || isFriendPlayer)
+					monsterInfoFlags |= MONSTERINFO_FLAG_ALLY;
+				if (!pEntity->HasFlesh())
+					monsterInfoFlags |= MONSTERINFO_FLAG_MACHINE;
+
 				if (displayName && *displayName)
 				{
 					MESSAGE_BEGIN(MSG_ONE, gmsgMonsterInfo, nullptr, edict());
+						WRITE_BYTE(MONSTERINFO_FULLUPDATE);
 						WRITE_STRING(displayName);
 						WRITE_SHORT(health);
 						WRITE_SHORT((int)ceil(pEntity->pev->max_health));
 						WRITE_SHORT(armor);
-						WRITE_BYTE(pMonster ? 1 : 0);
-						WRITE_BYTE(isPlayer ? 1 : 0);
-						WRITE_BYTE((isFriendPlayer || isFriendMonster) ? 1 : 0);
+						WRITE_BYTE(monsterInfoFlags);
 					MESSAGE_END();
 				}
 			}
@@ -2510,15 +2543,77 @@ void CBasePlayer::UpdateStatusBar()
 	{
 		return;
 	}
-	else if (m_lastSeenEntityIndex >= 0 && m_lastSeenTime + MONSTERINFO_LINGER_TIME <= gpGlobals->time)
+	else if (m_lastSeenEntityIndex >= 0)
 	{
-		m_lastSeenEntityIndex = -1;
-		m_lastSeenHealth = -1;
-		m_lastSeenArmor = -1;
+		if (m_lastSeenTime + MONSTERINFO_LINGER_TIME <= gpGlobals->time)
+		{
+			m_lastSeenEntityIndex = -1;
+			m_lastSeenHealth = -1;
+			m_lastSeenArmor = -1;
 
-		MESSAGE_BEGIN(MSG_ONE, gmsgMonsterInfo, nullptr, edict());
-			WRITE_STRING("");
-		MESSAGE_END();
+			MESSAGE_BEGIN(MSG_ONE, gmsgMonsterInfo, nullptr, edict());
+				WRITE_BYTE(MONSTERINFO_CLEAR);
+			MESSAGE_END();
+		}
+		else
+		{
+			edict_t* pEdict = INDEXENT(m_lastSeenEntityIndex);
+			if (!FNullEnt(pEdict))
+			{
+				CBaseEntity* pEntity = CBaseEntity::Instance(pEdict);
+				if (pEntity)
+				{
+					CBaseMonster* pMonster = pEntity->MyMonsterPointer();
+
+					int health = (int)ceil(pEntity->pev->health);
+					if (health < 0 || !pEntity->IsFullyAlive()) {
+						health = 0;
+					}
+					const int armor = (int)pEntity->pev->armorvalue;
+
+					const bool isPlayer = pEntity->IsPlayer();
+					const bool isFriendPlayer = isPlayer && g_pGameRules->PlayerRelationship(this, pEntity) == GR_TEAMMATE;
+					const bool isFriendMonster = (pMonster && pMonster->IDefaultRelationship(this) == R_AL);
+
+					if (m_lastSeenHealth != health || (m_lastSeenArmor != armor && isFriendPlayer))
+					{
+						m_lastSeenHealth = health;
+						m_lastSeenArmor = armor;
+
+						int monsterInfoFlags = MONSTERINFO_FLAG_NO;
+						if (pMonster)
+							monsterInfoFlags |= MONSTERINFO_FLAG_MONSTER;
+						if (isPlayer)
+							monsterInfoFlags |= MONSTERINFO_FLAG_PLAYER;
+						if (isFriendMonster || isFriendPlayer)
+							monsterInfoFlags |= MONSTERINFO_FLAG_ALLY;
+
+						if (health == 0)
+						{
+							m_lastSeenTime = Q_min(gpGlobals->time - MONSTERINFO_LINGER_TIME * 0.8f, m_lastSeenTime);
+						}
+
+						MESSAGE_BEGIN(MSG_ONE, gmsgMonsterInfo, nullptr, edict());
+							WRITE_BYTE(MONSTERINFO_FASTUPDATE);
+							WRITE_SHORT(health);
+							WRITE_SHORT((int)ceil(pEntity->pev->max_health));
+							WRITE_SHORT(armor);
+							WRITE_BYTE(monsterInfoFlags);
+						MESSAGE_END();
+					}
+				}
+			}
+			else
+			{
+				m_lastSeenEntityIndex = -1;
+				m_lastSeenHealth = -1;
+				m_lastSeenArmor = -1;
+
+				MESSAGE_BEGIN(MSG_ONE, gmsgMonsterInfo, nullptr, edict());
+					WRITE_BYTE(MONSTERINFO_CLEAR);
+				MESSAGE_END();
+			}
+		}
 	}
 
 	bool bForceResend = false;
@@ -2633,6 +2728,13 @@ void CBasePlayer::PreThink()
 {
 	SetMovementMode();
 
+	const bool bunnyhop = sv_bunnyhop.value ? true : false;
+	if (m_bunnyhop != bunnyhop)
+	{
+		m_bunnyhop = bunnyhop;
+		g_engfuncs.pfnSetPhysicsKeyValue( edict(), "bj", bunnyhop ? "1" : "0" );
+	}
+
 	int buttonsChanged = ( m_afButtonLast ^ pev->button );	// These buttons have changed this frame
 
 	// Debounced button codes for pressed/released
@@ -2719,6 +2821,24 @@ void CBasePlayer::PreThink()
 		if (viewEntity)
 		{
 			SET_VIEW(edict(), viewEntity->edict());
+		}
+	}
+
+	for (int i=0; i<MAX_MESSAGE_BOXES; ++i)
+	{
+		if (m_messageBoxEnts[i] != 0 && m_messageBoxDistances[i] > 0.0f)
+		{
+			if ((pev->origin - m_messageBoxOrigins[i]).IsLengthGreaterThan(m_messageBoxDistances[i]))
+			{
+				const int messageBoxId = m_messageBoxEnts[i]->entindex();
+
+				ClearMessageBoxByIndex(i);
+
+				MESSAGE_BEGIN(MSG_ONE, gmsgMessageBox, nullptr, pev);
+					WRITE_BYTE(0);
+					WRITE_LONG(messageBoxId);
+				MESSAGE_END();
+			}
 		}
 	}
 
@@ -3216,8 +3336,8 @@ void CBasePlayer::CheckTimeBasedDamage()
 			if( m_rgbTimeBasedDamage[i] )
 			{
 				// use up an antitoxin on poison or nervegas after a few seconds of damage					
-				if( ( ( i == itbd_NerveGas ) && ( m_rgbTimeBasedDamage[i] < NERVEGAS_DURATION ) ) ||
-					( ( i == itbd_Poison ) && ( m_rgbTimeBasedDamage[i] < POISON_DURATION ) ) )
+				if( ( ( i == itbd_NerveGas ) ) ||
+					( ( i == itbd_Poison ) ) )
 				{
 					if( m_rgItems[ITEM_ANTIDOTE] )
 					{
@@ -3727,7 +3847,7 @@ void CBasePlayer::PostThink()
 	{
 		if( m_flFallVelocity > 64 && !g_pGameRules->IsMultiplayer() )
 		{
-			CSoundEnt::InsertSound( bits_SOUND_PLAYER, pev->origin, (int)m_flFallVelocity, 0.2 );
+			InsertAISound( bits_SOUND_PLAYER, (int)m_flFallVelocity, 0.2 );
 			// ALERT( at_console, "fall %f\n", m_flFallVelocity );
 		}
 		m_flFallVelocity = 0;
@@ -4310,6 +4430,7 @@ void CBasePlayer::SendCurWeaponClear()
 		WRITE_BYTE( 0 );
 		WRITE_BYTE( 0 );
 		WRITE_SHORT( 0 );
+		WRITE_SHORT( 0 );
 	MESSAGE_END();
 }
 
@@ -4318,6 +4439,7 @@ void CBasePlayer::SendCurWeaponDead()
 	MESSAGE_BEGIN( MSG_ONE, gmsgCurWeapon, NULL, pev );
 		WRITE_BYTE( 0 );
 		WRITE_BYTE( 0XFF );
+		WRITE_SHORT( -1 );
 		WRITE_SHORT( -1 );
 	MESSAGE_END();
 }
@@ -4469,7 +4591,7 @@ CBaseEntity *FindEntityForward( CBaseEntity *pMe )
 		CBaseEntity *pHit = CBaseEntity::Instance( tr.pHit );
 		return pHit;
 	}
-	return NULL;
+	return nullptr;
 }
 
 void CBasePlayer::SuitLightTurnOn()
@@ -4497,7 +4619,7 @@ void CBasePlayer::UpdateSuitLightBattery(bool on)
 		WRITE_BYTE( m_iFlashBattery );
 	MESSAGE_END();
 
-	m_flFlashLightTime = gSkillData.flashlightDrainTime/100 + gpGlobals->time;
+	m_flFlashLightTime = GetSkillValue("flashlight_drain_time")/100 + gpGlobals->time;
 }
 
 void CBasePlayer::FlashlightToggle()
@@ -4647,6 +4769,19 @@ void CBasePlayer::ImpulseCommands()
 	PlayerUse();
 
 	int iImpulse = (int)pev->impulse;
+
+	// custom handled buttons
+	if (iImpulse >= 1 && iImpulse <= 50)
+	{
+		CBaseEntity* pEntity = nullptr;
+		while ((pEntity = UTIL_FindEntityByClassname(pEntity, "trigger_impulse")) != nullptr)
+		{
+			pEntity->Use(this, this, USE_TOGGLE, iImpulse);
+		}
+		pev->impulse = 0;
+		return;
+	}
+
 	switch( iImpulse )
 	{
 	case 99:
@@ -4971,6 +5106,8 @@ bool CBasePlayer::RemovePlayerItem( CBasePlayerWeapon *pItem, bool bCallHolster 
 		ResetAutoaim();
 		if( bCallHolster )
 			pItem->Holster();
+		else
+			pItem->ResetOnRemoveAsActive();
 		m_pActiveItem = NULL;
 		pev->viewmodel = 0;
 		pev->weaponmodel = 0;
@@ -5052,7 +5189,7 @@ int CBasePlayer::GiveAmmo(int iCount, const char *szName)
 	if (!addedAsWeapon)
 	{
 		m_rgAmmo[i] += iAdd;
-		if( gmsgAmmoPickup )  // make sure the ammo messages have been linked first
+		if (gmsgAmmoPickup && !m_hidePickups)  // make sure the ammo messages have been linked first
 		{
 			// Send the message that ammo has been picked up
 			MESSAGE_BEGIN( MSG_ONE, gmsgAmmoPickup, NULL, pev );
@@ -5421,7 +5558,7 @@ void CBasePlayer::UpdateClientData()
 		{
 			if( m_iFlashBattery )
 			{
-				m_flFlashLightTime = gSkillData.flashlightDrainTime/100 + gpGlobals->time;
+				m_flFlashLightTime = GetSkillValue("flashlight_drain_time")/100 + gpGlobals->time;
 				m_iFlashBattery--;
 
 				if( !m_iFlashBattery )
@@ -5432,7 +5569,7 @@ void CBasePlayer::UpdateClientData()
 		{
 			if( m_iFlashBattery < 100 )
 			{
-				m_flFlashLightTime = gSkillData.flashlightChargeTime/100 + gpGlobals->time;
+				m_flFlashLightTime = GetSkillValue("flashlight_charge_time")/100 + gpGlobals->time;
 				m_iFlashBattery++;
 			}
 			else
@@ -5581,6 +5718,77 @@ void CBasePlayer::UpdateClientData()
 		}
 
 		SendPlayerTemplateData();
+
+		for (int i=0; i<ARRAYSIZE(m_messageBoxEnts); ++i)
+		{
+			if (m_messageBoxEnts[i] != 0)
+			{
+				MESSAGE_BEGIN(MSG_ONE, gmsgMessageBox, nullptr, pev);
+					WRITE_BYTE(1);
+					WRITE_LONG(m_messageBoxEnts[i]->entindex());
+					WRITE_STRING(STRING(m_messageBoxEnts[i]->pev->message));
+				MESSAGE_END();
+			}
+		}
+
+		if (m_fadeStarted)
+		{
+			const float sumDurationLeft = m_fadeStarted + m_fadeDuration + m_fadeHoldTime - gpGlobals->time;
+			if (sumDurationLeft < 0.2f)
+			{
+				// it's too short, no point in replaying
+				m_fadeStarted = 0.0f;
+			}
+			else
+			{
+				int r, g, b;
+				UnpackRGB(r, g, b, m_fadeColor);
+				int alpha = m_fadeAlpha;
+
+				float fadeDuration, fadeHold;
+
+				if (FBitSet(m_fadeFlags, FFADE_OUT))
+				{
+					fadeDuration = sumDurationLeft - m_fadeHoldTime;
+					if (fadeDuration < 0.01f)
+					{
+						// Make sure it's not 0
+						fadeDuration = 0.01f;
+						fadeHold = sumDurationLeft - fadeDuration;
+					}
+					else
+					{
+						fadeHold = m_fadeHoldTime;
+					}
+				}
+				else
+				{
+					fadeHold = sumDurationLeft - m_fadeDuration;
+					fadeHold = Q_max(fadeHold, 0.0f);
+
+					fadeDuration = sumDurationLeft - fadeHold;
+
+					if (fadeDuration < m_fadeDuration)
+					{
+						alpha = alpha * fadeDuration / m_fadeDuration;
+					}
+				}
+
+				UTIL_ScreenFade(this, Vector(r, g, b), fadeDuration, fadeHold, alpha, m_fadeFlags);
+			}
+		}
+
+		if (!g_pGameRules->IsMultiplayer() || (entindex() == 1 && !IS_DEDICATED_SERVER()))
+		{
+			int numSend = 0;
+			for (auto it = g_errorCollector.DeprecationsBegin(); it != g_errorCollector.DeprecationsEnd() && numSend <= 10; ++it, ++numSend)
+			{
+				MESSAGE_BEGIN(MSG_ONE, gmsgDeprecation, NULL, edict());
+					WRITE_STRING(it->c_str());
+				MESSAGE_END();
+			}
+			g_errorCollector.ClearDeprecations();
+		}
 
 		m_bSentMessages = true;
 	}
@@ -6084,8 +6292,8 @@ Vector CBasePlayer::GetAutoaimVectorFromPoint( const Vector& vecSrc, float flDel
 		{
 			SET_CROSSHAIRANGLE( edict(), -m_vecAutoAim.x, m_vecAutoAim.y );
 
-			m_lastx = (int)m_vecAutoAim.x;
-			m_lasty = (int)m_vecAutoAim.y;
+			m_lastx = m_vecAutoAim.x;
+			m_lasty = m_vecAutoAim.y;
 		}
 	}
 
@@ -6680,10 +6888,11 @@ int CBasePlayer::GiveInventoryItem(string_t item, int count, bool allowOverflow)
 		}
 	}
 
+	const int inventoryFlags = m_hidePickups ? INVENTORY_DONT_SHOW_IN_HISTORY : 0;
 	MESSAGE_BEGIN(MSG_ONE, gmsgInventory, NULL, pev);
 		WRITE_SHORT(m_inventoryItemCounts[i]);
 		WRITE_STRING(STRING(item));
-		WRITE_BYTE(0);
+		WRITE_BYTE(inventoryFlags);
 	MESSAGE_END();
 
 	return result;
@@ -6706,10 +6915,11 @@ int CBasePlayer::SetInventoryItem(string_t item, int count, bool allowOverflow)
 		}
 		if (oldCount != count)
 		{
+			const int inventoryFlags = m_hidePickups ? INVENTORY_DONT_SHOW_IN_HISTORY : 0;
 			MESSAGE_BEGIN(MSG_ONE, gmsgInventory, NULL, pev);
 				WRITE_SHORT(m_inventoryItemCounts[i]);
 				WRITE_STRING(STRING(item));
-				WRITE_BYTE(0);
+				WRITE_BYTE(inventoryFlags);
 			MESSAGE_END();
 
 			int result = INVENTORY_ITEM_COUNT_CHANGED;
@@ -6791,6 +7001,15 @@ int CBasePlayer::InventoryItemIndex(string_t item)
 		}
 	}
 	return -1;
+}
+
+void CBasePlayer::NotifyPickup(const char *pickupName)
+{
+	if (m_hidePickups)
+		return;
+	MESSAGE_BEGIN(MSG_ONE, gmsgItemPickup, nullptr, pev);
+		WRITE_STRING(pickupName);
+	MESSAGE_END();
 }
 
 bool CBasePlayer::AddJournalRecord(string_t section, string_t record)
@@ -7101,6 +7320,82 @@ bool CBasePlayer::ShouldCollideWithCorpses()
 		return m_forceCollideWithCorpses;
 	}
 	return true;
+}
+
+void CBasePlayer::RemoveMessageBoxGaps()
+{
+	for (int i=0; i<ARRAYSIZE(m_messageBoxEnts); ++i)
+	{
+		if (m_messageBoxEnts[i] == 0)
+		{
+			for (int j=i+1; j<ARRAYSIZE(m_messageBoxEnts); ++j)
+			{
+				m_messageBoxEnts[j-1] = m_messageBoxEnts[j];
+				m_messageBoxOrigins[j-1] = m_messageBoxOrigins[j];
+				m_messageBoxDistances[j-1] = m_messageBoxDistances[j];
+
+				ClearMessageBoxByIndex(j);
+			}
+		}
+	}
+}
+
+bool CBasePlayer::AddMessageBox(CBaseEntity *pMessageBoxEnt, const Vector& origin, float distance)
+{
+	RemoveMessageBoxGaps();
+
+	for (int i=0; i<ARRAYSIZE(m_messageBoxEnts); ++i)
+	{
+		if (m_messageBoxEnts[i] == 0)
+		{
+			//ALERT(at_console, "Adding messagebox with index %d\n", pMessageBoxEnt->entindex());
+			m_messageBoxEnts[i] = pMessageBoxEnt;
+			m_messageBoxOrigins[i] = origin;
+			m_messageBoxDistances[i] = distance;
+			return true;
+		}
+		else if (m_messageBoxEnts[i] == pMessageBoxEnt)
+		{
+			ALERT(at_aiconsole, "Messagebox with id %d is already added\n", pMessageBoxEnt->entindex());
+			return false;
+		}
+	}
+
+	ALERT(at_warning, "Too many messageboxes for player at once. Removing the oldest one\n");
+
+	ClearMessageBoxByIndex(0);
+	RemoveMessageBoxGaps();
+
+	const int lastIndex = ARRAYSIZE(m_messageBoxEnts) - 1;
+	m_messageBoxEnts[lastIndex] = pMessageBoxEnt;
+	m_messageBoxOrigins[lastIndex] = origin;
+	m_messageBoxDistances[lastIndex] = distance;
+	return true;
+}
+
+bool CBasePlayer::CloseMessageBox(int messageBoxId)
+{
+	for (int i=0; i<ARRAYSIZE(m_messageBoxEnts); ++i)
+	{
+		if (m_messageBoxEnts[i] != 0 && m_messageBoxEnts[i]->entindex() == messageBoxId)
+		{
+			//ALERT(at_console, "Removing messagebox with index %d\n", messageBoxId);
+			ClearMessageBoxByIndex(i);
+			RemoveMessageBoxGaps();
+			return true;
+		}
+	}
+	return false;
+}
+
+void CBasePlayer::ClearMessageBoxByIndex(int i)
+{
+	if (i < 0 || i >= ARRAYSIZE(m_messageBoxEnts))
+		return;
+
+	m_messageBoxEnts[i] = 0;
+	m_messageBoxOrigins[i] = g_vecZero;
+	m_messageBoxDistances[i] = 0.0f;
 }
 
 const SoundScript* PM_GetPlayerSoundScript(int playerIndex, const char* name)
@@ -7879,6 +8174,7 @@ TYPEDESCRIPTION	CPlayerCapabilities::m_SaveData[] =
 	DEFINE_FIELD( CPlayerCapabilities, m_duckCapability, FIELD_SHORT ),
 	DEFINE_FIELD( CPlayerCapabilities, m_useCapability, FIELD_SHORT ),
 	DEFINE_FIELD( CPlayerCapabilities, m_stepSoundCapability, FIELD_SHORT ),
+	DEFINE_FIELD( CPlayerCapabilities, m_movementCapability, FIELD_SHORT ),
 	DEFINE_FIELD( CPlayerCapabilities, m_saveCapability, FIELD_SHORT ),
 };
 
@@ -8159,6 +8455,8 @@ void CRevertSaved::LoadThink()
 	}
 }
 
+#define SF_PLAYERSTASH_DONT_SHOW_PICKUPS (1 << 1)
+
 enum
 {
 	PLAYER_STASH_STASH = 1,
@@ -8330,6 +8628,9 @@ public:
 
 	void UnstashToPlayer(CBasePlayer* pPlayer)
 	{
+		if (FBitSet(pev->spawnflags, SF_PLAYERSTASH_DONT_SHOW_PICKUPS))
+			pPlayer->m_hidePickups = true;
+
 		if (m_healthPolicy > 0)
 		{
 			pPlayer->pev->health = pev->health;
@@ -8408,6 +8709,9 @@ public:
 				}
 			}
 		}
+
+		if (FBitSet(pev->spawnflags, SF_PLAYERSTASH_DONT_SHOW_PICKUPS))
+			pPlayer->m_hidePickups = false;
 
 		if (!FStringNull(m_triggerOnUnstash))
 			FireTargets(STRING(m_triggerOnUnstash), pPlayer, this);
@@ -8488,6 +8792,29 @@ public:
 };
 
 LINK_ENTITY_TO_CLASS( player_template, CPlayerTemplate )
+
+class CPlayerMarker : public CBaseEntity
+{
+public:
+	void Spawn() override;
+	void Precache() override;
+};
+
+LINK_ENTITY_TO_CLASS(player_marker, CPlayerMarker)
+
+void CPlayerMarker::Spawn()
+{
+	Precache();
+	SET_MODEL(ENT(pev), "models/player.mdl");
+	// use unique render fx to identify the entity on client
+	pev->renderfx = kRenderFxClampMinScale;
+	//ALERT(at_aiconsole, "DEBUG: Player_marker coordinates is %g %g %g \n", pev->origin.x, pev->origin.y, pev->origin.z);
+}
+
+void CPlayerMarker::Precache()
+{
+	PRECACHE_MODEL("models/player.mdl");
+}
 
 enum
 {

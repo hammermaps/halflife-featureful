@@ -1,6 +1,7 @@
 #include "parsetext.h"
 #include <cstring>
 #include <cstdio>
+#include <cstdlib>
 
 void SkipSpaceCharacters(const char* text, int& i, const int length)
 {
@@ -10,10 +11,10 @@ void SkipSpaceCharacters(const char* text, int& i, const int length)
 	}
 }
 
-bool SkipSpaces(const char *text, int& i, const int length)
+bool SkipSpacesAndTabs(const char *text, int& i, const int length)
 {
 	int start = i;
-	while (i<length && text[i] == ' ')
+	while (i<length && text[i] == ' ' || text[i] == '\t')
 	{
 		++i;
 	}
@@ -22,7 +23,7 @@ bool SkipSpaces(const char *text, int& i, const int length)
 
 void ConsumeNonSpaceCharacters(const char *text, int& i, const int length)
 {
-	while(i<length && text[i] != ' ' && text[i] != '\n' && text[i] != '\r' && text[i] != '\0')
+	while(i<length && !IsSpaceCharacter(text[i]) && text[i] != '\0')
 	{
 		++i;
 	}
@@ -148,4 +149,40 @@ bool ParseBoolean(const char* valueText, bool& result)
 bool ParseFloat(const char *valueText, float& result)
 {
 	return sscanf(valueText, "%f", &result) == 1;
+}
+
+bool ParseFloatRange(const char *valueText, FloatRange& result)
+{
+	if (sscanf(valueText, "%f", &result.min) != 1)
+		return false;
+
+	const char* found = strchr(valueText, ',');
+
+	if (found) {
+		found++;
+		if (sscanf(found, "%f", &result.max) != 1)
+			return false;
+	} else {
+		result.max = result.min;
+	}
+
+	return true;
+}
+
+bool ParseIntRange(const char *valueText, IntRange& result)
+{
+	if (sscanf(valueText, "%d", &result.min) != 1)
+		return false;
+
+	const char* found = strchr(valueText, ',');
+
+	if (found) {
+		found++;
+		if (sscanf(found, "%d", &result.max) != 1)
+			return false;
+	} else {
+		result.max = result.min;
+	}
+
+	return true;
 }

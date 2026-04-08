@@ -3797,6 +3797,8 @@ void CTriggerChangeValue::ApplySourceValue(CBaseEntity* pTarget, const char* sou
 		mypkvd.fHandled = false;
 
 		DispatchKeyValue(pTarget->edict(), &mypkvd);
+		if (FStrEq(mypkvd.szKeyName, "solid"))
+			UTIL_SetOrigin(pTarget->pev, pTarget->pev->origin);
 		ALERT(at_aiconsole, "'%s' (%s): dispatched value '%s' to key '%s' of entity '%s'\n", GetTargetname(), STRING(pev->classname), newValue, keyName, STRING(pTarget->pev->classname));
 	}
 		break;
@@ -5130,8 +5132,10 @@ void CTriggerRespawn::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYP
 			{
 				if (!FBitSet(pev->spawnflags, SF_TRIGGERRESPAWN_DONT_MOVE_LIVING_PLAYERS))
 				{
+					if (pPlayer->IsOnRope())
+						pPlayer->LetGoRope();
 					g_pGameRules->GetPlayerSpawnSpot(pPlayer);
-					pPlayer->pev->health = pPlayer->pev->max_health;
+					pPlayer->pev->health = Q_max(pPlayer->pev->max_health, pPlayer->pev->health);
 				}
 			}
 			else
@@ -5377,10 +5381,10 @@ void CTriggerKillMonster::KillMonster(CBaseEntity *pEntity)
 		default:
 			break;
 		}
-		pMonster->pev->health = 0;
-		DamageInfo damageInfo{1, DMG_GENERIC};
+		DamageInfo damageInfo{pMonster->pev->health, DMG_GENERIC};
 		if (pev->spawnflags & SF_KILLMONSTER_GIBALWAYS)
 			damageInfo.SetGibPolicy(GIB_ALWAYS);
+		damageInfo.SetIgnoreTransform();
 		pMonster->TakeDamage(pev, pev, damageInfo );
 	}
 }
@@ -5633,7 +5637,7 @@ public:
 	void Precache() override;
 	bool IsEnabledInMod() override { return g_modFeatures.IsMonsterEnabled("geneworm"); }
 	float DamageAmount() override {
-		return pev->dmg ? pev->dmg : gSkillData.gwormDmgHit;
+		return pev->dmg ? pev->dmg : GetSkillValue("geneworm_dmg_hit");
 	}
 	void EXPORT GeneWormTouch(CBaseEntity *pOther);
 
@@ -6452,6 +6456,54 @@ void CTriggerCommand::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TY
 	}
 }
 #endif
+
+class CTriggerImpulse : public CBaseDelay
+{
+public:
+	void Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value);
+	int ObjectCaps() override { return CBaseEntity::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
+
+	void KeyValue(KeyValueData *pkvd) override;
+
+	int Save(CSave &save) override;
+	int Restore(CRestore &restore) override;
+	static TYPEDESCRIPTION m_SaveData[];
+
+	string_t m_sMaster;
+};
+
+LINK_ENTITY_TO_CLASS( trigger_impulse, CTriggerImpulse )
+
+TYPEDESCRIPTION CTriggerImpulse::m_SaveData[] =
+{
+	DEFINE_FIELD( CTriggerImpulse, m_sMaster, FIELD_STRING ),
+};
+
+IMPLEMENT_SAVERESTORE( CTriggerImpulse, CBaseDelay )
+
+void CTriggerImpulse::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
+{
+	int iImpulse = (int)value;
+
+	if (pev->impulse != iImpulse)
+		return;
+
+	if (m_sMaster && !UTIL_IsMasterTriggered(m_sMaster, pActivator))
+		return;
+
+	SUB_UseTargets(pActivator);
+}
+
+void CTriggerImpulse::KeyValue( KeyValueData *pkvd )
+{
+	if (FStrEq( pkvd->szKeyName, "master" ))
+	{
+		m_sMaster = ALLOC_STRING(pkvd->szValue);
+		pkvd->fHandled = true;
+	}
+	else
+		CBaseDelay::KeyValue(pkvd);
+}
 
 class CTriggerChangeClass : public CPointEntity
 {

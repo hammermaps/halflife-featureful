@@ -26,6 +26,7 @@
 #include "locus.h"
 #include "talkmonster.h"
 #include "warpball.h"
+#include "error_collector.h"
 
 #define MONSTERMAKER_START_ON_FIX 1
 
@@ -76,6 +77,7 @@ public:
 	void Spawn() override;
 	bool CheckMonsterClassname();
 	void Precache() override;
+	void Activate() override;
 	void KeyValue( KeyValueData* pkvd) override;
 	void EXPORT ToggleUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 	void EXPORT CyclicUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
@@ -83,7 +85,7 @@ public:
 	void EXPORT CyclicBacklogThink();
 	void ReportNullEntity();
 	void DeathNotice( entvars_t *pevChild ) override;// monster maker children use this to tell the monster maker that they have died.
-	int MakeMonster();
+	std::pair<int, float> MakeMonster();
 
 	void GetRealHullSizes(Vector& minHullSize, Vector& maxHullSize);
 	int CalculateSpot(const Vector& testMinHullSize, const Vector& testMaxHullSize, Vector& placePosition, Vector& placeAngles, edict_t*& warpballSoundEnt, float spawnDelay);
@@ -401,6 +403,16 @@ void CMonsterMaker::Spawn()
 	m_flGround = 0;
 }
 
+void CMonsterMaker::Activate()
+{
+	if (FBitSet(pev->spawnflags, SF_MONSTERMAKER_ALIGN_TO_PLAYER))
+	{
+		g_errorCollector.AddFormattedDeprecation("%s: (at %g, %g, %g) has spawnflag %d. This will be removed/replaced in future. Use 'Face to' (face_position) parameter instead.",
+												 STRING(pev->classname), pev->origin.x, pev->origin.y, pev->origin.z, SF_MONSTERMAKER_ALIGN_TO_PLAYER);
+	}
+	CBaseMonster::Activate();
+}
+
 bool CMonsterMaker::CheckMonsterClassname()
 {
 	if (FStringNull(m_iszMonsterClassname))
@@ -633,19 +645,14 @@ int CMonsterMaker::CalculateSpot(const Vector &testMinHullSize, const Vector &te
 		if (pBlocker)
 		{
 			const char* blockerName = FStringNull(pBlocker->pev->classname) ? "" : STRING(pBlocker->pev->classname);
-			ALERT( at_aiconsole, "Spawning of %s is blocked by %s\n", STRING(m_iszMonsterClassname), blockerName );
+			ALERT(at_aiconsole, "Spawning of %s by %s '%s' is blocked by %s. Current live children: %d\n", STRING(m_iszMonsterClassname), STRING(pev->classname), STRING(pev->targetname), blockerName, m_cLiveChildren);
 
 			if (m_makeBlockerMoveAway)
 			{
 				CBaseMonster* pBlockerMonster = pBlocker->MyMonsterPointer();
-				if (pBlockerMonster && pBlockerMonster->IsFreeToManipulate())
+				if (pBlockerMonster)
 				{
-					int schedFlags = SUGGEST_SCHEDULE_FLAG_DONT_AVOID_THREAT_NODE;
-					if (m_makeBlockerMoveAway == 2)
-					{
-						schedFlags |= SUGGEST_SCHEDULE_FLAG_RUN;
-					}
-					pBlockerMonster->SuggestSchedule(SCHED_RETREAT_FROM_SPOT, tempPosEnt ? tempPosEnt : this, testMaxHullSize.x * 1.5f, 256, schedFlags);
+					pBlockerMonster->AskMoveAwayFromSpot(tempPosEnt ? tempPosEnt : this, testMaxHullSize.x * 1.5f, m_makeBlockerMoveAway == 2);
 				}
 			}
 
@@ -764,6 +771,7 @@ CBaseEntity* CMonsterMaker::SpawnMonster(const Vector &placePosition, const Vect
 		createdMonster->m_activeAfterCombat = m_activeAfterCombat;
 		createdMonster->m_sizeForGrapple = m_sizeForGrapple;
 		createdMonster->m_gibPolicy = m_gibPolicy;
+		createdMonster->m_triggerOnDeath = m_triggerOnDeath;
 
 		createdMonster->SetHead(m_iHead);
 
@@ -875,7 +883,7 @@ void CMonsterMaker::StartWarpballEffect(const Vector &vecPosition, edict_t* warp
 	const WarpballTemplate* warpballTemplate = g_WarpballCatalog.FindWarpballTemplate(warpballName, STRING(m_iszMonsterClassname));
 	if (warpballTemplate)
 	{
-		PlayWarpballEffect(*warpballTemplate, vecPosition, warpballSoundEnt);
+		PlayWarpballEffect(this, *warpballTemplate, vecPosition, warpballSoundEnt);
 		return;
 	}
 
@@ -898,12 +906,12 @@ void CMonsterMaker::StartWarpballEffect(const Vector &vecPosition, edict_t* warp
 //=========================================================
 // MakeMonster-  this is the code that drops the monster
 //=========================================================
-int CMonsterMaker::MakeMonster()
+std::pair<int, float> CMonsterMaker::MakeMonster()
 {
 	if( m_iMaxLiveChildren > 0 && m_cLiveChildren + m_delayedCount >= m_iMaxLiveChildren )
 	{
 		// not allowed to make a new one yet. Too many live ones out right now.
-		return MONSTERMAKER_LIMIT;
+		return std::make_pair(MONSTERMAKER_LIMIT, 0.0f);
 	}
 
 	Vector minHullSize = Vector( -34, -34, 0 );
@@ -944,13 +952,13 @@ int CMonsterMaker::MakeMonster()
 
 	const int spotResult = CalculateSpot(minHullSize, maxHullSize, placePosition, placeAngles, warpballSoundEnt, spawnDelay);
 	if (spotResult != 0)
-		return spotResult;
+		return std::make_pair(spotResult, 0.0f);
 
 	if (spawnDelay <= 0.0f)
 	{
 		CBaseEntity* createdEntity = SpawnMonster(placePosition, placeAngles);
 		if (!createdEntity)
-			return MONSTERMAKER_NULLENTITY;
+			return std::make_pair(MONSTERMAKER_NULLENTITY, 0.0f);
 
 		if (!FStringNull(warpballName))
 		{
@@ -980,10 +988,10 @@ int CMonsterMaker::MakeMonster()
 	else
 	{
 		if (!m_childIsValid)
-			return MONSTERMAKER_NULLENTITY;
+			return std::make_pair(MONSTERMAKER_NULLENTITY, 0.0f);
 		CMonsterMakerHull* pHull = CMonsterMakerHull::SelfCreate(this, placePosition, placeAngles, minHullSize, maxHullSize, spawnDelay);
 		if (!pHull)
-			return MONSTERMAKER_NULLENTITY;
+			return std::make_pair(MONSTERMAKER_NULLENTITY, 0.0f);
 		m_delayedCount++;
 
 		if (!FStringNull(warpballName))
@@ -1012,7 +1020,7 @@ int CMonsterMaker::MakeMonster()
 		}
 	}
 
-	return MONSTERMAKER_SPAWNED;
+	return std::make_pair(MONSTERMAKER_SPAWNED, spawnDelay);
 }
 
 //=========================================================
@@ -1023,7 +1031,7 @@ void CMonsterMaker::CyclicUse( CBaseEntity *pActivator, CBaseEntity *pCaller, US
 {
 	m_hActivator = pActivator;
 
-	if (MakeMonster() == MONSTERMAKER_BLOCKED)
+	if (MakeMonster().first == MONSTERMAKER_BLOCKED)
 	{
 		if (FBitSet(pev->spawnflags, SF_MONSTERMAKER_CYCLIC_BACKLOG))
 		{
@@ -1067,27 +1075,31 @@ void CMonsterMaker::MakerThink()
 {
 	pev->nextthink = gpGlobals->time + m_flDelay;
 
-	const int result = MakeMonster();
-	if (result == MONSTERMAKER_BLOCKED)
+	const auto result = MakeMonster();
+	if (result.first == MONSTERMAKER_BLOCKED)
 	{
 		if (m_delayAfterBlocked > 0)
 			pev->nextthink = gpGlobals->time + m_delayAfterBlocked;
 	}
-	else if (result == MONSTERMAKER_NULLENTITY)
+	else if (result.first == MONSTERMAKER_NULLENTITY)
 	{
 		ReportNullEntity();
 		SetThink(NULL); // I can't spawn it anyway, so prevent further spamming to console
+	}
+	else if (result.first == MONSTERMAKER_SPAWNED && result.second > 0.0f && FStringNull(m_iszPlacePosition))
+	{
+		pev->nextthink = gpGlobals->time + Q_max(result.second, m_flDelay);
 	}
 }
 
 void CMonsterMaker::CyclicBacklogThink()
 {
-	const int result = MakeMonster();
-	if (result == MONSTERMAKER_SPAWNED)
+	const auto result = MakeMonster();
+	if (result.first == MONSTERMAKER_SPAWNED)
 	{
 		m_cyclicBacklogSize--;
 	}
-	else if (result == MONSTERMAKER_NULLENTITY)
+	else if (result.first == MONSTERMAKER_NULLENTITY)
 	{
 		ReportNullEntity();
 	}

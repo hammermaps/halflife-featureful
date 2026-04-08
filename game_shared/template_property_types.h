@@ -45,6 +45,14 @@ struct NumberRange
 	constexpr inline bool operator!=(const N& o) const {
 		return !IsEqual(o);
 	}
+	inline NumberRange<N>& operator*=(const N f) {
+		min *= f;
+		max *= f;
+		return *this;
+	}
+	constexpr inline bool IsProperRange() const {
+		return max > min;
+	}
 private:
 	constexpr inline bool IsEqual(const NumberRange<N>& o) const {
 		return min == o.min && max == o.max;
@@ -53,6 +61,39 @@ private:
 		return min == o && max == o;
 	}
 };
+
+template<typename N, typename M>
+constexpr NumberRange<decltype(N() * M())> operator*(const NumberRange<N>& r, M f) {
+	return {r.min * f, r.max * f};
+}
+
+template<typename N>
+NumberRange<N> RangeSum(const NumberRange<N>& a, const NumberRange<N>& b)
+{
+	NumberRange<N> result = a;
+	if (b.IsProperRange())
+	{
+		if (!result.IsProperRange())
+		{
+			result.max = result.min;
+		}
+		result.min += b.min;
+		result.max += b.max;
+	}
+	else
+	{
+		if (result.IsProperRange())
+		{
+			result.min += b.min;
+			result.max += b.min;
+		}
+		else
+		{
+			result.min += b.min;
+		}
+	}
+	return result;
+}
 
 typedef NumberRange<float> FloatRange;
 typedef NumberRange<int> IntRange;

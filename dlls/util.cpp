@@ -31,6 +31,7 @@
 #include "global_models.h"
 #include "game.h"
 #include "gamerules.h"
+#include "color_utils.h"
 #include "string_utils.h"
 
 #include <set>
@@ -93,61 +94,11 @@ void ClearStringPool()
 
 std::set<std::string> g_precachedModels;
 std::set<std::string> g_precachedSounds;
+bool g_warnedAboutModelLimit = false;
+bool g_warnedAboutSoundLimit = false;
 
-int PRECACHE_MODEL(const char* name)
+static void ReportPrecachedResources(const std::set<std::string>& precachedResources, const char* resourceName, int argc)
 {
-	if (!name)
-	{
-		ALERT(at_warning, "Tried to precache model by the null string!\n");
-		return -1;
-	}
-	if (IsDeveloperModeOn())
-		g_precachedModels.insert(name);
-	return g_engfuncs.pfnPrecacheModel(name);
-}
-
-int PRECACHE_SOUND(const char* name)
-{
-	if (!name)
-	{
-		ALERT(at_warning, "Tried to precache sound by the null string!\n");
-		return -1;
-	}
-	if (name && *name == '!')
-	{
-		// no need to precache since it's a sentence
-		return -1;
-	}
-	if (IsDeveloperModeOn())
-		g_precachedSounds.insert(name);
-	return g_engfuncs.pfnPrecacheSound(name);
-}
-
-void SET_MODEL(edict_t *e, const char *m)
-{
-	if (IsDeveloperModeOn())
-		g_precachedModels.insert(m);
-	g_engfuncs.pfnSetModel(e, m);
-}
-
-void ClearPrecachedModels()
-{
-	g_precachedModels.clear();
-}
-
-void ClearPrecachedSounds()
-{
-	g_precachedSounds.clear();
-}
-
-static void ReportPrecachedResources(const std::set<std::string>& precachedResources, const char* resourceName)
-{
-	if (precachedResources.empty())
-	{
-		ALERT(at_console, "No precached %s registered! You need to restart or reload the map\n", resourceName);
-		return;
-	}
-	const int argc = CMD_ARGC();
 	if (argc > 1)
 		ALERT(at_console, "List of precached %s according to the list of prefixes:\n", resourceName);
 	else
@@ -188,6 +139,79 @@ static void ReportPrecachedResources(const std::set<std::string>& precachedResou
 	ALERT(at_console, "\nNumber of %s %s: %d\n", adj, resourceName, countShown);
 }
 
+int PRECACHE_MODEL(const char* name)
+{
+	if (!name)
+	{
+		ALERT(at_warning, "Tried to precache model by the null string!\n");
+		return -1;
+	}
+	if (IsDeveloperModeOn())
+	{
+		g_precachedModels.insert(name);
+		if (!g_warnedAboutModelLimit && g_precachedModels.size() > 512)
+		{
+			g_warnedAboutModelLimit = true;
+			ALERT(at_console, "The number of precached models is exceeding the maximum number on GoldSource (512) which will result in failure\n");
+			ReportPrecachedResources(g_precachedModels, "models", 0);
+		}
+	}
+	return g_engfuncs.pfnPrecacheModel(name);
+}
+
+int PRECACHE_SOUND(const char* name)
+{
+	if (!name)
+	{
+		ALERT(at_warning, "Tried to precache sound by the null string!\n");
+		return -1;
+	}
+	if (name && *name == '!')
+	{
+		// no need to precache since it's a sentence
+		return -1;
+	}
+	if (IsDeveloperModeOn())
+	{
+		g_precachedSounds.insert(name);
+		if (!g_warnedAboutSoundLimit && g_precachedSounds.size() >= 512)
+		{
+			g_warnedAboutSoundLimit = true;
+			ALERT(at_console, "The number of precached sounds is exceeding the maximum number on GoldSource (512) which will result in failure\n");
+			ReportPrecachedResources(g_precachedSounds, "sounds", 0);
+		}
+	}
+	return g_engfuncs.pfnPrecacheSound(name);
+}
+
+void SET_MODEL(edict_t *e, const char *m)
+{
+	if (IsDeveloperModeOn())
+		g_precachedModels.insert(m);
+	g_engfuncs.pfnSetModel(e, m);
+}
+
+void ClearPrecachedModels()
+{
+	g_precachedModels.clear();
+	g_warnedAboutModelLimit = false;
+}
+
+void ClearPrecachedSounds()
+{
+	g_precachedSounds.clear();
+}
+
+static void ReportPrecachedResources(const std::set<std::string>& precachedResources, const char* resourceName)
+{
+	if (precachedResources.empty())
+	{
+		ALERT(at_console, "No precached %s registered! You need to restart or reload the map\n", resourceName);
+		return;
+	}
+	ReportPrecachedResources(precachedResources, resourceName, CMD_ARGC());
+}
+
 void ReportPrecachedModels()
 {
 	ReportPrecachedResources(g_precachedModels, "models");
@@ -200,9 +224,12 @@ void ReportPrecachedSounds()
 
 void AddMapBSPAsPrecachedModel()
 {
-	char buf[1024];
-	snprintf(buf, sizeof(buf), "maps/%s.bsp", STRING(gpGlobals->mapname));
-	g_precachedModels.insert(buf);
+	if (IsDeveloperModeOn())
+	{
+		char buf[1024];
+		snprintf(buf, sizeof(buf), "maps/%s.bsp", STRING(gpGlobals->mapname));
+		g_precachedModels.insert(buf);
+	}
 }
 
 void WRITE_COLOR(const Color3& color)
@@ -855,8 +882,17 @@ void UTIL_ScreenShakeAll( const Vector &center, float amplitude, float frequency
 
 void UTIL_ScreenFadeBuild( ScreenFade &fade, const Vector &color, float fadeTime, float fadeHold, int alpha, int flags )
 {
-	fade.duration = FixedUnsigned16( fadeTime, 1 << 12 );		// 4.12 fixed
-	fade.holdTime = FixedUnsigned16( fadeHold, 1 << 12 );		// 4.12 fixed
+	if (fadeTime > 16.0f || fadeHold > 16.0f)
+	{
+		fade.duration = FixedUnsigned16( fadeTime, 1 << 8 );
+		fade.holdTime = FixedUnsigned16( fadeHold, 1 << 8 );
+		flags |= FFADE_LONGFADE;
+	}
+	else
+	{
+		fade.duration = FixedUnsigned16( fadeTime, 1 << 12 );		// 4.12 fixed
+		fade.holdTime = FixedUnsigned16( fadeHold, 1 << 12 );		// 4.12 fixed
+	}
 	fade.r = (int)color.x;
 	fade.g = (int)color.y;
 	fade.b = (int)color.z;
@@ -892,7 +928,22 @@ static int CalculateFadeAlpha( const Vector& fadeSource, CBaseEntity* pEntity, i
 		return 0;
 }
 
-void UTIL_ScreenFadeAll( const Vector &color, float fadeTime, float fadeHold, int alpha, int flags )
+static void SaveFadeToPlayer(CBaseEntity *pEntity, const Vector &color, float fadeTime, float fadeHold, int alpha, int flags)
+{
+	if (pEntity && pEntity->IsPlayer())
+	{
+		CBasePlayer* pPlayer = (CBasePlayer*)pEntity;
+
+		pPlayer->m_fadeStarted = gpGlobals->time;
+		pPlayer->m_fadeDuration = fadeTime;
+		pPlayer->m_fadeHoldTime = fadeHold;
+		pPlayer->m_fadeColor = PackRGB((int)color.x, (int)color.y, (int)color.z);
+		pPlayer->m_fadeAlpha = alpha;
+		pPlayer->m_fadeFlags = flags;
+	}
+}
+
+void UTIL_ScreenFadeAll( const Vector &color, float fadeTime, float fadeHold, int alpha, int flags, bool save )
 {
 	int i;
 	ScreenFade fade;
@@ -903,11 +954,13 @@ void UTIL_ScreenFadeAll( const Vector &color, float fadeTime, float fadeHold, in
 	{
 		CBaseEntity *pPlayer = UTIL_PlayerByIndex( i );
 
+		if (save)
+			SaveFadeToPlayer(pPlayer, color, fadeTime, fadeHold, alpha, flags);
 		UTIL_ScreenFadeWrite( fade, pPlayer );
 	}
 }
 
-void UTIL_ScreenFadeAll( const Vector& fadeSource, const Vector &color, float fadeTime, float fadeHold, int alpha, int flags )
+void UTIL_ScreenFadeAll( const Vector& fadeSource, const Vector &color, float fadeTime, float fadeHold, int alpha, int flags, bool save )
 {
 	int i;
 
@@ -916,24 +969,27 @@ void UTIL_ScreenFadeAll( const Vector& fadeSource, const Vector &color, float fa
 		CBaseEntity *pPlayer = UTIL_PlayerByIndex( i );
 		if (pPlayer)
 		{
-			UTIL_ScreenFade( fadeSource, pPlayer, color, fadeTime, fadeHold, alpha, flags );
+			UTIL_ScreenFade( fadeSource, pPlayer, color, fadeTime, fadeHold, alpha, flags, save );
 		}
 	}
 }
 
-void UTIL_ScreenFade( CBaseEntity *pEntity, const Vector &color, float fadeTime, float fadeHold, int alpha, int flags )
+void UTIL_ScreenFade( CBaseEntity *pEntity, const Vector &color, float fadeTime, float fadeHold, int alpha, int flags, bool save )
 {
 	ScreenFade fade;
+
+	if (save)
+		SaveFadeToPlayer(pEntity, color, fadeTime, fadeHold, alpha, flags);
 
 	UTIL_ScreenFadeBuild( fade, color, fadeTime, fadeHold, alpha, flags );
 	UTIL_ScreenFadeWrite( fade, pEntity );
 }
 
-void UTIL_ScreenFade( const Vector& fadeSource, CBaseEntity *pEntity, const Vector &color, float fadeTime, float fadeHold, int alpha, int flags )
+void UTIL_ScreenFade( const Vector& fadeSource, CBaseEntity *pEntity, const Vector &color, float fadeTime, float fadeHold, int alpha, int flags, bool save )
 {
 	alpha = CalculateFadeAlpha(fadeSource, pEntity, alpha);
 	if (alpha > 0)
-		UTIL_ScreenFade( pEntity, color, fadeTime, fadeHold, alpha, flags );
+		UTIL_ScreenFade( pEntity, color, fadeTime, fadeHold, alpha, flags, save );
 }
 
 void UTIL_HudMessage( CBaseEntity *pEntity, const hudtextparms_t &textparms, const char *pMessage )
@@ -2830,65 +2886,6 @@ void UTIL_CleanSpawnPoint( Vector origin, float dist )
 				UTIL_SetOrigin(ent->pev, tr.vecEndPos );
 		}
 	}
-}
-
-char *memfgets( byte *pMemFile, int fileSize, int &filePos, char *pBuffer, int bufferSize )
-{
-	// Bullet-proofing
-	if( !pMemFile || !pBuffer )
-		return NULL;
-
-	if( filePos >= fileSize )
-		return NULL;
-
-	int i = filePos;
-	int last = fileSize;
-
-	// fgets always NULL terminates, so only read bufferSize-1 characters
-	if( last - filePos > ( bufferSize - 1 ) )
-		last = filePos + ( bufferSize - 1 );
-
-	int stop = 0;
-
-	// Stop at the next newline (inclusive) or end of buffer
-	while( i < last && !stop )
-	{
-		if( pMemFile[i] == '\n' )
-		{
-			stop = 1;
-		}
-		if ( pMemFile[i] == '\r' )
-		{
-			if (i+1 < last && pMemFile[i+1] == '\n')
-			{
-				pMemFile[i] = '\n';
-				pMemFile[i+1] = '\0';
-				++i;
-			}
-			stop = 1;
-		}
-		i++;
-	}
-
-	// If we actually advanced the pointer, copy it over
-	if( i != filePos )
-	{
-		// We read in size bytes
-		int size = i - filePos;
-		// copy it out
-		memcpy( pBuffer, pMemFile + filePos, sizeof(byte) * size );
-
-		// If the buffer isn't full, terminate (this is always true)
-		if( size < bufferSize )
-			pBuffer[size] = 0;
-
-		// Update file pointer
-		filePos = i;
-		return pBuffer;
-	}
-
-	// No data read, bail
-	return NULL;
 }
 
 // LRC- change the origin to the given position, and bring any movewiths along too.

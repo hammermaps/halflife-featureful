@@ -36,6 +36,8 @@
 #define WEAPON_NAILGUN			29
 #define WEAPON_GRENADE_LAUNCHER	30
 
+#define WEAPON_MELEE			48
+
 #define WEAPON_PISTOL			50
 #define WEAPON_PISTOL2			51
 #define WEAPON_SMG				52
@@ -47,5 +49,7 @@
 
 #define WEAPON_CAMERA			60
 #define WEAPON_RADIO			61
+
+#define WEAPON_TOOL				63
 
 #endif

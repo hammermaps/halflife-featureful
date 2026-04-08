@@ -27,6 +27,7 @@ Each piece of equipment is defined by one line in the file.
 * `starthealth` - specify the starting health.
 * `maxhealth` - maximum player's health.
 * `maxarmor` - maximum player's armor.
+* `deploy` - the classname of the weapon to deploy. By default the best weapon (the one with the highest priority) is deployed.
 
 Example:
 
@@ -88,4 +89,14 @@ Example:
 suitlogon short
 item_longjump
 suitlight nothing
+```
+
+### Inventory items
+
+Put **inventory!** followed by the [player inventory]({{< ref player-inventory >}}) item name and the amount of items to give (if amount is not specified one item of the specified type is given).
+
+```
+inventory!battery_blue 3
+inventory!battery_red
+inventory!battery_yellow 2
 ```

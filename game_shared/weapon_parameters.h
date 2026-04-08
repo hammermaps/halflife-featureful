@@ -19,10 +19,7 @@
 #include "cone_degrees.h"
 #include "shake.h"
 #include "shell_bounce.h"
-
-#include "float_pair_packer.h"
-
-typedef FloatPairPacker<15, 14> WeaponSpreadPacker;
+#include "visual_object.h"
 
 #define LOUD_GUN_VOLUME			1000
 #define NORMAL_GUN_VOLUME		600
@@ -471,9 +468,15 @@ struct WeaponParameters
 {
 	struct IdleAnim
 	{
+		IdleAnim() {}
+		IdleAnim(int index, float probability, const FloatRange& dur):
+			animIndex(index), chance(probability), duration(dur) {}
+		IdleAnim(int index, float probability, const FloatRange& dur, const WeaponSoundScript& soundScript):
+			animIndex(index), chance(probability), duration(dur), sound(soundScript) {}
 		int animIndex;
 		float chance;
 		FloatRange duration;
+		WeaponSoundScript sound{CHAN_STATIC};
 	};
 	typedef fixed_vector<IdleAnim, 5> IdleAnimArray;
 	typedef fixed_vector<int, 4> FireAnimArray;
@@ -495,6 +498,8 @@ struct WeaponParameters
 		WeaponModeValueEmptyAware<WeaponSoundScript> sound{CHAN_ITEM};
 		WeaponModeValueEmptyAware<bool> waitForRecoil{false};
 		WeaponModeValueEmptyAwareNonNegative<float> suspendLaserSpotTime{0.0f};
+		WeaponModeValueEmptyAwareNonNegative<int> ammoCount;
+		WeaponModeValueEmptyAwareNonNegative<int> ammoCountMin{1};
 	};
 
 	struct StartReload
@@ -534,7 +539,6 @@ struct WeaponParameters
 			NATIVE,
 			BULLETS,
 			MELEE,
-			MELEE_WIND,
 			PROJECTILE
 		};
 
@@ -546,12 +550,17 @@ struct WeaponParameters
 		};
 
 		WeaponModeValue<Type> fireType{NATIVE};
-		WeaponModeValueNonNegative<float> damage{0.0f};
+		WeaponModeValueNonNegative<FloatRange> damage{0.0f};
+		WeaponModeValueNonNegative<FloatRange> damageChargedFactor{0.0f};
+		WeaponModeValueNonNegative<FloatRange> damageChargedMax{0.0f};
+		WeaponModeValueNonNegative<float> subsequentSwingFactor{1.0f};
 
 		WeaponModeValueEmptyAware<FireAnimArray> anims;
 		WeaponModeValue<FireAnimArray> hitAnims;
 		WeaponModeValue<FireAnimArray> chargeAnims;
 		WeaponModeValueNonNegative<float> chargeTime{0.0f};
+		WeaponModeValue<bool> chargedAttack{false};
+		WeaponModeValue<bool> laserSpotOnCharge{false};
 		WeaponModeValue<FireAnimArray> cooldownAnims;
 		WeaponModeValueNonNegative<float> cooldownTime{0.5f};
 		WeaponModeValue<WeaponSoundScript> sound{CHAN_WEAPON};
@@ -566,6 +575,7 @@ struct WeaponParameters
 		WeaponSpread spread{};
 		WeaponModeValueNonNegative<float> cycleTime{0.2f};
 		WeaponModeValueNonNegative<float> cycleTimeLastShot{0.0f};
+		WeaponModeValueNonNegative<float> hitCycleTime{0.0f};
 		WeaponModeValueEmptyAwareNonNegative<FloatRange> idleDelay{(FloatRange{10.0f, 15.0f})};
 		WeaponModeValueNonNegative<short> ammoPerFire{1};
 		WeaponModeValue<bool> allowUnderwater{true};
@@ -612,17 +622,29 @@ struct WeaponParameters
 		WeaponModeValueNonNegative<float> suspendLaserSpotTime{0.0f};
 
 		WeaponKickBackProfile kickBack;
+		WeaponModeValue<bool> kickBackOnHitOnly{false};
 
 		WeaponModeValueNonNegative<float> pushbackForce{0.0f};
 		WeaponModeValue<bool> pushbackVertical{false};
 
 		WeaponModeValue<PlayerShake> shake;
+		WeaponModeValue<PlayerShake> hitShake;
 
-		// TODO: this is temporary, will be replaced with configurable spray
-		WeaponModeValue<bool> spitSpray;
+		WeaponModeValueNonNegative<float> smackDelay{0.2f};
+		WeaponModeValue<bool> hitDecal{true};
+
+		WeaponModeValue<float> sprayOffsetUp{-24.0f};
+		WeaponModeValue<float> sprayOffsetSide{0.0f};
+		WeaponModeValue<float> sprayOffsetForward{0.0f};
+		WeaponModeValue<Visual> sprayVisual;
+		WeaponModeValue<int> sprayCount{8};
+		WeaponModeValue<int> spraySpeed{210};
+		WeaponModeValue<float> spraySpread{0.25f};
+		WeaponModeValue<int> sprayFlags{0};
 
 		WeaponModeValue<bool> preventMovement{false};
 		WeaponModeValue<PlayerSpeed> playerMaxSpeed;
+		WeaponModeValue<PlayerSpeed> playerMaxSpeedOnCharge;
 
 		WeaponModeValue<std::string> projectileName;
 		WeaponModeValue<std::string> projectileEntTemplate;
@@ -683,6 +705,7 @@ struct WeaponParameters
 
 	WeaponModeValueEmptyAware<IdleAnimArray> idleAnims;
 	WeaponModeValueNonNegative<int> viewModelBody{0};
+	std::vector<std::pair<int, int>> ammoToBody;
 	bool reloadAutostart = false;
 	bool manualReload = false;
 	bool manualReloadContinueOnDeploy = true;
@@ -716,6 +739,7 @@ struct WeaponParameters
 	fixed_string<32> secondaryAmmoName;
 
 	std::vector<std::string> modelSounds;
+	bool modelSoundsDefined = false;
 	std::string viewModel;
 	std::string viewModelDetonator;
 	std::string worldModel;
@@ -724,9 +748,13 @@ struct WeaponParameters
 	fixed_string<32> playerAnimExt{"onehanded"};
 	fixed_string<32> playerAnimExtDetonator{};
 	int priority{0};
+	bool worldModelAnimated{false};
+	int worldModelSequence{0};
 
 	fixed_string<32> toolIcon;
 	float toolTriggerDelay{0.0f};
+	WeaponSoundScript toolDenySound{CHAN_WEAPON};
+	float toolDelayAfterDeny{0.1f};
 	int toolIndex{-1};
 
 	WeaponModeValue<PlayerSpeed> playerMaxSpeed;
@@ -756,6 +784,8 @@ struct WeaponParameters
 	const char* DetonatorPlayerAnimExt() const {
 		return playerAnimExtDetonator.c_str();
 	}
+
+	bool IsUsableWithoutAmmo() const;
 };
 
 #endif

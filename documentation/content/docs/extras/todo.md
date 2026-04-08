@@ -12,7 +12,6 @@ This is the list of features that would be nice to have in our codebase. You are
 
 * ![](/images/decay.png) monster_alienflyer
 * ![](/images/svencoop.png) monster_bodyguard
-* ![](/images/svencoop.png) monster_kingpin
 * ![](/images/svencoop.png) monster_stukabat
 * monster_archer (probably should shoot spikes like pitdrone or some kinds of electric bolts)
 * ![](/images/tfc.png) Engineer's Sentry Gun (3 different levels)
@@ -31,7 +30,6 @@ This is the list of features that would be nice to have in our codebase. You are
 
 ### Monster configuration
 
-* Replaceable skill values per entity template (so monsters of the same class could use different damage values).
 * Configuration of monster's weapon (e.g. let barneys wield shotguns, let human grunts wield sniper rifles, etc.). This should allow to implement variety of human-like npcs via entity templates, e.g. HEV scientists from Sweet Half-Life.
 * Configuration of monster's dropped items.
 * The option to turn off certain attacks for monsters (e.g. to make melee-only alien grunts).
@@ -42,10 +40,7 @@ This is the list of features that would be nice to have in our codebase. You are
 
 * ![](/images/svencoop.png) weapon_uziakimbo
 * ![](/images/tfc.png) TFC Flamethrower
-* ![](/images/tfc.png) TFC Grenade launcher
-* ![](/images/tfc.png) TFC Nailgun
 * ![](/images/tfc.png) TFC Engineer's blaster (railgun)
-* ![](/images/tfc.png) TFC Sniper rifle
 * DMC/Quake lightning gun
 * ![](/images/decay.png) Vortigaunt hands
 * ![](/images/cstrike.png) flash grenade - should also make monsters temporarily blind

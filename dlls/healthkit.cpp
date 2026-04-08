@@ -23,8 +23,6 @@
 #include "wallcharger.h"
 #include "game.h"
 
-extern int gmsgItemPickup;
-
 class CHealthKit : public CItem
 {
 public:
@@ -34,7 +32,7 @@ public:
 
 	static const NamedSoundScript pickupSoundScript;
 protected:
-	virtual int DefaultCapacity() { return gSkillData.healthkitCapacity; }
+	virtual int DefaultCapacity() { return GetSkillValue("healthkit"); }
 };
 
 LINK_ENTITY_TO_CLASS( item_healthkit, CHealthKit )
@@ -70,10 +68,7 @@ bool CHealthKit::MyTouch( CBasePlayer *pPlayer )
 	if( pPlayer->TakeHealth( this, pev->health > 0 ? pev->health : DefaultCapacity(), HEAL_CHARGE ) )
 	{
 		if (healed) {
-			MESSAGE_BEGIN( MSG_ONE, gmsgItemPickup, NULL, pPlayer->pev );
-				WRITE_STRING( STRING( pev->classname ) );
-			MESSAGE_END();
-
+			NotifyPickup(pPlayer, pev->classname);
 			pPlayer->EmitSoundScript(GetSoundScript(pickupSoundScript));
 		}
 
@@ -417,7 +412,7 @@ class CWallHealth : public CWallCharger
 {
 public:
 	int RechargeTime() override { return (int)g_pGameRules->FlHealthChargerRechargeTime(); }
-	int ChargerCapacity() override { return (int)(pev->health > 0 ? pev->health : gSkillData.healthchargerCapacity); }
+	int ChargerCapacity() override { return (int)(pev->health > 0 ? pev->health : GetSkillValue("healthcharger")); }
 	bool GiveCharge(CBaseEntity* pActivator) override
 	{
 		return pActivator->TakeHealth( this, 1, HEAL_CHARGE ) > 0;
@@ -578,7 +573,7 @@ public:
 	void SetNeedleController(float yaw);
 	void UpdateOnRemove() override;
 	void UpdateJar();
-	int ChargerCapacity() { return (int)(pev->health > 0 ? pev->health : gSkillData.healthchargerCapacity); }
+	int ChargerCapacity() { return (int)(pev->health > 0 ? pev->health : GetSkillValue("healthcharger")); }
 	bool IsUsefulToDisplayHint(CBaseEntity* pPlayer) override;
 
 	bool AllowNoSuit(CBasePlayer* pPlayer) {

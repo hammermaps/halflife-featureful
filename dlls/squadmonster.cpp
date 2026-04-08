@@ -119,6 +119,18 @@ void CSquadMonster::ScheduleChange ()
 
 void CSquadMonster::OnDying(bool gibbed)
 {
+	RemoveMySelfFromSquad();
+	CBaseMonster::OnDying(gibbed);
+}
+
+void CSquadMonster::UpdateOnRemove()
+{
+	RemoveMySelfFromSquad();
+	CBaseMonster::UpdateOnRemove();
+}
+
+void CSquadMonster::RemoveMySelfFromSquad()
+{
 	VacateSlot();
 
 	if( InSquad() )
@@ -131,9 +143,9 @@ void CSquadMonster::OnDying(bool gibbed)
 			if( pSquadMember && pSquadMember != this )
 			{
 				if (pSquadMember->m_IdealMonsterState == pSquadMember->m_MonsterState &&
-						pSquadMember->IsFullyAlive() &&
-						pSquadMember->m_hEnemy == 0 && (pSquadMember->m_MonsterState == MONSTERSTATE_IDLE ||
-									   pSquadMember->m_MonsterState == MONSTERSTATE_ALERT))
+					pSquadMember->IsFullyAlive() &&
+					pSquadMember->m_hEnemy == 0 && (pSquadMember->m_MonsterState == MONSTERSTATE_IDLE ||
+													pSquadMember->m_MonsterState == MONSTERSTATE_ALERT))
 				{
 					pSquadMember->m_IdealMonsterState = MONSTERSTATE_HUNT;
 					pSquadMember->m_vecEnemyLKP = pev->origin;
@@ -144,7 +156,6 @@ void CSquadMonster::OnDying(bool gibbed)
 
 		pSquadLeader->SquadRemove( this );
 	}
-	CBaseMonster::OnDying(gibbed);
 }
 
 // These functions are still awaiting conversion to CSquadMonster 
@@ -450,17 +461,26 @@ bool CSquadMonster::CheckEnemy( CBaseEntity *pEnemy )
 	bool iUpdatedLKP = CBaseMonster::CheckEnemy( pEnemy );
 
 	// communicate with squad members about the enemy IF this individual has the same enemy as the squad leader.
-	if( InSquad() && pEnemy == MySquadLeader()->m_hEnemy )
+	if( InSquad() )
 	{
-		if( iUpdatedLKP )
+		CSquadMonster* pLeader = MySquadLeader();
+		if (pEnemy == pLeader->m_hEnemy)
 		{
-			// have new enemy information, so paste to the squad.
-			SquadPasteEnemyInfo();
+			if( iUpdatedLKP )
+			{
+				// have new enemy information, so paste to the squad.
+				SquadPasteEnemyInfo();
+			}
+			else
+			{
+				// enemy unseen, copy from the squad knowledge.
+				SquadCopyEnemyInfo();
+			}
 		}
-		else
+		else if (pLeader->m_hEnemy == 0 && m_hEnemy->IsFullyAlive())
 		{
-			// enemy unseen, copy from the squad knowledge.
-			SquadCopyEnemyInfo();
+			// Leader doesn't have enemy! Probably was busy with something when squad member saw the new enemy.
+			SquadMakeEnemy(m_hEnemy);
 		}
 	}
 
@@ -781,5 +801,8 @@ void CSquadMonster::ReportAIState(ALERT_TYPE level)
 			CSquadMonster* myLeader = MySquadLeader();
 			ALERT( level, "My Squad Leader: '%s'. ", FStringNull(myLeader->pev->targetname) ? STRING(myLeader->pev->classname) : STRING(myLeader->pev->targetname) );
 		}
+
+		if (m_iMySlot)
+			ALERT(level, "My squad slot: %d. ", m_iMySlot);
 	}
 }

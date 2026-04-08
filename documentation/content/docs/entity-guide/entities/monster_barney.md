@@ -10,7 +10,8 @@ bookToC: false
 ### Changes
 
 * Checks for friendly fire when shooting.
-* Now uses alert sentences (BA_ATTACK) when encountering enemy.
+* Now uses alert sentences (`BA_ATTACK`) when encountering enemy.
+* Can set a custom head if the model has multiple heads. The bodygroup index 2 is supposed to be the head bodygroup, i.e. the following order is expected : `body`, `gun`, `heads`.
 
 ### New parameters
 
@@ -25,6 +26,10 @@ bookToC: false
 ### Default classification
 
 `Player Ally`
+
+### Default display name
+
+`Security Guard`
 
 ### Soundscripts
 

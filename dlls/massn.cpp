@@ -166,7 +166,7 @@ void CMassn::Sniperrifle()
 
 	Vector	vecShellVelocity = gpGlobals->v_right * RANDOM_FLOAT(40, 90) + gpGlobals->v_up * RANDOM_FLOAT(75, 200) + gpGlobals->v_forward * RANDOM_FLOAT(-40, 40);
 	EjectBrass(vecShootOrigin - vecShootDir * 24, vecShellVelocity, pev->angles.y, m_iBrassShell, TE_BOUNCE_SHELL);
-	FireBullets(1, vecShootOrigin, vecShootDir, VECTOR_CONE_1DEGREES, 2048, gSkillData.monDmg762, 1);
+	FireBullets(1, vecShootOrigin, vecShootDir, VECTOR_CONE_1DEGREES, 2048, GetSkillValue("762_bullet"), 1);
 
 	pev->effects |= EF_MUZZLEFLASH;
 
@@ -202,25 +202,29 @@ void CMassn::DropMyItems(bool isGibbed)
 		if (!isGibbed) {
 			SetBodygroup( MASSN_GUN_GROUP, MASSN_GUN_NONE );
 		}
-		if( FBitSet( pev->weapons, MASSN_SNIPERRIFLE ) ) {
-			DropMyItem( "weapon_sniperrifle", vecGunPos, vecGunAngles, isGibbed );
-		} else if ( FBitSet( pev->weapons, MASSN_9MMAR ) ) {
-			DropMyItem( "weapon_9mmAR", vecGunPos, vecGunAngles, isGibbed );
-		}
-		if( FBitSet( pev->weapons, MASSN_GRENADELAUNCHER ) ) {
-			DropMyItem( "ammo_ARgrenades", isGibbed ? vecGunPos : BodyTarget( pev->origin ), vecGunAngles, isGibbed );
-		}
-#if FEATURE_MONSTERS_DROP_HANDGRENADES
-		if ( FBitSet (pev->weapons, MASSN_HANDGRENADE ) ) {
-			CBaseEntity* pGrenadeEnt = DropMyItem( "weapon_handgrenade", BodyTarget( pev->origin ), vecGunAngles, isGibbed );
-			if (pGrenadeEnt)
-			{
-				CBasePlayerWeapon* pGrenadeWeap = pGrenadeEnt->MyWeaponPointer();
-				if (pGrenadeWeap)
-					pGrenadeWeap->m_iDefaultAmmo = 1;
+
+		if (!DropEquipment(vecGunPos, vecGunAngles, isGibbed))
+		{
+			if( FBitSet( pev->weapons, MASSN_SNIPERRIFLE ) ) {
+				DropMyItem( "weapon_sniperrifle", vecGunPos, vecGunAngles, isGibbed );
+			} else if ( FBitSet( pev->weapons, MASSN_9MMAR ) ) {
+				DropMyItem( "weapon_9mmAR", vecGunPos, vecGunAngles, isGibbed );
 			}
-		}
+			if( FBitSet( pev->weapons, MASSN_GRENADELAUNCHER ) ) {
+				DropMyItem( "ammo_ARgrenades", isGibbed ? vecGunPos : BodyTarget( pev->origin ), vecGunAngles, isGibbed );
+			}
+#if FEATURE_MONSTERS_DROP_HANDGRENADES
+			if ( FBitSet (pev->weapons, MASSN_HANDGRENADE ) ) {
+				CBaseEntity* pGrenadeEnt = DropMyItem( "weapon_handgrenade", BodyTarget( pev->origin ), vecGunAngles, isGibbed );
+				if (pGrenadeEnt)
+				{
+					CBasePlayerWeapon* pGrenadeWeap = pGrenadeEnt->MyWeaponPointer();
+					if (pGrenadeWeap)
+						pGrenadeWeap->m_iDefaultAmmo = 1;
+				}
+			}
 #endif
+		}
 	}
 	pev->weapons = 0;
 }
@@ -258,13 +262,13 @@ void CMassn::HandleAnimEvent(MonsterEvent_t *pEvent)
 		{
 			Shoot();
 			PlayFirstBurstSounds();
-			CSoundEnt::InsertSound(bits_SOUND_COMBAT, pev->origin, 384, 0.3);
+			InsertAISound(bits_SOUND_COMBAT, 384, 0.3);
 		}
 		else if (FBitSet(pev->weapons, MASSN_SNIPERRIFLE))
 		{
 			Sniperrifle();
 			EmitSoundScript(sniperSoundScript);
-			CSoundEnt::InsertSound(bits_SOUND_COMBAT, pev->origin, 512, 0.3);
+			InsertAISound(bits_SOUND_COMBAT, 512, 0.3);
 
 			Vector vecGunPos;
 			Vector vecGunAngles;
@@ -288,7 +292,7 @@ void CMassn::HandleAnimEvent(MonsterEvent_t *pEvent)
 
 	case MASSN_AE_KICK:
 	{
-		PerformKick(pEvent->event, gSkillData.massnDmgKick);
+		PerformKick(pEvent->event, GetSkillValue("massassin_kick"));
 	}
 	break;
 
@@ -311,7 +315,7 @@ bool CMassn::CheckRangeAttack2( float flDot, float flDist )
 	{
 		return false;
 	}
-	return CheckRangeAttack2Impl(gSkillData.massnGrenadeSpeed, flDot, flDist, FBitSet(pev->weapons, MASSN_GRENADELAUNCHER));
+	return CheckRangeAttack2Impl(GetSkillValue("massassin_gspeed"), flDot, flDist, FBitSet(pev->weapons, MASSN_GRENADELAUNCHER));
 }
 
 //=========================================================
@@ -319,7 +323,7 @@ bool CMassn::CheckRangeAttack2( float flDot, float flDist )
 //=========================================================
 void CMassn::Spawn()
 {
-	SpawnHelper("models/massn.mdl", gSkillData.massnHealth);
+	SpawnHelper("models/massn.mdl", GetSkillValue("massassin_health"));
 
 	if (pev->weapons == 0)
 	{

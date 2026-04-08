@@ -31,6 +31,7 @@
 #include "player.h"
 #include "weapons.h"
 #include "game.h"
+#include "locus.h"
 
 class CRuleEntity : public CBaseEntity
 {
@@ -936,29 +937,6 @@ void CGamePlayerTeam::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TY
 /*
  * Starting player settings, like initial health, armor, weapons and items
  */
-#define SF_PLAYER_SETTINGS_MEDKIT (1 << 0)
-#define SF_PLAYER_SETTINGS_SUIT (1 << 1)
-#define SF_PLAYER_SETTINGS_CROWBAR (1 << 2)
-#define SF_PLAYER_SETTINGS_GLOCK (1 << 3)
-#define SF_PLAYER_SETTINGS_PYTHON (1 << 4)
-#define SF_PLAYER_SETTINGS_MP5 (1 << 5)
-#define SF_PLAYER_SETTINGS_SHOTGUN (1 << 6)
-#define SF_PLAYER_SETTINGS_CROSSBOW (1 << 7)
-#define SF_PLAYER_SETTINGS_RPG (1 << 8)
-#define SF_PLAYER_SETTINGS_GAUSS (1 << 9)
-#define SF_PLAYER_SETTINGS_EGON (1 << 10)
-#define SF_PLAYER_SETTINGS_HORNETGUN (1 << 11)
-#define SF_PLAYER_SETTINGS_PIPEWRENCH (1 << 12)
-#define SF_PLAYER_SETTINGS_KNIFE (1 << 13)
-#define SF_PLAYER_SETTINGS_GRAPPLE (1 << 14)
-#define SF_PLAYER_SETTINGS_DESERT_EAGLE (1 << 15)
-#define SF_PLAYER_SETTINGS_SNIPERRIFLE (1 << 16)
-#define SF_PLAYER_SETTINGS_M249 (1 << 17)
-#define SF_PLAYER_SETTINGS_DISPACER (1 << 18)
-#define SF_PLAYER_SETTINGS_SHOCKRIFLE (1 << 19)
-#define SF_PLAYER_SETTINGS_SPORELAUNCHER (1 << 20)
-#define SF_PLAYER_SETTINGS_LONGJUMP (1 << 23)
-
 enum
 {
 	VALUE_SETTING_DEFAULT = 0,
@@ -1044,7 +1022,7 @@ TYPEDESCRIPTION	CGamePlayerSettings::m_SaveData[] =
 	DEFINE_FIELD( CGamePlayerSettings, m_armorStrength, FIELD_FLOAT ),
 	DEFINE_FIELD( CGamePlayerSettings, m_healthSetting, FIELD_SHORT ),
 	DEFINE_FIELD( CGamePlayerSettings, m_armorSetting, FIELD_SHORT ),
-	DEFINE_FIELD( CGamePlayerSettings, m_healthSetting, FIELD_SHORT ),
+	DEFINE_FIELD( CGamePlayerSettings, m_maxHealthSetting, FIELD_SHORT ),
 	DEFINE_FIELD( CGamePlayerSettings, m_maxArmorSetting, FIELD_SHORT ),
 };
 
@@ -1515,3 +1493,98 @@ public:
 };
 
 LINK_ENTITY_TO_CLASS( game_journal, CGameJournal )
+
+extern int gmsgMessageBox;
+
+#define SF_MESSAGEBOX_ALLPLAYERS 0x0001
+
+class CGameMessageBox : public CPointEntity
+{
+	void KeyValue( KeyValueData *pkvd ) override
+	{
+		if (FStrEq(pkvd->szKeyName, "position"))
+		{
+			m_position = ALLOC_STRING(pkvd->szValue);
+			pkvd->fHandled = true;
+		}
+		else if (FStrEq(pkvd->szKeyName, "distance"))
+		{
+			m_distance = atof(pkvd->szValue);
+			pkvd->fHandled = true;
+		}
+		else
+			CPointEntity::KeyValue(pkvd);
+	}
+	void Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value) override
+	{
+		if (FBitSet(pev->spawnflags, SF_MESSAGEBOX_ALLPLAYERS))
+		{
+			for (int i = 1; i <= gpGlobals->maxClients; i++)
+			{
+				CBaseEntity *pEntity = UTIL_PlayerByIndex( i );
+				if (pEntity)
+				{
+					SetForPlayer((CBasePlayer*)pEntity);
+				}
+			}
+		}
+		else
+		{
+			CBasePlayer* pPlayer = g_pGameRules->EffectivePlayer(pActivator);
+			if (pPlayer)
+			{
+				SetForPlayer(pPlayer);
+			}
+		}
+	}
+	void SetForPlayer(CBasePlayer* pPlayer)
+	{
+		Vector origin = pev->origin;
+		float distance = 0.0f;
+
+		if (m_distance > 0.0f)
+		{
+			distance = m_distance;
+
+			if (!FStringNull(m_position))
+			{
+				if (!TryCalcLocus_Position(this, pPlayer, STRING(m_position), origin))
+				{
+					return;
+				}
+			}
+
+			if ((origin - pPlayer->pev->origin).IsLength2DGreaterThan(distance))
+			{
+				ALERT(at_warning, "Player is too far from the messagebox origin position\n");
+				return;
+			}
+		}
+
+		if (pPlayer->AddMessageBox(this, origin, distance))
+		{
+			MESSAGE_BEGIN(MSG_ONE, gmsgMessageBox, nullptr, pPlayer->pev);
+			WRITE_BYTE(1);
+			WRITE_LONG(entindex());
+			WRITE_STRING(STRING(pev->message));
+			MESSAGE_END();
+		}
+	}
+
+	int		Save( CSave &save ) override;
+	int		Restore( CRestore &restore ) override;
+	static	TYPEDESCRIPTION m_SaveData[];
+
+	string_t m_position;
+	float m_distance;
+};
+
+LINK_ENTITY_TO_CLASS( game_messagebox, CGameMessageBox )
+
+TYPEDESCRIPTION CGameMessageBox::m_SaveData[] =
+{
+	DEFINE_FIELD( CGameMessageBox, m_position, FIELD_STRING ),
+	DEFINE_FIELD( CGameMessageBox, m_distance, FIELD_FLOAT )
+};
+
+IMPLEMENT_SAVERESTORE( CGameMessageBox, CPointEntity )

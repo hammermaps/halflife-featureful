@@ -327,6 +327,12 @@ void RegisterAmmoTypes()
 	g_AmmoRegistry.Register("45acp", 200);
 	g_AmmoRegistry.Register("57mm", 200);
 	g_AmmoRegistry.Register("nails", 200);
+	g_AmmoRegistry.Register("grenades", 50);
+	g_AmmoRegistry.Register("fuel", 100);
+	g_AmmoRegistry.Register("cells", 100);
+	g_AmmoRegistry.Register("charges", 10);
+	g_AmmoRegistry.Register("rounds", 200);
+	g_AmmoRegistry.Register("slugs", 100);
 
 	for (unsigned int i = 0; i<g_modFeatures.maxAmmoCount; ++i)
 	{
@@ -382,7 +388,13 @@ void W_Precache( CBaseEntity* pWorld )
 		AmmoEnabled("762", "ammo_762"),
 		AmmoEnabled("45acp", "ammo_45acp"),
 		AmmoEnabled("57mm", "ammo_57mm"),
-		AmmoEnabled("nails", "ammo_nails")
+		AmmoEnabled("nails", "ammo_nails"),
+		AmmoEnabled("grenades", "ammo_grenadeclip"),
+		AmmoEnabled("fuel", "ammo_fuel"),
+		AmmoEnabled("cells", "ammo_cells"),
+		AmmoEnabled("charges", "ammo_charges"),
+		AmmoEnabled("rounds", "ammo_rounds"),
+		AmmoEnabled("slugs", "ammo_slugs"),
 	};
 
 	ALERT(at_console, "Precaching weapons\n");
@@ -507,6 +519,8 @@ TYPEDESCRIPTION	CBasePlayerWeapon::m_SaveData[] =
 	//DEFINE_FIELD( CBasePlayerWeapon, m_iClientClip, FIELD_INTEGER ), reset to zero on load so hud gets updated correctly
 	//DEFINE_FIELD( CBasePlayerWeapon, m_iClientWeaponState, FIELD_INTEGER ), reset to zero on load so hud gets updated correctly
 	DEFINE_FIELD( CBasePlayerWeapon, m_packedTime, FIELD_TIME ),
+
+	DEFINE_FIELD( CBasePlayerWeapon, m_inAltMode, FIELD_BOOLEAN ),
 };
 
 IMPLEMENT_SAVERESTORE( CBasePlayerWeapon, CBaseAnimating )
@@ -853,9 +867,12 @@ bool CBasePlayerWeapon::AddToPlayerDefault( CBasePlayer *pPlayer )
 {
 	if( CBasePlayerWeapon::AddToPlayer( pPlayer ) )
 	{
-		MESSAGE_BEGIN( MSG_ONE, gmsgWeapPickup, NULL, pPlayer->pev );
-			WRITE_BYTE( WeaponId() );
-		MESSAGE_END();
+		if (!pPlayer->m_hidePickups)
+		{
+			MESSAGE_BEGIN( MSG_ONE, gmsgWeapPickup, NULL, pPlayer->pev );
+				WRITE_BYTE( WeaponId() );
+			MESSAGE_END();
+		}
 		return true;
 	}
 	return false;
@@ -900,6 +917,7 @@ int CBasePlayerWeapon::UpdateClientData( CBasePlayer *pPlayer )
 			WRITE_BYTE( state );
 			WRITE_BYTE( WeaponId() );
 			WRITE_SHORT( m_iClip );
+			WRITE_SHORT( m_iMaxClip );
 		MESSAGE_END();
 
 		m_iClientClip = m_iClip;
@@ -991,13 +1009,13 @@ bool CBasePlayerWeapon::AddSecondaryAmmo(int iCount)
 //=========================================================
 bool CBasePlayerWeapon::IsUseable()
 {
-	if( m_iClip > 0 )
+	// Player has unlimited ammo for this weapon or does not use magazines
+	if (!UsesAmmo())
 	{
 		return true;
 	}
 
-	// Player has unlimited ammo for this weapon or does not use magazines
-	if (!UsesAmmo() || !UsesClip())
+	if (UsesClip() && m_iClip > 0)
 	{
 		return true;
 	}
@@ -1090,7 +1108,7 @@ void CBasePlayerWeapon::PrecacheWeaponModels()
 {
 	const WeaponParameters& params = MyParameters();
 
-	PRECACHE_MODEL(MyWorldModel());
+	PrecacheMyModel(params.worldModel.c_str());
 	PRECACHE_MODEL(params.ViewModel());
 	PrecachePModel(params.PlayerModel());
 
@@ -1151,6 +1169,12 @@ bool CBasePlayerWeapon::ExtractAmmo( CBasePlayerWeapon *pWeapon )
 		// blindly call with m_iDefaultAmmo. It's either going to be a value or zero. If it is zero,
 		// we only get the ammo in the weapon's clip, which is what we want. 
 		iReturn |= pWeapon->AddPrimaryAmmo( m_iDefaultAmmo );
+		m_iDefaultAmmo = 0;
+	}
+	else if (UsesClip())
+	{
+		if (m_iDefaultAmmo > 0)
+			m_iClip = m_iDefaultAmmo;
 		m_iDefaultAmmo = 0;
 	}
 
@@ -1245,7 +1269,6 @@ float CBasePlayerWeapon::GetNextAttackDelay( float delay )
 TYPEDESCRIPTION	CConfigurableWeapon::m_SaveData[] =
 {
 	DEFINE_FIELD( CConfigurableWeapon, m_fInSpecialReload, FIELD_INTEGER ),
-	DEFINE_FIELD( CConfigurableWeapon, m_inAltMode, FIELD_BOOLEAN ),
 	DEFINE_FIELD( CConfigurableWeapon, m_wasEmptyReload, FIELD_BOOLEAN ),
 	DEFINE_FIELD( CConfigurableWeapon, m_switchingBody, FIELD_BOOLEAN ),
 	DEFINE_FIELD( CConfigurableWeapon, m_wasInAltModeBeforeSwitchingBody, FIELD_BOOLEAN ),
@@ -1275,7 +1298,6 @@ TYPEDESCRIPTION	CConfigurableWeapon::m_SaveData[] =
 
 	DEFINE_FIELD( CConfigurableWeapon, m_iSwing, FIELD_INTEGER ),
 	DEFINE_FIELD( CConfigurableWeapon, m_iSwingMode, FIELD_INTEGER ),
-	DEFINE_FIELD( CConfigurableWeapon, m_flBigSwingStart, FIELD_TIME ),
 	DEFINE_FIELD( CConfigurableWeapon, m_swingIsAltAttack, FIELD_BOOLEAN ),
 
 	DEFINE_FIELD( CConfigurableWeapon, m_flRechargeTime, FIELD_TIME ),
@@ -1283,6 +1305,7 @@ TYPEDESCRIPTION	CConfigurableWeapon::m_SaveData[] =
 	DEFINE_FIELD( CConfigurableWeapon, m_chargingAttack, FIELD_BOOLEAN ),
 	DEFINE_FIELD( CConfigurableWeapon, m_chargingAltFire, FIELD_BOOLEAN ),
 	DEFINE_FIELD( CConfigurableWeapon, m_shouldPlayCooldown, FIELD_BOOLEAN ),
+	DEFINE_FIELD( CConfigurableWeapon, m_chargeStartTime, FIELD_TIME ),
 
 	DEFINE_FIELD( CConfigurableWeapon, m_toolTriggerTime, FIELD_TIME ),
 
@@ -1498,7 +1521,7 @@ void CWeaponBox::Touch( CBaseEntity *pOther )
 int CWeaponBox::ObjectCaps()
 {
 	if (IsPickableByUse(this) && !(pev->effects & EF_NODRAW)) {
-		return CBaseDelay::ObjectCaps() | FCAP_IMPULSE_USE;
+		return CBaseDelay::ObjectCaps() | FCAP_IMPULSE_USE | FCAP_ONLYVISIBLE_USE;
 	} else {
 		return CBaseDelay::ObjectCaps();
 	}
@@ -1714,10 +1737,21 @@ void CWeaponBox::SetWeaponModel(CBasePlayerWeapon *pItem)
 		weaponAngles.y += 180 + RANDOM_LONG(-15,15);
 
 		SET_MODEL( ENT( pev ), worldModel );
+
+		const WeaponParameters& weaponParams =  pItem->MyParameters();
+		if (weaponParams.worldModelAnimated)
+		{
+			pev->animtime = gpGlobals->time;
+			pev->framerate = 1.0f;
+		}
+		if (weaponParams.worldModelSequence > 0)
+		{
+			pev->sequence = weaponParams.worldModelSequence;
+		}
+
 		pev->angles = weaponAngles;
 		if (pItem->WeaponId() == WEAPON_TRIPMINE) {
 			pev->body = 3;
-			pev->sequence = 8;
 		}
 	}
 }

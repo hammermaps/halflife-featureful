@@ -20,6 +20,8 @@ TYPEDESCRIPTION	CDisplacerBall::m_SaveData[] =
 	DEFINE_FIELD(CDisplacerBall, m_iBeams, FIELD_INTEGER),
 	DEFINE_ARRAY(CDisplacerBall, m_pBeam, FIELD_CLASSPTR, 8),
 	DEFINE_FIELD(CDisplacerBall, m_hDisplacedTarget, FIELD_EHANDLE),
+	DEFINE_FIELD(CDisplacerBall, m_maxFrame, FIELD_INTEGER),
+	DEFINE_FIELD(CDisplacerBall, m_lastTime, FIELD_TIME),
 };
 
 IMPLEMENT_SAVERESTORE(CDisplacerBall, CBaseEntity);
@@ -47,7 +49,8 @@ const NamedVisual CDisplacerBall::ringVisual = BuildVisual("DisplacerBall.Ring")
 		.Life(0.3f)
 		.BeamParams(36, 0)
 		.RenderColor(255, 255, 255)
-		.Alpha(255);
+		.Alpha(255)
+		.WaveType(Visual::WAVETYPE_CYLINDER);
 
 const NamedVisual CDisplacerBall::lightVisual = BuildVisual("DisplacerBall.Light")
 		.Radius(160)
@@ -85,6 +88,8 @@ void CDisplacerBall::Spawn()
 	UTIL_SetSize(pev, g_vecZero, g_vecZero);
 
 	pev->frame = 0;
+	m_maxFrame = MODEL_FRAMES( pev->modelindex ) - 1;
+	m_lastTime = gpGlobals->time;
 
 	SetTouch(&CDisplacerBall::BallTouch);
 	SetThink(&CDisplacerBall::FlyThink);
@@ -92,7 +97,7 @@ void CDisplacerBall::Spawn()
 
 	m_iBeams = 0;
 
-	SetDefaultProjectileDamage(gSkillData.plrDmgDisplacer);
+	SetDefaultProjectileDamage(GetSkillValue("plr_displacer_other"));
 }
 
 void CDisplacerBall::Precache()
@@ -111,9 +116,11 @@ void CDisplacerBall::Precache()
 
 void CDisplacerBall::FlyThink()
 {
-	ArmBeam( -1 );
-	ArmBeam( 1 );
-	pev->nextthink = gpGlobals->time + 0.05;
+	ArmBeam(-1);
+	ArmBeam(1);
+	pev->nextthink = gpGlobals->time + 0.05f;
+
+	pev->frame = AnimateWithFramerate(pev->frame, m_maxFrame, pev->framerate, &m_lastTime);
 }
 
 void CDisplacerBall::ArmBeam( int iSide )
@@ -154,7 +161,7 @@ void CDisplacerBall::ArmBeam( int iSide )
 	{
 		//Beam hit something, deal radius damage to it
 		m_pBeam[m_iBeams]->EntsInit( pHit->entindex(), entindex() );
-		RadiusDamage( tr.vecEndPos, pev, VARS(pev->owner), DamageInfo{25, DMG_ENERGYBEAM}, 15, CLASS_NONE );
+		RadiusDamage( tr.vecEndPos, pev, VARS(pev->owner), DamageInfo{GetSkillValue("displacer_beam_dmg"), DMG_ENERGYBEAM}, GetSkillValue("displacer_beam_radius"), CLASS_NONE );
 	}
 	else
 	{
@@ -166,6 +173,7 @@ void CDisplacerBall::ArmBeam( int iSide )
 void CDisplacerBall::LaunchAsProjectile(const ProjectileParameters& params)
 {
 	LaunchAsProjectileImpl(DISPLACERBALL_SPEED, params);
+	SetMyProjectileEffectFlags();
 }
 
 void CDisplacerBall::SelfCreate(entvars_t *pevOwner,Vector vecStart)
@@ -259,15 +267,7 @@ void CDisplacerBall::BallTouch(CBaseEntity *pOther)
 
 void CDisplacerBall::Circle()
 {
-	const Visual* visual = GetVisual(ringVisual);
-	if (visual->modelIndex)
-	{
-		MESSAGE_BEGIN(MSG_PAS, SVC_TEMPENTITY, pev->origin);
-			WRITE_BYTE(TE_BEAMCYLINDER);
-			WRITE_CIRCLE(pev->origin, 800.0f);
-			WriteBeamVisual(visual);
-		MESSAGE_END();
-	}
+	SendBeamWave(pev->origin, 800.0f, GetVisual(ringVisual), MSG_PAS, pev->origin);
 
 	SendDynLight(pev->origin, GetVisual(lightVisual));
 }
@@ -298,7 +298,7 @@ void CDisplacerBall::ExplodeThink()
 	CBaseEntity* pAttacker = CBaseEntity::Instance( pev->owner );
 	pev->owner = NULL;
 
-	::RadiusDamage( pev->origin, pev, pAttacker ? pAttacker->pev : pev, DamageInfo(GetProjectileDamage(), DMG_BLAST).SetGibPolicy(GIB_ALWAYS), gSkillData.plrDisplacerRadius, CLASS_NONE );
+	::RadiusDamage( pev->origin, pev, pAttacker ? pAttacker->pev : pev, DamageInfo(GetProjectileDamage(), DMG_BLAST).SetGibPolicy(GIB_ALWAYS), GetSkillValue("plr_displacer_radius"), CLASS_NONE );
 
 	UTIL_Remove( this );
 }

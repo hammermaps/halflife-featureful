@@ -73,7 +73,7 @@ const NamedVisual CGonomeGuts::gutsVisual = BuildVisual::Animated("Gonome.Guts")
 void CGonomeGuts::Spawn()
 {
 	SpawnHelper("gonomeguts", gutsVisual);
-	SetDefaultProjectileDamage(gSkillData.gonomeDmgGuts);
+	SetDefaultProjectileDamage(GetSkillValue("gonome_dmg_guts"));
 }
 
 void CGonomeGuts::Precache()
@@ -170,7 +170,6 @@ protected:
 	float m_flNextFlinch;
 	float m_flNextThrowTime;// last time the gonome used the guts attack.
 	CGonomeGuts* m_pGonomeGuts;
-	bool m_fPlayerLocked;
 	EHANDLE m_lockedPlayer;
 	bool m_meleeAttack2;
 	bool m_playedAttackSound;
@@ -228,7 +227,7 @@ TYPEDESCRIPTION	CGonome::m_SaveData[] =
 {
 	DEFINE_FIELD( CGonome, m_flNextFlinch, FIELD_TIME ),
 	DEFINE_FIELD( CGonome, m_flNextThrowTime, FIELD_TIME ),
-	DEFINE_FIELD( CGonome, m_fPlayerLocked, FIELD_BOOLEAN ),
+	DEFINE_FIELD( CGonome, m_lockedPlayer, FIELD_EHANDLE ),
 };
 
 IMPLEMENT_SAVERESTORE( CGonome, CBaseMonster )
@@ -249,22 +248,16 @@ void CGonome::UpdateOnRemove()
 
 void CGonome::UnlockPlayer()
 {
-	if (g_modFeatures.gonome_lock_player)
+	if (m_lockedPlayer != 0)
 	{
-		if (m_fPlayerLocked)
-		{
-			CBasePlayer* player = 0;
-			if (m_lockedPlayer != 0 && m_lockedPlayer->IsPlayer())
-				player = m_lockedPlayer.Entity<CBasePlayer>();
-			else // if ehandle is empty for some reason just unlock the first player
-				player = (CBasePlayer*)UTIL_FindEntityByClassname(0, "player");
+		CBasePlayer* player = nullptr;
+		if (m_lockedPlayer->IsPlayer())
+			player = m_lockedPlayer.Entity<CBasePlayer>();
 
-			if (player)
-				player->EnableControl(true);
+		if (player)
+			player->EnableControl(true);
 
-			m_lockedPlayer = 0;
-			m_fPlayerLocked = false;
-		}
+		m_lockedPlayer = 0;
 	}
 }
 
@@ -522,7 +515,7 @@ void CGonome::HandleAnimEvent(MonsterEvent_t *pEvent)
 		params.punchAngle.x = 5;
 		params.punchAngle.z = 9;
 		params.knockRight = 25.0f;
-		params.damageInfo.damage = gSkillData.gonomeDmgOneSlash;
+		params.damageInfo.damage = GetSkillValue("gonome_dmg_one_slash");
 		params.hitSoundScript = attackHitSoundScript;
 		params.missSoundScript = attackMissSoundScript;
 		SetTraceHullAttackParamsFromTemplate(pEvent->event, params);
@@ -538,7 +531,7 @@ void CGonome::HandleAnimEvent(MonsterEvent_t *pEvent)
 		params.punchAngle.x = 5;
 		params.punchAngle.z = -9;
 		params.knockRight = -25.0f;
-		params.damageInfo.damage = gSkillData.gonomeDmgOneSlash;
+		params.damageInfo.damage = GetSkillValue("gonome_dmg_one_slash");
 		params.hitSoundScript = attackHitSoundScript;
 		params.missSoundScript = attackMissSoundScript;
 		SetTraceHullAttackParamsFromTemplate(pEvent->event, params);
@@ -556,7 +549,7 @@ void CGonome::HandleAnimEvent(MonsterEvent_t *pEvent)
 			params.distance = GONOME_MELEE_ATTACK_RADIUS;
 			params.punchAngle.x = 9;
 			params.knockForward = -25.0f;
-			params.damageInfo.damage = gSkillData.gonomeDmgOneBite;
+			params.damageInfo.damage = GetSkillValue("gonome_dmg_one_bite");
 			if (pEvent->event == GONOME_AE_BITE4)
 			{
 				params.punchAngle.x = 15;
@@ -569,21 +562,17 @@ void CGonome::HandleAnimEvent(MonsterEvent_t *pEvent)
 
 			if (pHurt)
 			{
-				if (g_modFeatures.gonome_lock_player)
+				if (pEvent->event == GONOME_AE_BITE4)
 				{
-					if (pEvent->event == GONOME_AE_BITE4)
+					UnlockPlayer();
+				}
+				else if (pHurt->IsPlayer() && pHurt->IsAlive() && GetSkillValue("gonome_lock_player"))
+				{
+					if (m_lockedPlayer == 0)
 					{
-						UnlockPlayer();
-					}
-					else if (pHurt->IsPlayer() && pHurt->IsAlive())
-					{
-						if (!m_fPlayerLocked)
-						{
-							CBasePlayer* player = (CBasePlayer*)pHurt;
-							player->EnableControl(false);
-							m_lockedPlayer = player;
-							m_fPlayerLocked = true;
-						}
+						CBasePlayer* player = (CBasePlayer*)pHurt;
+						player->EnableControl(false);
+						m_lockedPlayer = player;
 					}
 				}
 			}
@@ -636,7 +625,7 @@ void CGonome::Spawn()
 	pev->movetype = MOVETYPE_STEP;
 	SetMyBloodColor( BLOOD_COLOR_GREEN );
 	pev->effects = 0;
-	SetMyHealth( gSkillData.gonomeHealth );
+	SetMyHealth( GetSkillValue("gonome_health") );
 	SetMyFieldOfView(0.2f);// indicates the width of this monster's forward view cone ( as a dotproduct result )
 	m_MonsterState = MONSTERSTATE_NONE;
 	SetMyCanOpenDoors(true);

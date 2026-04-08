@@ -27,13 +27,18 @@
 #include	"scriptevent.h"
 #include	"ai_debug.h"
 #include	"mod_features.h"
+#include	"skill.h"
+#include	"skilldata.h"
+#include	"soundent.h"
+
+#include <algorithm>
+#include <random>
 
 bool g_fIsXash3D = false;
 
 void EntvarsKeyvalue( entvars_t *pev, KeyValueData *pkvd );
 
 extern DLL_GLOBAL Vector g_vecAttackDir;
-extern DLL_GLOBAL int g_iSkillLevel;
 
 static DLL_FUNCTIONS gFunctionTable =
 {
@@ -320,7 +325,7 @@ void DispatchThink( edict_t *pent )
 	if( pEntity )
 	{
 		if( FBitSet( pEntity->pev->flags, FL_DORMANT ) )
-			ALERT( at_error, "Dormant entity %s is thinking!!\n", STRING( pEntity->pev->classname ) );
+			ALERT(at_error, "Dormant entity %s (targetname is '%s', globalname is '%s') is thinking!!\n", STRING(pEntity->pev->classname), STRING(pEntity->pev->targetname), STRING(pEntity->pev->globalname));
 
 		pEntity->Think();
 	}
@@ -374,7 +379,7 @@ void DispatchSave( edict_t *pent, SAVERESTOREDATA *pSaveData )
 CBaseEntity *FindGlobalEntity( string_t classname, string_t globalname )
 {
 	edict_t *pent = FIND_ENTITY_BY_STRING( NULL, "globalname", STRING( globalname ) );
-	CBaseEntity *pReturn = CBaseEntity::Instance( pent );
+	CBaseEntity *pReturn = CBaseEntity::OwnInstance( pent );
 	if( pReturn )
 	{
 		if( !FClassnameIs( pReturn->pev, STRING( classname ) ) )
@@ -640,6 +645,9 @@ void CBaseEntity::SetNonLethalHealthThreshold()
 
 DamageInfo CBaseEntity::TransformDamageInfo(entvars_t *pevInflictor, entvars_t *pevAttacker, const DamageInfo& inputDamageInfo)
 {
+	if (inputDamageInfo.ignoreTransform)
+		return inputDamageInfo;
+
 	const EntTemplate* entTemplate = GetMyEntTemplate();
 	if (entTemplate && entTemplate->HasCustomTakeDamageRules())
 	{
@@ -751,6 +759,8 @@ TYPEDESCRIPTION	CBaseEntity::m_SaveData[] =
 	DEFINE_FIELD( CBaseEntity, m_ownerEntTemplate, FIELD_STRING ),
 	DEFINE_FIELD( CBaseEntity, m_objectHint, FIELD_STRING ),
 	DEFINE_FIELD( CBaseEntity, m_displayName, FIELD_STRING ),
+
+	DEFINE_FIELD( CBaseEntity, m_lootRandomSeed, FIELD_INTEGER ),
 };
 
 void CBaseEntity::KeyValue(KeyValueData* pkvd)
@@ -1110,14 +1120,11 @@ const Visual* CBaseEntity::RegisterVisual(const NamedVisual &defaultVisual, bool
 
 void CBaseEntity::RegisterVisualAsMineOwn(const NamedVisual &visual)
 {
-	if (!FStringNull(m_entTemplate))
+	// Precache custom model if it's defined in the own_visual of my entity template
+	const char* myModel = MyOwnModel(nullptr);
+	if (myModel)
 	{
-		// Precache custom model if it's defined in the own_visual of my entity template
-		const char* myModel = MyOwnModel(nullptr);
-		if (myModel)
-		{
-			PRECACHE_MODEL(myModel);
-		}
+		PRECACHE_MODEL(myModel);
 	}
 	RegisterVisual(visual);
 }
@@ -1202,18 +1209,15 @@ void CBaseEntity::ApplyVisual(const Visual *visual, const char* modelOverride, i
 
 void CBaseEntity::ApplyVisualWithOwn(const Visual *visual)
 {
-	if (!FStringNull(m_entTemplate))
+	const Visual* ownVisual = MyOwnVisual();
+	if (ownVisual)
 	{
-		const Visual* ownVisual = MyOwnVisual();
-		if (ownVisual)
-		{
-			// If own_visual is defined in my entity template, join it with the referenced visual
-			Visual joinedVisual = *ownVisual;
-			if (visual)
-				joinedVisual.CompleteFrom(*visual);
-			ApplyVisual(&joinedVisual, nullptr);
-			return;
-		}
+		// If own_visual is defined in my entity template, join it with the referenced visual
+		Visual joinedVisual = *ownVisual;
+		if (visual)
+			joinedVisual.CompleteFrom(*visual);
+		ApplyVisual(&joinedVisual, nullptr);
+		return;
 	}
 	ApplyVisual(visual, nullptr);
 }
@@ -1300,14 +1304,6 @@ const char* CBaseEntity::MyOwnModel(const char *defaultModel)
 	if (ownVisual && ownVisual->model)
 		return ownVisual->model;
 
-#if FEATURE_REVERSE_RELATIONSHIP_MODELS
-	if (m_reverseRelationship)
-	{
-		const char* reverseModel = ReverseRelationshipModel();
-		if (reverseModel)
-			return reverseModel;
-	}
-#endif
 	return defaultModel;
 }
 
@@ -1487,7 +1483,7 @@ void CBaseEntity::PrecacheChildren(const char *childDefaultClassname, bool rever
 					if (vecMax)
 					{
 						if (localMax.LengthSqr() > vecMax->LengthSqr())
-							*vecMax = localMin;
+							*vecMax = localMax;
 					}
 				}
 			}
@@ -1851,12 +1847,230 @@ CBaseEntity* CBaseEntity::CreateAndLaunchAsProjectile(const ProjectileParameters
 
 const char* CBaseEntity::DisplayName()
 {
-	return FStringNull(m_displayName) ? DefaultDisplayName() : STRING(m_displayName);
+	if (!FStringNull(m_displayName))
+		return STRING(m_displayName);
+
+	const EntTemplate* entTemplate = GetMyEntTemplate();
+	if (entTemplate)
+	{
+		const char* name = entTemplate->GetDisplayName();
+		if (name)
+			return name;
+	}
+	return DefaultDisplayName();
 }
 
 int CBaseEntity::IRelationship( CBaseEntity *pTarget )
 {
 	return R_NO;
+}
+
+void CBaseEntity::SetMyProjectileEffectFlags(int defaultEffects)
+{
+	const EntTemplate* entTemplate = GetMyEntTemplate();
+	if (entTemplate)
+	{
+		const EntTemplate::Projectile& projectileParams = entTemplate->GetProjectileParams();
+		if (projectileParams.effects.has_value())
+		{
+			pev->effects |= *projectileParams.effects;
+			return;
+		}
+	}
+	pev->effects |= defaultEffects;
+}
+
+FloatRange CBaseEntity::GetSkillValueRange(const char *name)
+{
+	const EntTemplate* entTemplate = GetMyEntTemplate();
+	const EntTemplate* ownerEntTemplate = GetOwnerEntTemplate();
+
+	return ::GetSkillValueRange(name, entTemplate, STRING(m_entTemplate), ownerEntTemplate, STRING(m_ownerEntTemplate));
+}
+
+float CBaseEntity::GetSkillValue(const char *name)
+{
+	const EntTemplate* entTemplate = GetMyEntTemplate();
+	const EntTemplate* ownerEntTemplate = GetOwnerEntTemplate();
+
+	return ::GetSkillValue(name, entTemplate, STRING(m_entTemplate), ownerEntTemplate, STRING(m_ownerEntTemplate));
+}
+
+void CBaseEntity::InsertAISound(int iType, const Vector &vecOrigin, int iVolume, float flDuration)
+{
+	CSoundEnt::InsertSound(this, iType, vecOrigin, iVolume, flDuration);
+}
+
+void CBaseEntity::InsertAISound(int iType, int iVolume, float flDuration)
+{
+	InsertAISound(iType, pev->origin, iVolume, flDuration);
+}
+
+void CBaseEntity::MarkAsNonBlockerForPlayer()
+{
+	pev->iuser3 = -1;
+}
+
+void CBaseEntity::InitLootRandomSeed()
+{
+	m_lootRandomSeed = RANDOM_LONG((1<<20), (1<<30));
+	if (m_lootRandomSeed % 2 == 0)
+		m_lootRandomSeed++;
+}
+
+float CBaseEntity::SharedLootRandomFloat(float low, float high)
+{
+	float result = UTIL_SharedRandomFloat(static_cast<unsigned int>(m_lootRandomSeed), low, high);
+	m_lootRandomSeed = UTIL_LastRandomSeed();
+	return result;
+}
+
+void CBaseEntity::DropLoot(bool gibbed)
+{
+	const EntTemplate* entTemplate = GetMyEntTemplate();
+	if (entTemplate)
+	{
+		const DropItemSet& lootDrop = entTemplate->GetLootDrop();
+
+		auto dropItem = [this, gibbed](const char* classname, const char* entTemplate, const char* pickupName) {
+			if (!classname || !*classname)
+				return;
+
+			EntityOverrides entityOverrides;
+			if (entTemplate && *entTemplate)
+			{
+				entityOverrides.entTemplate = MAKE_STRING(entTemplate);
+			}
+			if (pickupName && *pickupName && strcmp(classname, "item_pickup") == 0)
+			{
+				entityOverrides.netname = MAKE_STRING(pickupName);
+			}
+
+			CBaseEntity* pItem = Create(classname, Center(), pev->angles, edict(), entityOverrides);
+			if (pItem)
+			{
+				const float velocity = gibbed ? 100.0f : 75.0f;
+
+				pItem->pev->avelocity = Vector( 0, RANDOM_FLOAT( 0, 100 ), 0 );
+				pItem->pev->velocity = Vector( RANDOM_FLOAT( -velocity, velocity ), RANDOM_FLOAT( -velocity, velocity ), RANDOM_FLOAT( velocity*2, velocity*3 ) );
+				if (IsProbablyPickupClassname(classname))
+					pItem->pev->spawnflags |= SF_NORESPAWN;
+			}
+		};
+
+		auto shouldDrop = [this](const DropItemInfoHandle& handle) {
+			if (handle.chance >= 1.0f)
+				return true;
+			if (handle.chance > 0.0f && SharedLootRandomFloat(0.0f, 1.0f) <= handle.chance)
+				return true;
+			return false;
+		};
+
+		if (lootDrop.maxWeight > 0 && lootDrop.items.size() > 1)
+		{
+			std::vector<DropItemInfoHandle> handles;
+			handles.reserve(lootDrop.items.size());
+
+			for (const auto& itemInfo : lootDrop.items)
+			{
+				handles.push_back(DropItemInfoHandle(itemInfo));
+			}
+
+			std::minstd_rand rg(static_cast<unsigned int>(m_lootRandomSeed));
+			std::shuffle(handles.begin(), handles.end(), rg);
+			m_lootRandomSeed = static_cast<int>(rg());
+
+			float totalWeight = 0.0f;
+			for (const auto& handle : handles)
+			{
+				if ((totalWeight == 0.0f || totalWeight + handle.weight <= lootDrop.maxWeight) && shouldDrop(handle))
+				{
+					dropItem(handle.classname, handle.entTemplate, handle.pickupName);
+					totalWeight += handle.weight;
+					if (totalWeight >= lootDrop.maxWeight)
+						break;
+				}
+			}
+		}
+		else
+		{
+			for (const auto& itemInfo : lootDrop.items)
+			{
+				const DropItemInfoHandle handle{itemInfo};
+				if (shouldDrop(handle))
+				{
+					dropItem(handle.classname, handle.entTemplate, handle.pickupName);
+				}
+			}
+		}
+	}
+}
+
+bool CBaseEntity::DropEquipment(const Vector& gunPos, const Vector& angles, bool extraVelocity)
+{
+	const EntTemplate* entTemplate = GetMyEntTemplate();
+	if (entTemplate)
+	{
+		auto& equipmentDrop = entTemplate->GetEquipmentDrop();
+		if (equipmentDrop.has_value())
+		{
+			for (auto& equipment : *equipmentDrop)
+			{
+				if (equipment.weapons.has_value())
+				{
+					if (!MatchFlagSet(pev->weapons, *equipment.weapons, equipment.weaponsMatch))
+					{
+						continue;
+					}
+				}
+
+				EntityOverrides entityOverrides;
+				entityOverrides.entTemplate = equipment.entTemplate.empty() ? iStringNull : MAKE_STRING(equipment.entTemplate.c_str());
+
+				Vector vecPos = gunPos;
+				if (equipment.position == EquipmentItem::POS_BODY)
+					vecPos = BodyTarget(pev->origin);
+
+				CBaseEntity* pItem = Create(equipment.classname.c_str(), vecPos, angles, edict(), entityOverrides);
+				if (pItem)
+				{
+					if (extraVelocity)
+					{
+						pItem->pev->velocity = Vector(RANDOM_FLOAT(-100, 100), RANDOM_FLOAT(-100, 100), RANDOM_FLOAT(200, 300));
+						pItem->pev->avelocity = Vector(0, RANDOM_FLOAT(200, 400), 0);
+					}
+					else
+					{
+						pItem->pev->velocity = pev->velocity;
+						pItem->pev->avelocity = Vector(0, RANDOM_FLOAT(0, 100), 0);
+					}
+					pItem->pev->spawnflags |= SF_NORESPAWN;
+				}
+			}
+
+			return true;
+		}
+	}
+	return false;
+}
+
+void CBaseEntity::PrecacheEquipmentDrop()
+{
+	const EntTemplate* entTemplate = GetMyEntTemplate();
+	if (entTemplate)
+	{
+		auto& equipmentDrop = entTemplate->GetEquipmentDrop();
+		if (equipmentDrop.has_value())
+		{
+			for (auto& equipment : *equipmentDrop)
+			{
+				EntityOverrides entityOverrides;
+				entityOverrides.entTemplate = equipment.entTemplate.empty() ? iStringNull : MAKE_STRING(equipment.entTemplate.c_str());
+
+				UTIL_PrecacheOther(equipment.classname.c_str(), entityOverrides);
+			}
+		}
+	}
 }
 
 bool FilterEntity(CBaseEntity* pEntity, const EntityFilter& filter, CBaseEntity* pInitiator)
@@ -1993,22 +2207,6 @@ bool FilterEntity(CBaseEntity* pEntity, const EntityFilter& filter, CBaseEntity*
 	return filter.negate ? !match : match;
 }
 
-static bool MatchDamageType(int damageType, int matchedDamageType, DamageTypeMatch damageTypeMatch)
-{
-	switch (damageTypeMatch) {
-	case DamageTypeMatch::ONE:
-		return FBitSet(damageType, matchedDamageType);
-	case DamageTypeMatch::ALL:
-		return (damageType & matchedDamageType) == matchedDamageType;
-	case DamageTypeMatch::NONE:
-		return !FBitSet(damageType, matchedDamageType);
-	case DamageTypeMatch::EXACT:
-		return damageType == matchedDamageType;
-	default:
-		return false;
-	}
-}
-
 static bool MatchDamageValue(float damage, float matchedDamage, ValueComparison comparison)
 {
 	switch (comparison) {
@@ -2029,7 +2227,7 @@ bool CheckTakeDamageConditions(const EntTemplate::DamageConditions& conditions, 
 {
 	if (conditions.dmgType)
 	{
-		if (!MatchDamageType(damageInfo.type, *conditions.dmgType, conditions.dmgTypeMatch))
+		if (!MatchFlagSet(damageInfo.type, *conditions.dmgType, conditions.dmgTypeMatch))
 			return false;
 	}
 	if (conditions.dmgComparison != ValueComparison::UNKNOWN)

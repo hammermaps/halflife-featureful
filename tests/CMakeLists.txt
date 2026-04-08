@@ -15,6 +15,7 @@ endif()
 include_directories (. ../common ../engine ../pm_shared ../game_shared ../dlls ../public ../cl_dll)
 
 add_executable(test
+	bucket_preferences_test.cpp
 	ent_templates_test.cpp
 	fixed_string_test.cpp
 	fixed_vector_test.cpp
@@ -25,6 +26,8 @@ add_executable(test
 	messages_test.cpp
 	objecthint_test.cpp
 	parsetext_test.cpp
+	savetitles_test.cpp
+	skilldata_test.cpp
 	soundscripts_test.cpp
 	visuals_test.cpp
 	warpball_test.cpp
@@ -40,10 +43,12 @@ add_executable(test
 	../game_shared/schema_definitions.cpp
 	../game_shared/schema_weapons.cpp
 	../game_shared/tex_materials.cpp
+	../game_shared/visual_object.cpp
 	../game_shared/util_shared.cpp
 	../game_shared/weapon_parameters.cpp
 	../game_shared/weapon_templates.cpp
 	../public/safe_snprintf.c
+	../cl_dll/bucket_preferences.cpp
 	../cl_dll/inventory_hud.cpp
 	../cl_dll/journal_config.cpp
 	../cl_dll/message_strings.cpp
@@ -54,6 +59,9 @@ add_executable(test
 	../dlls/followers.cpp
 	../dlls/inventory.cpp
 	../dlls/objecthint_spec.cpp
+	../dlls/savetitles.cpp
+	../dlls/skill.cpp
+	../dlls/skilldata.cpp
 	../dlls/visuals.cpp
 	../dlls/warpball.cpp
 	main.cpp

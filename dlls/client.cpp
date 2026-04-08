@@ -45,9 +45,9 @@
 #include "tex_materials.h"
 #include "unicode.h"
 #include "mod_features.h"
+#include "error_collector.h"
 
 extern DLL_GLOBAL bool		g_fGameOver;
-extern DLL_GLOBAL int		g_iSkillLevel;
 extern DLL_GLOBAL unsigned int		g_ulFrameCount;
 
 extern void CopyToBodyQue( entvars_t* pev );
@@ -460,6 +460,15 @@ void ClientCommand( edict_t *pEntity )
 	entvars_t *pev = &pEntity->v;
 	CBasePlayer* pPlayer = GetClassPtr( (CBasePlayer *)pev );
 
+	auto removeEntity = [pEntity](CBaseEntity* pRemoveEnt)
+	{
+		if (pRemoveEnt && pRemoveEnt->entindex() > gpGlobals->maxClients)
+		{
+			ClientPrint(&pEntity->v, HUD_PRINTCONSOLE, UTIL_VarArgs("Removing %s \"%s\"\n", STRING(pRemoveEnt->pev->classname), STRING(pRemoveEnt->pev->targetname)));
+			UTIL_Remove(pRemoveEnt);
+		}
+	};
+
 	if( FStrEq( pcmd, "say" ) )
 	{
 		Host_Say( pEntity, 0 );
@@ -540,7 +549,6 @@ void ClientCommand( edict_t *pEntity )
 	{
 		if( CanRunCheatCommand(pev) )
 		{
-			CBaseEntity *pPlayer = CBaseEntity::Instance( pEntity );
 			const bool entityUnderCrosshair = CMD_ARGC() <= 1 || FStrEq( CMD_ARGV(1), "!cross" );
 			USE_TYPE useType = USE_TOGGLE;
 			float value = 0.0f;
@@ -561,29 +569,81 @@ void ClientCommand( edict_t *pEntity )
 				}
 			}
 
-			if ( entityUnderCrosshair )
+			if (entityUnderCrosshair)
 			{
-				TraceResult tr;
-				UTIL_MakeVectors( pev->v_angle );
-				UTIL_TraceLine(
-					pev->origin + pev->view_ofs,
-					pev->origin + pev->view_ofs + gpGlobals->v_forward * 1000,
-					dont_ignore_monsters, pEntity, &tr
-				);
-
-				if( tr.pHit )
+				CBaseEntity *pHitEnt = FindEntityForward(pPlayer);
+				if( pHitEnt )
 				{
-					CBaseEntity *pHitEnt = CBaseEntity::Instance( tr.pHit );
-					if( pHitEnt )
-					{
-						pHitEnt->Use( pPlayer, pPlayer, useType, value );
-						ClientPrint( &pEntity->v, HUD_PRINTCONSOLE, UTIL_VarArgs( "Fired %s \"%s\"\n", STRING( pHitEnt->pev->classname ), STRING( pHitEnt->pev->targetname ) ) );
-					}
+					pHitEnt->Use( pPlayer, pPlayer, useType, value );
+					ClientPrint( &pEntity->v, HUD_PRINTCONSOLE, UTIL_VarArgs( "Fired %s \"%s\"\n", STRING( pHitEnt->pev->classname ), STRING( pHitEnt->pev->targetname ) ) );
 				}
 			}
 			else
 			{
 				FireTargets( CMD_ARGV( 1 ), pPlayer, pPlayer, useType, value );
+			}
+		}
+	}
+	else if( FStrEq( pcmd, "ent_remove" ) )
+	{
+		if (CanRunCheatCommand(pev))
+		{
+			const bool entityUnderCrosshair = CMD_ARGC() <= 1 || FStrEq(CMD_ARGV(1), "") || FStrEq( CMD_ARGV(1), "!cross" );
+
+			if (entityUnderCrosshair)
+			{
+				CBaseEntity *pHitEnt = FindEntityForward(pPlayer);
+				if (pHitEnt && pHitEnt->entindex() > gpGlobals->maxClients)
+				{
+					UTIL_Remove(pHitEnt);
+				}
+			}
+			else
+			{
+				const char* removeTarget = CMD_ARGV(1);
+
+				int index  = atoi(removeTarget);
+				if (index > 0)
+				{
+					removeEntity(CBaseEntity::OwnInstance(INDEXENT(index)));
+				}
+				else
+				{
+					CBaseEntity* pRemoveEnt = UTIL_FindEntityByTargetname(nullptr, removeTarget);
+					if (pRemoveEnt)
+					{
+						removeEntity(pRemoveEnt);
+					}
+					pRemoveEnt = UTIL_FindEntityByClassname(nullptr, removeTarget);
+					if (pRemoveEnt)
+					{
+						removeEntity(pRemoveEnt);
+					}
+				}
+			}
+		}
+	}
+	else if( FStrEq( pcmd, "ent_remove_all" ) )
+	{
+		if (CanRunCheatCommand(pev))
+		{
+			if (CMD_ARGC() < 2)
+			{
+				ClientPrint(&pEntity->v, HUD_PRINTCONSOLE, UTIL_VarArgs("usage: %s <targetname>/<classname>\n", CMD_ARGV(1)));
+			}
+			else
+			{
+				const char* removeTarget = CMD_ARGV(1);
+
+				CBaseEntity* pRemoveEnt = nullptr;
+				while((pRemoveEnt = UTIL_FindEntityByTargetname(pRemoveEnt, removeTarget)) != nullptr)
+				{
+					removeEntity(pRemoveEnt);
+				}
+				while((pRemoveEnt = UTIL_FindEntityByClassname(pRemoveEnt, removeTarget)) != nullptr)
+				{
+					removeEntity(pRemoveEnt);
+				}
 			}
 		}
 	}
@@ -602,21 +662,10 @@ void ClientCommand( edict_t *pEntity )
 
 				if (entityUnderCrosshair)
 				{
-					TraceResult tr;
-					UTIL_MakeVectors( pev->v_angle );
-					UTIL_TraceLine(
-						pev->origin + pev->view_ofs,
-						pev->origin + pev->view_ofs + gpGlobals->v_forward * 1000,
-						dont_ignore_monsters, pEntity, &tr
-					);
-
-					if (tr.pHit && ENTINDEX(tr.pHit) != 0)
+					CBaseEntity *pHitEnt = FindEntityForward(pPlayer);
+					if (pHitEnt)
 					{
-						CBaseEntity *pHitEnt = CBaseEntity::Instance(tr.pHit);
-						if (pHitEnt)
-						{
-							PrintEntityKeyValues(pev, pHitEnt);
-						}
+						PrintEntityKeyValues(pev, pHitEnt);
 					}
 					else
 					{
@@ -678,7 +727,6 @@ void ClientCommand( edict_t *pEntity )
 	}
 	else if( FStrEq( pcmd, "spectate" ) ) // clients wants to become a spectator
 	{
-		CBasePlayer *pPlayer = GetClassPtr( (CBasePlayer *)pev );
 		if( !pPlayer->IsObserver() )
 		{
 			// always allow proxies to become a spectator
@@ -757,6 +805,13 @@ void ClientCommand( edict_t *pEntity )
 	else if ( FStrEq( pcmd, "disband_followers" ) )
 	{
 		pPlayer->DisbandFollowers();
+	}
+	else if ( FStrEq( pcmd, "close_messagebox" ) )
+	{
+		if (CMD_ARGC() > 1)
+		{
+			pPlayer->CloseMessageBox(atoi(CMD_ARGV(1)));
+		}
 	}
 	else if ( FStrEq( pcmd, "make_start_following" ) || FStrEq( pcmd, "make_stop_following" ) )
 	{
@@ -976,6 +1031,12 @@ void ServerActivate( edict_t *pEdictList, int edictCount, int clientMax )
 			ALERT( at_console, "**Graph Pointers Set!\n" );
 		}
 	}
+
+	if (g_pGameRules->IsMultiplayer() && IS_DEDICATED_SERVER())
+	{
+		// No suitable client to send the deprecations to, so just clear them
+		g_errorCollector.ClearDeprecations();
+	}
 }
 
 /*
@@ -1186,14 +1247,6 @@ void ClientPrecache()
 	PRECACHE_SOUND( "common/wpn_denyselect.wav" );
 #endif
 
-	// geiger sounds
-//	PRECACHE_SOUND( "player/geiger6.wav" );
-//	PRECACHE_SOUND( "player/geiger5.wav" );
-//	PRECACHE_SOUND( "player/geiger4.wav" );
-	PRECACHE_SOUND( "player/geiger3.wav" );
-	PRECACHE_SOUND( "player/geiger2.wav" );
-	PRECACHE_SOUND( "player/geiger1.wav" );
-
 	if( giPrecacheGrunt )
 		UTIL_PrecacheOther( "monster_human_grunt" );
 }
@@ -1350,21 +1403,10 @@ void SetupVisibility( edict_t *pViewEntity, edict_t *pClient, unsigned char **pv
 		return;
 	}
 
-	if( pView->v.effects & EF_MERGE_VISIBILITY )
+	org = pView->v.origin + pView->v.view_ofs;
+	if( pView->v.flags & FL_DUCKING )
 	{
-		if( FClassnameIs( pView, "env_sky" ) )
-		{
-			org = pView->v.origin;
-		}
-		else return; // don't merge pvs
-	}
-	else
-	{
-		org = pView->v.origin + pView->v.view_ofs;
-		if( pView->v.flags & FL_DUCKING )
-		{
-			org += ( VEC_HULL_MIN - VEC_DUCK_HULL_MIN );
-		}
+		org += ( VEC_HULL_MIN - VEC_DUCK_HULL_MIN );
 	}
 
 	*pvs = ENGINE_SET_PVS( org );
@@ -1411,7 +1453,6 @@ int AddToFullPack( struct entity_state_s *state, int e, edict_t *ent, edict_t *h
 	{
 		if( !ENGINE_CHECK_VISIBILITY( (const struct edict_s *)ent, pSet ) )
 		{
-			// env_sky is visible always
 			if (!(pEntity->m_EFlags & EFLAG_ALWAYS_SEND) && !pEntity->MustAddToFullPack(pSet))
 			{
 				return 0;

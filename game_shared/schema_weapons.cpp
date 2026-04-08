@@ -19,7 +19,7 @@ const char* const json_schemas::weapons = R"(
 		"items": {
 			"$ref": "#/anim_index"
 		},
-		"minItems": 1,
+		"minItems": 0,
 		"maxItems": 4
 	},
 	"waves_array": {
@@ -91,6 +91,9 @@ const char* const json_schemas::weapons = R"(
 			},
 			"duration": {
 				"$ref": "definitions.json#/range"
+			},
+			"sound": {
+				"$ref": "#/w_soundscript"
 			}
 		},
 		"additionalProperties": false,
@@ -106,6 +109,9 @@ const char* const json_schemas::weapons = R"(
 				"chance": {
 					"type": "number",
 					"exclusiveMinimum": 0
+				},
+				"sound": {
+					"$ref": "#/w_soundscript"
 				}
 			},
 			"required": ["anim", "duration", "chance"],
@@ -187,6 +193,19 @@ const char* const json_schemas::weapons = R"(
 		},
 		"additionalProperties": false
 	},
+	"weapon_damage": {
+		"oneOf": [
+			{
+				"type": "string",
+				"minLength": 1
+			},
+			{
+				"$ref": "definitions.json#/range"
+			}
+		]
+	},
+)"
+R"(
 	"fire": {
 		"type": "object",
 		"properties": {
@@ -194,9 +213,17 @@ const char* const json_schemas::weapons = R"(
 				"enum": ["bullet", "bullets", "melee", "projectile"]
 			},
 			"damage": {
-				"type": ["number", "string"],
-				"minimum": 0,
-				"minLength": 1
+				"$ref": "#/weapon_damage"
+			},
+			"damage_charged_factor": {
+				"$ref": "#/weapon_damage"
+			},
+			"damage_charged_max": {
+				"$ref": "#/weapon_damage"
+			},
+			"subsequent_swing_dmg_factor": {
+				"type": "number",
+				"minimum": 0
 			},
 			"anims": {
 				"$ref": "#/anim_array"
@@ -209,6 +236,9 @@ const char* const json_schemas::weapons = R"(
 				"minItems": 1,
 				"maxItems": 4
 			},
+			"hit_anims": {
+				"$ref": "#/anim_array"
+			},
 			"charge_anims": {
 				"$ref": "anim_array"
 			},
@@ -218,6 +248,12 @@ const char* const json_schemas::weapons = R"(
 			},
 			"charge_sound": {
 				"$ref": "#/w_soundscript"
+			},
+			"charged_attack": {
+				"type": "boolean"
+			},
+			"laser_spot_on_charge": {
+				"type": "boolean"
 			},
 			"cooldown_anims": {
 				"$ref": "anim_array"
@@ -363,6 +399,10 @@ const char* const json_schemas::weapons = R"(
 				"exclusiveMinimum": 0
 			},
 			"cycle_time_last_shot": {
+				"type": "number",
+				"minimum": 0
+			},
+			"hit_cycle_time": {
 				"type": "number",
 				"minimum": 0
 			},
@@ -558,6 +598,9 @@ const char* const json_schemas::weapons = R"(
 					}
 				]
 			},
+			"kickback_on_hit_only": {
+				"type": "boolean"
+			},
 			"pushback_force": {
 				"type": "number",
 				"minimum": 0
@@ -568,10 +611,23 @@ const char* const json_schemas::weapons = R"(
 			"shake": {
 				"$ref": "definitions.json#/shake"
 			},
+			"hit_shake": {
+				"$ref": "definitions.json#/shake"
+			},
+			"smack_delay": {
+				"type": "number",
+				"minimum": 0
+			},
+			"hit_decal": {
+				"type": "boolean"
+			},
 			"prevent_movement": {
 				"type": "boolean"
 			},
 			"player_maxspeed": {
+				"$ref": "definitions.json#/absolute_or_factor"
+			},
+			"player_maxspeed_on_charge": {
 				"$ref": "definitions.json#/absolute_or_factor"
 			},
 			"projectile": {
@@ -683,6 +739,48 @@ const char* const json_schemas::weapons = R"(
 						"exclusiveMinimum": 0
 					}
 				}
+			},
+			"spray": {
+				"type": "object",
+				"properties": {
+					"offset": {
+						"type": "object",
+						"properties": {
+							"up": {
+								"type": "number"
+							},
+							"side": {
+								"type": "number"
+							},
+							"forward": {
+								"type": "number"
+							}
+						},
+						"additionalProperties": false
+					},
+					"visual": {
+						"$ref": "definitions.json#/visual_object"
+					},
+					"count": {
+						"type": "integer",
+						"minimum": 0
+					},
+					"speed": {
+						"type": "integer",
+						"minimum": 0
+					},
+					"spread": {
+						"type": "number",
+						"minimum": 0
+					},
+					"flags": {
+						"type": "array",
+						"items": {
+							"enum": ["collideworld", "animate", "animated", "fadeout"]
+						}
+					}
+				},
+				"additionalProperties": false
 			}
 		},
 		"additionalProperties": false
@@ -740,8 +838,7 @@ const char* const json_schemas::weapons = R"(
 				"minimum": 0
 			},
 			"idle_delay": {
-				"type": "number",
-				"minimum": 0
+				"$ref": "definitions.json#/range_non_negative"
 			},
 			"sound": {
 				"$ref": "#/w_soundscript"
@@ -752,6 +849,14 @@ const char* const json_schemas::weapons = R"(
 			"laser_suspend_time": {
 				"type": "number",
 				"minimum": 0
+			},
+			"ammo_count": {
+				"type": "integer",
+				"minimum": 0
+			},
+			"ammo_count_min": {
+				"type": "integer",
+				"minimum": 1
 			}
 		},
 		"additionalProperties": false
@@ -839,6 +944,13 @@ R"(
 			},
 			"priority": {
 				"type": "integer"
+			},
+			"world_model_animated": {
+				"type": "boolean"
+			},
+			"world_model_sequence": {
+				"type": "integer",
+				"minimum": 0
 			},
 			"deploy": {
 				"$ref": "#/deploy"
@@ -962,6 +1074,16 @@ R"(
 				"type": "integer",
 				"minimum": 0
 			},
+			"ammo_to_viewmodel_body": {
+				"type": "object",
+				"patternProperties": {
+					"^[0-9]+$": {
+						"type": "integer",
+						"minimum": 0
+					}
+				},
+				"additionalProperties": false
+			},
 			"reload": {
 				"$ref": "#/reload"
 			},
@@ -1050,8 +1172,7 @@ R"(
 			"model_sounds": {
 				"type": "array",
 				"items": {
-					"type": "string",
-					"minLength": 1
+					"type": "string"
 				}
 			},
 			"tool": {
@@ -1063,6 +1184,13 @@ R"(
 					"trigger_delay": {
 						"type": "number",
 						"minimum": 0
+					},
+					"deny_sound": {
+						"$ref": "#/w_soundscript"
+					},
+					"delay_after_deny": {
+						"type": "number",
+						"exclusiveMinimum": 0
 					}
 				},
 				"additionalProperties": false

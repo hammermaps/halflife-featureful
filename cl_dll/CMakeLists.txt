@@ -86,6 +86,7 @@ set (CLDLL_SOURCES
 	../dlls/minigun.cpp
 	../dlls/uzi.cpp
 	../dlls/nailgun.cpp
+	../dlls/grenadelauncher.cpp
 	ev_hldm.cpp
 	hl/hl_baseentity.cpp
 	hl/hl_events.cpp
@@ -94,12 +95,15 @@ set (CLDLL_SOURCES
 	ammo.cpp
 	ammo_secondary.cpp
 	ammohistory.cpp
+	bucket_preferences.cpp
 	cdll_int.cpp
 	cl_fx.cpp
 	cl_msg_fx.cpp
+	cmdkeys.cpp
 	com_weapons.cpp
 	death.cpp
 	demo.cpp
+	displaynames.cpp
 	entity.cpp
 	environment.cpp
 	ev_common.cpp
@@ -112,6 +116,7 @@ set (CLDLL_SOURCES
 	hud_caption.cpp
 	hud_error_collection.cpp
 	hud_journal.cpp
+	hud_messagebox.cpp
 	hud_meter.cpp
 	hud_monsterinfo.cpp
 	hud_msg.cpp
@@ -149,6 +154,7 @@ set (CLDLL_SOURCES
 	../game_shared/schema_weapons.cpp
 	../game_shared/sound_channel.cpp
 	../game_shared/soundscripts.cpp
+	../game_shared/visual_object.cpp
 	../game_shared/unicode.cpp
 	../game_shared/util_shared.cpp
 	../game_shared/weapon_parameters.cpp

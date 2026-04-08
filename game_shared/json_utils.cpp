@@ -148,37 +148,49 @@ bool ReadJsonDocumentWithSchema(Document &document, const char *pMemFile, int fi
 		StringBuffer docPathBuffer;
 		docPointer.Stringify(docPathBuffer);
 
-		StringBuffer badValueBuffer;
-		Value *badVal = GetValueByPointer(document, docPointer);
-		if (badVal)
-		{
-			Writer<StringBuffer> writer(badValueBuffer);
-			badVal->Accept(writer);
-		}
-
-		StringBuffer schemaPartBuffer;
 		const char* invalidKeyword = validator.GetInvalidSchemaKeyword();
 		auto& errorVal = validator.GetError();
-		if (errorVal.HasMember(invalidKeyword))
-		{
-			Writer<StringBuffer> writer(schemaPartBuffer);
-			errorVal[invalidKeyword].Accept(writer);
-		}
-
-		const char* keyword = validator.GetInvalidSchemaKeyword();
 
 		char buf[1028];
-		if (strcmp(keyword, "additionalProperties") == 0)
+		if (strcmp(invalidKeyword, "additionalProperties") == 0)
 		{
 			safe_snprintf(buf, sizeof(buf), "%s: unknown property \"%s\" is prohibited\n", fileName, docPathBuffer.GetString());
 		}
+		else if (strcmp(invalidKeyword, "dependencies") == 0 && errorVal.HasMember(invalidKeyword) && errorVal[invalidKeyword].HasMember("errors"))
+		{
+			const char* dependentPropertyName = "";
+
+			auto& errors = errorVal[invalidKeyword]["errors"];
+			auto it = errors.MemberBegin();
+			if (it != errors.MemberEnd())
+			{
+				dependentPropertyName = it->name.GetString();
+			}
+
+			safe_snprintf(buf, sizeof(buf), "%s: dependencies constraint is unmet (incompatible properties are given) in \"%s\": '%s'\n", fileName, docPathBuffer.GetString(), dependentPropertyName);
+		}
 		else
 		{
+			StringBuffer badValueBuffer;
+			Value *badVal = GetValueByPointer(document, docPointer);
+			if (badVal)
+			{
+				Writer<StringBuffer> writer(badValueBuffer);
+				badVal->Accept(writer);
+			}
+
+			StringBuffer schemaPartBuffer;
+			if (errorVal.HasMember(invalidKeyword))
+			{
+				Writer<StringBuffer> writer(schemaPartBuffer);
+				errorVal[invalidKeyword].Accept(writer);
+			}
+
 			safe_snprintf(buf, sizeof(buf), "%s: property \"%s\" : %s doesn't match the constraint '%s' in '%s': %s\n",
 				fileName,
 				docPathBuffer.GetString(),
 				badValueBuffer.GetString(),
-				keyword,
+				invalidKeyword,
 				schemaPathBuffer.GetString(),
 				schemaPartBuffer.GetString());
 		}
@@ -343,54 +355,92 @@ bool UpdatePropertyFromJson(Color3& color, const Value& jsonValue, const char* k
 	return false;
 }
 
+FloatRange FloatRangeFromJSON(const rapidjson::Value& value)
+{
+	FloatRange floatRange;
+	if (value.IsNumber())
+	{
+		floatRange.min = value.GetFloat();
+		floatRange.max = floatRange.min;
+	}
+	else if (value.IsObject())
+	{
+		auto minIt = value.FindMember("min");
+		auto maxIt = value.FindMember("max");
+		if (minIt != value.MemberEnd())
+		{
+			if (minIt->value.IsFloat())
+				floatRange.min = minIt->value.GetFloat();
+		}
+		if (maxIt != value.MemberEnd())
+		{
+			if (maxIt->value.IsFloat())
+				floatRange.max = maxIt->value.GetFloat();
+		}
+	}
+	else if (value.IsString())
+	{
+		ParseFloatRange(value.GetString(), floatRange);
+	}
+	else if (value.IsArray())
+	{
+		Value::ConstArray arr = value.GetArray();
+		floatRange.min = arr[0].GetFloat();
+		floatRange.max = arr[1].GetFloat();
+	}
+
+	if (floatRange.min > floatRange.max) {
+		floatRange.min = floatRange.max;
+	}
+	return floatRange;
+}
+
+IntRange IntRangeFromJSON(const rapidjson::Value& value)
+{
+	IntRange intRange;
+	if (value.IsInt())
+	{
+		intRange.min = value.GetInt();
+		intRange.max = intRange.min;
+	}
+	else if (value.IsObject())
+	{
+		auto minIt = value.FindMember("min");
+		auto maxIt = value.FindMember("max");
+		if (minIt != value.MemberEnd())
+		{
+			if (minIt->value.IsInt())
+				intRange.min = minIt->value.GetInt();
+		}
+		if (maxIt != value.MemberEnd())
+		{
+			if (maxIt->value.IsInt())
+				intRange.max = maxIt->value.GetInt();
+		}
+	}
+	else if (value.IsString())
+	{
+		ParseIntRange(value.GetString(), intRange);
+	}
+	else if (value.IsArray())
+	{
+		Value::ConstArray arr = value.GetArray();
+		intRange.min = arr[0].GetInt();
+		intRange.max = arr[1].GetInt();
+	}
+
+	if (intRange.min > intRange.max) {
+		intRange.min = intRange.max;
+	}
+	return intRange;
+}
+
 bool UpdatePropertyFromJson(FloatRange& floatRange, const Value& jsonValue, const char* key)
 {
 	auto it = jsonValue.FindMember(key);
 	if (it != jsonValue.MemberEnd())
 	{
-		const Value& value = it->value;
-		if (value.IsNumber())
-		{
-			floatRange.min = value.GetFloat();
-			floatRange.max = floatRange.min;
-		}
-		else if (value.IsObject())
-		{
-			auto minIt = value.FindMember("min");
-			auto maxIt = value.FindMember("max");
-			if (minIt != value.MemberEnd())
-			{
-				if (minIt->value.IsFloat())
-					floatRange.min = minIt->value.GetFloat();
-			}
-			if (maxIt != value.MemberEnd())
-			{
-				if (maxIt->value.IsFloat())
-					floatRange.max = maxIt->value.GetFloat();
-			}
-		}
-		else if (value.IsString())
-		{
-			const char* str = value.GetString();
-			const char* found = strchr(str, ',');
-			floatRange.min = (float)atof(str);
-			if (found) {
-				found++;
-				floatRange.max = (float)atof(found);
-			} else {
-				floatRange.max = floatRange.min;
-			}
-		}
-		else if (value.IsArray())
-		{
-			Value::ConstArray arr = value.GetArray();
-			floatRange.min = arr[0].GetFloat();
-			floatRange.max = arr[1].GetFloat();
-		}
-
-		if (floatRange.min > floatRange.max) {
-			floatRange.min = floatRange.max;
-		}
+		floatRange = FloatRangeFromJSON(it->value);
 		return true;
 	}
 	return false;

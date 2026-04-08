@@ -690,7 +690,7 @@ void CLightning::StrikeThink()
 			}
 		}
 
-		MESSAGE_BEGIN( MSG_BROADCAST, gmsgCustomBeam ? gmsgCustomBeam : SVC_TEMPENTITY );
+		MESSAGE_BEGIN( MSG_BROADCAST, gmsgCustomBeam );
 			if( IsPointEntity( pStart ) || IsPointEntity( pEnd ) )
 			{
 				if( !IsPointEntity( pEnd ) )	// One point entity must be in pEnd
@@ -733,10 +733,7 @@ void CLightning::StrikeThink()
 			WRITE_COLOR( pev->rendercolor );   // r, g, b
 			WRITE_BYTE( (int)pev->renderamt );	// brightness
 			WRITE_BYTE( m_speed );		// speed
-		if (gmsgCustomBeam)
-		{
 			WRITE_BYTE( GetFlags() );
-		}
 		MESSAGE_END();
 		DoSparks( pStart->pev->origin, pEnd->pev->origin );
 		if( pev->dmg > 0 )
@@ -781,7 +778,7 @@ void CLightning::DamageThink()
 void CLightning::Zap( const Vector &vecSrc, const Vector &vecDest )
 {
 #if 1
-	MESSAGE_BEGIN( MSG_BROADCAST, gmsgCustomBeam ? gmsgCustomBeam : SVC_TEMPENTITY );
+	MESSAGE_BEGIN( MSG_BROADCAST, gmsgCustomBeam );
 		WRITE_BYTE( TE_BEAMPOINTS );
 		WRITE_VECTOR( vecSrc );
 		WRITE_VECTOR( vecDest );
@@ -794,10 +791,7 @@ void CLightning::Zap( const Vector &vecSrc, const Vector &vecDest )
 		WRITE_COLOR( pev->rendercolor );   // r, g, b
 		WRITE_BYTE( (int)pev->renderamt );	// brightness
 		WRITE_BYTE( m_speed );		// speed
-	if (gmsgCustomBeam)
-	{
 		WRITE_BYTE( GetFlags() );
-	}
 	MESSAGE_END();
 #else
 	MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
@@ -971,7 +965,7 @@ void CLightning::SendRingBeam(CBaseEntity *pClient)
 			return;
 		}
 
-		MESSAGE_BEGIN( msgType, gmsgCustomBeam ? gmsgCustomBeam : SVC_TEMPENTITY, NULL, pClientEdict );
+		MESSAGE_BEGIN( msgType, gmsgCustomBeam, NULL, pClientEdict );
 			WRITE_BYTE( TE_BEAMRING );
 			WRITE_SHORT( pStart->entindex() );
 			WRITE_SHORT( pEnd->entindex() );
@@ -987,10 +981,7 @@ void CLightning::SendRingBeam(CBaseEntity *pClient)
 			WRITE_BYTE( (int)pev->rendercolor.z );   // r, g, b
 			WRITE_BYTE( (int)pev->renderamt );	// brightness
 			WRITE_BYTE( m_speed );		// speed
-		if (gmsgCustomBeam)
-		{
 			WRITE_BYTE( GetFlags() );
-		}
 		MESSAGE_END();
 	}
 }
@@ -1021,7 +1012,7 @@ CSprite* CLaser::CreateTerminalSprite(string_t spriteName)
 	CSprite* pSprite = nullptr;
 	if(spriteName)
 	{
-		pSprite = CSprite::SpriteCreate( STRING(spriteName), pev->origin, true );
+		pSprite = CSprite::SpriteCreate( STRING(spriteName), pev->origin );
 		if (pSprite)
 		{
 			pSprite->SetTransparency( kRenderGlow, (int)pev->rendercolor.x, (int)pev->rendercolor.y, (int)pev->rendercolor.z, (int)pev->renderamt, (int)pev->renderfx );
@@ -1299,16 +1290,40 @@ void CSprite::SpriteInit( const char *pSpriteName, const Vector &origin )
 	Spawn();
 }
 
-CSprite *CSprite::SpriteCreate( const char *pSpriteName, const Vector &origin, bool animate, int spawnflags )
+static CSprite* CreateAndInitSprite(const char *pSpriteName, const Vector &origin, int spawnflags = 0)
 {
-	CSprite *pSprite = GetClassPtr( (CSprite *)NULL );
+	CSprite *pSprite = GetClassPtr((CSprite *)nullptr);
 	pSprite->pev->spawnflags = spawnflags;
 	pSprite->SpriteInit( pSpriteName, origin );
-	pSprite->pev->classname = MAKE_STRING( "env_sprite" );
+	pSprite->pev->classname = MAKE_STRING("env_sprite");
 	pSprite->pev->solid = SOLID_NOT;
 	pSprite->pev->movetype = MOVETYPE_NOCLIP;
-	if( animate )
+	return pSprite;
+}
+
+CSprite *CSprite::SpriteCreate( const char *pSpriteName, const Vector &origin )
+{
+	CSprite *pSprite = CreateAndInitSprite(pSpriteName, origin);
+	pSprite->TurnOn();
+
+	return pSprite;
+}
+
+CSprite *CSprite::SpriteCreateAndAnimate(const char *pSpriteName, const Vector &origin, float framerate)
+{
+	CSprite *pSprite = CreateAndInitSprite(pSpriteName, origin);
+	pSprite->pev->framerate = framerate;
+	if (pSprite->pev->framerate > 0.0f)
 		pSprite->TurnOn();
+
+	return pSprite;
+}
+
+CSprite *CSprite::SpriteCreateAndAnimateOnce(const char *pSpriteName, const Vector &origin, float framerate)
+{
+	CSprite *pSprite = CreateAndInitSprite(pSpriteName, origin, SF_SPRITE_ONCE_AND_REMOVE);
+	pSprite->pev->framerate = framerate;
+	pSprite->TurnOn();
 
 	return pSprite;
 }
@@ -1990,6 +2005,8 @@ class CEnvShooter : public CGibShooter
 	int m_iPhysics;
 	float m_fFriction;
 	Vector m_vecSize;
+	int m_bloodColor;
+	int m_startGibBody;
 };
 
 TYPEDESCRIPTION CEnvShooter::m_SaveData[] =
@@ -1999,6 +2016,8 @@ TYPEDESCRIPTION CEnvShooter::m_SaveData[] =
 	DEFINE_FIELD(CEnvShooter, m_iPhysics, FIELD_INTEGER),
 	DEFINE_FIELD(CEnvShooter, m_fFriction, FIELD_FLOAT),
 	DEFINE_FIELD(CEnvShooter, m_vecSize, FIELD_VECTOR),
+	DEFINE_FIELD(CEnvShooter, m_bloodColor, FIELD_INTEGER),
+	DEFINE_FIELD(CEnvShooter, m_startGibBody, FIELD_INTEGER),
 };
 
 IMPLEMENT_SAVERESTORE( CEnvShooter, CGibShooter )
@@ -2064,6 +2083,16 @@ void CEnvShooter::KeyValue( KeyValueData *pkvd )
 		m_vecSize = m_vecSize / 2;
 		pkvd->fHandled = true;
 	}
+	else if (FStrEq(pkvd->szKeyName, "bloodcolor"))
+	{
+		m_bloodColor = atoi(pkvd->szValue);
+		pkvd->fHandled = true;
+	}
+	else if (FStrEq(pkvd->szKeyName, "start_gib_body"))
+	{
+		m_startGibBody = atoi(pkvd->szValue);
+		pkvd->fHandled = true;
+	}
 	else
 	{
 		CGibShooter::KeyValue( pkvd );
@@ -2112,13 +2141,13 @@ CBaseEntity *CEnvShooter::CreateGib(const Vector& vecPos, const Vector& vecVel, 
 		{
 			int bodyPart = 0;
 
-			if( pev->body > 1 )
-				bodyPart = RANDOM_LONG( 0, pev->body - 1 );
+			if (pev->body > 1)
+				bodyPart = RANDOM_LONG(m_startGibBody, pev->body - 1);
 
 			pGib->pev->body = bodyPart;
 		}
 
-		pGib->m_bloodColor = DONT_BLEED;
+		pGib->m_bloodColor = m_bloodColor > 0 ? m_bloodColor : DONT_BLEED;
 		pGib->m_material = m_iGibMaterial;
 
 		pGib->pev->rendermode = pev->rendermode;
@@ -2665,11 +2694,11 @@ void CFade::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType
 		{
 			if (FBitSet(pev->spawnflags, SF_FADE_BLINDDIRECT))
 			{
-				UTIL_ScreenFade( pev->origin, pActivator, pev->rendercolor, Duration(), HoldTime(), (int)pev->renderamt, fadeFlags );
+				UTIL_ScreenFade( pev->origin, pActivator, pev->rendercolor, Duration(), HoldTime(), (int)pev->renderamt, fadeFlags, true );
 			}
 			else
 			{
-				UTIL_ScreenFade( pActivator, pev->rendercolor, Duration(), HoldTime(), (int)pev->renderamt, fadeFlags );
+				UTIL_ScreenFade( pActivator, pev->rendercolor, Duration(), HoldTime(), (int)pev->renderamt, fadeFlags, true );
 			}
 		}
 	}
@@ -2677,11 +2706,11 @@ void CFade::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType
 	{
 		if (FBitSet(pev->spawnflags, SF_FADE_BLINDDIRECT))
 		{
-			UTIL_ScreenFadeAll( pev->origin, pev->rendercolor, Duration(), HoldTime(), (int)pev->renderamt, fadeFlags );
+			UTIL_ScreenFadeAll( pev->origin, pev->rendercolor, Duration(), HoldTime(), (int)pev->renderamt, fadeFlags, true );
 		}
 		else
 		{
-			UTIL_ScreenFadeAll( pev->rendercolor, Duration(), HoldTime(), (int)pev->renderamt, fadeFlags );
+			UTIL_ScreenFadeAll( pev->rendercolor, Duration(), HoldTime(), (int)pev->renderamt, fadeFlags, true );
 		}
 	}
 	SUB_UseTargets( this );
@@ -3064,7 +3093,7 @@ void CItemSoda::CanTouch( CBaseEntity *pOther )
 
 	// spoit sound here
 	pOther->EmitSoundScript(GetSoundScript(drinkSoundScript));
-	pOther->TakeHealth( this, pev->health ? pev->health : gSkillData.sodaHeal, DMG_GENERIC );// a bit of health.
+	pOther->TakeHealth( this, pev->health ? pev->health : GetSkillValue("soda"), DMG_GENERIC );// a bit of health.
 
 	if( !FNullEnt( pev->owner ) )
 	{
@@ -3537,7 +3566,7 @@ void CEnvWarpBall::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE 
 		w.aiSound.radius = Radius();
 		w.aiSound.duration = m_aiSoundDuration > 0.0f ? m_aiSoundDuration : 0.3f;
 	}
-	PlayWarpballEffect(w, vecOrigin, playSoundEnt);
+	PlayWarpballEffect(this, w, vecOrigin, playSoundEnt);
 
 	SUB_UseTargets( this );
 
@@ -3660,7 +3689,7 @@ void CEnvWarpballTemplated::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, U
 	const WarpballTemplate* warpballTemplate = g_WarpballCatalog.FindWarpballTemplate(STRING(warpballName), entityClassname);
 	if (warpballTemplate)
 	{
-		PlayWarpballEffect(*warpballTemplate, vecOrigin, playSoundEnt);
+		PlayWarpballEffect(this, *warpballTemplate, vecOrigin, playSoundEnt);
 	}
 	else
 	{
@@ -3994,7 +4023,7 @@ void CEnvXenMaker::TrySpawn()
 		}
 	}
 
-	PlayWarpballEffect(w, vecOrigin, posEnt);
+	PlayWarpballEffect(this, w, vecOrigin, posEnt);
 }
 
 void CEnvXenMaker::PlaySecondSoundThink()
@@ -6124,8 +6153,7 @@ void CEnvExtinguisher::ExtinguisherUse(CBaseEntity *pActivator, CBaseEntity *pCa
 		if (blastSprite)
 		{
 			blastSprite->SetScale(scales[i]);
-			blastSprite->AnimateAndDie(10.0f);
-			blastSprite->pev->dmgtime = turnoffTime;
+			blastSprite->AnimateForDurationAndDie(1.5f);
 		}
 	}
 
@@ -6157,5 +6185,105 @@ void CEnvExtinguisher::TurnOff()
 	{
 		SetThink(&CBaseEntity::SUB_Remove);
 		pev->nextthink = gpGlobals->time;
+	}
+}
+
+//=========================================================
+// G-Cont - env_mirror, mirroring only models
+//=========================================================
+
+#define SF_MIRROR_DRAWPLAYER 0x01
+
+extern int gmsgMirror;
+
+class CEnvMirror : public CBaseEntity
+{
+public:
+	void Spawn() override;
+	void Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value) override;
+	void KeyValue(KeyValueData* pkvd) override;
+	int ObjectCaps() override { return CBaseEntity ::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
+
+	int Save(CSave& save) override;
+	int Restore(CRestore& restore) override;
+	void SendMessages(CBaseEntity* pClient);
+
+	int m_iRadius;
+	bool m_iActive;
+	static TYPEDESCRIPTION m_SaveData[];
+};
+
+TYPEDESCRIPTION CEnvMirror::m_SaveData[] =
+{
+	DEFINE_FIELD(CEnvMirror, m_iRadius, FIELD_INTEGER),
+	DEFINE_FIELD(CEnvMirror, m_iActive, FIELD_BOOLEAN),
+};
+IMPLEMENT_SAVERESTORE(CEnvMirror, CBaseEntity)
+
+void CEnvMirror::KeyValue(KeyValueData* pkvd)
+{
+	if (FStrEq(pkvd->szKeyName, "radius"))
+	{
+		m_iRadius = atoi(pkvd->szValue);
+		pkvd->fHandled = true;
+	}
+	else
+		CBaseEntity::KeyValue(pkvd);
+}
+
+LINK_ENTITY_TO_CLASS(env_mirror, CEnvMirror)
+
+void CEnvMirror::Spawn(void)
+{
+	pev->flags |= FL_WORLDBRUSH;
+
+	pev->angles = g_vecZero;
+	pev->movetype = MOVETYPE_PUSH; // so it doesn't get pushed by anything
+
+	pev->solid = SOLID_BSP;
+
+	m_iActive = true;
+
+	Precache();
+
+	SET_MODEL(ENT(pev), STRING(pev->model));
+
+	if (pev->spawnflags & SF_MIRROR_DRAWPLAYER)
+		CBaseEntity::Create("player_marker", VecBModelOrigin(pev), pev->angles);
+
+	if (m_iRadius <= 0)
+		m_iRadius = 330;
+	if (!pev->frags) //Smart field system. g-cont
+	{
+		if (pev->size.y > pev->size.x && pev->size.z > pev->size.x)
+			pev->frags = 0;
+		if (pev->size.x > pev->size.y && pev->size.z > pev->size.y)
+			pev->frags = 1;
+		if (pev->size.y > pev->size.z && pev->size.x > pev->size.z)
+			pev->frags = 2;
+	}
+
+	pev->nextthink = gpGlobals->time + 0.1f;
+}
+
+void CEnvMirror::SendMessages(CBaseEntity *pClient)
+{
+	edict_t* pClientEdict = pClient ? pClient->edict() : nullptr;
+	const int msgType = pClient ? MSG_ONE : MSG_ALL;
+
+	MESSAGE_BEGIN(msgType, gmsgMirror, nullptr, pClientEdict);
+		WRITE_BYTE(m_iActive ? 1 : 0);
+		WRITE_VECTOR(Center());
+		WRITE_SHORT((int)m_iRadius);
+		WRITE_BYTE((byte)pev->frags);
+	MESSAGE_END();
+}
+
+void CEnvMirror::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
+{
+	if (ShouldToggle(useType, m_iActive))
+	{
+		m_iActive = !m_iActive;
+		SendMessages(nullptr);
 	}
 }

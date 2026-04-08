@@ -30,6 +30,7 @@
 #include	"game.h"
 #include	"gamerules.h"
 #include	"common_soundscripts.h"
+#include	"studio.h"
 
 //=========================================================
 // Monster's Anim Events Go Here
@@ -43,6 +44,30 @@
 #define	BARNEY_BODY_GUNDRAWN		1
 #define BARNEY_BODY_GUNGONE		2
 
+#define BARNEY_GUN_GROUP 1
+#define BARNEY_HEAD_GROUP 2
+
+void SetBarneyHead(CBaseEntity* pEntity, int head)
+{
+	void *pmodel = GET_MODEL_PTR(ENT(pEntity->pev));
+	if (pmodel)
+	{
+		studiohdr_t *pstudiohdr = (studiohdr_t *)pmodel;
+		if (pstudiohdr->numbodyparts > BARNEY_HEAD_GROUP)
+		{
+			if (head < 0)
+			{
+				int headCount = GetBodygroupNumModels(pmodel, BARNEY_HEAD_GROUP);
+				if (headCount > 1)
+					head = RANDOM_LONG(0, headCount - 1);
+				else
+					head = 0;
+			}
+			SetBodygroup(pmodel, pEntity->pev, BARNEY_HEAD_GROUP, head);
+		}
+	}
+}
+
 class CBarney : public CTalkMonster
 {
 public:
@@ -53,7 +78,7 @@ public:
 	int DefaultISoundMask() override;
 	void BarneyFirePistol( const char* shotSoundScript, float flDamage );
 	void AlertSound() override;
-	const char* DefaultDisplayName() override { return "Barney"; }
+	const char* DefaultDisplayName() override { return "Security Guard"; }
 	int DefaultClassify() override;
 	const char* ReverseRelationshipModel() override { return "models/barnabus.mdl"; }
 	void HandleAnimEvent( MonsterEvent_t *pEvent ) override;
@@ -88,7 +113,13 @@ public:
 	float m_checkAttackTime;
 	bool m_lastAttackCheck;
 
+	void SetHead(int head) override {
+		m_iHead = head;
+	}
+
 	virtual void SetGunState(int gunState);
+	bool HasGun();
+
 	int bodystate;
 	CUSTOM_SCHEDULES
 
@@ -96,6 +127,8 @@ protected:
 	void SpawnImpl(const char* modelName, float health);
 	DamageInfo DefaultHandleTraceAttackImpl(entvars_t *pevInflictor, entvars_t *pevAttacker, const DamageInfo &inputDamageInfo, Vector vecDir, TraceResult *ptr, bool hasHelmet);
 	virtual bool PrioritizeMeleeAttack() { return false; }
+
+	int m_iHead;
 };
 
 LINK_ENTITY_TO_CLASS( monster_barney, CBarney )
@@ -327,7 +360,7 @@ void CBarney::BarneyFirePistol( const char* shotSoundScript, float flDamage )
 	}
 	EmitSoundScript(shotSoundScript, soundParams);
 
-	CSoundEnt::InsertSound( bits_SOUND_COMBAT, pev->origin, 384, 0.3f );
+	InsertAISound( bits_SOUND_COMBAT, 384, 0.3f );
 
 	// UNDONE: Reload?
 	m_cAmmoLoaded--;// take away a bullet!
@@ -347,11 +380,11 @@ void CBarney::HandleAnimEvent( MonsterEvent_t *pEvent )
 		ReportFireAnimEvent(pEvent->event);
 		if (pev->frags)
 		{
-			BarneyFirePistol(firePythonSoundScript, gSkillData.monDmg357);
+			BarneyFirePistol(firePythonSoundScript, GetSkillValue("357_bullet"));
 		}
 		else
 		{
-			BarneyFirePistol(firePistolSoundScript, gSkillData.monDmg9MM);
+			BarneyFirePistol(firePistolSoundScript, GetSkillValue("9mm_bullet"));
 		}
 		break;
 	case BARNEY_AE_DRAW:
@@ -394,17 +427,48 @@ void CBarney::SpawnImpl(const char* modelName, float health)
 void CBarney::Spawn()
 {
 	Precache();
-	SpawnImpl("models/barney.mdl", gSkillData.barneyHealth);
+	SpawnImpl("models/barney.mdl", GetSkillValue("barney_health"));
 	if (bodystate == -1) {
 		bodystate = RANDOM_LONG(BARNEY_BODY_GUNHOLSTERED, BARNEY_BODY_GUNDRAWN);
 	}
 	SetGunState(bodystate);
+	SetBarneyHead(this, m_iHead);
 }
 
 void CBarney::SetGunState(int gunState)
 {
-	pev->body = gunState;
+	void *pmodel = GET_MODEL_PTR(ENT(pev));
+	if (pmodel)
+	{
+		studiohdr_t *pstudiohdr = (studiohdr_t *)pmodel;
+		if (pstudiohdr->numbodyparts > BARNEY_GUN_GROUP)
+		{
+			::SetBodygroup(pmodel, pev, BARNEY_GUN_GROUP, gunState);
+		}
+		else
+		{
+			pev->body = gunState;
+		}
+	}
 	m_fGunDrawn = gunState == BARNEY_BODY_GUNDRAWN;
+}
+
+bool CBarney::HasGun()
+{
+	void *pmodel = GET_MODEL_PTR(ENT(pev));
+	if (pmodel)
+	{
+		studiohdr_t *pstudiohdr = (studiohdr_t *)pmodel;
+		if (pstudiohdr->numbodyparts > BARNEY_GUN_GROUP)
+		{
+			return ::GetBodygroup(pmodel, pev, BARNEY_GUN_GROUP) < BARNEY_BODY_GUNGONE;
+		}
+		else
+		{
+			return pev->body < BARNEY_BODY_GUNGONE;
+		}
+	}
+	return false;
 }
 
 //=========================================================
@@ -428,6 +492,8 @@ void CBarney::Precache()
 	TalkInit();
 	CTalkMonster::Precache();
 	RegisterTalkMonster();
+
+	PrecacheEquipmentDrop();
 }	
 
 const char* CBarney::DefaultSentenceGroup(int group)
@@ -465,6 +531,11 @@ void CBarney::KeyValue(KeyValueData *pkvd)
 	if (FStrEq(pkvd->szKeyName, "bodystate"))
 	{
 		bodystate = atoi(pkvd->szValue);
+		pkvd->fHandled = true;
+	}
+	if (FStrEq(pkvd->szKeyName, "head"))
+	{
+		m_iHead = atoi(pkvd->szValue);
 		pkvd->fHandled = true;
 	}
 	else
@@ -526,20 +597,22 @@ DamageInfo CBarney::DefaultHandleTraceAttackImpl(entvars_t *pevInflictor, entvar
 
 void CBarney::OnDying(bool gibbed)
 {
-	if( g_pGameRules->FMonsterCanDropWeapons(this) && !FBitSet(pev->spawnflags, SF_MONSTER_DONT_DROP_GUN) && pev->body < BARNEY_BODY_GUNGONE )
+	if( g_pGameRules->FMonsterCanDropWeapons(this) && !FBitSet(pev->spawnflags, SF_MONSTER_DONT_DROP_GUN) && HasGun() )
 	{
 		// drop the gun!
 		Vector vecGunPos;
 		Vector vecGunAngles;
 
-		pev->body = BARNEY_BODY_GUNGONE;
-
+		SetGunState(BARNEY_BODY_GUNGONE);
 		GetAttachment( 0, vecGunPos, vecGunAngles );
 
-		if (pev->frags)
-			DropItem( "weapon_357", vecGunPos, vecGunAngles );
-		else
-			DropItem( "weapon_9mmhandgun", vecGunPos, vecGunAngles );
+		if (!DropEquipment(vecGunPos, vecGunAngles, gibbed))
+		{
+			if (pev->frags)
+				DropItem( "weapon_357", vecGunPos, vecGunAngles );
+			else
+				DropItem( "weapon_9mmhandgun", vecGunPos, vecGunAngles );
+		}
 	}
 	CTalkMonster::OnDying(gibbed);
 }
@@ -652,10 +725,13 @@ class CDeadBarney : public CDeadMonster
 public:
 	void Spawn() override;
 	const char* DefaultModel() override { return "models/barney.mdl"; }
+	void KeyValue( KeyValueData *pkvd ) override;
 	int	DefaultClassify() override { return	CLASS_PLAYER_ALLY; }
 
 	const char* getPos(int pos) const override;
 	static const char *m_szPoses[3];
+
+	int head;
 };
 
 const char *CDeadBarney::m_szPoses[] = { "lying_on_back", "lying_on_side", "lying_on_stomach" };
@@ -667,12 +743,24 @@ const char* CDeadBarney::getPos(int pos) const
 
 LINK_ENTITY_TO_CLASS( monster_barney_dead, CDeadBarney )
 
+void CDeadBarney::KeyValue( KeyValueData *pkvd )
+{
+	if (FStrEq(pkvd->szKeyName, "head"))
+	{
+		head = atoi(pkvd->szValue);
+		pkvd->fHandled = true;
+	}
+	else
+		CDeadMonster::KeyValue( pkvd );
+}
+
 //=========================================================
 // ********** DeadBarney SPAWN **********
 //=========================================================
 void CDeadBarney::Spawn()
 {
 	SpawnHelper();
+	SetBarneyHead(this, head);
 	MonsterInitDead();
 }
 
@@ -693,16 +781,13 @@ public:
 	void Precache() override;
 	bool IsEnabledInMod() override { return g_modFeatures.IsMonsterEnabled("otis"); }
 	const char* DefaultSentenceGroup(int group) override;
-	const char* DefaultDisplayName() override { return "Otis"; }
 	const char* ReverseRelationshipModel() override { return "models/otisf.mdl"; }
 
 	DamageInfo DefaultHandleTraceAttack(entvars_t *pevInflictor, entvars_t *pevAttacker, const DamageInfo &inputDamageInfo, Vector vecDir, TraceResult *ptr) override;
 	void OnDying(bool gibbed) override;
-	
-	void KeyValue( KeyValueData *pkvd ) override;
+
 	void HandleAnimEvent( MonsterEvent_t *pEvent ) override;
 
-	void SetHead(int head) override;
 	void SetGunState(int gunState) override;
 
 	static constexpr const char* fireDesertEagleSoundScript = "Otis.FireDesertEagle";
@@ -717,8 +802,7 @@ public:
 	}
 
 protected:
-	void SetNonGunBody();
-	int m_iHead;
+	void CacheGunGroupModels();
 	int m_gunGroupModels;
 };
 
@@ -727,8 +811,8 @@ LINK_ENTITY_TO_CLASS( monster_otis, COtis )
 void COtis::Spawn()
 {
 	Precache();
-	SpawnImpl("models/otis.mdl", gSkillData.otisHealth);
-	SetNonGunBody();
+	SpawnImpl("models/otis.mdl", GetSkillValue("otis_health"));
+	CacheGunGroupModels();
 	if ( m_iHead == -1 )
 		SetBodygroup(OTIS_HEAD_GROUP, RANDOM_LONG(0, 1));
 	else
@@ -759,7 +843,9 @@ void COtis::Precache()
 	RegisterTalkMonster();
 
 	if (pev->modelindex)
-		SetNonGunBody();
+		CacheGunGroupModels();
+
+	PrecacheEquipmentDrop();
 }
 
 const char* COtis::DefaultSentenceGroup(int group)
@@ -797,24 +883,13 @@ DamageInfo COtis::DefaultHandleTraceAttack(entvars_t *pevInflictor, entvars_t *p
 	return DefaultHandleTraceAttackImpl(pevInflictor, pevAttacker, inputDamageInfo, vecDir, ptr, false);
 }
 
-void COtis::KeyValue( KeyValueData *pkvd )
-{
-	if (FStrEq(pkvd->szKeyName, "head"))
-	{
-		m_iHead = atoi(pkvd->szValue);
-		pkvd->fHandled = true;
-	}
-	else
-		CBarney::KeyValue( pkvd );
-}
-
 void COtis::HandleAnimEvent( MonsterEvent_t *pEvent )
 {
 	switch( pEvent->event )
 	{
 		case BARNEY_AE_SHOOT:
 			ReportFireAnimEvent(pEvent->event);
-			BarneyFirePistol(fireDesertEagleSoundScript, gSkillData.monDmg357);
+			BarneyFirePistol(fireDesertEagleSoundScript, GetSkillValue("357_bullet"));
 			break;
 			
 		case BARNEY_AE_DRAW:
@@ -847,17 +922,15 @@ void COtis::OnDying(bool gibbed)
 
 		GetAttachment( 0, vecGunPos, vecGunAngles );
 
-		DropItem( g_modFeatures.DesertEagleDropName(), vecGunPos, vecGunAngles );
+		if (!DropEquipment(vecGunPos, vecGunAngles, gibbed))
+		{
+			DropItem( g_modFeatures.DesertEagleDropName(), vecGunPos, vecGunAngles );
+		}
 	}
 	CTalkMonster::OnDying(gibbed);
 }
 
-void COtis::SetHead(int head)
-{
-	m_iHead = head;
-}
-
-void COtis::SetNonGunBody()
+void COtis::CacheGunGroupModels()
 {
 	void *pmodel = GET_MODEL_PTR(ENT(pev));
 	if (pmodel)
@@ -872,11 +945,8 @@ public:
 	void Spawn() override;
 	const char* DefaultModel() override { return "models/otis.mdl"; }
 	bool IsEnabledInMod() override { return g_modFeatures.IsMonsterEnabled("otis"); }
-	void KeyValue( KeyValueData *pkvd ) override;
 	const char* getPos(int pos) const override;
 	static const char *m_szPoses[5];
-
-	int head;
 };
 
 const char *CDeadOtis::m_szPoses[] = { "lying_on_back", "lying_on_side", "lying_on_stomach", "stuffed_in_vent", "dead_sitting" };
@@ -891,22 +961,11 @@ LINK_ENTITY_TO_CLASS( monster_otis_dead, CDeadOtis )
 void CDeadOtis::Spawn()
 {
 	SpawnHelper();
-	if ( head == -1 )
-		SetBodygroup(2, RANDOM_LONG(0, 1));
+	if (head == -1)
+		SetBodygroup(OTIS_HEAD_GROUP, RANDOM_LONG(0, 1));
 	else
-		SetBodygroup(2, head);
+		SetBodygroup(OTIS_HEAD_GROUP, head);
 	MonsterInitDead();
-}
-
-void CDeadOtis::KeyValue( KeyValueData *pkvd )
-{
-	if (FStrEq(pkvd->szKeyName, "head"))
-	{
-		head = atoi(pkvd->szValue);
-		pkvd->fHandled = true;
-	}
-	else 
-		CDeadBarney::KeyValue( pkvd );
 }
 
 class CBarniel : public CBarney
@@ -916,7 +975,6 @@ public:
 	void Precache() override;
 	bool IsEnabledInMod() override { return g_modFeatures.IsMonsterEnabled("barniel"); }
 	const char* DefaultSentenceGroup(int group) override;
-	const char* DefaultDisplayName() override { return "Barniel"; }
 	const char* ReverseRelationshipModel() override { return NULL; }
 	void HandleAnimEvent( MonsterEvent_t *pEvent ) override;
 	void DeathSound() override;
@@ -952,12 +1010,13 @@ const NamedSoundScript CBarniel::firePistolSoundScript = {
 void CBarniel::Spawn()
 {
 	Precache();
-	SpawnImpl("models/barniel.mdl", gSkillData.barneyHealth);
+	SpawnImpl("models/barniel.mdl", GetSkillValue("barney_health"));
 
 	if (bodystate == -1) {
 		bodystate = RANDOM_LONG(BARNEY_BODY_GUNHOLSTERED, BARNEY_BODY_GUNDRAWN);
 	}
 	SetGunState(bodystate);
+	SetBarneyHead(this, m_iHead);
 }
 
 void CBarniel::Precache()
@@ -974,6 +1033,8 @@ void CBarniel::Precache()
 	TalkInit();
 	CTalkMonster::Precache();
 	RegisterTalkMonster();
+
+	PrecacheEquipmentDrop();
 }
 
 const char* CBarniel::DefaultSentenceGroup(int group)
@@ -1012,7 +1073,7 @@ void CBarniel::HandleAnimEvent( MonsterEvent_t *pEvent )
 	{
 	case BARNEY_AE_SHOOT:
 		ReportFireAnimEvent(pEvent->event);
-		BarneyFirePistol(firePistolSoundScript, gSkillData.monDmg9MM);
+		BarneyFirePistol(firePistolSoundScript, GetSkillValue("9mm_bullet"));
 		break;
 	default:
 		CBarney::HandleAnimEvent( pEvent );
@@ -1031,15 +1092,18 @@ void CBarniel::PainSound()
 
 void CBarniel::OnDying(bool gibbed)
 {
-	if( g_pGameRules->FMonsterCanDropWeapons(this) && !FBitSet(pev->spawnflags, SF_MONSTER_DONT_DROP_GUN) && pev->body < BARNEY_BODY_GUNGONE )
+	if( g_pGameRules->FMonsterCanDropWeapons(this) && !FBitSet(pev->spawnflags, SF_MONSTER_DONT_DROP_GUN) && HasGun() )
 	{
 		Vector vecGunPos;
 		Vector vecGunAngles;
 
-		pev->body = BARNEY_BODY_GUNGONE;
+		SetGunState(BARNEY_BODY_GUNGONE);
 		GetAttachment( 0, vecGunPos, vecGunAngles );
 
-		DropItem( "weapon_9mmhandgun", vecGunPos, vecGunAngles );
+		if (!DropEquipment(vecGunPos, vecGunAngles, gibbed))
+		{
+			DropItem( "weapon_9mmhandgun", vecGunPos, vecGunAngles );
+		}
 	}
 	CTalkMonster::OnDying(gibbed);
 }
@@ -1066,6 +1130,7 @@ LINK_ENTITY_TO_CLASS( monster_barniel_dead, CDeadBarniel )
 void CDeadBarniel::Spawn()
 {
 	SpawnHelper();
+	SetBarneyHead(this, head);
 	MonsterInitDead();
 }
 
@@ -1139,13 +1204,14 @@ const NamedSoundScript CKate::punchSoundScript = {
 void CKate::Spawn()
 {
 	Precache();
-	SpawnImpl("models/kate.mdl", gSkillData.kateHealth);
+	SpawnImpl("models/kate.mdl", GetSkillValue("kate_health"));
 	m_iCombatState = -1;
 
 	if (bodystate == -1) {
 		bodystate = RANDOM_LONG(BARNEY_BODY_GUNHOLSTERED, BARNEY_BODY_GUNDRAWN);
 	}
 	SetGunState(bodystate);
+	SetBarneyHead(this, m_iHead);
 }
 
 void CKate::Precache()
@@ -1171,6 +1237,8 @@ void CKate::Precache()
 	TalkInit();
 	CTalkMonster::Precache();
 	RegisterTalkMonster();
+
+	PrecacheEquipmentDrop();
 }
 
 const char* CKate::DefaultSentenceGroup(int group)
@@ -1209,7 +1277,7 @@ void CKate::HandleAnimEvent( MonsterEvent_t *pEvent )
 	{
 	case BARNEY_AE_SHOOT:
 		ReportFireAnimEvent(pEvent->event);
-		BarneyFirePistol(firePistolSoundScript, gSkillData.monDmg9MM);
+		BarneyFirePistol(firePistolSoundScript, GetSkillValue("9mm_bullet"));
 		break;
 	case KATE_AE_KICK:
 	{
@@ -1217,7 +1285,7 @@ void CKate::HandleAnimEvent( MonsterEvent_t *pEvent )
 		params.punchAngle.x = 5;
 		params.knockForward = -100;
 		params.knockUp = 50;
-		params.damageInfo.damage = gSkillData.hgruntDmgKick;
+		params.damageInfo.damage = GetSkillValue("hgrunt_kick");
 		params.damageInfo.type = DMG_CLUB;
 		params.skipAllies = true;
 		SetTraceHullAttackParamsFromTemplate(pEvent->event, params);
@@ -1300,15 +1368,18 @@ void CKate::PainSound()
 
 void CKate::OnDying(bool gibbed)
 {
-	if( g_pGameRules->FMonsterCanDropWeapons(this) && !FBitSet(pev->spawnflags, SF_MONSTER_DONT_DROP_GUN) && pev->body < BARNEY_BODY_GUNGONE )
+	if( g_pGameRules->FMonsterCanDropWeapons(this) && !FBitSet(pev->spawnflags, SF_MONSTER_DONT_DROP_GUN) && HasGun() )
 	{
 		Vector vecGunPos;
 		Vector vecGunAngles;
 
-		pev->body = BARNEY_BODY_GUNGONE;
+		SetGunState(BARNEY_BODY_GUNGONE);
 		GetAttachment( 0, vecGunPos, vecGunAngles );
 
-		DropItem( "weapon_9mmhandgun", vecGunPos, vecGunAngles );
+		if (!DropEquipment(vecGunPos, vecGunAngles, gibbed))
+		{
+			DropItem( "weapon_9mmhandgun", vecGunPos, vecGunAngles );
+		}
 	}
 	CTalkMonster::OnDying(gibbed);
 }
@@ -1345,5 +1416,6 @@ LINK_ENTITY_TO_CLASS( monster_kate_dead, CDeadKate )
 void CDeadKate::Spawn()
 {
 	SpawnHelper();
+	SetBarneyHead(this, head);
 	MonsterInitDead();
 }

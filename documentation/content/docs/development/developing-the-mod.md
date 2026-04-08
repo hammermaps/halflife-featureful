@@ -26,6 +26,8 @@ Featureful SDK introduces some new console commands designed to aid the develope
 
 * `buddha` - Alternative to `god`. Player can take damage, but their health never gets lower than 1hp.
 * `fire` - trigger entity(-ies) by name (the first argument) or the entity in front of the player (if the argument is not provided). The special name `!cross` means the entity in front of the player. The second (optional) argument is either `on`, `off` or `set` allows to change the input trigger type. If the second argument is `set`, the third argument is expected which is a number to set (can be used to set the value for `game_counter`, etc.). Note: the player is passed as an *activator*.
+* `ent_remove` - remove one entity by entity index, targetname or classname. Same as in [Source](https://developer.valvesoftware.com/wiki/Ent_remove).
+* `ent_remove_all` - remove all entities by the specified targetname or classname. Same as in [Source](https://developer.valvesoftware.com/wiki/Ent_remove_all).
 * [global variables related commands]({{< ref "global-variables/#console-commands" >}})
 * [Player inventory related commands]({{< ref "player-inventory/#developer-commands" >}})
 * `entities_count` - print the current number of entities on the map at console. Use it to see how close the map is to the entity limit.
@@ -37,5 +39,7 @@ Featureful SDK introduces some new console commands designed to aid the develope
 * `dump_precached_models` and `dump_precached_sounds` - show the count and the list of precached models (including sprites and brush models) or sounds. Useful to keep track of the number of precached resources and to see what's exactly is being precached.
 * `dump_soundscripts` - report soundscripts. See [soundscript debugging]({{< ref "soundscripts/#debugging" >}}).
 * `dump_visuals` - report visuals. See [visuals debugging]({{< ref "visuals/#debugging" >}}).
+* `get_skill` - report skill values. See [skill variables]({{< ref "skill-variables" >}}).
 * `test_particles` - produce some particles. This is for ParticleMan testing.
 * Various commands for [monsters testing and debugging]({{< ref "monsters/#debugging" >}}).
+* `impulse 101` - gives all the enabled weapons to the player and some ammo for them. If player didn't have a suit it will also give a suit (and won't play a greeting sentence which proved to be very annoying if you use this command quite often).

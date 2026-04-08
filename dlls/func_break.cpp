@@ -29,6 +29,7 @@
 #include "game.h"
 #include "locus.h"
 #include "common_soundscripts.h"
+#include "error_collector.h"
 
 extern DLL_GLOBAL Vector	g_vecAttackDir;
 
@@ -140,6 +141,16 @@ void CBreakable::KeyValue( KeyValueData* pkvd )
 			m_iszSpawnObject = MAKE_STRING( pSpawnObjects[object] );
 		pkvd->fHandled = true;
 	}
+	else if( FStrEq( pkvd->szKeyName, "spawnobject_name" ) )
+	{
+		m_iszSpawnObject = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = true;
+	}
+	else if( FStrEq( pkvd->szKeyName, "spawnobject_template" ) )
+	{
+		m_iszSpawnObjectTemplate = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = true;
+	}
 	else if ( FStrEq( pkvd->szKeyName, "randomitem_template" ) )
 	{
 		pev->message = ALLOC_STRING(pkvd->szValue);
@@ -197,6 +208,7 @@ TYPEDESCRIPTION CBreakable::m_SaveData[] =
 	DEFINE_FIELD( CBreakable, m_angle, FIELD_FLOAT ),
 	DEFINE_FIELD( CBreakable, m_iszGibModel, FIELD_STRING ),
 	DEFINE_FIELD( CBreakable, m_iszSpawnObject, FIELD_STRING ),
+	DEFINE_FIELD( CBreakable, m_iszSpawnObjectTemplate, FIELD_STRING ),
 	DEFINE_FIELD( CBreakable, m_targetActivator, FIELD_SHORT ),
 	DEFINE_FIELD( CBreakable, m_iGibs, FIELD_INTEGER ),
 	DEFINE_FIELD( CBreakable, m_iszWhenHit, FIELD_STRING ),
@@ -242,6 +254,19 @@ void CBreakable::Spawn()
 	// Flag unbreakable glass as "worldbrush" so it will block ALL tracelines
 	if( !IsBreakable() && pev->rendermode != kRenderNormal )
 		pev->flags |= FL_WORLDBRUSH;
+
+	InitLootRandomSeed();
+}
+
+void CBreakable::Activate()
+{
+	if (FBitSet(pev->spawnflags, SF_BREAK_OP4MORTAR_ONLY))
+	{
+		const Vector center = Center();
+		g_errorCollector.AddFormattedDeprecation("%s (center: %g, %g, %g) has the spawnflag %d. This will be removed/replaced in future. Use entity template with custom take_damage property instead.",
+												 STRING(pev->classname), center.x, center.y, center.z, SF_BREAK_OP4MORTAR_ONLY);
+	}
+	CBaseDelay::Activate();
 }
 
 const NamedSoundScript CBreakable::woodSoundScript = {
@@ -470,8 +495,12 @@ void CBreakable::Precache()
 	m_idShard = PRECACHE_MODEL( pGibName );
 
 	// Precache the spawn item's data
-	if( m_iszSpawnObject )
-		UTIL_PrecacheOther( STRING( m_iszSpawnObject ) );
+	if (!FStringNull(m_iszSpawnObject))
+	{
+		EntityOverrides entityOverrides;
+		entityOverrides.entTemplate = m_iszSpawnObjectTemplate;
+		UTIL_PrecacheOther(STRING(m_iszSpawnObject), entityOverrides);
+	}
 }
 
 // play shard sound when func_breakable takes damage.
@@ -887,14 +916,18 @@ void CBreakable::DieToActivator( CBaseEntity* pActivator )
 				shouldApplyPhysicsFix = contents == 0;
 			}
 		}
-		CBaseEntity* pEntity = CBaseEntity::CreateNoSpawn( spawnObject, bmodelOrigin, pev->angles, edict() );
+		EntityOverrides entityOverrides;
+		entityOverrides.entTemplate = m_iszSpawnObjectTemplate;
+		CBaseEntity* pEntity = CBaseEntity::CreateNoSpawn( spawnObject, bmodelOrigin, pev->angles, edict(), entityOverrides );
 		if (pEntity)
 		{
-			if (shouldApplyPhysicsFix)
+			if (shouldApplyPhysicsFix && IsProbablyPickupClassname(spawnObject))
 				pEntity->pev->spawnflags |= SF_ITEM_FIX_PHYSICS;
 			DispatchSpawnAutoClean(pEntity);
 		}
 	}
+
+	DropLoot(false);
 
 	if( Explodable() )
 	{
@@ -933,6 +966,8 @@ bool CBreakable::IsDestroyableObstacle()
 	return pev->takedamage && IsBreakable();
 }
 
+#define SF_PUSHABLE_DISABLED (1<<24)
+
 class CPushable : public CBreakable
 {
 public:
@@ -947,7 +982,12 @@ public:
 	void EXPORT StopSound();
 	//virtual void	SetActivator( CBaseEntity *pActivator ) { m_pPusher = pActivator; }
 
-	int ObjectCaps() override { return ( CBaseEntity::ObjectCaps() & ~FCAP_ACROSS_TRANSITION ) | FCAP_CONTINUOUS_USE; }
+	int ObjectCaps() override {
+		int caps = CBaseEntity::ObjectCaps() & ~FCAP_ACROSS_TRANSITION;
+		if (!FBitSet(pev->spawnflags, SF_PUSHABLE_DISABLED))
+			caps |= FCAP_CONTINUOUS_USE;
+		return caps;
+	}
 	bool PlaysItsOwnHitSounds() const override {
 		return FBitSet(pev->spawnflags, SF_PUSH_BREAKABLE);
 	}
@@ -963,6 +1003,24 @@ public:
 	const char* DefaultDisplayName() override { return "Pushable"; }
 	bool IsDestroyableObstacle() override;
 	bool ShouldCollideWithCorpses() override { return !m_ignoreCorpses; }
+	bool ShouldCollideWithTinyCreatures() override {
+		return !g_modFeatures.ShouldIgnoreTinyCreatures(m_handleTinyCreatures);
+	}
+
+	int SizeForGrapple()
+	{
+		if (m_sizeForGrapple < 0)
+			return GRAPPLE_NOT_A_TARGET;
+		else if (m_sizeForGrapple > 0 && m_sizeForGrapple <= GRAPPLE_FIXED)
+			return m_sizeForGrapple;
+		else
+		{
+			const EntTemplate* entTemplate = GetMyEntTemplate();
+			if (entTemplate && entTemplate->IsSizeForGrappleDefined())
+				return entTemplate->SizeForGrapple();
+		}
+		return DefaultSizeForGrapple();
+	}
 
 	static TYPEDESCRIPTION m_SaveData[];
 
@@ -971,6 +1029,9 @@ public:
 	float m_soundTime;
 	bool m_ignoreCorpses;
 	bool m_instantGibCorpses;
+	short m_handleTinyCreatures;
+	bool m_toggleable;
+	short m_sizeForGrapple;
 
 	static const NamedSoundScript moveSoundScript;
 };
@@ -981,6 +1042,9 @@ TYPEDESCRIPTION	CPushable::m_SaveData[] =
 	DEFINE_FIELD( CPushable, m_soundTime, FIELD_TIME ),
 	DEFINE_FIELD( CPushable, m_ignoreCorpses, FIELD_BOOLEAN ),
 	DEFINE_FIELD( CPushable, m_instantGibCorpses, FIELD_BOOLEAN ),
+	DEFINE_FIELD( CPushable, m_handleTinyCreatures, FIELD_SHORT ),
+	DEFINE_FIELD( CPushable, m_toggleable, FIELD_BOOLEAN ),
+	DEFINE_FIELD( CPushable, m_sizeForGrapple, FIELD_SHORT ),
 };
 
 IMPLEMENT_SAVERESTORE( CPushable, CBreakable )
@@ -1056,6 +1120,21 @@ void CPushable::KeyValue( KeyValueData *pkvd )
 		m_instantGibCorpses = atoi(pkvd->szValue) != 0;
 		pkvd->fHandled = true;
 	}
+	else if ( FStrEq(pkvd->szKeyName, "handle_tiny_creatures") )
+	{
+		m_handleTinyCreatures = atoi(pkvd->szValue);
+		pkvd->fHandled = true;
+	}
+	else if ( FStrEq(pkvd->szKeyName, "toggleable_push") )
+	{
+		m_toggleable = atoi(pkvd->szValue) != 0;
+		pkvd->fHandled = true;
+	}
+	else if ( FStrEq( pkvd->szKeyName, "size_for_grapple" ) )
+	{
+		m_sizeForGrapple = (short)atoi( pkvd->szValue );
+		pkvd->fHandled = true;
+	}
 	else
 		CBreakable::KeyValue( pkvd );
 }
@@ -1063,12 +1142,35 @@ void CPushable::KeyValue( KeyValueData *pkvd )
 // Pull the func_pushable
 void CPushable::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 {
+	if (m_toggleable && (!pCaller || !pCaller->IsPlayer()))
+	{
+		const bool state = !FBitSet(pev->spawnflags, SF_PUSHABLE_DISABLED);
+		if (ShouldToggle(useType, state))
+		{
+			if (state)
+			{
+				SetBits(pev->spawnflags, SF_PUSHABLE_DISABLED);
+				pev->solid = FBitSet(pev->spawnflags, SF_BREAK_NOT_SOLID) ? SOLID_NOT : SOLID_BSP;
+			}
+			else
+			{
+				ClearBits(pev->spawnflags, SF_PUSHABLE_DISABLED);
+				pev->solid = SOLID_BBOX;
+			}
+			UTIL_SetOrigin(pev, pev->origin);
+		}
+		return;
+	}
+
 	if( !pActivator || !pActivator->IsPlayer() )
 	{
 		if( pev->spawnflags & SF_PUSH_BREAKABLE )
 			this->CBreakable::Use( pActivator, pCaller, useType, value );
 		return;
 	}
+
+	if (FBitSet(pev->spawnflags, SF_PUSHABLE_DISABLED))
+		return;
 
 	if( pActivator->pev->velocity != g_vecZero )
 		Move( pActivator, 0 );
@@ -1085,6 +1187,9 @@ NODE_LINKENT CPushable::HandleLinkEnt(int afCapMask, bool nodeQueryStatic)
 
 void CPushable::Touch( CBaseEntity *pOther )
 {
+	if (FBitSet(pev->spawnflags, SF_PUSHABLE_DISABLED))
+		return;
+
 	if( FClassnameIs( pOther->pev, "worldspawn" ) )
 		return;
 
@@ -1106,9 +1211,10 @@ void CPushable::Move( CBaseEntity *pOther, int push )
 		return;
 	}
 
-	if (m_instantGibCorpses && pOther->pev->deadflag == DEAD_DEAD)
+	const bool shouldInstaGib = (m_instantGibCorpses && pOther->IsCorpse()) || (g_modFeatures.ShouldCrushTinyCreatures(m_handleTinyCreatures) && pOther->IsTinyCreature());
+	if (shouldInstaGib)
 	{
-		pOther->TakeDamage(pev, pev, DamageInfo(pOther->pev->health + 1, DMG_CRUSH).SetGibPolicy(GIB_ALWAYS));
+		pOther->TakeDamage(pev, pev, DamageInfo(pOther->pev->health + 1, DMG_CRUSH).SetIgnoreTransform().SetGibPolicy(GIB_ALWAYS));
 	}
 
 	if( pOther->IsPlayer() )

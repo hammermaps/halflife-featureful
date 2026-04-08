@@ -1,4 +1,5 @@
 #include "weapon_parameters.h"
+#include "clamp.h"
 
 template<>
 WeaponSoundScript& WeaponModeValue<WeaponSoundScript>::Materialize(bool altMode)
@@ -123,4 +124,18 @@ void WeaponKickBackProfile::SetKickBack(bool altMode, const RuleList &rules)
 const WeaponKickBackProfile::RuleList& WeaponKickBackProfile::GetRuleList(bool altMode) const
 {
 	return _rules.Get(altMode);
+}
+
+bool WeaponParameters::IsUsableWithoutAmmo() const
+{
+	if (fire.ammoPerFire.Get(false) <= 0)
+		return true;
+
+	if (secondaryFireType != SecondaryFireType::DISABLED && fire.ammoPerFire.Get(true) <= 0)
+		return true;
+
+	if ((fire.useSecondaryAmmo.Get(false) || fire.useSecondaryAmmo.Get(true)) && secondaryAmmoName.empty())
+		return true;
+
+	return false;
 }

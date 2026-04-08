@@ -3,11 +3,13 @@
 
 #include "blood_types.h"
 #include "classify.h"
+#include "const.h"
 #include "grapple_target.h"
 #include "hull_sizes.h"
 #include "dmg_types.h"
 #include "gib.h"
 #include "hitgroup.h"
+#include "util_shared.h"
 
 #include <algorithm>
 #include <set>
@@ -28,17 +30,33 @@ const char* entTemplatesSchema = R"(
 }
 )";
 
-static DamageTypeMatch ParseDamageTypeMatch(const char* str)
+bool MatchFlagSet(int flagSet, int matchedFlagSet, FlagSetMatch matchType)
+{
+	switch (matchType) {
+	case FlagSetMatch::ONE:
+		return FBitSet(flagSet, matchedFlagSet);
+	case FlagSetMatch::ALL:
+		return (flagSet & matchedFlagSet) == matchedFlagSet;
+	case FlagSetMatch::NONE:
+		return !FBitSet(flagSet, matchedFlagSet);
+	case FlagSetMatch::EXACT:
+		return flagSet == matchedFlagSet;
+	default:
+		return false;
+	}
+}
+
+static FlagSetMatch ParseFlagSetMatch(const char* str)
 {
 	if (stricmp(str, "one") == 0)
-		return DamageTypeMatch::ONE;
+		return FlagSetMatch::ONE;
 	else if (stricmp(str, "all") == 0)
-		return DamageTypeMatch::ALL;
+		return FlagSetMatch::ALL;
 	else if (stricmp(str, "none") == 0)
-		return DamageTypeMatch::NONE;
+		return FlagSetMatch::NONE;
 	else if (stricmp(str, "exact") == 0)
-		return DamageTypeMatch::EXACT;
-	return DamageTypeMatch::INVALID;
+		return FlagSetMatch::EXACT;
+	return FlagSetMatch::INVALID;
 }
 
 static std::pair<ValueComparison, float> ParseValueComparison(const char* str)
@@ -586,8 +604,8 @@ void EntTemplate::DamageConditions::UpdateFromJSON(const Value &value)
 	});
 
 	HandleJSONMember(value, "dmg_type_match", [this](const Value& value) {
-		auto dmgTypeMatchResult = ParseDamageTypeMatch(value.GetString());
-		if (dmgTypeMatchResult != DamageTypeMatch::INVALID)
+		auto dmgTypeMatchResult = ParseFlagSetMatch(value.GetString());
+		if (dmgTypeMatchResult != FlagSetMatch::INVALID)
 			dmgTypeMatch = dmgTypeMatchResult;
 	});
 
@@ -836,6 +854,53 @@ void EntTemplate::UpdatePainSoundRule(::PainSoundRule &rule) const
 	{
 		rule.allowWhenDying = (bool)_painSoundRule.allowWhenDying;
 	}
+}
+
+void EntTemplate::SetSkillReplacement(const char* name, const SkillReplacement& replacement) {
+	if (strncmp(name, "sk_", 3) == 0)
+	{
+		name += 3;
+	}
+	if (*name == '\0')
+		return;
+	_skillReplacements[name] = replacement;
+}
+
+const SkillReplacement* EntTemplate::GetSkillReplacement(const char* name) const {
+	if (_skillReplacements.empty())
+		return nullptr;
+	if (strncmp(name, "sk_", 3) == 0)
+	{
+		name += 3;
+	}
+	if (*name == '\0')
+		return nullptr;
+	auto it = _skillReplacements.find(name);
+	if (it != _skillReplacements.end())
+	{
+		return &it->second;
+	}
+	return nullptr;
+}
+
+void EntTemplate::SetDisplayName(std::string &&name)
+{
+	_displayName = std::move(name);
+}
+
+void EntTemplate::SetDisplayName(const char *name)
+{
+	if (name && *name)
+		_displayName = name;
+	else
+		_displayName.clear();
+}
+
+const char* EntTemplate::GetDisplayName() const
+{
+	if (!_displayName.empty())
+		return _displayName.c_str();
+	return nullptr;
 }
 
 bool EntTemplateSystem::AddTemplateFromJsonValue(const Value& allTemplatesJsonValue, const char* name, const Value& value, const char* fileName, std::vector<std::string> inheritanceChain)
@@ -1288,6 +1353,36 @@ void EntTemplateSystem::AddTemplateFromJsonValueImpl(const std::string& template
 		entTemplate.SetLootDrop(DropItemSet::FromJSON(value));
 	});
 
+	HandleJSONMember(value, "equipment_drop", [&entTemplate](const Value& value) {
+		Value::ConstArray arr = value.GetArray();
+		std::vector<EquipmentItem> equipmentDrop;
+		for (auto& item : arr)
+		{
+			EquipmentItem equipment;
+			UpdatePropertyFromJson(equipment.weapons, item, "weapons");
+
+			HandleJSONMember(item, "weapons_match", [&equipment](const Value& value) {
+				auto weaponsMatch = ParseFlagSetMatch(value.GetString());
+				if (weaponsMatch != FlagSetMatch::INVALID)
+					equipment.weaponsMatch = weaponsMatch;
+			});
+
+			UpdatePropertyFromJson(equipment.classname, item, "classname");
+			UpdatePropertyFromJson(equipment.entTemplate, item, "ent_template");
+
+			HandleJSONMember(item, "at_position", [&equipment](const Value& value) {
+				const char* str = value.GetString();
+				if (strcmp(str, "gun") == 0)
+					equipment.position = EquipmentItem::POS_GUN;
+				else if (strcmp(str, "body") == 0)
+					equipment.position = EquipmentItem::POS_BODY;
+			});
+
+			equipmentDrop.push_back(equipment);
+		}
+		entTemplate.SetEquipmentDrop(std::move(equipmentDrop));
+	});
+
 	HandleJSONMember(value, "children", [&entTemplate](const Value& value) {
 		if (value.IsArray())
 		{
@@ -1316,6 +1411,87 @@ void EntTemplateSystem::AddTemplateFromJsonValueImpl(const std::string& template
 		UpdatePropertyFromJson(rule.lowerBound, value, "lower_bound_dmg");
 		UpdatePropertyFromJson(rule.allowWhenDying, value, "allow_when_dying");
 		entTemplate.SetPainSoundRule(rule);
+	});
+
+	HandleJSONMember(value, "skill", [&entTemplate](const Value& value) {
+		for (auto skillIt = value.MemberBegin(); skillIt != value.MemberEnd(); ++skillIt)
+		{
+			const char* skillName = skillIt->name.GetString();
+			const Value& skillValue = skillIt->value;
+
+			if (*skillName)
+			{
+				SkillReplacement replacement;
+				if (skillValue.IsString())
+				{
+					const char* str = skillValue.GetString();
+					if (*str == '*')
+					{
+						const float multiplier = atof(str+1);
+						replacement.easy = replacement.medium = replacement.hard = multiplier;
+						replacement.type = SkillReplacement::MULTIPLIER;
+					}
+					else
+					{
+						replacement.replacement = skillValue.GetString();
+						replacement.type = SkillReplacement::STRING;
+					}
+				}
+				else if (skillValue.IsNumber())
+				{
+					replacement.easy = replacement.medium = replacement.hard = skillValue.GetFloat();
+					replacement.type = SkillReplacement::COMMON;
+				}
+				else if (skillValue.IsArray())
+				{
+					Value::ConstArray arr = skillValue.GetArray();
+					if (arr.Size() == 3)
+					{
+						replacement.type = SkillReplacement::DIFFICULTIES;
+						replacement.easy = arr[0].GetFloat();
+						replacement.medium = arr[1].GetFloat();
+						replacement.hard = arr[2].GetFloat();
+					}
+				}
+				entTemplate.SetSkillReplacement(skillName, replacement);
+			}
+		}
+	});
+
+	std::string displayName;
+	if (UpdatePropertyFromJson(displayName, value, "displayname"))
+	{
+		entTemplate.SetDisplayName(std::move(displayName));
+	}
+
+	HandleJSONMember(value, "projectile", [&entTemplate](const Value& value) {
+		EntTemplate::Projectile projectile;
+		HandleJSONMember(value, "effect_flags", [&entTemplate, &projectile](const Value& value) {
+			int effects = 0;
+			Value::ConstArray arr = value.GetArray();
+			for (const auto& item : arr)
+			{
+				if (strcmp(item.GetString(), "rocketflare") == 0)
+				{
+					effects |= EF_LIGHT;
+				}
+				else if (strcmp(item.GetString(), "brightlight") == 0)
+				{
+					effects |= EF_BRIGHTLIGHT;
+				}
+			}
+			projectile.effects = effects;
+		});
+		entTemplate.SetProjectileParams(projectile);
+	});
+
+	HandleJSONMember(value, "pickup", [&entTemplate](const Value& value) {
+		HandleJSONMember(value, "hud_sprite", [&entTemplate](const Value& value) {
+			if (value.IsString())
+			{
+				entTemplate.SetPickupHudSprite(value.GetString());
+			}
+		});
 	});
 
 	_entTemplates[templateName] = entTemplate;

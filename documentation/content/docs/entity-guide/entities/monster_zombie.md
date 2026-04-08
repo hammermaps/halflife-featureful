@@ -7,6 +7,10 @@ bookToC: false
 
 [TWHL](https://twhl.info/wiki/page/monster_zombie)
 
+### Changes
+
+* Unlike original Half-Life, zombies don't have resistance against Tau-Cannon and tank guns anymore. This is believed to be wrong coding by Valve as zombies lack resistance to against bullets from other weapons.
+
 ### Skill variables
 
 * **sk_zombie_health** - monster's health.
@@ -17,12 +21,16 @@ bookToC: false
 
 `Alien Monster`
 
+### Default display name
+
+`Zombie`
+
 ### Soundscripts
 
 * **Zombie.Idle** - idle sounds.
 * **Zombie.Alert** - alert sounds.
 * **Zombie.Pain** - pain sounds.
-* **Zombie.Die** - death sounds.
+* **Zombie.Die** - death sounds. Empty by default.
 * **Zombie.Attack** - plays occasionally on the slash attack.
 * **Zombie.AttackHit** - melee attack hit. Derived from **NPC.AttackHit**
 * **Zombie.AttackMiss** - melee attack miss. Derived from **NPC.AttackMiss**

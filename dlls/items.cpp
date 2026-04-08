@@ -32,8 +32,6 @@
 #include "common_soundscripts.h"
 #include "inventory.h"
 
-extern int gmsgItemPickup;
-
 class CWorldItem : public CBaseEntity
 {
 public:
@@ -196,7 +194,7 @@ IMPLEMENT_SAVERESTORE( CItemRandom, CBaseEntity )
 
 bool CItemRandom::IsAppropriateItemName(const char *name)
 {
-	return IsNullItem(name) || (strncmp(name, "ammo_", 5) == 0) || (strncmp(name, "item_", 5) == 0) || (strncmp(name, "weapon_", 7) == 0);
+	return IsNullItem(name) || IsProbablyPickupClassname(name);
 }
 
 bool CItemRandom::IsNullItem(const char *name)
@@ -527,6 +525,24 @@ void CItem::TouchOrUse(CBaseEntity *pOther)
 	}
 }
 
+void CItem::NotifyPickup(CBasePlayer* pPlayer, string_t defaultPickup)
+{
+	const EntTemplate* entTemplate = GetMyEntTemplate();
+	if (entTemplate)
+	{
+		const char* hudSprite = entTemplate->GetPickupHudSprite();
+		if (hudSprite)
+		{
+			pPlayer->NotifyPickup(hudSprite);
+			return;
+		}
+	}
+	if (!FStringNull(defaultPickup))
+	{
+		pPlayer->NotifyPickup(STRING(defaultPickup));
+	}
+}
+
 Vector CItem::MyRespawnSpot()
 {
 	return g_pGameRules->VecItemRespawnSpot( this );
@@ -613,9 +629,7 @@ public:
 
 			pPlayer->EmitSoundScript(GetSoundScript(pickupSoundScript));
 
-			MESSAGE_BEGIN( MSG_ONE, gmsgItemPickup, NULL, pPlayer->pev );
-				WRITE_STRING( STRING( pev->classname ) );
-			MESSAGE_END();
+			NotifyPickup(pPlayer, pev->classname);
 
 			if (ShouldSetSuitUpdate())
 			{
@@ -641,7 +655,7 @@ public:
 protected:
 	virtual const char* DefaultModel() { return "models/w_battery.mdl"; }
 	virtual bool ShouldSetSuitUpdate() { return true; }
-	virtual int DefaultCapacity() { return gSkillData.batteryCapacity; }
+	virtual int DefaultCapacity() { return GetSkillValue("battery"); }
 };
 
 LINK_ENTITY_TO_CLASS( item_battery, CItemBattery )
@@ -692,9 +706,8 @@ class CItemAntidote : public CItem
 
 		if (!FStringNull(pev->noise))
 			EMIT_SOUND( pPlayer->edict(), CHAN_ITEM, STRING(pev->noise), 1, ATTN_NORM );
-		MESSAGE_BEGIN( MSG_ONE, gmsgItemPickup, NULL, pPlayer->pev );
-			WRITE_STRING( STRING( pev->classname ) );
-		MESSAGE_END();
+
+		NotifyPickup(pPlayer, pev->classname);
 
 		return true;
 	}
@@ -737,12 +750,7 @@ class CItemSecurity : public CItem
 
 		if (!FStringNull(pev->noise))
 			EMIT_SOUND( pPlayer->edict(), CHAN_ITEM, STRING(pev->noise), 1, ATTN_NORM );
-		if (!FStringNull(pev->netname))
-		{
-			MESSAGE_BEGIN( MSG_ONE, gmsgItemPickup, NULL, pPlayer->pev );
-				WRITE_STRING( STRING(pev->netname) );
-			MESSAGE_END();
-		}
+		NotifyPickup(pPlayer, pev->netname);
 		if (!FStringNull(pev->message))
 			UTIL_ShowMessage( STRING( pev->message ), pPlayer );
 
@@ -878,10 +886,7 @@ class CItemLongJump : public CItem
 		if( pPlayer->HasSuit() )
 		{
 			pPlayer->SetLongjump(true);
-
-			MESSAGE_BEGIN( MSG_ONE, gmsgItemPickup, NULL, pPlayer->pev );
-				WRITE_STRING( STRING( pev->classname ) );
-			MESSAGE_END();
+			NotifyPickup(pPlayer, pev->classname);
 
 			EMIT_SOUND_SUIT( pPlayer->edict(), "!HEV_A1" );	// Play the longjump sound UNDONE: Kelly? correct sound?
 			return true;
@@ -941,9 +946,7 @@ public:
 		else if ( pPlayer->HasSuitLight() )
 			return false;
 		pPlayer->SetFlashlight();
-		MESSAGE_BEGIN( MSG_ONE, gmsgItemPickup, NULL, pPlayer->pev );
-			WRITE_STRING( STRING(pev->classname) );
-		MESSAGE_END();
+		NotifyPickup(pPlayer, pev->classname);
 		pPlayer->EmitSoundScript(GetSoundScript(pickupSoundScript));
 		return true;
 	}
@@ -976,9 +979,7 @@ public:
 		else if ( pPlayer->HasSuitLight() )
 			return false;
 		pPlayer->SetNVG();
-		MESSAGE_BEGIN( MSG_ONE, gmsgItemPickup, NULL, pPlayer->pev );
-			WRITE_STRING( STRING(pev->classname) );
-		MESSAGE_END();
+		NotifyPickup(pPlayer, pev->classname);
 		return true;
 	}
 };

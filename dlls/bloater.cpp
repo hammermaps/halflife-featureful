@@ -130,8 +130,6 @@ void CBloater::Precache()
 // AI Schedules Specific to this monster
 //=========================================================
 
-#define BLOATING_TIME 2.1
-#define BASE_FLOATER_SPEED 100
 #define FLOATER_GLOW_SPRITE "sprites/glow02.spr"
 
 #define bits_MEMORY_FLOATER_PROVOKED bits_MEMORY_CUSTOM1
@@ -191,7 +189,6 @@ public:
 	bool ShouldAdvanceRoute( float flWaypointDist ) override;
 
 	void StartBloating();
-	void ChangeGlowVisual(CSprite* pGlow, const Visual& newGlow);
 	void ExplodeEffect();
 	void MakeProvoked(bool alertOthers = true);
 	void AlertOthers();
@@ -248,6 +245,7 @@ protected:
 	{
 		return !FBitSet(pev->spawnflags, SF_MONSTER_WAIT_UNTIL_PROVOKED) || HasMemory(bits_MEMORY_FLOATER_PROVOKED);
 	}
+	void CreateGlows(const Visual* visual);
 	void GlowUpdate();
 	void GlowUpdate(CSprite* glow);
 
@@ -397,7 +395,7 @@ void CFloater::Spawn()
 	pev->movetype		= MOVETYPE_FLY;
 	pev->flags		|= FL_FLY;
 	SetMyBloodColor( BLOOD_COLOR_GREEN );
-	SetMyHealth( gSkillData.floaterHealth );
+	SetMyHealth( GetSkillValue("floater_health") );
 	pev->view_ofs		= Vector( 0, 0, -2 );// position of the eyes relative to monster's origin.
 	SetMyFieldOfView(VIEW_FIELD_FULL);// indicates the width of this monster's forward view cone ( as a dotproduct result )
 	m_MonsterState		= MONSTERSTATE_NONE;
@@ -415,12 +413,7 @@ void CFloater::Spawn()
 			pGlowVisual = GetVisual(glowVisual);
 		if (pGlowVisual)
 		{
-			m_leftGlow = CreateSpriteFromVisual(pGlowVisual, pev->origin);
-			if (m_leftGlow)
-				m_leftGlow->SetAttachment(edict(), 2);
-			m_rightGlow = CreateSpriteFromVisual(pGlowVisual, pev->origin);
-			if (m_rightGlow)
-				m_rightGlow->SetAttachment(edict(), 1);
+			CreateGlows(pGlowVisual);
 		}
 	}
 	else
@@ -551,7 +544,7 @@ void CFloater::RunTask( Task_t *pTask )
 		{
 			MakeIdealYaw( m_vecEnemyLKP );
 			ChangeYaw( pev->yaw_speed );
-			if (((m_hEnemy->Center() - pev->origin)).IsLengthLessThan(128) && !Bloating())
+			if (!Bloating() && ((m_hEnemy->Center() - pev->origin)).IsLengthLessThan(GetSkillValue("floater_bloat_distance")))
 			{
 				StartBloating();
 			}
@@ -579,13 +572,14 @@ void CFloater::PrescheduleThink()
 	GlowUpdate();
 	if (Bloating())
 	{
-		float fraction = (gpGlobals->time - StartBloatingTime()) / BLOATING_TIME;
+		const float bloatTime = GetSkillValue("floater_bloat_time");
+		const float fraction = (gpGlobals->time - StartBloatingTime()) / bloatTime;
 		pev->scale = OriginalScale() + (TargetScale() - OriginalScale()) * fraction;
-		if (gpGlobals->time >= StartBloatingTime() + BLOATING_TIME)
+		if (gpGlobals->time >= StartBloatingTime() + bloatTime)
 		{
 			TakeDamage(pev, pev, DamageInfo(pev->health, DMG_GENERIC));
 		}
-		m_flGroundSpeed = BASE_FLOATER_SPEED + 400 * fraction;
+		m_flGroundSpeed = GetSkillValue("floater_basespeed") + GetSkillValue("floater_extraspeed") * fraction;
 	}
 	CBaseMonster::PrescheduleThink();
 }
@@ -662,7 +656,7 @@ void CFloater::SetActivity( Activity NewActivity )
 	CBaseMonster::SetActivity(NewActivity);
 	if (m_flGroundSpeed == 0)
 	{
-		m_flGroundSpeed = BASE_FLOATER_SPEED;
+		m_flGroundSpeed = GetSkillValue("floater_basespeed");
 	}
 }
 
@@ -699,7 +693,7 @@ void CFloater::Move( float flInterval )
 
 	if( m_flGroundSpeed == 0 )
 	{
-		m_flGroundSpeed = BASE_FLOATER_SPEED;
+		m_flGroundSpeed = GetSkillValue("floater_basespeed");
 	}
 
 	flMoveDist = m_flGroundSpeed * flInterval;
@@ -908,7 +902,6 @@ KilledResult CFloater::Killed(entvars_t *pevInflictor, entvars_t *pevAttacker, i
 	g_howlTime = gpGlobals->time;
 	StopSoundScript(howlSoundScript);
 	ExplodeEffect();
-	CSoundEnt::InsertSound( bits_SOUND_DANGER, pev->origin, 300, 0.3 );
 	return killedResult;
 }
 
@@ -935,6 +928,19 @@ void CFloater::UpdateOnRemove()
 	UTIL_Remove(m_rightGlow);
 	m_rightGlow = NULL;
 	CBaseMonster::UpdateOnRemove();
+}
+
+void CFloater::CreateGlows(const Visual *visual)
+{
+	if (!visual)
+		return;
+
+	m_leftGlow = CreateSpriteFromVisual(visual, pev->origin);
+	if (m_leftGlow)
+		m_leftGlow->SetAttachment(edict(), 2);
+	m_rightGlow = CreateSpriteFromVisual(visual, pev->origin);
+	if (m_rightGlow)
+		m_rightGlow->SetAttachment(edict(), 1);
 }
 
 void CFloater::GlowUpdate()
@@ -975,29 +981,13 @@ void CFloater::StartBloating()
 	SetTargetScale( OriginalScale() * 1.5f );
 	SetStartBloatingTime( gpGlobals->time );
 
-	if (m_leftGlow || m_rightGlow)
+	if (m_hasAttachments)
 	{
-		const Visual* pGlowBloatingVisual = GetVisual(glowBloatingVisual);
-		if (pGlowBloatingVisual)
-		{
-			if (m_leftGlow)
-				ChangeGlowVisual(m_leftGlow, *pGlowBloatingVisual);
-			if (m_rightGlow)
-				ChangeGlowVisual(m_rightGlow, *pGlowBloatingVisual);
-		}
-	}
-}
+		UTIL_Remove(m_leftGlow);
+		UTIL_Remove(m_rightGlow);
 
-void CFloater::ChangeGlowVisual(CSprite* pGlow, const Visual& newGlow)
-{
-	const char* model = newGlow.model;
-	if (model && !FStrEq(STRING(pGlow->pev->model), model))
-	{
-		SET_MODEL(pGlow->edict(), model);
+		CreateGlows(GetVisual(glowBloatingVisual));
 	}
-	pGlow->pev->rendermode = newGlow.rendermode;
-	pGlow->pev->renderfx = newGlow.renderfx;
-	pGlow->SetScale(RandomizeNumberFromRange(newGlow.scale));
 }
 
 void CFloater::ExplodeEffect()
@@ -1014,7 +1004,7 @@ void CFloater::ExplodeEffect()
 
 	EmitSoundScript(explodeSoundScript);
 
-	RadiusDamage(exploOrigin, pev, pev, DamageInfo{gSkillData.floaterExplode, DMG_BLAST|DMG_ACID}, Classify());
+	RadiusDamage(exploOrigin, pev, pev, DamageInfo{GetSkillValue("floater_explode"), DMG_BLAST|DMG_ACID}, Classify());
 }
 
 void CFloater::FloaterBloatUse(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
@@ -1027,22 +1017,12 @@ void CFloater::MakeProvoked(bool alertOthers)
 {
 	if (!IsProvoked())
 	{
-		if (m_leftGlow || m_rightGlow)
+		if (m_hasAttachments)
 		{
-			const Visual* pGlowVisual = GetVisual(glowVisual);
-			if (pGlowVisual)
-			{
-				if (m_leftGlow)
-				{
-					ChangeGlowVisual(m_leftGlow, *pGlowVisual);
-					m_leftGlow->SetColor(pGlowVisual->rendercolor.r, pGlowVisual->rendercolor.g, pGlowVisual->rendercolor.b);
-				}
-				if (m_rightGlow)
-				{
-					ChangeGlowVisual(m_rightGlow, *pGlowVisual);
-					m_rightGlow->SetColor(pGlowVisual->rendercolor.r, pGlowVisual->rendercolor.g, pGlowVisual->rendercolor.b);
-				}
-			}
+			UTIL_Remove(m_leftGlow);
+			UTIL_Remove(m_rightGlow);
+
+			CreateGlows(GetVisual(glowVisual));
 		}
 
 		Remember(bits_MEMORY_FLOATER_PROVOKED);

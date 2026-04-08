@@ -61,6 +61,7 @@ public:
 	// basic functions
 	void Spawn() override;
 	void Precache() override;
+	void Activate() override;
 	void KeyValue( KeyValueData* pkvd) override;
 	void EXPORT BreakTouch( CBaseEntity *pOther );
 	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value ) override;
@@ -133,6 +134,7 @@ public:
 	float m_angle;
 	string_t m_iszGibModel;
 	string_t m_iszSpawnObject;
+	string_t m_iszSpawnObjectTemplate;
 
 	short m_targetActivator;
 	int m_iGibs;

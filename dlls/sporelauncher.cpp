@@ -20,6 +20,7 @@
 #include "weapons.h"
 #include "player.h"
 #include "mod_features.h"
+#include "fx_flags.h"
 #ifndef CLIENT_DLL
 #include "spore.h"
 #endif
@@ -40,36 +41,13 @@ enum sporelauncher_e
 class CSporelauncher : public CConfigurableWeapon
 {
 public:
-	void Spawn() override;
-	void Precache() override;
 	int WeaponId() const override { return WEAPON_SPORELAUNCHER; }
 
 	bool GetItemInfo(ItemInfo *p) override;
 	WeaponParameters GetDefaultParameters() const override;
-
-	void OnIdleAnimation(int anim) override;
-
-	int m_iSquidSpitSprite;
 };
 
 LINK_WEAPON_TO_CLASS(weapon_sporelauncher, CSporelauncher)
-
-void CSporelauncher::Spawn()
-{
-	CConfigurableWeapon::Spawn();
-	pev->animtime = gpGlobals->time;
-	pev->framerate = 1.0f;
-}
-
-void CSporelauncher::Precache()
-{
-	CConfigurableWeapon::Precache();
-
-	PRECACHE_SOUND("weapons/splauncher_pet.wav");
-
-	PRECACHE_MODEL("sprites/bigspit.spr");
-	m_iSquidSpitSprite = PRECACHE_MODEL("sprites/tinyspit.spr");
-}
 
 bool CSporelauncher::GetItemInfo(ItemInfo *p)
 {
@@ -97,13 +75,16 @@ WeaponParameters CSporelauncher::GetDefaultParameters() const
 	params.playerModel = "models/p_spore_launcher.mdl";
 	params.playerAnimExt = "rpg";
 	params.priority = 20;
+	params.worldModelAnimated = true;
 
 	params.deploy.animIndex = SPLAUNCHER_DRAW1;
+
+	WeaponSoundScript fidgetSoundScript(CHAN_ITEM, {"weapons/splauncher_pet.wav"}, 0.7f, ATTN_NORM, 100);
 
 	params.idleAnims.main = WeaponParameters::IdleAnimArray{
 		WeaponParameters::IdleAnim{SPLAUNCHER_IDLE, 0.75f, 2.0f},
 		WeaponParameters::IdleAnim{SPLAUNCHER_IDLE2, 0.20f, 4.0f},
-		WeaponParameters::IdleAnim{SPLAUNCHER_FIDGET, 0.05f, 4.0f}
+		WeaponParameters::IdleAnim{SPLAUNCHER_FIDGET, 0.05f, 4.0f, fidgetSoundScript}
 	};
 
 	// Primary fire
@@ -136,7 +117,22 @@ WeaponParameters CSporelauncher::GetDefaultParameters() const
 
 	params.fire.clientPunchPitch = -3.0f;
 
-	params.fire.spitSpray = true;
+	params.fire.sprayOffsetUp = -20.0f;
+	params.fire.sprayOffsetSide = 8.0f;
+	params.fire.sprayOffsetForward = 16.0f;
+
+	Visual sprayVisual;
+	sprayVisual.SetModel("sprites/tinyspit.spr");
+	sprayVisual.SetAlpha(255);
+	sprayVisual.SetRenderMode(kRenderTransAlpha);
+	sprayVisual.SetFramerate(0.5f);
+	sprayVisual.SetRenderFx(kRenderFxNoDissipation);
+
+	params.fire.sprayVisual = sprayVisual;
+	params.fire.sprayCount = 8;
+	params.fire.spraySpeed = 210;
+	params.fire.spraySpread = 0.25f;
+	params.fire.sprayFlags = SPRAY_FLAG_FADEOUT;
 	//
 
 	// Alt fire
@@ -175,12 +171,4 @@ WeaponParameters CSporelauncher::GetDefaultParameters() const
 	params.endReload.attackDelay = 0.0f;
 
 	return params;
-}
-
-void CSporelauncher::OnIdleAnimation(int anim)
-{
-	if (anim == SPLAUNCHER_FIDGET)
-	{
-		EMIT_SOUND(m_pPlayer->edict(), CHAN_ITEM, "weapons/splauncher_pet.wav", 0.7f, ATTN_NORM);
-	}
 }

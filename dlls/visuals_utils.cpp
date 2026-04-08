@@ -4,17 +4,21 @@
 extern int gmsgSprite;
 extern int gmsgSpray;
 extern int gmsgSmoke;
+extern int gmsgCustomBeam;
 
-CSprite* CreateSpriteFromVisual(const Visual* visual, const Vector& origin, int spawnFlags)
+CSprite* CreateSpriteFromVisual(const Visual* visual, const Vector& origin, bool once)
 {
 	if (!visual || !visual->modelIndex)
 		return nullptr;
 
 	const float framerate = RandomizeNumberFromRange(visual->framerate);
-	CSprite *sprite = CSprite::SpriteCreate(visual->model, origin, framerate > 0.0f, spawnFlags);
+	CSprite *sprite = nullptr;
+	if (once)
+		sprite = CSprite::SpriteCreateAndAnimateOnce(visual->model, origin, framerate);
+	else
+		sprite = CSprite::SpriteCreateAndAnimate(visual->model, origin, framerate);
 	if (sprite)
 	{
-		sprite->pev->framerate = framerate;
 		sprite->SetTransparency(visual->rendermode, visual->rendercolor.r, visual->rendercolor.g, visual->rendercolor.b, visual->renderamt, visual->renderfx);
 		sprite->SetScale(RandomizeNumberFromRange(visual->scale));
 	}
@@ -41,7 +45,7 @@ CBeam* CreateBeamFromVisual(const Visual* visual)
 	return beam;
 }
 
-void WriteBeamVisual(const Visual *visual)
+static void WriteBeamVisual(const Visual *visual)
 {
 	WRITE_SHORT( visual->modelIndex );
 	WRITE_BYTE( 0 ); // framestart
@@ -54,7 +58,7 @@ void WriteBeamVisual(const Visual *visual)
 	WRITE_BYTE( visual->beamScrollRate );		// speed
 }
 
-void WriteBeamFollowVisual(const Visual *visual)
+static void WriteBeamFollowVisual(const Visual *visual)
 {
 	WRITE_SHORT( visual->modelIndex );
 	WRITE_BYTE( (int)(10*RandomizeNumberFromRange(visual->life)) ); // life
@@ -166,15 +170,75 @@ void SendSmoke(const Vector& position, const Visual* visual)
 	MESSAGE_END();
 }
 
-void SendBeamFollow(int entIndex, const Visual* visual)
+void SendBeamFollow(int entIndexAndAttachment, const Visual* visual, int msgType, const float* origin)
 {
 	if (!visual || !visual->modelIndex)
 		return;
 
-	MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
-		WRITE_BYTE( TE_BEAMFOLLOW );
-		WRITE_SHORT( entIndex );	// entity
-		WriteBeamFollowVisual( visual );
+	MESSAGE_BEGIN(msgType, SVC_TEMPENTITY, origin);
+		WRITE_BYTE(TE_BEAMFOLLOW);
+		WRITE_SHORT(entIndexAndAttachment);
+		WriteBeamFollowVisual(visual);
+	MESSAGE_END();
+}
+
+void SendBeam(int entIndexAndAttachment, const Vector& endPos, const Visual* visual, int msgType, const float* origin)
+{
+	if (!visual || !visual->modelIndex)
+		return;
+
+	MESSAGE_BEGIN(msgType, gmsgCustomBeam, origin);
+		WRITE_BYTE(TE_BEAMENTPOINT);
+		WRITE_SHORT(entIndexAndAttachment);
+		WRITE_VECTOR(endPos);
+		WriteBeamVisual(visual);
+		WRITE_BYTE(visual->beamFlags);
+	MESSAGE_END();
+}
+
+void SendBeam(const Vector& startPos, const Vector& endPos, const Visual* visual, int msgType, const float* origin)
+{
+	if (!visual || !visual->modelIndex)
+		return;
+
+	MESSAGE_BEGIN(msgType, gmsgCustomBeam, origin);
+		WRITE_BYTE(TE_BEAMPOINTS);
+		WRITE_VECTOR(startPos);
+		WRITE_VECTOR(endPos);
+		WriteBeamVisual(visual);
+		WRITE_BYTE(visual->beamFlags);
+	MESSAGE_END();
+}
+
+void SendBeam(int entIndexAndAttachment, int entIndexAndAttachment2, const Visual* visual, int msgType, const float* origin)
+{
+	if (!visual || !visual->modelIndex)
+		return;
+
+	MESSAGE_BEGIN(msgType, gmsgCustomBeam, origin);
+		WRITE_BYTE(TE_BEAMENTS);
+		WRITE_SHORT(entIndexAndAttachment);
+		WRITE_SHORT(entIndexAndAttachment2);
+		WriteBeamVisual(visual);
+		WRITE_BYTE(visual->beamFlags);
+	MESSAGE_END();
+}
+
+void SendBeamWave(const Vector& vecSrc, float radius, const Visual* visual, int msgType, const float* origin)
+{
+	if (!visual || !visual->modelIndex)
+		return;
+
+	int tmpEntType = TE_BEAMCYLINDER;
+	if (visual->waveType == Visual::WAVETYPE_TORUS)
+		tmpEntType = TE_BEAMTORUS;
+	else if (visual->waveType == Visual::WAVETYPE_DISK)
+		tmpEntType = TE_BEAMDISK;
+
+	MESSAGE_BEGIN(msgType, SVC_TEMPENTITY, origin);
+		WRITE_BYTE(tmpEntType);
+		WRITE_CIRCLE(vecSrc, radius);
+		WriteBeamVisual(visual);
 	MESSAGE_END();
 }
 

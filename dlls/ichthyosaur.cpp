@@ -453,7 +453,7 @@ void CIchthyosaur::HandleAnimEvent( MonsterEvent_t *pEvent )
 					params.punchAngle.x = 5;
 					params.punchAngle.z = -18;
 					params.knockRight = -300.0f;
-					params.damageInfo.damage = gSkillData.ichthyosaurDmgShake;
+					params.damageInfo.damage = GetSkillValue("ichthyosaur_shake");
 					params.damageInfo.type = DMG_SLASH;
 					SetTraceHullAttackParamsFromTemplate(pEvent->event, params);
 
@@ -514,7 +514,7 @@ void CIchthyosaur::Spawn()
 	pev->solid		= SOLID_BBOX;
 	pev->movetype		= MOVETYPE_FLY;
 	SetMyBloodColor( BLOOD_COLOR_GREEN );
-	SetMyHealth( gSkillData.ichthyosaurHealth );
+	SetMyHealth( GetSkillValue("ichthyosaur_health") );
 	pev->view_ofs		= Vector( 0, 0, 16 );
 	SetMyFieldOfView(VIEW_FIELD_WIDE);
 	m_MonsterState		= MONSTERSTATE_NONE;
@@ -531,7 +531,7 @@ void CIchthyosaur::Spawn()
 
 	m_idealDist = 384;
 	m_flMinSpeed = 80;
-	m_flMaxSpeed = 300;
+	m_flMaxSpeed = GetSkillValue("ichthyosaur_maxspeed") * 0.75f;
 	m_flMaxDist = 384;
 
 	Vector Forward;
@@ -573,7 +573,7 @@ Schedule_t* CIchthyosaur::GetSchedule()
 		return GetScheduleOfType( SCHED_IDLE_WALK );
 		break;
 	case MONSTERSTATE_COMBAT:
-		m_flMaxSpeed = 400;
+		m_flMaxSpeed = GetSkillValue("ichthyosaur_maxspeed");
 		// eat them
 		if( HasConditions( bits_COND_CAN_MELEE_ATTACK1 ) )
 		{

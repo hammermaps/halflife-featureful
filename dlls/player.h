@@ -118,6 +118,8 @@ enum sbar_data
 // this is trigger_camera flag, need to have it here
 #define SF_CAMERA_STOP_BY_PLAYER_INPUT_USE (1 << 25)
 
+CBaseEntity *FindEntityForward(CBaseEntity *pMe);
+
 class CBasePlayer : public CBaseMonster
 {
 public:
@@ -232,7 +234,7 @@ public:
 	int					m_iDeaths;
 	float				m_flRespawnTimer;	// used in PlayerDeathThink() to make sure players can always respawn
 
-	int m_lastx, m_lasty;  // These are the previous update's crosshair angles, DON"T SAVE/RESTORE
+	float m_lastx, m_lasty;  // These are the previous update's crosshair angles, DON"T SAVE/RESTORE
 
 	int m_nCustomSprayFrames;// Custom clan logo frames for this player
 	float	m_flNextDecalTime;// next time this player can spray a decal
@@ -552,6 +554,9 @@ public:
 	bool m_needSatchelRecheck;
 
 	bool m_forceCollideWithCorpses;
+	bool m_hidePickups;
+
+	void NotifyPickup(const char* pickupName);
 
 	bool AddJournalRecord(string_t section, string_t record);
 	string_t m_journalSections[MAX_JOURNAL_RECORDS];
@@ -567,6 +572,21 @@ public:
 	int m_ClientVolume;
 	float m_NextClientVolumeUpdate;
 
+	float m_fadeStarted;
+	float m_fadeDuration;
+	float m_fadeHoldTime;
+	int m_fadeColor;
+	short m_fadeAlpha;
+	short m_fadeFlags;
+
+	EHANDLE m_messageBoxEnts[MAX_MESSAGE_BOXES];
+	Vector m_messageBoxOrigins[MAX_MESSAGE_BOXES];
+	float m_messageBoxDistances[MAX_MESSAGE_BOXES];
+	void RemoveMessageBoxGaps();
+	bool AddMessageBox(CBaseEntity* pMessageBoxEnt, const Vector& origin, float distance);
+	bool CloseMessageBox(int messageBoxId);
+	void ClearMessageBoxByIndex(int i);
+
 	int m_ToolSignalBits;
 	int m_ToolStateBits;
 	int m_ClientToolStateBits;
@@ -574,6 +594,8 @@ public:
 	int m_ToolUnalignedBits;
 	int m_ClientToolUnalignedBits;
 	edict_t* m_UseToolTriggers[32];
+
+	bool m_bunnyhop;
 };
 
 extern int gmsgHudText;

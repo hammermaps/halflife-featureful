@@ -25,7 +25,10 @@ extern "C"
 #include "in_defs.h"
 //#include "view.h"
 #include <cctype>
+#include "keydefs.h"
 #include "player_capabilities.h"
+
+#include <set>
 
 #if USE_VGUI
 #include "vgui_TeamFortressViewport.h"
@@ -419,8 +422,31 @@ HUD_Key_Event
 Return 1 to allow engine to process the key, otherwise, act on it as needed
 ============
 */
+
+bool g_checkingBindings = false;
+std::set<int> g_boundKeynums;
+
 int DLLEXPORT HUD_Key_Event( int down, int keynum, const char *pszCurrentBinding )
 {
+	if (g_checkingBindings)
+	{
+		if (down)
+		{
+			if (pszCurrentBinding && *pszCurrentBinding)
+			{
+				g_boundKeynums.insert(keynum);
+			}
+			//gEngfuncs.Con_DPrintf("Key Event: %d. Binding: %s\n", keynum, pszCurrentBinding ? pszCurrentBinding : "[unbound]");
+		}
+		return 0;
+	}
+
+	if (down)
+	{
+		if (gHUD.HandleKeyDown(keynum))
+			return 0;
+	}
+
 #if USE_VGUI
 	if (gViewPort)
 		return gViewPort->KeyInput(down, keynum, pszCurrentBinding);
@@ -983,10 +1009,7 @@ int CL_ButtonBits( int bResetState )
 
 	if( in_attack.state & 3 )
 	{
-		if( gHUD.m_MOTD.m_bShow )
-			gHUD.m_MOTD.Reset();
-		else
-			bits |= IN_ATTACK;
+		bits |= IN_ATTACK;
 	}
 
 	if( in_duck.state & 3 )

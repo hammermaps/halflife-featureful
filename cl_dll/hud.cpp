@@ -413,6 +413,11 @@ int __MsgFunc_OnRope( const char *pszName, int iSize, void *pbuf )
 	return gHUD.MsgFunc_OnRope( pszName, iSize, pbuf );
 }
 
+int __MsgFunc_Mirror( const char *pszName, int iSize, void *pbuf )
+{
+	return gHUD.MsgFunc_Mirror( pszName, iSize, pbuf );
+}
+
 // TFFree Command Menu
 void __CmdFunc_OpenCommandMenu()
 {
@@ -643,6 +648,10 @@ void CHud::ParseModConfigs()
 	translatedStrings.ReadFromFile("messages.json");
 	m_messageStrings = std::move(translatedStrings);
 
+	DisplayNames displayNames;
+	displayNames.ReadFromFile("displaynames.json");
+	m_displayNames = std::move(displayNames);
+
 	JournalConfig journalConfig;
 	journalConfig.ReadFromFile("journal.json");
 	m_journalConfig = std::move(journalConfig);
@@ -714,6 +723,7 @@ void CHud::Init()
 	HOOK_MESSAGE( SoundScript );
 	HOOK_MESSAGE( Capability );
 	HOOK_MESSAGE( OnRope );
+	HOOK_MESSAGE( Mirror );
 
 	CVAR_CREATE( "hud_classautokill", "1", FCVAR_ARCHIVE | FCVAR_USERINFO );		// controls whether or not to suicide immediately on TF class switch
 	CVAR_CREATE( "hud_takesshots", "0", FCVAR_ARCHIVE );		// controls whether or not to automatically take screenshots at the end of a round
@@ -850,6 +860,7 @@ void CHud::Init()
 	m_Caption.Init();
 	m_MonsterInfo.Init();
 	m_Meter.Init();
+	m_MessageBox.Init();
 
 	hudRenderer.Init();
 
@@ -866,6 +877,8 @@ void CHud::Init()
 	gEngfuncs.pfnAddCommand("make_stop_following", nullptr);
 	gEngfuncs.pfnAddCommand("make_start_following", nullptr);
 	gEngfuncs.pfnAddCommand("buddha", nullptr);
+	gEngfuncs.pfnAddCommand("ent_remove_all", nullptr);
+	gEngfuncs.pfnAddCommand("ent_remove", nullptr);
 
 	MsgFunc_ResetHUD( 0, 0, NULL );
 	ClientCmd( "richpresence_gamemode\n" );
@@ -985,12 +998,6 @@ void CHud::ParseClientFeatures()
 	const char* fileName = "features/featureful_client.cfg";
 	int fileSize = 0;
 	char* pfile = (char *)gEngfuncs.COM_LoadFile( fileName, 5, &fileSize );
-	if ( !pfile )
-	{
-		fileName = "featureful_client.cfg";
-		pfile = (char *)gEngfuncs.COM_LoadFile( fileName, 5, &fileSize );
-	}
-
 	if( !pfile )
 		return;
 
@@ -1053,7 +1060,7 @@ void CHud::ParseClientFeatures()
 			ConsumeNonSpaceCharacters(pfile, i, fileSize);
 
 			const int keyLength = i - keyStart;
-			SkipSpaces(pfile, i, fileSize);
+			SkipSpacesAndTabs(pfile, i, fileSize);
 			const int valueStart = i;
 			ConsumeLineSignificantOnly(pfile, i, fileSize);
 			const int valueLength = i - valueStart;
@@ -1241,6 +1248,7 @@ void CHud::VidInit()
 	vidInitAtLeastOnce = true;
 
 	keyedDlightManager.Reset();
+	fakeMirrors.clear();
 
 	int j;
 	m_scrinfo.iSize = sizeof(m_scrinfo);
@@ -1357,18 +1365,6 @@ void CHud::VidInit()
 	// assumption: number_1, number_2, etc, are all listed and loaded sequentially
 	m_HUD_number_0 = GetSpriteIndex( "number_0" );
 
-	if( m_HUD_number_0 == -1 )
-	{
-		const char *msg = "There is something wrong with your game data! Please, reinstall\n";
-
-		if( HUD_MessageBox( msg ) )
-		{
-			gEngfuncs.pfnClientCmd( "quit\n" );
-		}
-
-		return;
-	}
-
 	LoadWallPuffSprites();
 
 	m_iFontHeight = m_rgrcRects[m_HUD_number_0].bottom - m_rgrcRects[m_HUD_number_0].top;
@@ -1402,6 +1398,7 @@ void CHud::VidInit()
 	m_Caption.VidInit();
 	m_MonsterInfo.VidInit();
 	m_Meter.VidInit();
+	m_MessageBox.VidInit();
 
 	hudRenderer.VidInit();
 	memset(&fog, 0, sizeof(fog));
@@ -1917,7 +1914,7 @@ int CHudMoveMode::Draw(float flTime)
 		return 1;
 	}
 	int r, g, b, x, y;
-	wrect_t* prc;
+	const wrect_t* prc = nullptr;
 	HSPRITE sprite;
 	UnpackRGB( r,g,b, gHUD.HUDColor() );
 
@@ -1959,11 +1956,6 @@ int CHudMoveMode::MsgFunc_MoveMode(const char *pszName, int iSize, void *pbuf)
 	BEGIN_READ( pbuf, iSize );
 	m_movementState = READ_SHORT();
 	return 1;
-}
-
-bool CHud::ShouldUseConsoleFont()
-{
-	return true;
 }
 
 extern WEAPON *gpActiveSel;
@@ -2014,4 +2006,58 @@ bool CHud::UseVguiScoreBoard()
 #else
 	return false;
 #endif
+}
+
+bool CHud::HandleClientButton(int button)
+{
+	if (button == IN_ATTACK)
+	{
+		if (m_MOTD.m_bShow)
+		{
+			m_MOTD.Reset();
+			return true;
+		}
+	}
+
+	if (button == IN_ATTACK)
+	{
+		if (!TopLevelWindowIsActive() && m_MessageBox.HandleClientInput())
+			return true;
+	}
+
+	return false;
+}
+
+bool CHud::HandleKeyDown(int keynum)
+{
+	if (m_MOTD.m_bShow)
+	{
+		return m_MOTD.HandleKeyDown(keynum);
+	}
+	if (!TopLevelWindowIsActive() && m_MessageBox.HandleKeyDown(keynum))
+	{
+		return true;
+	}
+	return false;
+}
+
+bool CHud::TopLevelWindowIsActive()
+{
+	if (m_Scoreboard.m_iShowscoresHeld)
+		return true;
+	if (m_Journal.m_iShowscoresHeld && m_Journal.ShouldDraw())
+		return true;
+	if (m_MOTD.m_bShow)
+		return true;
+	return false;
+}
+
+bool CHud::HasActiveFakeMirrors() const
+{
+	for (const auto& mirror: fakeMirrors)
+	{
+		if (mirror.enabled)
+			return true;
+	}
+	return false;
 }

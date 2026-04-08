@@ -318,8 +318,9 @@ void CBarnacleGrapple::PrecacheDefaultModelSounds()
 
 void CBarnacleGrapple::Spawn()
 {
+	const WeaponParameters& params = MyParameters();
 	Precache();
-	SET_MODEL(ENT(pev), MyWorldModel());
+	SetMyModel(params.worldModel.c_str());
 	m_pTip = NULL;
 	m_bGrappling = false;
 	SetInitialAmmoAmount();
@@ -346,6 +347,10 @@ WeaponParameters CBarnacleGrapple::GetDefaultParameters() const
 	params.playerModel = "models/p_bgrap.mdl";
 	params.playerAnimExt = "gauss";
 	params.priority = 21;
+
+	params.secondaryFireType = SecondaryFireType::ALTERNATIVE_FIRE;
+
+	params.fire.weaponVolume = 450;
 
 	return params;
 }
@@ -521,9 +526,11 @@ void CBarnacleGrapple::PrimaryAttack()
 		}
 	}
 #endif
+	const WeaponParameters& params = MyParameters();
+
 	if( m_fireState != OFF )
 	{
-		m_pPlayer->m_iWeaponVolume = 450;
+		m_pPlayer->m_iWeaponVolume = params.fire.weaponVolume.Get(false);
 
 		if( m_flShootTime != 0.0 && gpGlobals->time > m_flShootTime )
 		{
@@ -542,7 +549,7 @@ void CBarnacleGrapple::PrimaryAttack()
 
 		SendWeaponAnim( BGRAPPLE_FIRE );
 
-		m_pPlayer->m_iWeaponVolume = 450;
+		m_pPlayer->m_iWeaponVolume = params.fire.weaponVolume.Get(false);;
 
 		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 0.1;
 #if !CLIENT_DLL
@@ -614,7 +621,7 @@ void CBarnacleGrapple::PrimaryAttack()
 					{
 						if( m_flDamageTime + 0.5 < gpGlobals->time )
 						{
-							float flDamage = gSkillData.plrDmgGrapple;
+							float flDamage = GetSkillValue("plr_grapple");
 
 							if( g_pGameRules->IsMultiplayer() )
 							{

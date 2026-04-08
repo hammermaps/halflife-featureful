@@ -270,7 +270,8 @@ const NamedVisual CTor::slamVisual = BuildVisual("Tor.Slam")
 	.Life(0.2f)
 	.BeamWidth(12)
 	.RenderColor(255, 255, 255)
-	.Alpha(255);
+	.Alpha(255)
+	.WaveType(Visual::WAVETYPE_CYLINDER);
 
 const NamedVisual CTor::beamVisual = BuildVisual("Tor.Beam")
 	.Model("sprites/xenobeam.spr")
@@ -409,7 +410,7 @@ void CTor::HandleAnimEvent(MonsterEvent_t* pEvent)
 	{
 	case EVENT_SLAM:
 		SlamAttack();
-		CSoundEnt::InsertSound(bits_SOUND_COMBAT, pev->origin, NORMAL_GUN_VOLUME, 0.3f);
+		InsertAISound(bits_SOUND_COMBAT, NORMAL_GUN_VOLUME, 0.3f);
 		break;
 	case EVENT_SHOOT:
 		m_nextBeam = m_nextBeamBurst = gpGlobals->time;
@@ -432,7 +433,7 @@ void CTor::HandleAnimEvent(MonsterEvent_t* pEvent)
 	case EVENT_STAFF_SWING:
 	{
 		TraceHullAttackParams params;
-		params.damageInfo = DamageInfo{gSkillData.torDmgPunch, DMG_SLASH};
+		params.damageInfo = DamageInfo{GetSkillValue("tor_punch"), DMG_SLASH};
 		params.distance = MELEE_ATTACK_DISTANCE;
 		params.punchAngle.x = 5;
 		params.punchAngle.z = 18;
@@ -453,7 +454,7 @@ void CTor::HandleAnimEvent(MonsterEvent_t* pEvent)
 	case EVENT_STAFF_STAB:
 	{
 		TraceHullAttackParams params;
-		params.damageInfo = DamageInfo{gSkillData.torDmgPunch, DMG_SLASH};
+		params.damageInfo = DamageInfo{GetSkillValue("tor_punch"), DMG_SLASH};
 		params.distance = MELEE_ATTACK_DISTANCE;
 		params.punchAngle.x = 18;
 		params.knockForward = 100;
@@ -543,7 +544,7 @@ void CTor::MonsterThink()
 			m_nextBeam = gpGlobals->time + 0.05;
 			m_burstShotsFired++;
 			EmitSoundScript(shootSoundScript);
-			CSoundEnt::InsertSound(bits_SOUND_COMBAT, pev->origin, NORMAL_GUN_VOLUME, 0.3f);
+			InsertAISound(bits_SOUND_COMBAT, NORMAL_GUN_VOLUME, 0.3f);
 
 			Vector vecSrc, angles;
 			GetAttachment(0, vecSrc, angles);
@@ -575,10 +576,10 @@ void CTor::MonsterThink()
 
 				CBaseEntity* phit = CBaseEntity::Instance(tr.pHit);
 				if (phit) {
-					phit->TakeDamage(pev, pev, DamageInfo{gSkillData.torDmgEnergyBeam, DMG_ENERGYBEAM});
+					phit->TakeDamage(pev, pev, DamageInfo{GetSkillValue("tor_energybeam"), DMG_ENERGYBEAM});
 
 					if (phit->MyMonsterPointer() && (phit->pev->movetype == MOVETYPE_STEP || phit->IsPlayer())) {
-						phit->pev->velocity.z += (phit->pev->flags & FL_ONGROUND) ? 200 : 120;
+						phit->pev->velocity.z += (phit->pev->flags & FL_ONGROUND) ? GetSkillValue("tor_lift_speed_ground") : GetSkillValue("tor_lift_speed");
 					}
 				}
 			}
@@ -718,7 +719,7 @@ void CTor::Spawn()
 	pev->solid = SOLID_SLIDEBOX;
 	pev->movetype = MOVETYPE_STEP;
 	SetMyBloodColor( BLOOD_COLOR_GREEN );
-	SetMyHealth( gSkillData.torHealth );
+	SetMyHealth( GetSkillValue("tor_health") );
 	pev->view_ofs = Vector(0, 0, 0);// position of the eyes relative to monster's origin.
 	SetMyFieldOfView(VIEW_FIELD_WIDE);
 	m_MonsterState = MONSTERSTATE_NONE;
@@ -819,7 +820,7 @@ void CTor::SlamAttack()
 			const Vector pushForce = pushDir * 700 * pushPower;
 
 			pEntity->pev->velocity = pEntity->pev->velocity + launchForce + pushForce;
-			pEntity->TakeDamage(pev, pev, DamageInfo{gSkillData.torDmgSonicBlast * launchPower, DMG_SONIC});
+			pEntity->TakeDamage(pev, pev, DamageInfo{GetSkillValue("tor_sonicblast") * launchPower, DMG_SONIC});
 
 			if (pEntity->IsPlayer()) {
 				pEntity->pev->punchangle.x = 10;
@@ -829,15 +830,8 @@ void CTor::SlamAttack()
 
 	EmitSoundScript(slamSoundScript);
 
-	float radius = (SLAM_ATTACK_RADIUS + 50) / 0.3f;
-
-	const Visual* visual = GetVisual(slamVisual);
-
-	MESSAGE_BEGIN( MSG_PAS, SVC_TEMPENTITY, pev->origin );
-	WRITE_BYTE( TE_BEAMCYLINDER );
-	WRITE_CIRCLE( pev->origin, radius );
-	WriteBeamVisual(visual);
-	MESSAGE_END();
+	const float radius = (SLAM_ATTACK_RADIUS + 50) / 0.3f;
+	SendBeamWave(pev->origin, radius, GetVisual(slamVisual), MSG_PAS, pev->origin);
 }
 
 bool CTor::GetSummonPos(Vector& pos)
@@ -895,17 +889,10 @@ void CTor::StartSummon()
 	const Visual* beamVisual = GetVisual(summonBeamVisual);
 	for (int i = 0; i < 3; i++)
 	{
-		MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
-		WRITE_BYTE(TE_BEAMPOINTS);
-		WRITE_VECTOR(startPos);
-		WRITE_VECTOR(summonPos);
-		WriteBeamVisual(beamVisual);
-		MESSAGE_END();
+		SendBeam(startPos, summonPos, beamVisual);
 	}
 
 	CSprite* portalSprite = CreateSpriteFromVisual(GetVisual(summonSpriteVisual), summonPos);
-	if (portalSprite)
-		portalSprite->TurnOn();
 
 	CTorSummonPoint* summonPoint = GetClassPtr((CTorSummonPoint*)nullptr);
 	summonPoint->pev->classname = MAKE_STRING("env_tor_summon_point");

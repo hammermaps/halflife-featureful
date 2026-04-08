@@ -37,6 +37,7 @@ public:
 	void Precache() override;
 	bool IsEnabledInMod() override { return g_modFeatures.IsMonsterEnabled("pitworm"); }
 	int  DefaultClassify() override;
+	const char* DefaultDisplayName() override { return "Pit Worm"; }
 	int	ObjectCaps() override { return CBaseMonster::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
 	void SetObjectCollisionBox() override
 	{
@@ -324,7 +325,7 @@ void CPitWorm::Spawn()
 	pev->flags |= FL_MONSTER|FL_FLY;
 	pev->takedamage = DAMAGE_AIM;
 
-	SetMyHealth( gSkillData.pwormHealth );
+	SetMyHealth( GetSkillValue("pitworm_health") );
 	pev->max_health = pev->health;
 
 	pev->view_ofs = PITWORM_EYE_OFFSET;
@@ -570,8 +571,8 @@ void CPitWorm::CommandUse(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYP
 	switch (useType)
 	{
 	case USE_ON:
-		CSoundEnt::InsertSound(bits_SOUND_WORLD, pActivator->pev->origin, 1024, 1.0);
-		//ALERT(at_console, "USE_ON\n");
+		if (pActivator)
+			InsertAISound(bits_SOUND_WORLD, pActivator->pev->origin, 1024, 1.0f);
 		break;
 	case USE_OFF:
 	case USE_TOGGLE:
@@ -874,7 +875,7 @@ void CPitWorm::HitTouch(CBaseEntity* pOther)
 
 	if (pOther->pev->takedamage)
 	{
-		pOther->TakeDamage(pev, pev, DamageInfo(gSkillData.pwormDmgSwipe, DMG_CRUSH|DMG_SLASH));
+		pOther->TakeDamage(pev, pev, DamageInfo(GetSkillValue("pitworm_dmg_swipe"), DMG_CRUSH|DMG_SLASH));
 		pOther->pev->punchangle.z = 15;
 		pOther->pev->velocity.z += 200;
 		EmitSoundScript(attackHitSoundScript);
@@ -970,7 +971,7 @@ void CPitWorm::BeamEffect(TraceResult &tr)
 	CBaseEntity *pEntity = CBaseEntity::Instance( tr.pHit );
 	if( pEntity != NULL && pEntity->pev->takedamage )
 	{
-		pEntity->ApplyTraceAttack(pev, pev, DamageInfo{gSkillData.pwormDmgBeam, DMG_ENERGYBEAM}, m_vecBeam, &tr);
+		pEntity->ApplyTraceAttack(pev, pev, DamageInfo{GetSkillValue("pitworm_dmg_beam"), DMG_ENERGYBEAM}, m_vecBeam, &tr);
 	}
 	else if ( tr.flFraction != 1.0f )
 	{

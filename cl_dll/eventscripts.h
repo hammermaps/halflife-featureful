@@ -37,10 +37,10 @@ struct ShellInfoParams
 
 // Some of these are HL/TFC specific?
 void EV_EjectBrass( float *origin, float *velocity, float rotation, int model, int soundtype );
-void EV_GetGunPosition( struct event_args_s *args, float *pos, float *origin );
+Vector EV_GetGunPosition(struct event_args_s *args, const Vector& origin);
 void EV_GetDefaultShellInfo( const struct event_args_s *args, const ShellInfoParams& infoParams, float *ShellVelocity, float *ShellOrigin );
-qboolean EV_IsLocal( int idx );
-qboolean EV_IsPlayer( int idx );
+bool EV_IsLocal( int idx );
+bool EV_IsPlayer( int idx );
 void EV_CreateTracer( float *start, float *end );
 
 struct cl_entity_s *GetEntity( int idx );

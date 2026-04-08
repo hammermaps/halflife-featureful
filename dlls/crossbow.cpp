@@ -87,6 +87,7 @@ void CCrossbowBolt::LaunchAsProjectile(const ProjectileParameters& params)
 	const float defaultSpeed = inWater ? BOLT_WATER_VELOCITY : BOLT_AIR_VELOCITY;
 
 	LaunchAsProjectileImpl(defaultSpeed, params);
+	SetMyProjectileEffectFlags();
 	pev->speed = pev->velocity.Length();
 	pev->avelocity.z = 10.0f;
 }
@@ -140,11 +141,11 @@ void CCrossbowBolt::BoltTouch( CBaseEntity *pOther )
 		{
 			if( pOther->IsPlayer() )
 			{
-				damage = gSkillData.plrDmgCrossbowClient;
+				damage = GetSkillValue("plr_xbow_bolt_client");
 			}
 			else
 			{
-				damage = gSkillData.plrDmgCrossbowMonster;
+				damage = GetSkillValue("plr_xbow_bolt_monster");
 			}
 		}
 
@@ -207,6 +208,8 @@ void CCrossbowBolt::BoltTouch( CBaseEntity *pOther )
 		{
 			UTIL_Sparks( pev->origin );
 		}
+
+		ClearBits(pev->effects, EF_LIGHT);
 	}
 
 	if (explosiveBolt)
@@ -231,7 +234,7 @@ void CCrossbowBolt::ExplodeThink()
 	int iContents = UTIL_PointContents( pev->origin );
 	int iScale;
 
-	pev->dmg = 40;
+	pev->dmg = GetSkillValue("plr_xbow_bolt_explo");
 	iScale = 10;
 
 	MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, pev->origin );
@@ -366,9 +369,6 @@ WeaponParameters CCrossbow::GetDefaultParameters() const
 	if (bIsMultiplayer())
 		params.fire.clientPunchPitch.alt = 0.0f;
 
-	params.fire.idleDelay = 5.0f;
-	params.fire.idleDelay.mainEmptied = 0.75f;
-
 	params.fire.projectileName = "crossbow_bolt";
 	params.fire.projectileOffsetUp = -2.0f;
 	params.fire.projectileRespectPunchangle = true;
@@ -421,7 +421,7 @@ void CCrossbow::NativeAttack(bool altMode)
 #if !CLIENT_DLL
 	if( tr.pHit->v.takedamage )
 	{
-		CBaseEntity::Instance( tr.pHit )->ApplyTraceAttack( m_pPlayer->pev, m_pPlayer->pev, DamageInfo(120, DMG_BULLET).SetGibPolicy(GIB_NEVER), vecDir, &tr );
+		CBaseEntity::Instance( tr.pHit )->ApplyTraceAttack( m_pPlayer->pev, m_pPlayer->pev, DamageInfo(GetSkillValue("plr_xbow_bolt_hitscan"), DMG_BULLET).SetGibPolicy(GIB_NEVER), vecDir, &tr );
 	}
 #endif
 }

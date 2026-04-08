@@ -147,7 +147,7 @@ public:
 		return m_totalHeadCount > 0 ? m_totalHeadCount : 4;
 	}
 	bool NeedleIsEquiped() {
-		return pev->body >= TotalHeadCount();
+		return AbleToHeal() && pev->body >= TotalHeadCount();
 	}
 
 	static const NamedSoundScript painSoundScript;
@@ -791,7 +791,7 @@ int CScientist::GetDefaultVoicePitch()
 
 void CScientist::Spawn()
 {
-	SciSpawnHelper("models/scientist.mdl", gSkillData.scientistHealth);
+	SciSpawnHelper("models/scientist.mdl", GetSkillValue("scientist_health"));
 	CalcTotalHeadCount();
 
 	// White hands
@@ -883,6 +883,7 @@ int CScientist::DefaultISoundMask()
 			bits_SOUND_COMBAT |
 			bits_SOUND_CARCASS |
 			bits_SOUND_MEAT |
+			bits_SOUND_GARBAGE |
 			bits_SOUND_DANGER |
 			bits_SOUND_PLAYER;
 }
@@ -1181,11 +1182,11 @@ void CScientist::Heal()
 	if( target.IsLengthGreaterThan(100.0f) )
 		return;
 
-	m_hTargetEnt->TakeHealth(this, gSkillData.scientistHeal, DMG_GENERIC );
+	m_hTargetEnt->TakeHealth(this, GetSkillValue("scientist_heal"), DMG_GENERIC );
 	EmitSoundScript(healSoundScript);
 
 	// Don't heal again for 1 minute
-	m_healTime = gpGlobals->time + gSkillData.scientistHealTime;
+	m_healTime = gpGlobals->time + GetSkillValue("scientist_heal_time");
 }
 
 void CScientist::ReportAIState(ALERT_TYPE level)
@@ -1570,7 +1571,7 @@ LINK_ENTITY_TO_CLASS( monster_cleansuit_scientist, CCleansuitScientist )
 
 void CCleansuitScientist::Spawn()
 {
-	SciSpawnHelper("models/cleansuit_scientist.mdl", gSkillData.cleansuitScientistHealth);
+	SciSpawnHelper("models/cleansuit_scientist.mdl", GetSkillValue("cleansuit_scientist_health"));
 	TalkMonsterInit();
 }
 
@@ -1675,7 +1676,7 @@ void CRosenberg::Spawn()
 #if FEATURE_ROSENBERG_DECAY
 	SciSpawnHelper("models/scientist_rosenberg.mdl", gSkillData.scientistHealth * 2);
 #else
-	SciSpawnHelper("models/scientist.mdl", gSkillData.scientistHealth * 2);
+	SciSpawnHelper("models/scientist.mdl", GetSkillValue("scientist_health") * 2);
 	CalcTotalHeadCount();
 	pev->body = 3;
 #endif
@@ -1753,10 +1754,13 @@ public:
 	int GetDefaultVoicePitch() override { return 100; }
 	void Spawn() override
 	{
-		SciSpawnHelper("models/scientist.mdl", gSkillData.scientistHealth);
+		SciSpawnHelper("models/scientist.mdl", GetSkillValue("civilian_health"));
 		TalkMonsterInit();
 	}
 	void Precache() override;
+	void HandleAnimEvent( MonsterEvent_t *pEvent ) override {
+		CTalkMonster::HandleAnimEvent(pEvent);
+	}
 	const char* DefaultDisplayName() override { return "Civilian"; }
 	bool AbleToHeal() override { return false; }
 
@@ -1785,102 +1789,6 @@ void CCivilian::Precache()
 	CTalkMonster::Precache();
 	RegisterTalkMonster();
 }
-
-#define FEATURE_GUS 0
-
-#if FEATURE_GUS
-class CGus : public CScientist
-{
-public:
-	int GetDefaultVoicePitch() {
-		if (pev->body)
-			return 95;
-		else
-			return 100;
-	}
-	void Spawn();
-	void Precache();
-	const char* DefaultDisplayName() { return "Construction Worker"; }
-	bool AbleToHeal() { return false; }
-	void ReportAIState(ALERT_TYPE level);
-	int RandomHeadCount() {
-		return 2;
-	}
-	int TotalHeadCount() {
-		return 2;
-	}
-};
-
-LINK_ENTITY_TO_CLASS( monster_gus, CGus )
-
-void CGus::Spawn()
-{
-	SciSpawnHelper("models/gus.mdl", gSkillData.scientistHealth);
-	TalkMonsterInit();
-}
-
-void CGus::Precache()
-{
-	PrecacheMyModel("models/gus.mdl");
-	PrecacheMyGibModel();
-	RegisterAndPrecacheSoundScript(painSoundScript);
-	RegisterAndPrecacheSoundScript(dieSoundScript, painSoundScript);
-	TalkInit();
-	CTalkMonster::Precache();
-	RegisterTalkMonster();
-}
-
-void CGus::ReportAIState(ALERT_TYPE level)
-{
-	CTalkMonster::ReportAIState(level);
-}
-
-//=========================================================
-// Dead Worker PROP
-//=========================================================
-class CDeadWorker : public CDeadMonster
-{
-public:
-	void Spawn();
-	const char* DefaultModel() { return "models/worker.mdl"; }
-	int	DefaultClassify() { return	CLASS_HUMAN_PASSIVE; }
-
-	const char* getPos(int pos) const;
-	static const char *m_szPoses[6];
-};
-const char *CDeadWorker::m_szPoses[] = { "lying_on_back", "lying_on_stomach", "dead_sitting", "dead_table1", "dead_table2", "dead_table3" };
-
-const char* CDeadWorker::getPos(int pos) const
-{
-	return m_szPoses[pos % ARRAYSIZE(m_szPoses)];
-}
-
-LINK_ENTITY_TO_CLASS( monster_worker_dead, CDeadWorker )
-
-void CDeadWorker::Spawn()
-{
-	SpawnHelper();
-	MonsterInitDead();
-}
-
-class CDeadGus : public CDeadWorker
-{
-	void Spawn();
-	const char* DefaultModel() { return "models/gus.mdl"; }
-};
-
-LINK_ENTITY_TO_CLASS( monster_gus_dead, CDeadGus )
-
-void CDeadGus::Spawn()
-{
-	SpawnHelper();
-	if (pev->body == -1)
-	{
-		pev->body = RANDOM_LONG(0,1);
-	}
-	MonsterInitDead();
-}
-#endif
 
 class CKeller : public CScientist
 {
@@ -1923,7 +1831,7 @@ const NamedSoundScript CKeller::dieSoundScript = {
 
 void CKeller::Spawn()
 {
-	SciSpawnHelper("models/wheelchair_sci.mdl", gSkillData.scientistHealth * 2);
+	SciSpawnHelper("models/wheelchair_sci.mdl", GetSkillValue("scientist_health") * 2);
 	TalkMonsterInit();
 }
 

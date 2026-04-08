@@ -39,11 +39,7 @@
 #include "ent_templates.h"
 #include "ai_debug.h"
 
-#include <algorithm>
-#include <random>
-
 extern DLL_GLOBAL Vector		g_vecAttackDir;
-extern DLL_GLOBAL int			g_iSkillLevel;
 
 #define GERMAN_GIB_COUNT		4
 #define	HUMAN_GIB_COUNT			6
@@ -827,6 +823,7 @@ KilledResult CBaseMonster::Killed( entvars_t *pevInflictor, entvars_t *pevAttack
 
 	const bool shouldGib = ShouldGibMonster( iGib );
 	OnDying(shouldGib);
+	TriggerOnDeath(CBaseEntity::OwnInstance(pevAttacker));
 
 	if (shouldGib)
 	{
@@ -852,86 +849,10 @@ KilledResult CBaseMonster::Killed( entvars_t *pevInflictor, entvars_t *pevAttack
 void CBaseMonster::OnDying(bool gibbed)
 {
 	if (!g_modFeatures.dying_monsters_block_player)
-		pev->iuser3 = -1;
+		MarkAsNonBlockerForPlayer();
 	Remember( bits_MEMORY_KILLED );
 
-	const EntTemplate* entTemplate = GetMyEntTemplate();
-	if (entTemplate)
-	{
-		const DropItemSet& lootDrop = entTemplate->GetLootDrop();
-
-		auto dropItem = [this, gibbed](const char* classname, const char* entTemplate, const char* pickupName) {
-			if (!classname || !*classname)
-				return;
-
-			EntityOverrides entityOverrides;
-			if (entTemplate && *entTemplate)
-			{
-				entityOverrides.entTemplate = MAKE_STRING(entTemplate);
-			}
-			if (pickupName && *pickupName && strcmp(classname, "item_pickup") == 0)
-			{
-				entityOverrides.netname = MAKE_STRING(pickupName);
-			}
-
-			CBaseEntity* pItem = Create(classname, Center(), pev->angles, edict(), entityOverrides);
-			if (pItem)
-			{
-				const float velocity = gibbed ? 100.0f : 75.0f;
-
-				pItem->pev->avelocity = Vector( 0, RANDOM_FLOAT( 0, 100 ), 0 );
-				pItem->pev->velocity = Vector( RANDOM_FLOAT( -velocity, velocity ), RANDOM_FLOAT( -velocity, velocity ), RANDOM_FLOAT( velocity*2, velocity*3 ) );
-				if (strncmp(classname, "ammo_", 5) == 0 || strncmp(classname, "item_", 5) == 0 || strncmp(classname, "weapon_", 7) == 0)
-					pItem->pev->spawnflags |= SF_NORESPAWN;
-			}
-		};
-
-		auto shouldDrop = [this](const DropItemInfoHandle& handle) {
-			if (handle.chance >= 1.0f)
-				return true;
-			if (handle.chance > 0.0f && SharedRandomFloat(0.0f, 1.0f) <= handle.chance)
-				return true;
-			return false;
-		};
-
-		if (lootDrop.maxWeight > 0 && lootDrop.items.size() > 1)
-		{
-			std::vector<DropItemInfoHandle> handles;
-			handles.reserve(lootDrop.items.size());
-
-			for (const auto& itemInfo : lootDrop.items)
-			{
-				handles.push_back(DropItemInfoHandle(itemInfo));
-			}
-
-			std::minstd_rand rg(static_cast<unsigned int>(m_lootRandomSeed));
-			std::shuffle(handles.begin(), handles.end(), rg);
-			m_lootRandomSeed = static_cast<int>(rg());
-
-			float totalWeight = 0.0f;
-			for (const auto& handle : handles)
-			{
-				if ((totalWeight == 0.0f || totalWeight + handle.weight <= lootDrop.maxWeight) && shouldDrop(handle))
-				{
-					dropItem(handle.classname, handle.entTemplate, handle.pickupName);
-					totalWeight += handle.weight;
-					if (totalWeight >= lootDrop.maxWeight)
-						break;
-				}
-			}
-		}
-		else
-		{
-			for (const auto& itemInfo : lootDrop.items)
-			{
-				const DropItemInfoHandle handle{itemInfo};
-				if (shouldDrop(handle))
-				{
-					dropItem(handle.classname, handle.entTemplate, handle.pickupName);
-				}
-			}
-		}
-	}
+	DropLoot(gibbed);
 
 	// tell owner ( if any ) that we're dead.This is mostly for MonsterMaker functionality.
 	CBaseEntity *pOwner = CBaseEntity::Instance( pev->owner );
@@ -1019,7 +940,7 @@ void CGib::WaitTillLand()
 		if( m_bloodColor != DONT_BLEED )
 		{
 			// ok, start stinkin!
-			CSoundEnt::InsertSound( bits_SOUND_MEAT, pev->origin, 384, 25 );
+			InsertAISound( bits_SOUND_MEAT, 384, 25 );
 		}
 	}
 	else
@@ -1036,9 +957,6 @@ void CGib::BounceGibTouch( CBaseEntity *pOther )
 {
 	Vector	vecSpot;
 	TraceResult	tr;
-
-	//if( RANDOM_LONG( 0, 1 ) )
-	//	return;// don't bleed everytime
 
 	if( pev->flags & FL_ONGROUND )
 	{
@@ -1278,9 +1196,10 @@ TakeDamageResult CBaseMonster::TakeDamage( entvars_t *pevInflictor, entvars_t *p
 		if( ( !FNullEnt( pevInflictor ) ) && ( pev->movetype == MOVETYPE_WALK ) && ( !pevAttacker || pevAttacker->solid != SOLID_TRIGGER ) && !damageInfo.noPlayerPush )
 		{
 			Vector velocityAdd = vecDir * -DamageForce( damageInfo.damage );
-			if (!AllowGrenadeJump())
+
+			if (velocityAdd.z > 0)
 			{
-				velocityAdd.z = 0;
+				velocityAdd.z *= GrenadeJumpFactor();
 			}
 			pev->velocity = pev->velocity + velocityAdd;
 		}
@@ -1310,6 +1229,12 @@ TakeDamageResult CBaseMonster::TakeDamage( entvars_t *pevInflictor, entvars_t *p
 			SetConditions( bits_COND_LIGHT_DAMAGE );
 			takeDamageResult.SetGotLightDamage();
 		}
+
+		if (pev->health <= 0.0f && m_pCine && m_pCine->m_interruptionPolicy != SCRIPT_INTERRUPTION_POLICY_ONLY_DEATH && !m_pCine->CanInterrupt())
+		{
+			TriggerOnDeath(CBaseEntity::OwnInstance(pevAttacker));
+		}
+
 		return takeDamageResult;
 	}
 
@@ -1617,7 +1542,7 @@ bool CBaseMonster::SetTraceHullAttackParamsFromTemplate(int eventIndex, TraceHul
 	return false;
 }
 
-CBaseEntity* CBaseMonster::CheckTraceHullAttack( const TraceHullAttackParams& params, float height, const Vector& aimAngles )
+TraceResult CBaseMonster::CheckTraceHullAttack( const TraceHullAttackParams& params, float height, const Vector& aimAngles )
 {
 	TraceResult tr;
 
@@ -1632,20 +1557,106 @@ CBaseEntity* CBaseMonster::CheckTraceHullAttack( const TraceHullAttackParams& pa
 
 	UTIL_TraceHull( vecStart, vecEnd, dont_ignore_monsters, head_hull, ENT( pev ), &tr );
 
-	CBaseEntity *pEntity = CBaseEntity::OwnInstance( tr.pHit );
-	if (pEntity)
+	return tr;
+}
+
+static bool IsEntityOnTopOfAnother(CBaseEntity* pEntity, CBaseEntity* pOther)
+{
+	return pEntity->pev->absmin.z + 2.0f >= pOther->pev->absmax.z &&
+		pEntity->pev->absmin.x <= pOther->pev->absmax.x &&
+		pEntity->pev->absmin.y <= pOther->pev->absmax.y &&
+		pEntity->pev->absmax.x >= pOther->pev->absmin.x &&
+		pEntity->pev->absmax.y >= pOther->pev->absmin.y;
+}
+
+CBaseEntity* CBaseMonster::PerformTraceHullAttack(const TraceHullAttackParams& params)
+{
+	CBaseEntity *pHurt = nullptr;
+	CBaseEntity* pHurtTry = nullptr;
+	TraceResult tr;
+
+	// check if we're trying to hit enemy on top of our head
+	if (m_hEnemy != 0 && m_IdealMonsterState != MONSTERSTATE_SCRIPT && IsEntityOnTopOfAnother(m_hEnemy, this))
 	{
-		if( params.damageInfo.damage > 0 && pEntity->pev->takedamage && !(params.skipAllies && (pEntity && IRelationship(pEntity) == R_AL)) )
+		float h = pev->size.z * 0.95f;
+		if (params.height)
+			h = Q_max(*params.height, h);
+		Vector aimAngles = pev->angles;
+		const Vector targetOrigin = m_hEnemy->BodyTarget(pev->origin);
+		const Vector aimDir = targetOrigin - (pev->origin + Vector(0,0,h));
+		aimAngles.x = UTIL_VecToAngles(aimDir).x;
+
+		TraceHullAttackParams paramsTop = params;
+		// do less damage if the attack is not originated from the top of the monster
+		if (!params.height || *params.height < pev->size.z * 0.95f)
+			paramsTop.damageInfo.damage *= 0.5f;
+		paramsTop.distance = paramsTop.distance * 0.25f;
+
+		// Try to knock the enemy from my head
+		paramsTop.knockForward = std::fabs(paramsTop.knockForward);
+		paramsTop.knockForward = Q_max(paramsTop.knockForward, 120.0f);
+		paramsTop.knockUp = -Q_max(paramsTop.knockUp * 0.5f, 120.0f);
+
+		tr = CheckTraceHullAttack(paramsTop, h, aimAngles);
+		pHurtTry = CBaseEntity::OwnInstance(tr.pHit);
+		//ALERT(at_console, "%s: enemy is on top of my head! Hit %s\n", STRING(pev->classname), pHurtTry ? STRING(pHurtTry->pev->classname) : "nothing");
+	}
+	if (!pHurtTry || !pHurtTry->pev->takedamage)
+	{
+		pHurtTry = nullptr;
+
+		const float myHeight = pev->size.z;
+
+		fixed_vector<float, 5> heights;
+		heights.push_back(params.height ? *params.height : myHeight * 0.5f);
+
+		if (params.allowRetry && npc_trace_hull_attack_retry.value && params.damageInfo.damage > 0)
 		{
-			TakeDamageResult takeDamageResult = pEntity->TakeDamage(pev, pev, params.damageInfo);
+			heights.push_back(0.75f * myHeight);
+			if (params.height)
+				heights.push_back(0.5f * myHeight);
+			heights.push_back(0.25f * myHeight);
+			if (!params.height || *params.height < myHeight)
+				heights.push_back(0.95f * myHeight);
+		}
+
+		for (float height : heights)
+		{
+			TraceResult trLocal = CheckTraceHullAttack(params, height, pev->angles);
+			CBaseEntity* pHurtTryLocal = CBaseEntity::OwnInstance(trLocal.pHit);
+			if (pHurtTryLocal)
+			{
+				if (!pHurtTry)
+				{
+					pHurtTry = pHurtTryLocal; // save the first result as more prioritized
+					tr = trLocal;
+				}
+
+				if (pHurtTryLocal->pev->takedamage) // most preference to something that can take damage
+				{
+					pHurt = pHurtTryLocal;
+					tr = trLocal;
+					break;
+				}
+			}
+		}
+	}
+
+	if (!pHurt)
+		pHurt = pHurtTry;
+
+	if (pHurt)
+	{
+		if (params.damageInfo.damage > 0 && pHurt->pev->takedamage && !(params.skipAllies && (pHurt && IRelationship(pHurt) == R_AL)))
+		{
+			TakeDamageResult takeDamageResult = pHurt->TakeDamage(pev, pev, params.damageInfo);
 
 			if (params.spawnBlood && takeDamageResult.TookDamageToHealth())
 			{
-				SpawnBlood(params.bloodOrigin ? *params.bloodOrigin : tr.vecEndPos, pEntity->BloodColor(), 25);// a little surface blood.
+				SpawnBlood(params.bloodOrigin ? *params.bloodOrigin : tr.vecEndPos, pHurt->BloodColor(), 25);// a little surface blood.
 			}
 		}
 
-		CBaseEntity* pHurt = pEntity;
 		if (params.punchAngle.x)
 			pHurt->pev->punchangle.x = params.punchAngle.x;
 		if (params.punchAngle.y)
@@ -1686,82 +1697,7 @@ CBaseEntity* CBaseMonster::CheckTraceHullAttack( const TraceHullAttackParams& pa
 								   gpGlobals->v_up * params.knockUp;
 			//ALERT(at_console, "New velocity after knock: %g, %g, %g\n", pHurt->pev->velocity.x, pHurt->pev->velocity.y, pHurt->pev->velocity.z);
 		}
-	}
-	return pEntity;
-}
 
-static bool IsEntityOnTopOfAnother(CBaseEntity* pEntity, CBaseEntity* pOther)
-{
-	return pEntity->pev->absmin.z + 2.0f >= pOther->pev->absmax.z &&
-		pEntity->pev->absmin.x <= pOther->pev->absmax.x &&
-		pEntity->pev->absmin.y <= pOther->pev->absmax.y &&
-		pEntity->pev->absmax.x >= pOther->pev->absmin.x &&
-		pEntity->pev->absmax.y >= pOther->pev->absmin.y;
-}
-
-CBaseEntity* CBaseMonster::PerformTraceHullAttack(const TraceHullAttackParams& params)
-{
-	CBaseEntity *pHurt = nullptr;
-	CBaseEntity* pHurtTry = nullptr;
-
-	// check if we're trying to hit enemy on top of our head
-	if (m_hEnemy != 0 && m_IdealMonsterState != MONSTERSTATE_SCRIPT && IsEntityOnTopOfAnother(m_hEnemy, this))
-	{
-		float h = pev->size.z * 0.95f;
-		if (params.height)
-			h = Q_max(*params.height, h);
-		Vector aimAngles = pev->angles;
-		const Vector targetOrigin = m_hEnemy->BodyTarget(pev->origin);
-		const Vector aimDir = targetOrigin - (pev->origin + Vector(0,0,h));
-		aimAngles.x = UTIL_VecToAngles(aimDir).x;
-
-		TraceHullAttackParams paramsTop = params;
-		// do less damage if the attack is not originated from the top of the monster
-		if (!params.height || *params.height < pev->size.z * 0.95f)
-			paramsTop.damageInfo.damage *= 0.5f;
-		paramsTop.distance = paramsTop.distance * 0.25f;
-
-		// Try to knock the enemy from my head
-		paramsTop.knockForward = std::fabs(paramsTop.knockForward);
-		paramsTop.knockForward = Q_max(paramsTop.knockForward, 120.0f);
-		paramsTop.knockUp = -Q_max(paramsTop.knockUp * 0.5f, 120.0f);
-
-		pHurtTry = CheckTraceHullAttack( paramsTop, h, aimAngles );
-		//ALERT(at_console, "%s: enemy is on top of my head! Hit %s\n", STRING(pev->classname), pHurtTry ? STRING(pHurtTry->pev->classname) : "nothing");
-	}
-	if (!pHurtTry || !pHurtTry->pev->takedamage)
-	{
-		const float myHeight = pev->size.z;
-
-		fixed_vector<float, 5> heights;
-		heights.push_back(params.height ? *params.height : myHeight * 0.5f);
-
-		if (params.allowRetry && npc_trace_hull_attack_retry.value && params.damageInfo.damage > 0)
-		{
-			heights.push_back(0.75f * myHeight);
-			if (params.height)
-				heights.push_back(0.5f * myHeight);
-			heights.push_back(0.25f * myHeight);
-			if (!params.height || *params.height < myHeight)
-				heights.push_back(0.95f * myHeight);
-		}
-
-		for (float height : heights)
-		{
-			pHurtTry = CheckTraceHullAttack( params, height, pev->angles );
-			if (pHurtTry && pHurtTry->pev->takedamage)
-			{
-				pHurt = pHurtTry;
-				break;
-			}
-		}
-	}
-
-	if (!pHurt)
-		pHurt = pHurtTry;
-
-	if (pHurt)
-	{
 		if (params.hitSoundScript)
 			EmitSoundScript(params.hitSoundScript);
 	}
@@ -2070,7 +2006,7 @@ void CBaseEntity::BloodEffect(const DamageInfo &damageInfo, const Vector &vecOri
 //=========================================================
 float CBaseMonster::HeadHitGroupDamageMultiplier()
 {
-	return gSkillData.monHead;
+	return GetSkillValue("monster_head");
 }
 
 void CBaseMonster::TraceAttack( entvars_t *pevInflictor, entvars_t *pevAttacker, const DamageInfo& inputDamageInfo, Vector vecDir, TraceResult *ptr )
@@ -2092,18 +2028,18 @@ void CBaseMonster::TraceAttack( entvars_t *pevInflictor, entvars_t *pevAttacker,
 			damageInfo.damage *= HeadHitGroupDamageMultiplier();
 			break;
 		case HITGROUP_CHEST:
-			damageInfo.damage *= gSkillData.monChest;
+			damageInfo.damage *= GetSkillValue("monster_chest");
 			break;
 		case HITGROUP_STOMACH:
-			damageInfo.damage *= gSkillData.monStomach;
+			damageInfo.damage *= GetSkillValue("monster_stomach");
 			break;
 		case HITGROUP_LEFTARM:
 		case HITGROUP_RIGHTARM:
-			damageInfo.damage *= gSkillData.monArm;
+			damageInfo.damage *= GetSkillValue("monster_arm");
 			break;
 		case HITGROUP_LEFTLEG:
 		case HITGROUP_RIGHTLEG:
-			damageInfo.damage *= gSkillData.monLeg;
+			damageInfo.damage *= GetSkillValue("monster_leg");
 			break;
 		default:
 			break;
@@ -2215,7 +2151,7 @@ Go to the trouble of combining multiple pellets into a single damage call.
 This version is used by Players, uses the random seed generator to sync client and server side shots.
 ================
 */
-Vector CBaseEntity::FireBulletsPlayer( unsigned int cShots, Vector vecSrc, Vector vecDirShooting, Vector vecSpread, float flDistance, float flDamage, float flRangeModifier, int iTracerFreq, entvars_t *pevAttacker, int shared_rand )
+Vector CBaseEntity::FireBulletsPlayer( unsigned int cShots, Vector vecSrc, Vector vecDirShooting, Vector vecSpread, float flDistance, const FloatRange& flDamageRange, float flRangeModifier, int iTracerFreq, entvars_t *pevAttacker, int shared_rand )
 {
 	TraceResult tr;
 	Vector vecRight = gpGlobals->v_right;
@@ -2251,9 +2187,10 @@ Vector CBaseEntity::FireBulletsPlayer( unsigned int cShots, Vector vecSrc, Vecto
 		if( tr.flFraction != 1.0f )
 		{
 			const float flCurrentDistance = tr.flFraction * flDistance;
+			const float flDamage = RandomizeSkillValue(flDamageRange);
 			const float currentDamage = (flRangeModifier == 1.0f || flRangeModifier == 0.0f) ? flDamage : flDamage * std::pow(flRangeModifier, flCurrentDistance / 500);
 
-			//ALERT(at_console, "Damage is %g\n", currentDamage);
+			//ALERT(at_console, "Damage is %g. Min: %g. Max: %g\n", currentDamage, flDamageRange.min, flDamageRange.max);
 
 			DamageInfo damageInfo{currentDamage, DMG_BULLET};
 			damageInfo.SetGibPolicy(GIB_NEVER);

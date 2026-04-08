@@ -201,7 +201,6 @@ public:
 	
 	virtual void MonsterInit();
 	virtual void MonsterInitDead();	// Call after animation/pose is set up
-	void InitRandomSeeds();
 	virtual void BecomeDead();
 	void EXPORT CorpseFallThink();
 
@@ -357,12 +356,13 @@ public:
 	void SetTouchAttackFromTemplate(TouchAttackParams& params);
 	void PerformTouchAttack(const TouchAttackParams& params, CBaseEntity* pOther);
 	bool SetTraceHullAttackParamsFromTemplate(int eventIndex, TraceHullAttackParams& params);
-	CBaseEntity *CheckTraceHullAttack(const TraceHullAttackParams& params, float height, const Vector& aimAngles);
+	TraceResult CheckTraceHullAttack(const TraceHullAttackParams& params, float height, const Vector& aimAngles);
 	CBaseEntity* PerformTraceHullAttack(const TraceHullAttackParams& params);
 	bool FacingIdeal();
 
 	bool FCheckAITrigger();// checks and, if necessary, fires the monster's trigger target.
 	bool FCheckAITrigger( short condition );// checks and, if necessary, fires the monster's trigger target.
+	void TriggerOnDeath(CBaseEntity* pKiller);
 
 	bool BBoxFlat();
 
@@ -476,8 +476,12 @@ public:
 
 	bool HandleDoorBlockage(CBaseEntity* pDoor) override;
 
+	virtual void AskMoveAwayFromSpot(CBaseEntity* pSpotEntity, float minDist, bool run);
+
 	int SharedRandomLong(int low, int high);
 	float SharedRandomFloat(float low, float high);
+
+	virtual int AwakeClassify() { return Classify(); }
 
 	//
 	// Glowshell effects
@@ -524,7 +528,7 @@ public:
 	bool m_bForceConditionsGather;
 	float m_flNextPainTime;
 	float m_equalDislikeTime;
-	int m_lootRandomSeed;
+	string_t m_triggerOnDeath;
 
 	float m_clearOwnerTime;
 
@@ -546,6 +550,7 @@ class CDeadMonster : public CBaseMonster
 public:
 	void Precache() override;
 	void SpawnHelper(int bloodColor = BLOOD_COLOR_RED, int health = 8);
+	void MonsterInitDead() override;
 	void KeyValue( KeyValueData *pkvd ) override;
 	virtual const char* DefaultModel() {
 		return nullptr;

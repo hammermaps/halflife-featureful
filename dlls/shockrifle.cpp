@@ -37,7 +37,6 @@ enum shockrifle_e
 class CShockrifle : public CConfigurableWeapon
 {
 public:
-	void Spawn() override;
 	void Precache() override;
 	void PrecacheDefaultModelSounds() override;
 	int WeaponId() const override { return WEAPON_SHOCKRIFLE; }
@@ -46,6 +45,7 @@ public:
 	WeaponParameters GetDefaultParameters() const override;
 
 	void NativeAttack(bool altMode) override;
+	bool HandleAttackSubstitution(bool altMode) override;
 	void Holster() override;
 	void CreateChargeEffect();
 	void EXPORT ClearBeams();
@@ -56,14 +56,6 @@ private:
 };
 
 LINK_WEAPON_TO_CLASS(weapon_shockrifle, CShockrifle)
-
-void CShockrifle::Spawn()
-{
-	CConfigurableWeapon::Spawn();
-	pev->sequence = 0;
-	pev->animtime = gpGlobals->time;
-	pev->framerate = 1.0f;
-}
 
 void CShockrifle::Precache()
 {
@@ -106,6 +98,7 @@ WeaponParameters CShockrifle::GetDefaultParameters() const
 	params.playerModel = "models/p_shock.mdl";
 	params.playerAnimExt = "bow";
 	params.priority = 15;
+	params.worldModelAnimated = true;
 
 	params.deploy.animIndex = SHOCK_DRAW;
 
@@ -166,24 +159,28 @@ void CShockrifle::Holster()
 
 void CShockrifle::NativeAttack(bool altMode)
 {
-	if (m_pPlayer->pev->waterlevel == WL_Eyes)
-	{
-#if !CLIENT_DLL
-		const float radius = 150 * m_pPlayer->m_rgAmmo[PrimaryAmmoIndex()];
-		const float dmg = 100 * m_pPlayer->m_rgAmmo[PrimaryAmmoIndex()];
-		EMIT_SOUND(ENT(pev), CHAN_WEAPON, "weapons/shock_discharge.wav", VOL_NORM, ATTN_NORM);
-		m_pPlayer->m_rgAmmo[PrimaryAmmoIndex()] = 0;
-		RadiusDamage(m_pPlayer->pev->origin, m_pPlayer->pev, m_pPlayer->pev, DamageInfo(dmg, DMG_SHOCK).SetGibPolicy(GIB_ALWAYS), radius, CLASS_NONE );
-#endif
-		return;
-	}
-
 	CreateChargeEffect();
 
 	ProjectileAttack(altMode);
 
 	SetThink( &CShockrifle::ClearBeams );
 	pev->nextthink = gpGlobals->time + 0.08;
+}
+
+bool CShockrifle::HandleAttackSubstitution(bool altMode)
+{
+	if (m_pPlayer->pev->waterlevel == WL_Eyes)
+	{
+#if !CLIENT_DLL
+		const float dmg = GetSkillValue("plr_shockroach_discharge_factor") * m_pPlayer->m_rgAmmo[PrimaryAmmoIndex()];
+		const float radius = 1.5f * dmg;
+		EMIT_SOUND(ENT(pev), CHAN_WEAPON, "weapons/shock_discharge.wav", VOL_NORM, ATTN_NORM);
+		m_pPlayer->m_rgAmmo[PrimaryAmmoIndex()] = 0;
+		RadiusDamage(m_pPlayer->pev->origin, m_pPlayer->pev, m_pPlayer->pev, DamageInfo(dmg, DMG_SHOCK).SetGibPolicy(GIB_ALWAYS), radius, CLASS_NONE );
+#endif
+		return true;
+	}
+	return false;
 }
 
 void CShockrifle::CreateChargeEffect()

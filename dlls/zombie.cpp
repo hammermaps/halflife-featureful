@@ -51,6 +51,7 @@ public:
 
 	PainSoundRule DefaultPainSoundRule() override;
 	void PainSound() override;
+	void DeathSound() override;
 	void AlertSound() override;
 	void IdleSound() override;
 	void AttackSound();
@@ -58,6 +59,7 @@ public:
 	static const NamedSoundScript idleSoundScript;
 	static const NamedSoundScript alertSoundScript;
 	static const NamedSoundScript painSoundScript;
+	static const NamedSoundScript dieSoundScript;
 	static const NamedSoundScript attackSoundScript;
 	static constexpr const char* attackHitSoundScript = "Zombie.AttackHit";
 	static constexpr const char* attackMissSoundScript = "Zombie.AttackMiss";
@@ -71,8 +73,8 @@ public:
 	bool IsDisplaceable() override { return true; }
 	Vector DefaultMinHullSize() override { return VEC_HUMAN_HULL_MIN; }
 	Vector DefaultMaxHullSize() override { return VEC_HUMAN_HULL_MAX; }
-	virtual float OneSlashDamage() { return gSkillData.zombieDmgOneSlash; }
-	virtual float BothSlashDamage() { return gSkillData.zombieDmgBothSlash; }
+	virtual float OneSlashDamage() { return GetSkillValue("zombie_dmg_one_slash"); }
+	virtual float BothSlashDamage() { return GetSkillValue("zombie_dmg_both_slash"); }
 protected:
 	void SlashAttack(const TraceHullAttackParams& params);
 	void ZombieSpawnHelper(const char* modelName, float health);
@@ -100,6 +102,12 @@ const NamedSoundScript CZombie::painSoundScript = {
 	{"zombie/zo_pain1.wav", "zombie/zo_pain2.wav"},
 	IntRange(95, 104),
 	"Zombie.Pain"
+};
+
+const NamedSoundScript CZombie::dieSoundScript = {
+	CHAN_VOICE,
+	{},
+	"Zombie.Die"
 };
 
 const NamedSoundScript CZombie::attackSoundScript = {
@@ -153,6 +161,11 @@ PainSoundRule CZombie::DefaultPainSoundRule()
 void CZombie::PainSound()
 {
 	EmitSoundScript(painSoundScript);
+}
+
+void CZombie::DeathSound()
+{
+	EmitSoundScript(dieSoundScript);
 }
 
 void CZombie::AlertSound()
@@ -256,7 +269,7 @@ void CZombie::ZombieSpawnHelper(const char* modelName, float health)
 void CZombie::Spawn()
 {
 	Precache();
-	ZombieSpawnHelper("models/zombie.mdl", gSkillData.zombieHealth);
+	ZombieSpawnHelper("models/zombie.mdl", GetSkillValue("zombie_health"));
 }
 
 //=========================================================
@@ -274,6 +287,7 @@ void CZombie::PrecacheSounds()
 	RegisterAndPrecacheSoundScript(idleSoundScript);
 	RegisterAndPrecacheSoundScript(alertSoundScript);
 	RegisterAndPrecacheSoundScript(painSoundScript);
+	RegisterAndPrecacheSoundScript(dieSoundScript);
 	RegisterAndPrecacheSoundScript(attackSoundScript);
 	RegisterAndPrecacheSoundScript(attackHitSoundScript, NPC::attackHitSoundScript);
 	RegisterAndPrecacheSoundScript(attackMissSoundScript, NPC::attackMissSoundScript);
@@ -324,10 +338,10 @@ public:
 	int	DefaultClassify() override { return	CLASS_ALIEN_MONSTER; }
 
 	const char* getPos(int pos) const override;
-	static const char *m_szPoses[2];
+	static const char *m_szPoses[3];
 };
 
-const char *CDeadZombie::m_szPoses[] = { "dieheadshot", "dieforward" };
+const char *CDeadZombie::m_szPoses[] = { "dieheadshot", "dieforward", "slidewall" };
 
 const char* CDeadZombie::getPos(int pos) const
 {
@@ -348,9 +362,8 @@ class CZombieBarney : public CZombie
 	void Spawn() override;
 	void Precache() override;
 	bool IsEnabledInMod() override { return g_modFeatures.IsMonsterEnabled("zombie_barney"); }
-	const char* DefaultDisplayName() override { return "Zombie Barney"; }
-	float OneSlashDamage() override { return gSkillData.zombieBarneyDmgOneSlash; }
-	float BothSlashDamage() override { return gSkillData.zombieBarneyDmgBothSlash; }
+	float OneSlashDamage() override { return GetSkillValue("zombie_barney_dmg_one_slash"); }
+	float BothSlashDamage() override { return GetSkillValue("zombie_barney_dmg_both_slash"); }
 };
 
 LINK_ENTITY_TO_CLASS( monster_zombie_barney, CZombieBarney )
@@ -358,7 +371,7 @@ LINK_ENTITY_TO_CLASS( monster_zombie_barney, CZombieBarney )
 void CZombieBarney::Spawn()
 {
 	Precache();
-	ZombieSpawnHelper("models/zombie_barney.mdl", gSkillData.zombieBarneyHealth);
+	ZombieSpawnHelper("models/zombie_barney.mdl", GetSkillValue("zombie_barney_health"));
 }
 
 void CZombieBarney::Precache()
@@ -390,9 +403,8 @@ class CZombieSoldier : public CZombie
 	void Spawn() override;
 	void Precache() override;
 	bool IsEnabledInMod() override { return g_modFeatures.IsMonsterEnabled("zombie_soldier"); }
-	const char* DefaultDisplayName() override { return "Zombie Soldier"; }
-	float OneSlashDamage() override { return gSkillData.zombieSoldierDmgOneSlash; }
-	float BothSlashDamage() override { return gSkillData.zombieSoldierDmgBothSlash; }
+	float OneSlashDamage() override { return GetSkillValue("zombie_soldier_dmg_one_slash"); }
+	float BothSlashDamage() override { return GetSkillValue("zombie_soldier_dmg_both_slash"); }
 };
 
 LINK_ENTITY_TO_CLASS( monster_zombie_soldier, CZombieSoldier )
@@ -400,7 +412,7 @@ LINK_ENTITY_TO_CLASS( monster_zombie_soldier, CZombieSoldier )
 void CZombieSoldier::Spawn()
 {
 	Precache();
-	ZombieSpawnHelper("models/zombie_soldier.mdl", gSkillData.zombieSoldierHealth);
+	ZombieSpawnHelper("models/zombie_soldier.mdl", GetSkillValue("zombie_soldier_health"));
 }
 
 void CZombieSoldier::Precache()

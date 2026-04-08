@@ -41,6 +41,7 @@
 #include "classify.h"
 #include "studio.h"
 #include "clamp.h"
+#include "tex_materials.h"
 #include "ai_debug.h"
 #include "graphic_debug.h"
 
@@ -166,7 +167,7 @@ TYPEDESCRIPTION	CBaseMonster::m_SaveData[] =
 	DEFINE_FIELD( CBaseMonster, m_bForceConditionsGather, FIELD_BOOLEAN ),
 	DEFINE_FIELD( CBaseMonster, m_flNextPainTime, FIELD_TIME ),
 	DEFINE_FIELD( CBaseMonster, m_equalDislikeTime, FIELD_TIME ),
-	DEFINE_FIELD( CBaseMonster, m_lootRandomSeed, FIELD_INTEGER ),
+	DEFINE_FIELD( CBaseMonster, m_triggerOnDeath, FIELD_STRING ),
 
 	DEFINE_FIELD( CBaseMonster, m_clearOwnerTime, FIELD_TIME ),
 };
@@ -1496,7 +1497,7 @@ void CBaseMonster::SetActivity( Activity NewActivity )
 	else
 	{
 		// Not available try to get default anim
-		ALERT( at_aiconsole, "%s has no sequence for act:%d\n", STRING( pev->classname ), NewActivity );
+		ALERT(at_aiconsole, "%s (%s) has no sequence for act:%d\n", STRING(pev->classname), STRING(pev->model), NewActivity);
 		pev->sequence = 0;	// Set to the reset anim (if it's there)
 	}
 }
@@ -2605,14 +2606,7 @@ void CBaseMonster::MonsterInit()
 	pev->nextthink = gpGlobals->time + 0.1f;
 	SetUse( &CBaseMonster::MonsterUse );
 
-	InitRandomSeeds();
-}
-
-void CBaseMonster::InitRandomSeeds()
-{
-	m_lootRandomSeed = RANDOM_LONG((1<<20), (1<<30));
-	if (m_lootRandomSeed % 2 == 0)
-		m_lootRandomSeed++;
+	InitLootRandomSeed();
 }
 
 //=========================================================
@@ -3362,6 +3356,51 @@ void CBaseMonster::HandleAnimEvent( MonsterEvent_t *pEvent )
 			EmitSoundScript(NPC::bodyDropLightSoundScript);
 		}
 		break;
+	case MONSTER_EVENT_MATERIAL_FOOTSTEP:
+	{
+		if (FBitSet(pev->flags, FL_ONGROUND))
+		{
+			const Vector vecStart = pev->origin;
+			const Vector vecEnd = pev->origin - Vector(0, 0, 2);
+
+
+			TraceResult tr;
+			UTIL_TraceLine(vecStart, vecEnd, ignore_monsters, edict(), &tr);
+
+			CBaseEntity* pHit = Instance(tr.pHit);
+
+			float rgfl1[3];
+			float rgfl2[3];
+			const char* pTexture;
+
+			vecStart.CopyToArray(rgfl1);
+			vecEnd.CopyToArray(rgfl2);
+
+			if (pHit)
+				pTexture = TRACE_TEXTURE(ENT(pHit->pev), rgfl1, rgfl2);
+			else
+				pTexture = TRACE_TEXTURE(ENT(0), rgfl1, rgfl2);
+
+			if (pTexture && *pTexture)
+			{
+				char szbuffer[64];
+				GetStrippedTextureName(szbuffer, pTexture);
+
+				char chTextureType = TEXTURETYPE_Find(szbuffer);
+
+				const MaterialStepData* stepData = g_MaterialRegistry.GetMaterialStepData(chTextureType);
+				if (stepData)
+				{
+					const MaterialStepData::StepSoundArray& arr = RANDOM_LONG(0, 1) ? stepData->left : stepData->right;
+					if (!arr.empty())
+					{
+						EMIT_SOUND(edict(), CHAN_BODY, arr[RANDOM_LONG(0, arr.size()-1)].c_str(), stepData->running.volume, ATTN_IDLE);
+					}
+				}
+			}
+		}
+	}
+		break;
 	case MONSTER_EVENT_SWISHSOUND:
 		{
 			// NO MONSTER may use this anim event unless that monster's precache precaches this sound!!!
@@ -3886,6 +3925,11 @@ void CBaseMonster::KeyValue( KeyValueData *pkvd )
 		m_gibPolicy = (short)atoi( pkvd->szValue );
 		pkvd->fHandled = true;
 	}
+	else if ( FStrEq( pkvd->szKeyName, "trigger_on_death" ) )
+	{
+		m_triggerOnDeath = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = true;
+	}
 	else
 	{
 		CBaseToggle::KeyValue( pkvd );
@@ -3897,7 +3941,7 @@ void CBaseMonster::Activate()
 	CBaseToggle::Activate();
 
 	if (!g_modFeatures.dying_monsters_block_player && pev->deadflag == DEAD_DYING && HasMemory(bits_MEMORY_KILLED)) {
-		pev->iuser3 = -1;
+		MarkAsNonBlockerForPlayer();
 	}
 }
 
@@ -4094,6 +4138,15 @@ bool CBaseMonster::FCheckAITrigger()
 	return ret;
 }
 
+void CBaseMonster::TriggerOnDeath(CBaseEntity *pKiller)
+{
+	if (!FStringNull(m_triggerOnDeath))
+	{
+		FireTargets(STRING(m_triggerOnDeath), pKiller, this);
+		m_triggerOnDeath = iStringNull;
+	}
+}
+
 //=========================================================	
 // CanPlaySequence - determines whether or not the monster
 // can play the scripted sequence or AI sequence that is 
@@ -4147,23 +4200,20 @@ bool CBaseMonster::CanPlaySequence( int interruptFlags )
 
 bool CBaseMonster::FindLateralSpotAway( const Vector& vecThreat, float minDist, float maxDist, int flags )
 {
-	const bool threatIsMyself = pev->origin == vecThreat;
+	Vector vecFromThreat = pev->origin - vecThreat;
+	vecFromThreat.z = 0;
+
+	const bool threatIsRightOnMe = vecFromThreat == g_vecZero;
 
 	Vector vecRight{};
-	if (threatIsMyself)
+	if (threatIsRightOnMe)
 	{
 		UTIL_MakeVectors(pev->angles);
-		Vector vecRight = gpGlobals->v_right;
+		vecRight = gpGlobals->v_right;
 		vecRight.z = 0;
 	}
 	else
 	{
-		Vector vecFromThreat = pev->origin - vecThreat;
-		vecFromThreat.z = 0;
-
-		if (vecFromThreat == g_vecZero)
-			return false;
-
 		vecFromThreat.NormalizeInPlace();
 
 		const float sideAngleRad = M_PI_F * 0.5f;
@@ -4188,7 +4238,7 @@ bool CBaseMonster::FindLateralSpotAway( const Vector& vecThreat, float minDist, 
 		const Vector vecLeftTest = vecStart - startOffset - vecStepRight * ( coverChecks - i );
 		const Vector vecRightTest = vecStart + startOffset + vecStepRight * ( coverChecks - i );
 
-		if (!threatIsMyself || (vecLeftTest - vecThreat).LengthSqr() > distToThreatSqr)
+		if (!threatIsRightOnMe || (vecLeftTest - vecThreat).LengthSqr() > distToThreatSqr)
 		{
 			if( (!FBitSet(flags, FINDSPOTAWAY_CHECK_SPOT) || FValidateCover( vecLeftTest )) )
 			{
@@ -4199,7 +4249,7 @@ bool CBaseMonster::FindLateralSpotAway( const Vector& vecThreat, float minDist, 
 			}
 		}
 
-		if (!threatIsMyself || (vecRightTest - vecThreat).LengthSqr() > distToThreatSqr)
+		if (!threatIsRightOnMe || (vecRightTest - vecThreat).LengthSqr() > distToThreatSqr)
 		{
 			if( (!FBitSet(flags, FINDSPOTAWAY_CHECK_SPOT) || FValidateCover( vecRightTest )) )
 			{
@@ -4592,7 +4642,7 @@ bool CBaseMonster::ShouldCollide(CBaseEntity *pOther)
 {
 	if (pev->deadflag == DEAD_DEAD && FBitSet(pev->flags, FL_MONSTER))
 		return pOther->ShouldCollideWithCorpses();
-	return true;
+	return CBaseToggle::ShouldCollide(pOther);
 }
 
 bool CBaseMonster::ShouldCollideWithCorpses()
@@ -4804,18 +4854,18 @@ bool CBaseMonster::HandleDoorBlockage(CBaseEntity *pDoor)
 	return false;
 }
 
-int CBaseMonster::SharedRandomLong(int low, int high)
+void CBaseMonster::AskMoveAwayFromSpot(CBaseEntity* pSpotEntity, float minDist, bool run)
 {
-	int result = UTIL_SharedRandomLong(static_cast<unsigned int>(m_lootRandomSeed), low, high);
-	m_lootRandomSeed = UTIL_LastRandomSeed();
-	return result;
-}
+	if (!IsFreeToManipulate())
+		return;
 
-float CBaseMonster::SharedRandomFloat(float low, float high)
-{
-	float result = UTIL_SharedRandomFloat(static_cast<unsigned int>(m_lootRandomSeed), low, high);
-	m_lootRandomSeed = UTIL_LastRandomSeed();
-	return result;
+	int schedFlags = SUGGEST_SCHEDULE_FLAG_DONT_AVOID_THREAT_NODE;
+
+	if (run)
+	{
+		schedFlags |= SUGGEST_SCHEDULE_FLAG_RUN;
+	}
+	SuggestSchedule(SCHED_RETREAT_FROM_SPOT, pSpotEntity, minDist, 256, schedFlags);
 }
 
 void CBaseMonster::GlowShellOn(const Visual* visual)
@@ -4895,7 +4945,7 @@ void CDeadMonster::SpawnHelper(const char* defaultModel, int bloodColor, int hea
 	pev->sequence = LookupSequence( seqName );
 	if (pev->sequence == -1)
 	{
-		ALERT ( at_console, "%s with bad pose (no %s animation in %s)\n", STRING(pev->classname), seqName, defaultModel );
+		ALERT ( at_console, "%s with bad pose (no '%s' animation in %s)\n", STRING(pev->classname), seqName, STRING(pev->model) );
 	}
 	SetMyHealth( health );
 }
@@ -4903,6 +4953,27 @@ void CDeadMonster::SpawnHelper(const char* defaultModel, int bloodColor, int hea
 void CDeadMonster::SpawnHelper(int bloodColor, int health)
 {
 	SpawnHelper(DefaultModel(), bloodColor, health);
+}
+
+void CDeadMonster::MonsterInitDead()
+{
+	bool shouldForceLastFrame = false;
+	if (pev->sequence < 0)
+	{
+		pev->sequence = LookupActivity(ACT_DIESIMPLE);
+		if (pev->sequence != ACTIVITY_NOT_AVAILABLE)
+		{
+			ALERT(at_aiconsole, "Dead monster %s had invalid sequence. Setting a sequence based on ACT_DIESIMPLE as a fallback\n", STRING(pev->classname));
+			shouldForceLastFrame = true;
+		}
+		else
+		{
+			pev->sequence = 0;
+		}
+	}
+	CBaseMonster::MonsterInitDead();
+	if (shouldForceLastFrame)
+		pev->frame = 255;
 }
 
 bool CDeadMonster::ShouldCollide(CBaseEntity* pOther)

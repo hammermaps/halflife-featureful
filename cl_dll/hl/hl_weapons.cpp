@@ -247,7 +247,7 @@ CBaseEntity::FireBulletsPlayer
 Only produces random numbers to match the server ones.
 =====================
 */
-Vector CBaseEntity::FireBulletsPlayer ( unsigned int cShots, Vector vecSrc, Vector vecDirShooting, Vector vecSpread, float flDistance, float flDamage, float flRangeModifier, int iTracerFreq, entvars_t *pevAttacker, int shared_rand )
+Vector CBaseEntity::FireBulletsPlayer ( unsigned int cShots, Vector vecSrc, Vector vecDirShooting, Vector vecSpread, float flDistance, const FloatRange& flDamageRange, float flRangeModifier, int iTracerFreq, entvars_t *pevAttacker, int shared_rand )
 {
 	float x = 0.0f, y = 0.0f;
 
@@ -622,6 +622,8 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 	player.m_afButtonPressed =  buttonsChanged & cmd->buttons;	
 	// The ones not down are "released"
 	player.m_afButtonReleased = buttonsChanged & ( ~cmd->buttons );
+	player.pev->v_angle = cmd->viewangles;
+	player.pev->origin = from->client.origin;
 
 	// Set player variables that weapons code might check/alter
 	player.pev->button = cmd->buttons;
@@ -641,6 +643,13 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 	player.m_flAmmoStartCharge = from->client.fuser3;
 
 	g_vPlayerVelocity = player.pev->velocity;
+
+	cl_entity_t *pplayer = gEngfuncs.GetLocalPlayer();
+	if (pplayer)
+	{
+		player.pev->angles = pplayer->angles;
+		player.pev->v_angle = v_angles;
+	}
 
 	// Point to current weapon object
 	if( from->client.m_iId )
@@ -665,7 +674,8 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 
 		if( viewModelIsOk && player.m_flNextAttack <= 0 )
 		{
-			pWeapon->ItemPostFrame();
+			if (!cmd->weaponselect)
+				pWeapon->ItemPostFrame();
 		}
 	}
 
@@ -708,6 +718,7 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 	to->client.fuser2 = player.m_flNextAmmoBurn;
 	to->client.fuser3 = player.m_flAmmoStartCharge;
 	to->client.maxspeed = player.pev->maxspeed;
+	to->client.punchangle = player.pev->punchangle;
 
 	// Make sure that weapon animation matches what the game .dll is telling us
 	//  over the wire ( fixes some animation glitches )

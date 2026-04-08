@@ -24,6 +24,7 @@
 #include	"game.h"
 #include	"player.h"
 #include	"weapon_ids.h"
+#include	"clamp.h"
 
 //=========================================================
 // Monster's Anim Events Go Here
@@ -95,9 +96,10 @@ public:
 	bool CheckRangeAttack1 ( float flDot, float flDist ) override;
 	bool CheckRangeAttack2 ( float flDot, float flDist ) override;
 	DamageInfo DefaultTransformDamageInfo(entvars_t *pevInflictor, entvars_t *pevAttacker, const DamageInfo& inputDamageInfo) override;
-	virtual float GetDamageAmount() { return gSkillData.headcrabDmgBite; }
+	virtual float GetDamageAmount() { return GetSkillValue("headcrab_dmg_bite"); }
 
 	Schedule_t* GetScheduleOfType ( int Type ) override;
+	virtual Schedule_t* GetLeapAttackSchedule();
 
 	CUSTOM_SCHEDULES
 
@@ -273,8 +275,7 @@ void CHeadCrab::HandleAnimEvent( MonsterEvent_t *pEvent )
 
 				// How fast does the headcrab need to travel to reach that height given gravity?
 				float height = m_hEnemy->pev->origin.z + m_hEnemy->pev->view_ofs.z - pev->origin.z;
-				if( height < 16 )
-					height = 16;
+				height = clamp(height, 16.0f, 120.0f);
 				float speed = sqrt( 2 * gravity * height );
 				float time = speed / gravity;
 
@@ -317,7 +318,7 @@ void CHeadCrab::HandleAnimEvent( MonsterEvent_t *pEvent )
 void CHeadCrab::Spawn()
 {
 	Precache();
-	SpawnHelper("models/headcrab.mdl", gSkillData.headcrabHealth);
+	SpawnHelper("models/headcrab.mdl", GetSkillValue("headcrab_health"));
 	MonsterInit();
 }
 
@@ -518,14 +519,27 @@ Schedule_t *CHeadCrab::GetScheduleOfType( int Type )
 {
 	switch( Type )
 	{
+		case SCHED_CHASE_ENEMY_FAILED:
+		{
+			if (FBitSet(pev->flags, FL_ONGROUND) && m_hEnemy != 0 && HasConditions(bits_COND_SEE_ENEMY))
+			{
+				return GetLeapAttackSchedule();
+			}
+		}
+		break;
 		case SCHED_RANGE_ATTACK1:
 		{
-			return &slHCRangeAttack1[0];
+			return GetLeapAttackSchedule();
 		}
 		break;
 	}
 
 	return CBaseMonster::GetScheduleOfType( Type );
+}
+
+Schedule_t* CHeadCrab::GetLeapAttackSchedule()
+{
+	return slHCRangeAttack1;
 }
 
 class CDeadHeadCrab : public CDeadMonster
@@ -557,9 +571,10 @@ public:
 	void Precache() override;
 	const char* DefaultDisplayName() override { return "Baby Headcrab"; }
 	void SetYawSpeed() override;
-	float GetDamageAmount() override { return gSkillData.headcrabDmgBite * 0.3f; }
+	float GetDamageAmount() override { return GetSkillValue("babycrab_dmg_bite"); }
 	bool CheckRangeAttack1( float flDot, float flDist ) override;
 	Schedule_t *GetScheduleOfType ( int Type ) override;
+	Schedule_t* GetLeapAttackSchedule() override;
 
 	static constexpr const char* idleSoundScript = "Babycrab.Idle";
 	static constexpr const char* alertSoundScript = "Babycrab.Alert";
@@ -608,7 +623,7 @@ void CBabyCrab::ApplyDefaultRenderProps(int overridenRenderProps)
 void CBabyCrab::Spawn()
 {
 	Precache();
-	SpawnHelper("models/baby_headcrab.mdl", gSkillData.headcrabHealth * 0.25f); // less health than full grown
+	SpawnHelper("models/baby_headcrab.mdl", GetSkillValue("babycrab_health"));
 	MonsterInit();
 }
 
@@ -656,16 +671,16 @@ Schedule_t *CBabyCrab::GetScheduleOfType( int Type )
 	{
 		case SCHED_FAIL:	// If you fail, try to jump!
 			if( m_hEnemy != 0 )
-				return slHCRangeAttack1Fast;
-		break;
-		case SCHED_RANGE_ATTACK1:
-		{
-			return slHCRangeAttack1Fast;
-		}
+				return GetLeapAttackSchedule();
 		break;
 	}
 
 	return CHeadCrab::GetScheduleOfType( Type );
+}
+
+Schedule_t* CBabyCrab::GetLeapAttackSchedule()
+{
+	return slHCRangeAttack1Fast;
 }
 
 #define bits_MEMORY_SHOCKTROOPER_IS_OWNER bits_MEMORY_CUSTOM1
@@ -677,7 +692,7 @@ public:
 	void Precache() override;
 	bool IsEnabledInMod() override { return g_modFeatures.IsMonsterEnabled("shockroach"); }
 	const char* DefaultDisplayName() override { return "Shock Roach"; }
-	float GetDamageAmount() override { return gSkillData.sroachDmgBite; }
+	float GetDamageAmount() override { return GetSkillValue("shockroach_dmg_bite"); }
 	void EXPORT LeapTouch(CBaseEntity *pOther);
 	bool TryGiveAsWeapon(CBaseEntity* pOther);
 	void EXPORT RoachUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
@@ -694,8 +709,10 @@ public:
 	void MonsterThink() override;
 	void StartTask(Task_t* pTask) override;
 	bool ShouldFadeOnDeath() override;
+	bool IsStillSpawning();
 	TakeDamageResult TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, const DamageInfo& damageInfo ) override;
 	void OnDying(bool gibbed) override;
+	void ReportAIState(ALERT_TYPE level) override;
 
 	Vector DefaultMinHullSize() override { return Vector( -12.0f, -12.0f, 0.0f ); }
 	Vector DefaultMaxHullSize() override { return Vector( 12.0f, 12.0f, 4.0f ); }
@@ -713,6 +730,7 @@ public:
 	static const NamedSoundScript biteSoundScript;
 
 	float m_flBirthTime;
+	float m_flDie;
 	bool m_fRoachSolid;
 
 protected:
@@ -724,6 +742,7 @@ LINK_ENTITY_TO_CLASS(monster_shockroach, CShockRoach)
 TYPEDESCRIPTION	CShockRoach::m_SaveData[] =
 {
 	DEFINE_FIELD(CShockRoach, m_flBirthTime, FIELD_TIME),
+	DEFINE_FIELD(CShockRoach, m_flDie, FIELD_TIME),
 	DEFINE_FIELD(CShockRoach, m_fRoachSolid, FIELD_BOOLEAN),
 };
 
@@ -800,7 +819,7 @@ void CShockRoach::Spawn()
 	pev->movetype = MOVETYPE_FLY;
 	SetMyBloodColor( BLOOD_COLOR_GREEN );
 	pev->effects = 0;
-	SetMyHealth( gSkillData.sroachHealth );
+	SetMyHealth( GetSkillValue("shockroach_health") );
 	pev->view_ofs = Vector(0, 0, 20);// position of the eyes relative to monster's origin.
 	pev->yaw_speed = 5;//!!! should we put this in the monster's changeanim function since turn rates may vary with state/anim?
 	SetMyFieldOfView(0.5f);// indicates the width of this monster's forward view cone ( as a dotproduct result )
@@ -809,6 +828,12 @@ void CShockRoach::Spawn()
 
 	m_fRoachSolid = false;
 	m_flBirthTime = gpGlobals->time;
+
+	const float lifespan = GetSkillValue("shockroach_lifespan");
+	if (lifespan >= 0.0f)
+		m_flDie = gpGlobals->time + lifespan;
+	else
+		m_flDie = 0.0f;
 
 	MonsterInit();
 
@@ -896,21 +921,24 @@ void CShockRoach::RoachUse(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TY
 //=========================================================
 void CShockRoach::MonsterThink()
 {
-	float lifeTime = (gpGlobals->time - m_flBirthTime);
-	if (lifeTime >= 0.2)
+	const float lifeTime = (gpGlobals->time - m_flBirthTime);
+	if (lifeTime >= 0.2f)
 	{
 		pev->movetype = MOVETYPE_STEP;
 	}
-	if (!m_fRoachSolid && lifeTime >= 2.0) {
+	if (!m_fRoachSolid && lifeTime >= 2.0f) {
 		m_fRoachSolid = true;
 		SetMySize();
 	}
-	// die when ready
-	if (lifeTime >= gSkillData.sroachLifespan)
-	{
-		TakeDamage(pev, pev, DamageInfo(pev->health, DMG_GENERIC).SetGibPolicy(GIB_NEVER));
-	}
 
+	if (m_flDie)
+	{
+		// die when ready
+		if (lifeTime >= (m_flDie - m_flBirthTime))
+		{
+			TakeDamage(pev, pev, DamageInfo(pev->health, DMG_GENERIC).SetGibPolicy(GIB_NEVER).SetIgnoreTransform());
+		}
+	}
 	CHeadCrab::MonsterThink();
 }
 
@@ -976,11 +1004,23 @@ void CShockRoach::AttackSound()
 		EmitSoundScript(attackSoundScript);
 }
 
+bool CShockRoach::IsStillSpawning()
+{
+	if (m_flDie)
+	{
+		const float lifespan = m_flDie - m_flBirthTime;
+		return gpGlobals->time - m_flBirthTime < Q_min(lifespan, 2.0f);
+	}
+	return false;
+}
+
 TakeDamageResult CShockRoach::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, const DamageInfo& damageInfo )
 {
 	DamageInfo dmgInfo = damageInfo;
-	if ( gpGlobals->time - m_flBirthTime < 2.0 )
-		dmgInfo.damage = 0.0;
+	if (IsStillSpawning())
+	{
+		dmgInfo.nonLethal = true;
+	}
 	return CBaseMonster::TakeDamage( pevInflictor, pevAttacker, dmgInfo );
 }
 
@@ -988,6 +1028,19 @@ void CShockRoach::OnDying(bool gibbed)
 {
 	SetUse(NULL);
 	CHeadCrab::OnDying(gibbed);
+}
+
+void CShockRoach::ReportAIState(ALERT_TYPE level)
+{
+	CHeadCrab::ReportAIState(level);
+	if (m_flDie)
+	{
+		ALERT(level, "Lifespan left: %g. ", m_flDie - gpGlobals->time);
+	}
+	else
+	{
+		ALERT(level, "Has infinite lifespan. ");
+	}
 }
 
 class CDeadShockRoach : public CDeadMonster

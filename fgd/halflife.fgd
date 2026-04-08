@@ -250,7 +250,18 @@
 	]
 ]
 
-@BaseClass base(Targetname,RenderFields,Appearflags,Angles,Sequence,BloodColor) = DeadMonster
+@BaseClass = EntityEffects
+[
+	effects(choices) : "Effects" =
+	[
+		0 : "No effects"
+		16 : "Invert light (take light from ceiling)"
+		1024 : "Don't reflect in env_mirror"
+		2048 : "Model is always bright"
+	]
+]
+
+@BaseClass base(Targetname,RenderFields,Appearflags,Angles,Sequence,BloodColor,EntityEffects) = DeadMonster
 [
 	health(string) : "Custom Health"
 	model(studio) : "Custom Model"
@@ -259,11 +270,6 @@
 	[
 		2 : "Don't drop to ground" : 0
 		4 : "Not solid"	: 0
-	]
-	effects(choices) : "Effects" =
-	[
-		0 : "No effects"
-		16 : "Invert light"
 	]
 	TriggerTarget(String) : "TriggerTarget" : : "The event to trigger when the TriggerCondition is met. Used by monsters."
 	TriggerCondition(Choices) : "Trigger Condition" : : "This controls the condition under which a monster will trigger its TriggerTarget. The options are:" =
@@ -404,7 +410,7 @@
 	size_for_grapple(Choices) : "Size For Grapple" =
 	[
 		-1 : "Not a Target"
-		0 : "Monster's Default"
+		0 : "Object's Default"
 		1 : "Small"
 		2 : "Medium"
 		3 : "Large"
@@ -455,6 +461,7 @@
 	minhullsize(string) : "Custom Min Hull Size (X Y Z)"
 	maxhullsize(string) : "Custom Max Hull Size (X Y Z)"
 	gibmodel(studio) : "Custom gib model"
+	trigger_on_death(target_destination) : "Trigger on death (locus = killer)"
 ]
 
 @BaseClass = MonsterGibPolicy
@@ -489,7 +496,7 @@
 		524288 : "Ignore move away requests" : 0 : "Don't move away when ally player tries to push me or when ally monster asks me to move away"
 		1048576: "Act out of PVS" : 0 : "Act as usual even if there're no players in the PVS"
 	]
-	is_player_ally(choices) : "Reverse Relationship" : : "Set inverted relationship with players. Sven Co-op compatible parameter. Simple alternative to custom classify." =
+	is_player_ally(choices) : "Reverse Relationship [Sven Co-op compat]" : : "Set inverted relationship with players. Sven Co-op compatible parameter. Simple alternative to custom classify." =
 	[
 		0 : "No"
 		1 : "Yes"
@@ -593,7 +600,7 @@
 	spawnflags(Flags) =
 	[
 		64 : "Start Inactive" : 0
-		1024: "Grunts Don't Drop Gun" : 0
+		1024: "Grunts Don't Drop Gun/Equipment" : 0
 		32768 : "No deploy, just fly" : 0
 	]
 	num(integer) : "Number of grunts per deploy [1-4]" : : "By default the number of grunts Osprey can bring at once depends on the number of alive grunts at the moment the Osprey starts flying."
@@ -615,15 +622,15 @@
 
 	delay(string) : "Delay between shots" : "0" : "Delay (in seconds) between shots. If it's 0, delay is getting set to 0.1 automatically (default HL behavior). Set it to negative value to spawn all gibs at once"
 
-	m_iszPosition(string) : "At position (blank = here) [LP]"
-	m_iszVelocity(string) : "At velocity (blank = angle) [LV]"
+	m_iszPosition(string) : "Shoot from position (blank = here) [LP]"
+	m_iszVelocity(string) : "Shoot at velocity/direction (blank = angle) [LV]"
 	m_flVelocity(string) : "Gib Speed Factor [LR]" : "200"
 
 	m_flVariance(string) : "Course Variance" : "0.15"
 
 	m_flGibLife(string) : "Gib Life" : "4" : "Time in seconds for gibs to live +/- 5%"
 
-	m_iszSpawnTarget(target_destination) : "Fire on spawn (locus = shot)"
+	m_iszSpawnTarget(target_destination) : "Fire on spawn (locus = gib)"
 
 	spawnflags(Flags) =
 	[
@@ -679,7 +686,7 @@
 	delay(string) : "Delay before fire" : "0"
 	gibmodel(studio) : "Gib Model" : ""
 	m_iGibs(integer) : "Custom number of gibs"
-	spawnobject(choices) : "Spawn On Break" : 0 =
+	spawnobject(choices) : "Spawn On Break (predefined)" : 0 =
 	[
 		0: "Nothing"
 		1: "Battery"
@@ -721,6 +728,8 @@
 		37: "Medkit (portable)"
 		38: "HEV Suit"
 	]
+	spawnobject_name(string) : "Spawn On Break (classname)"
+	spawnobject_template(string) : "Entity template for Spawn On Break"
 	explodemagnitude(integer) : "Explode Magnitude (0=none)" : 0
 	randomitem_template(string) : "info_item_random entity"
 	target_activator(choices) : "Target's Activator" =
@@ -879,7 +888,18 @@
 	]
 ]
 
-@BaseClass base(Appearflags, Targetname, RenderFields, Global, Angles, SoundRadius, BaseLockable, StartStopable, OpenClosable, CustomObjectHint, CollisionWithCorpses) = Door
+@BaseClass = TinyCreaturesHandling
+[
+	handle_tiny_creatures(choices) : "How to handle tiny creatures" =
+	[
+		-1 : "Get blocked (vanilla Half-Life)"
+		0 : "Default (handle_tiny_creatures value)"
+		1 : "Crush"
+		2 : "Don't collide"
+	]
+]
+
+@BaseClass base(Appearflags, Targetname, RenderFields, Global, Angles, SoundRadius, BaseLockable, StartStopable, OpenClosable, CustomObjectHint, CollisionWithCorpses, InstantGibCorpses, TinyCreaturesHandling) = Door
 [
 	killtarget(target_destination) : "KillTarget"
 	speed(integer) : "Speed" : 100
@@ -1083,7 +1103,7 @@
 	killtarget(target_destination) : "Kill target"
 	master(string) : "Master"
 	delay(string) : "Delay before trigger" : "0"
-	message(string) : "Message (set sound too!)"
+	message(string) : "Message Name (titles.txt)"
 ]
 
 @BaseClass = TriggerCond
@@ -1120,43 +1140,63 @@
 	m_iszEntity(string) : "Target Monster [LE]"
 	m_iszPlay(string) : "Action Animation"
 	m_iszIdle(string) : "Idle Animation"
+	m_interruptionPolicy(choices) : "Interruption policy" =
+	[
+		0 : "Default (by any damage)"
+		1 : "No Interruptions (same as flag)"
+		2 : "By Death Only"
+	]
 	m_iszFireOnBegin(target_destination): "Fire after moving"
 	m_iszFireOnAnimStart(target_destination) : "Fire on Animation start" : : "Fire at the beginning of Action Animation"
 	m_iszFireOnPossessed(target_destination) : "Fire on Possession" : : "Fire when monster is possessed by script"
 	m_flRadius(integer) : "Search Radius" : 512
+	m_applySearchRadius(choices) : "Test against search radius" =
+	[
+		0 : "When searching by classname"
+		1 : "Always"
+	]
+	m_searchPolicy(choices) : "Search target monster by..." : : "Search target monster by targetname or classname" =
+	[
+		0 : "Targetname, then classname"
+		1 : "Targetname only"
+		2 : "Classname only"
+	]
+	m_fMoveTo(choices) : "Move to Position" : 5 =
+	[
+		0 : "No"
+		1 : "Walk"
+		2 : "Run"
+		4 : "Instantaneous (legacy)"
+		5 : "No - Turn to Face"
+		7 : "Teleport"
+	]
+	m_iszMoveTarget(string) : "Move target (blank = this script) [LE]"
+	moveto_radius(string) : "Move to target's radius"
+	m_iszAttack(string) : "Turn target (blank = this script) [LE]"
+	m_fTurnType(choices) : "Turn mode" =
+	[
+		0 : "Match turn target's angle"
+		1 : "Turn to target"
+		2 : "Don't Turn"
+	]
 	m_iPriority(choices) : "Priority" =
 	[
 		0 : "Normal"
 		4 : "Override other sequences"
 	]
-	m_iszMoveTarget(string) : "Move target (blank = this) [LE]"
-	m_fMoveTo(choices) : "Move to Position" : 0 =
-	[
-		0 : "No"
-		1 : "Walk"
-		2 : "Run"
-		4 : "Instantaneous"
-		5 : "No - Turn to Face"
-		7 : "Teleport"
-	]
-	m_iFinishSchedule(Choices) : "AI Schedule when done" =
-	[
-		0 : "Default AI"
-		1 : "Ambush"
-	]
 	spawnflags(Flags) =
 	[
 		4 : "Repeatable"	: 0
-		8 : "Leave Corpse"	: 0
-		32: "No Interruptions"	: 0
-		64: "Override AI"	: 0
+		8 : "Leave Corpse (scripted death)"	: 0
+		32: "No Interruptions (legacy)"	: 0
+		64: "Override AI (Allow possession in combat)"	: 1
 		128: "No Script Movement" : 0
-		256: "Continuous animation" : 0 : "Don't reset to idle between animations"
-		512: "Apply new angles" : 0 : "If the animation includes changing of monster's angles, set them after it finished. For smoother transition and better looks."
-		1024: "Auto-search" : 0 : "Act as if scripted sequence doesn't have a targetname: start searching for the monster in the script radius."
-		4096: "Try once" : 0 : "By default once triggered the script will continue to search for the target monster if it could not find one instantly. This flag prevents such behavior"
+		256: "No Reset Entity (Continuous animation)" : 0 : "Don't reset to idle between animations"
+		512: "Apply new angles from bones" : 0 : "If the animation includes changing of monster's angles, set them after it finished. For smoother transition and better looks."
+		1024: "Auto-search (act as unnamed)" : 0 : "Act as if scripted sequence doesn't have a targetname: start searching for the monster in the script radius."
+		4096: "Try search once" : 0 : "By default once triggered the script will continue to search for the target monster if it could not find one instantly. This flag prevents such behavior"
 		8192: "Don't reset head turn" : 0 : "Don't reset head turn for talk monsters"
-		16384: "Force idle looping" : 0 : "Force idle animation looping. Use it when you want to loop an animation that does not have a loop flag"
+		16384: "Force idle animation looping" : 0 : "Force idle animation looping. Use it when you want to loop an animation that does not have a loop flag"
 		32768: "Remove on interruption" : 0 : "Remove scripted sequence when it's getting interrupted"
 	]
 	m_targetActivator(choices) : "Activator for targets" : : "Activator for Target, Fire after moving, Fire on Animation start" =
@@ -1166,21 +1206,13 @@
 		2 : "Possessed Monster"
 		3 : "Forward my activator"
 	]
-	moveto_radius(string) : "Move to radius"
-	m_iszAttack(string) : "Turn target (blank = this) [LE]"
-	m_fTurnType(choices) : "Turn mode" =
-	[
-		0 : "Match Angle"
-		1 : "Turn to face"
-		2 : "Don't Turn"
-	]
 	required_state(choices) : "Required MonsterState" =
 	[
 		0 : "Any"
 		1 : "Idle"
 		2 : "Combat"
-		3 : "Alert"
-		4 : "Idle or Alert"
+		3 : "Alert, Hunt"
+		4 : "Non-combat (Idle, Alert, Hunt)"
 	]
 	m_requiredFollowerState(choices) : "Required follower state" =
 	[
@@ -1188,33 +1220,24 @@
 		1 : "Following player"
 		2 : "Not following player"
 	]
-	m_applySearchRadius(choices) : "Apply search radius" =
-	[
-		0 : "Only to Class Name"
-		1 : "Always"
-	]
 	m_iRepeats(integer) : "Repeat action X more times"
-	m_fRepeatFrame(string) : "Repeat from frame"
+	m_fRepeatFrame(string) : "Repeat from frame [0-255]"
 	m_maxMoveFailAttempts(integer) : "Max move fail attempts" : : "When not zero, teleport the monster to the script position after this number of failed move attempts (for Walk and Run scripts)"
-	m_interruptionPolicy(choices) : "Interruption policy" =
-	[
-		0 : "Default (by any damage)"
-		1 : "No Interruptions (same as flag)"
-		2 : "By Death Only"
-	]
-	m_searchPolicy(choices) : "Search policy" : : "Search target monster by targetname or classname" =
-	[
-		0 : "Targetname, classname"
-		1 : "Targetname only"
-		2 : "Classname only"
-	]
 	m_takeDamagePolicy(choices) : "TakeDamage policy" =
 	[
 		0 : "As usual"
-		1 : "No (Invulnerable)"
+		1 : "Invulnerable during script"
 		2 : "Non-lethal damage"
 	]
+	m_iFinishSchedule(Choices) : "AI Schedule when done" =
+	[
+		0 : "Default AI"
+		1 : "Ambush"
+	]
 	master(string) : "Master" : : "Scripted sequence won't search for its target monster while master is locked"
+	initial_search_delay(string) : "Delay before initial search (default = 1.0)"
+	search_delay(string) : "Delay between search attempts (default = 1.0)"
+	m_playFramerate(string) : "Action Animation framerate" : : "Custom action animation framerate. 1.0 is normal framerate"
 ]
 
 //
@@ -1367,6 +1390,12 @@
 @PointClass base(Ammo) studio() = ammo_45acp : ".45 ACP Ammo" []
 @PointClass base(Ammo) studio() = ammo_57mm : "57mm Ammo" []
 @PointClass base(Ammo) studio() = ammo_nails : "Nails Ammo" []
+@PointClass base(Ammo) studio() = ammo_grenadeclip : "Grenade Launcher Ammo" []
+@PointClass base(Ammo) studio() = ammo_fuel : "Fuel Ammo" []
+@PointClass base(Ammo) studio() = ammo_cells : "Cells Ammo" []
+@PointClass base(Ammo) studio() = ammo_charges : "Charges Ammo" []
+@PointClass base(Ammo) studio() = ammo_rounds : "Rounds Ammo" []
+@PointClass base(Ammo) studio() = ammo_slugs : "Slugs Ammo" []
 
 @SolidClass base(Targetname, Target, ZHLT, RenderFields, EntityTemplate) = button_target : "Target Button"
 [
@@ -1690,7 +1719,7 @@
 
 @PointClass base(Targetname) size(-16 -16 -16, 16 16 16) = env_beamtrail : "Beam trail effect"
 [
-	target(target_destination) : "Entity to trail [LE]"
+	target(target_generic) : "Entity to trail [LE]"
 	netname(sprite) : "Sprite Name" : "sprites/smoke.spr"
 	renderamt(integer) : "Brightness (1 - 255)" : 255
 	rendercolor(color255) : "Color (R G B)" : "255 255 255"
@@ -1773,6 +1802,8 @@
 		"pitdronespike" : "pitdronespike"
 		"mortar_shell" : "mortar_shell (op4mortar)"
 		"nail": "nail"
+		"grenaderound": "grenaderound"
+		"env_genewormcloud": "env_genewormcloud"
 	]
 	detonation_delay(string) : "Grenade detonation delay"
 	speed(string) : "Custom projectile speed"
@@ -1915,7 +1946,7 @@
 		1: "Fade From" : 0
 		2: "Modulate" : 0
 		4: "Activator Only" : 0
-		8: "Direct blind" : 0 : "Fade alpha depends on the angle between viewer camera and env_fade origin"
+		8: "Directional blind" : 0 : "Fade alpha depends on the angle between viewer camera and env_fade origin"
 	]
 	duration(string) : "Duration (seconds)" : "2"
 	holdtime(string) : "Hold Fade (seconds)" : "0"
@@ -1982,7 +2013,7 @@
 
 @PointClass base(Targetname, Target) = env_message : "HUD Text Message"
 [
-	message(string) : "Message Name"
+	message(string) : "Message Name (titles.txt)"
 	spawnflags(flags) =
 	[
 		1: "Play Once" : 0
@@ -1999,12 +2030,20 @@
 	]
 ]
 
-@PointClass base(Targetname, Angles, RenderFields) studio() = env_model : "New alternative to cyclers"
+@SolidClass base(Targetname) = env_mirror : "Mirror" : "Fake mirror that reflects only models"
+[
+	radius(integer) : "Radius" : 330
+	spawnflag(flags) =
+	[
+		1 : "Draw Player" : 1
+	]
+]
+
+@PointClass base(Targetname, Angles, RenderFields, Scalable, EntityEffects) studio() = env_model : "New alternative to cyclers"
 [
 	model(studio) : "Model name"
 	skin(integer) : "Skin" : 0
 	body(integer) : "Body" : 0
-	scale(string) : "Scale (1.0 = normal size)"
 	frame(integer) : "Starting frame (-1..255)"
 	m_iszSequence_On(string) : "Sequence when on"
 	m_iAction_On(choices) : "Behaviour when on" : 0 =
@@ -2031,6 +2070,8 @@
 		32: "Always send to client (ignore PVS)" : 0 : "Make sure the model is sent to the client independent of player's PVS. This ensures the model will render even if its origin is not visible to the player"
 	]
 ]
+
+@PointClass base(Targetname) = env_plasmacluster : "Kingpin plasma cluster (for testing)" []
 
 @PointClass base(Targetname) size(-16 -16 -16, 16 16 16) = env_quakefx : "Quake 1 particle effects"
 [
@@ -2343,6 +2384,13 @@
 	]
 	scale(string) : "Gib/Shot Scale"
 	skin(integer) : "Gib Skin (-1 is random)"
+	bloodcolor(choices) : "Gib Blood Color" =
+	[
+		0 : "Default (don't bleed)"
+		247 : "Human (red)"
+		195 : "Alien (yellow)"
+	]
+	start_gib_body(integer) : "Start gib body (skip first submodels)" : : "Randomize gib starting with this submodel"
 	spawnflags(Flags) =
 	[
 		1 : "Repeatable" 	: 0
@@ -2458,9 +2506,12 @@
 	type(choices) : "Sound Type" : 32 =
 	[
 		1 : "Combat"
+		2 : "World"
+		4 : "Player"
 		8 : "Carcass"
 		16 : "Meat"
 		32 : "Danger"
+		64 : "Garbage"
 	]
 ]
 
@@ -3001,7 +3052,7 @@
 	_minlight(string) : "Minimum light level"
 ]
 
-@SolidClass base(Targetname,Global,RenderFields, PlatSounds, ZHLT, StartStopable, OpenClosable, CollisionWithCorpses) = func_plat : "Elevator"
+@SolidClass base(Targetname,Global,RenderFields, PlatSounds, ZHLT, StartStopable, OpenClosable, CollisionWithCorpses, InstantGibCorpses, TinyCreaturesHandling) = func_plat : "Elevator"
 [
 	spawnflags(Flags) =
 	[
@@ -3012,7 +3063,7 @@
 	_minlight(string) : "Minimum light level"
 ]
 
-@SolidClass base(Targetname, Global, RenderFields, PlatSounds, Angles, ZHLT, StartStopable, OpenClosable, CollisionWithCorpses) = func_platrot : "Moving Rotating platform"
+@SolidClass base(Targetname, Global, RenderFields, PlatSounds, Angles, ZHLT, StartStopable, OpenClosable, CollisionWithCorpses, InstantGibCorpses, TinyCreaturesHandling) = func_platrot : "Moving Rotating platform"
 [
 	spawnflags(Flags) =
 	[
@@ -3026,7 +3077,7 @@
 	_minlight(string) : "Minimum light level"
 ]
 
-@SolidClass base(Breakable, BreakableSpawnFlags, RenderFields, ZHLT, EntityTemplate, VisibleBreakable, CollisionWithCorpses, InstantGibCorpses) = func_pushable : "Pushable object"
+@SolidClass base(Breakable, BreakableSpawnFlags, RenderFields, ZHLT, EntityTemplate, VisibleBreakable, CollisionWithCorpses, InstantGibCorpses, TinyCreaturesHandling, SizeForGrapple) = func_pushable : "Pushable object"
 [
 	spawnflags(flags) =
 	[
@@ -3040,6 +3091,11 @@
 	buoyancy(integer) : "Buoyancy" : 20
 	_minlight(string) : "Minimum light level"
 	displayname(string) : "HUD Info name" : : "Name to display when player is looking at this pushable. Requires 'Show HUD Info' spawnflag."
+	toggleable_push(choices) : "Toggleable pushability" =
+	[
+		0: "No"
+		1: "Yes"
+	]
 ]
 
 @SolidClass base(Global, Recharger, EntityTemplate, RenderFields, ZHLT, CustomObjectHint) = func_recharge: "Battery recharger"
@@ -3081,8 +3137,9 @@
 		64: "X Axis" : 0
 		128: "Y Axis" : 0
 		256:"Touch Activates": 0
-		512:"Player Can't Use": 0
+		512:"Deprecated (untick this!)": 0
 		1024:"Check master on return": 0
+		16384:"Player Can't Use": 0
 	]
 	_minlight(string) : "Minimum light level"
 ]
@@ -3169,6 +3226,8 @@
 		"pitdronespike" : "pitdronespike"
 		"mortar_shell" : "mortar_shell (op4mortar)"
 		"nail" : "nail"
+		"grenaderound": "grenaderound"
+		"env_genewormcloud": "env_genewormcloud"
 	]
 	projectile_ent_template(string) : "Projectile Entity Template"
 	detonation_delay(string) : "Detonation delay"
@@ -3190,7 +3249,7 @@
 	_minlight(string) : "Minimum light level"
 ]
 
-@SolidClass base(Targetname, Global, RenderFields, ZHLT, SoundRadius, CollisionWithCorpses) = func_tracktrain : "Track Train"
+@SolidClass base(Targetname, Global, RenderFields, ZHLT, SoundRadius, CollisionWithCorpses, InstantGibCorpses, TinyCreaturesHandling) = func_tracktrain : "Track Train"
 [
 	spawnflags(flags) =
 	[
@@ -3229,7 +3288,7 @@
 	target(target_destination) : "Train Name"
 ]
 
-@SolidClass base(Targetname, Global, RenderFields, ZHLT, BaseTrain, SoundRadius, CollisionWithCorpses) = func_train : "Moving platform"
+@SolidClass base(Targetname, Global, RenderFields, ZHLT, BaseTrain, SoundRadius, CollisionWithCorpses, InstantGibCorpses, TinyCreaturesHandling) = func_train : "Moving platform"
 [
 	movesnd(choices) : "Move Sound" : 0 =
 	[
@@ -3407,6 +3466,18 @@
 	]
 ]
 
+@PointClass base(Targetname) color(170 255 255) = game_messagebox : "Show message box"
+[
+	message(string) : "Message ID"
+	distance(string) : "Autoclose distance" : : "If player is farther than this distance from the messagebox origin position the messagebox will automatically close"
+	position(string) : "Origin position (blank = here) [LP]" : : "The position to use when checking if the messagebox must be autoclosed"
+
+	spawnflags(flags) =
+	[
+		1: "All Players" : 0
+	]
+]
+
 @PointClass base(Targetname) = game_player_equip : "Initial player equipment"
 [
 	spawnflags(flags) =
@@ -3471,6 +3542,12 @@
 	_45acp(integer) : ".45 ACP"
 	_57mm(integer) : "57 mm"
 	nails(integer) : "Nails"
+	grenades(integer) : "Grenades (grenade launcher)"
+	fuel(integer) : "Fuel ammo"
+	cells(integer) : "Cells ammo"
+	charges(integer) : "Charges ammo"
+	rounds(integer) : "Rounds ammo"
+	slugs(integer) : "Slugs ammo"
 	suit(choices): "Suit" =
 	[
 		-1: "Remove suit"
@@ -3668,6 +3745,13 @@
 		1: "Give"
 		2: "Give (allow duplicate)"
 	]
+	weapon_grenadelauncher(choices) : "Grenade Launcher" =
+	[
+		-1: "Remove"
+		0: "No change"
+		1: "Give"
+		2: "Give (allow duplicate)"
+	]
 	weapon_camera(choices) : "Camera" =
 	[
 		-1: "Remove"
@@ -3676,6 +3760,20 @@
 		2: "Give (allow duplicate)"
 	]
 	weapon_radio(choices) : "Radio" =
+	[
+		-1: "Remove"
+		0: "No change"
+		1: "Give"
+		2: "Give (allow duplicate)"
+	]
+	weapon_tool(choices) : "Tool" =
+	[
+		-1: "Remove"
+		0: "No change"
+		1: "Give"
+		2: "Give (allow duplicate)"
+	]
+	weapon_melee(choices) : "Melee (custom)" =
 	[
 		-1: "Remove"
 		0: "No change"
@@ -3843,6 +3941,12 @@
 	ammo_45acp(string) : ".45 ACP clip chance"
 	ammo_57mm(string) : "57mm clip chance"
 	ammo_nails(string) : "nails clip chance"
+	ammo_grenadeclip(string) : "grenade clip chance"
+	ammo_fuel(string) : "fuel ammo chance"
+	ammo_cells(string) : "cells ammo chance"
+	ammo_charges(string) : "charges ammo chance"
+	ammo_rounds(string) : "rounds ammo chance"
+	ammo_slugs(string) : "slugs ammo chance"
 	weapon_handgrenade(string) : "Hand Grenades chance"
 	weapon_tripmine(string) : "Tripmine chance"
 	weapon_satchel(string) : "Satchel chance"
@@ -3870,8 +3974,11 @@
 	weapon_minigun(string) : "Minigun chance"
 	weapon_uzi(string) : "Uzi chance"
 	weapon_nailgun(string) : "Nailgun chance"
+	weapon_grenadelauncher(string) : "Grenade Launcher chance"
 	weapon_camera(string) : "Camera chance"
 	weapon_radio(string) : "Radio chance"
+	weapon_tool(string) : "Tool chance"
+	weapon_melee(string) : "Melee (custom) chance"
 	weapon_pistol(string) : "Pistol (custom) chance"
 	weapon_pistol2(string) : "Pistol 2 (custom) chance"
 	weapon_smg(string) : "SMG (custom) chance"
@@ -4005,12 +4112,12 @@
 	model(studio) : "Model" : : "The model to use. If not defined, it will use the model defined by the entity template for the inventory item type. If it's missing the models/w_security.mdl will be used as a fallback"
 	item_name(string) : "Inventory item" : : "Inventory item to give to player"
 	count(integer) : "Inventory item count" : 1 : "Count of inventory items to give (if item is defined)"
-	message(string) : "Message" : : "Message from titles.txt to show on pickup"
+	message(string) : "Message Name (titles.txt)" : : "Message from titles.txt to show on pickup"
 	noise(sound) : "Pickup sound" : : "Custom sound to play on pickup"
 ]
 @PointClass size(-16 -16 0, 16 16 36) base(Item) studio("models/w_security.mdl") = item_security : "Security card"
 [
-	message(string) : "Message" : : "Message from titles.txt to show on pickup"
+	message(string) : "Message Name (titles.txt)" : : "Message from titles.txt to show on pickup"
 	noise(sound) : "Pickup sound" : "items/gunpickup4.wav"
 	hudname(string) : "HUD name" : : "Sprite from hud.txt to show on pickup. By default it won't show anything"
 ]
@@ -4042,7 +4149,7 @@
 	template(string) : "info_item_random entity"
 ]
 
-@PointClass base(Targetname, Appearflags, Angles, Global, RenderFields, Scalable) studio() = item_generic : "Generic scenery item"
+@PointClass base(Targetname, Appearflags, Angles, Global, RenderFields, Scalable, EntityEffects) studio() = item_generic : "Generic scenery item"
 [
 	model(studio) : "Model" : "models/w_security.mdl"
 	sequencename(string) : "Sequence Name"
@@ -4200,7 +4307,55 @@
 	m_fDuration(string) : "Removed after time (secs)"
 ]
 
-@SolidClass base(Door, ZHLT) = momentary_door : "Momentary/Continuous door"
+@BaseClass = MomentaryDoor
+[
+	movesnd(choices) : "Move Sound" : 0 =
+	[
+		0: "No Sound"
+		1: "Servo (Sliding)"
+		2: "Pneumatic (Sliding)"
+		3: "Pneumatic (Rolling)"
+		4: "Vacuum"
+		5: "Power Hydraulic"
+		6: "Large Rollers"
+		7: "Track Door"
+		8: "Snappy Metal Door"
+	]
+	stopsnd(choices) : "Stop Sound" : 0 =
+	[
+		0: "No Sound"
+		1: "Clang with brake"
+		2: "Clang reverb"
+		3: "Ratchet Stop"
+		4: "Chunk"
+		5: "Light airbrake"
+		6: "Metal Slide Stop"
+		7: "Metal Lock Stop"
+		8: "Snappy Metal Stop"
+	]
+	lip(integer) : "Lip"
+]
+
+@BaseClass = StartStopableMomentary
+[
+	fireonstart(target_destination) : "Fire On Start" : : "Fire when door starts moving (either direction)"
+	fireonstart_triggerstate(choices) : "Fire On Start Trigger State" =
+	[
+		0: "Off"
+		1: "On"
+		2: "Toggle"
+	]
+
+	fireonstop(target_destination) : "Fire On Stop" : : "Fire when door stops moving"
+	fireonstop_triggerstate(choices) : "Fire On Stop Trigger State" =
+	[
+		0: "Off"
+		1: "On"
+		2: "Toggle"
+	]
+]
+
+@SolidClass base(Appearflags, Targetname, RenderFields, Global, Angles, MomentaryDoor, SoundRadius, StartStopableMomentary, OpenClosable, CustomObjectHint, ZHLT) = momentary_door : "Momentary/Continuous door"
 [
 	spawnflags(flags) =
 	[
@@ -4453,10 +4608,10 @@
 	pose(Choices) : "Pose" : 0 =
 	[
 		0 : "On Stomach (OpFor)"
-        1 : "On Stomach (hands forward)"
-        2 : "On Side"
-        3 : "On Back"
-        4 : "On Stomach (hands backward)"
+		1 : "On Stomach (hands forward)"
+		2 : "On Side"
+		3 : "On Back"
+		4 : "On Stomach (hands backward)"
 	]
 ]
 @PointClass base(Monster, FollowingMonster, Sequence) size(-32 -32 0, 32 32 64) studio("models/Tor.mdl") = monster_alien_tor : "Alien Tor"
@@ -4589,9 +4744,16 @@
 		0 : "Gun Holstered"
 		1 : "Gun Drawn"
 	]
+	head(choices) : "Head (for custom models)" =
+	[
+		-1: "Random"
+		0 : "Default"
+		1 : "Custom 1"
+		2 : "Custom 2"
+	]
 	spawnflags(Flags) =
 	[
-		1024: "Don't Drop Gun" : 0
+		1024: "Don't Drop Gun/Equipment" : 0
 	]
 ]
 @PointClass base(DeadMonster) size(-16 -16 0, 16 16 72) studio("models/barney.mdl") = monster_barney_dead : "Dead Barney"
@@ -4607,6 +4769,13 @@
 		35 : "lying_on_back"
 		36 : "lying_on_side"
 		37 : "lying_on_stomach"
+	]
+	head(choices) : "Head (for custom models)" =
+	[
+		-1: "Random"
+		0 : "Default"
+		1 : "Custom 1"
+		2 : "Custom 2"
 	]
 ]
 @PointClass base(Monster,TalkMonster, Sequence) size(-16 -16 0, 16 16 72) studio("models/barniel.mdl") = monster_barniel : "Barniel"
@@ -4700,7 +4869,7 @@
 	]
 	spawnflags(Flags) =
 	[
-		1024: "Don't Drop Gun" : 0
+		1024: "Don't Drop Gun/Equipment" : 0
 	]
 ]
 @PointClass base(DeadMonster) size(-16 -16 0, 16 16 72) studio("models/barniel.mdl") = monster_barniel_dead : "Dead Barniel"
@@ -4816,7 +4985,7 @@
 	]
 	spawnflags(Flags) =
 	[
-		1024: "Don't Drop Gun" : 0
+		1024: "Don't Drop Gun/Equipment" : 0
 	]
 ]
 @PointClass base(DeadMonster) size(-16 -16 0, 16 16 72) studio("models/kate.mdl") = monster_kate_dead : "Dead Kate"
@@ -4942,7 +5111,7 @@
 	]
 	spawnflags(Flags) =
 	[
-		1024: "Don't Drop Gun" : 0
+		1024: "Don't Drop Gun/Equipment" : 0
 	]
 ]
 
@@ -5122,25 +5291,25 @@
 		21 : "bust"
 	]
 ]
-@PointClass base(Monster, Sequence) size(-16 -16 -36, 16 16 36) studio() = monster_generic : "Generic Script Monster"
+@PointClass base(Monster, Sequence, EntityEffects) size(-16 -16 -36, 16 16 36) studio() = monster_generic : "Generic Script Monster"
 [
 	spawnflags(Flags) =
 	[
 		4 : "Not solid"	: 0
 		8 : "Head controller" : 0
 	]
-	model(studio) : "model"
+	model(studio) : "Model (required)"
 	body(integer) : "Body" : 0
 	skin(integer) : "Skin"
 ]
 
-@PointClass base(DeadMonster, Sequence) size(-16 -16 -36, 16 16 36) studio() = monster_generic_dead : "Generic Script Monster"
+@PointClass base(DeadMonster) size(-16 -16 -36, 16 16 36) studio() = monster_generic_dead : "Generic Script Monster"
 [
 	spawnflags(Flags) =
 	[
 		4 : "Not solid"	: 0
 	]
-	model(studio) : "model"
+	model(studio) : "Model (required)"
 	body(integer) : "Body"
 	skin(integer) : "Skin"
 	pose(string) : "Pose (string)" : : "Name of the sequence"
@@ -5274,7 +5443,7 @@
 	]
 	spawnflags(Flags) =
 	[
-		1024: "Don't Drop Gun" : 0
+		1024: "Don't Drop Gun/Equipment" : 0
 	]
 ]
 @PointClass base(Weapon, Targetx, RenderFields, Sequence) studio("models/w_grenade.mdl") = monster_handgrenade : "Live Handgrenade" []
@@ -5399,11 +5568,16 @@
 		32768 : "Start sleeping" : 0 : "Houndeye starts sleeping with eyes closed and doesn't wake up until hears player or combat"
 	]
 ]
-@PointClass base(DeadMonster) size(-16 -16 0, 16 16 72) studio("models/houndeye_dead.mdl") = monster_houndeye_dead : "Dead Houndeye"
+@PointClass base(DeadMonster) size(-16 -16 0, 16 16 72) studio("models/houndeye.mdl") = monster_houndeye_dead : "Dead Houndeye"
 [
-	sequence(Choices) : "Animation Sequence (editor)" : 0 =
+	sequence(Choices) : "Animation Sequence (editor)" : 6 =
 	[
-		0 : "dead"
+		0 : "dead (Opfor houndeye_dead.mdl)"
+		6 : "die"
+		7 : "die1"
+		8 : "die2"
+		9 : "die3"
+		13 : "die_crumple"
 	]
 	skin(Choices) : "Eye state" =
 	[
@@ -5411,9 +5585,14 @@
 		1 : "Half open"
 		2 : "Closed"
 	]
-	pose(Choices) : "Pose" : 0 =
+	pose(Choices) : "Pose" : 1 =
 	[
-		0 : "Just plain dead"
+		0 : "Dead (Opfor houndeye_dead.mdl)"
+		1 : "On left side"
+		2 : "On left side (alt)"
+		3 : "Backwards on left side"
+		4 : "Backwards on right side"
+		5 : "On stomach"
 	]
 ]
 @PointClass base(Monster, FollowingMonster, Sequence) size(-16 -16 0, 16 16 72) studio("models/hassassin.mdl") = monster_human_assassin : "Human Assassin"
@@ -5463,7 +5642,7 @@
 	spawnflags(Flags) =
 	[
 		32 : "SquadLeader" : 0
-		1024: "Don't Drop Gun" : 0
+		1024: "Don't Drop Gun/Equipment" : 0
 	]
 	netname(string) : "Squad Name"
 	weapons(Choices) : "Weapons" : 1 =
@@ -5695,7 +5874,7 @@
 	spawnflags(Flags) =
 	[
 		32 : "SquadLeader" : 0
-		1024: "Don't Drop Gun" : 0
+		1024: "Don't Drop Gun/Equipment" : 0
 	]
 ]
 
@@ -5779,7 +5958,7 @@
 	]
 	spawnflags(Flags) =
 	[
-		1024: "Don't Drop Gun" : 0
+		1024: "Don't Drop Gun/Equipment" : 0
 	]
 	netname(string) : "Squad Name"
 ]
@@ -5873,7 +6052,7 @@
 	spawnflags(Flags) =
 	[
 		32 : "SquadLeader" : 0
-		1024: "Don't Drop Gun" : 0
+		1024: "Don't Drop Gun/Equipment" : 0
 	]
 
 	head(Choices) : "Heads" : -1 =
@@ -5963,7 +6142,7 @@
 	]
 	spawnflags(Flags) =
 	[
-		1024: "Don't Drop Gun" : 0
+		1024: "Don't Drop Gun/Equipment" : 0
 	]
 ]
 
@@ -6057,7 +6236,7 @@
 	spawnflags(Flags) =
 	[
 		32 : "SquadLeader" : 0
-		1024: "Don't Drop Gun" : 0
+		1024: "Don't Drop Gun/Equipment" : 0
 	]
 	weapons(Choices) : "Weapons" : 1 =
 	[
@@ -6131,7 +6310,7 @@
 	]
 	spawnflags(Flags) =
 	[
-		1024: "Don't Drop Gun" : 0
+		1024: "Don't Drop Gun/Equipment" : 0
 	]
 ]
 
@@ -6164,7 +6343,7 @@
 	spawnflags(Flags) =
 	[
 		32 : "SquadLeader" : 0
-		1024: "Don't Drop Gun" : 0
+		1024: "Don't Drop Gun/Equipment" : 0
 	]
 	sequence(Choices) : "Animation Sequence (editor)" : 0 =
 	[
@@ -6193,7 +6372,7 @@
 	spawnflags(Flags) =
 	[
 		32 : "SquadLeader" : 0
-		1024: "Don't Drop Gun" : 0
+		1024: "Don't Drop Gun/Equipment" : 0
 	]
     sequence(Choices) : "Animation Sequence (editor)" : 14 =
 	[
@@ -6238,6 +6417,21 @@
 		15 : "new_ickyjump"
 	]
 ]
+
+@PointClass base(Monster, Sequence) size(-6 -6 0, 6 6 6) studio("models/kingpin.mdl") = monster_kingpin : "Kingpin"
+[
+	teleport_target(string) : "Teleport target" : : "Name of targets to teleport to when can't get to enemy"
+	second_chance(choices) : "Can use second chance" =
+	[
+		0: "No"
+		1: "Yes"
+	]
+	spawnflags(Flags) =
+	[
+		32768 : "Escape on death" : 0 : "Escape away via teleport instead of gibbing. Still counts as death for trigger condition"
+	]
+]
+
 @PointClass base(Monster, Sequence) size(-6 -6 0, 6 6 6) studio("models/leech.mdl") = monster_leech : "Leech"
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 0 =
@@ -6303,7 +6497,7 @@
 	spawnflags(Flags) =
 	[
 		32 : "SquadLeader" : 0
-		1024: "Don't Drop Gun" : 0
+		1024: "Don't Drop Gun/Equipment" : 0
 	]
 
 	head(Choices) : "Heads" : 0 =
@@ -6559,7 +6753,7 @@
 	]
 	spawnflags(Flags) =
 	[
-		1024: "Don't Drop Gun" : 0
+		1024: "Don't Drop Gun/Equipment" : 0
 	]
 ]
 @PointClass base(DeadMonster, OtisHead) size(-16 -16 0, 16 16 72) studio("models/otis.mdl") = monster_otis_dead : "Dead Otis"
@@ -6693,177 +6887,6 @@
 	]
 ]
 
-// @PointClass base(Monster, Civilian) size(-16 -16 0, 16 16 72) studio("models/gus.mdl") = monster_gus : "Construction Worker"
-// [
-// 	body(Choices) : "Body" : -1 =
-// 	[
-// 		-1 : "Random"
-// 		0 : "White"
-// 		1 : "Black"
-// 	]
-// 	sequence(Choices) : "Animation Sequence (editor)" : 13 =
-// 	[
-// 		0 : "walk"
-// 		1 : "walk_scared"
-// 		2 : "run"
-// 		3 : "run1"
-// 		4 : "run2"
-// 		5 : "180_Left"
-// 		6 : "180_Right"
-// 		7 : "flinch"
-// 		8 : "flinch1"
-// 		9 : "laflinch"
-// 		10 : "raflinch"
-// 		11 : "llflinch"
-// 		12 : "rlflinch"
-// 		13 : "idle1"
-// 		14 : "idle3"
-// 		15 : "idle4"
-// 		16 : "idle5"
-// 		17 : "idle6"
-// 		18 : "idle7"
-// 		19 : "crouchstand"
-// 		20 : "crouch_idle"
-// 		21 : "crouch_idle2"
-// 		22 : "crouch_idle3_1"
-// 		23 : "crouch_idle3_2"
-// 		24 : "panic"
-// 		25 : "fear1"
-// 		26 : "fear2"
-// 		27 : "eye_wipe"
-// 		28 : "pull_needle"
-// 		29 : "return_needle"
-// 		30 : "give_shot"
-// 		31 : "diesimple"
-// 		32 : "dieforward"
-// 		33 : "dieforward1"
-// 		34 : "diebackward"
-// 		35 : "headshot"
-// 		36 : "gutshot"
-// 		37 : "barnacled1"
-// 		38 : "barnacled2"
-// 		39 : "barnacled3"
-// 		40 : "barnacled4"
-// 		41 : "lying_on_back"
-// 		42 : "lying_on_stomach"
-// 		43 : "dead_sitting"
-// 		44 : "dead_table1"
-// 		45 : "dead_table2"
-// 		46 : "dead_table3"
-// 		47 : "console"
-// 		48 : "checktie"
-// 		49 : "dryhands"
-// 		50 : "tieshoe"
-// 		51 : "writeboard"
-// 		52 : "studycart"
-// 		53 : "lean"
-// 		54 : "pondering"
-// 		55 : "pondering2"
-// 		56 : "pondering3"
-// 		57 : "buysoda"
-// 		58 : "pause"
-// 		59 : "yes"
-// 		60 : "no"
-// 		61 : "push_button"
-// 		62 : "converse1"
-// 		63 : "converse2"
-// 		64 : "retina"
-// 		65 : "talkleft"
-// 		66 : "talkright"
-// 		67 : "deskidle"
-// 		68 : "coffee"
-// 		69 : "franticbutton"
-// 		70 : "startle"
-// 		71 : "sitlookleft"
-// 		72 : "sitlookright"
-// 		73 : "sitscared"
-// 		74 : "sitting2"
-// 		75 : "sitting3"
-// 		76 : "cprscientist"
-// 		77 : "cprscientistrevive"
-// 		78 : "cowering_in_corner"
-// 		79 : "sstruggleidle"
-// 		80 : "sstruggle"
-// 		81 : "headcrabbed"
-// 		82 : "c1a0_catwalkidle"
-// 		83 : "c1a0_catwalk"
-// 		84 : "ceiling_dangle"
-// 		85 : "ventpull1"
-// 		86 : "ventpull2"
-// 		87 : "ventpullidle1"
-// 		88 : "ventpullidle2"
-// 		89 : "sitidle"
-// 		90 : "sitstand"
-// 		91 : "keypad"
-// 		92 : "panic1"
-// 		93 : "lookwindow"
-// 		94 : "wave"
-// 		95 : "pulldoor"
-// 		96 : "beatdoor"
-// 		97 : "fallingloop"
-// 		98 : "crawlwindow"
-// 		99 : "divewindow"
-// 		100 : "locked_door"
-// 		101 : "push_button2"
-// 		102 : "unlock_door"
-// 		103 : "quicklook"
-// 		104 : "handrailidle"
-// 		105 : "handrail"
-// 		106 : "hanging_idle"
-// 		107 : "fall"
-// 		108 : "scientist_get_pulled"
-// 		109 : "hanging_idle2"
-// 		110 : "fall_elevator"
-// 		111 : "scientist_idlewall"
-// 		112 : "ickyjump_sci"
-// 		113 : "haulscientist"
-// 		114 : "c1a4_wounded_idle"
-// 		115 : "c1a4_dying_speech"
-// 		116 : "tentacle_grab"
-// 		117 : "helicack"
-// 		118 : "windive"
-// 		119 : "scicrashidle"
-// 		120 : "scicrash"
-// 		121 : "onguard"
-// 		122 : "seeya"
-// 		123 : "rocketcrawl"
-// 		124 : "portal"
-// 		125 : "gluonshow"
-// 		126 : "crouch"
-// 		127 : "kneel"
-// 		128 : "dudedu"
-// 		129 : "cower_chat"
-// 		130 : "cower_chat_die"
-// 	]
-// ]
-// @PointClass base(DeadMonster) size(-16 -16 0, 16 16 72) studio("models/gus.mdl") = monster_gus_dead : "Dead Construction Worker"
-// [
-// 	sequence(Choices) : "Animation Sequence (editor)" : 41 =
-// 	[
-// 		41 : "lying_on_back"
-// 		42 : "lying_on_stomach"
-// 		43 : "dead_sitting"
-// 		44 : "dead_table1"
-// 		45 : "dead_table2"
-// 		46 : "dead_table3"
-// 	]
-// 	body(Choices) : "Body" : -1 =
-// 	[
-// 		-1 : "Random"
-// 		0 : "White"
-// 		1 : "Black"
-// 	]
-// 	pose(Choices) : "Pose" : 0 =
-// 	[
-// 		0 : "On back"
-// 		1 : "On Stomach"
-// 		2 : "Sitting"
-// 		3 : "Table1"
-// 		4 : "Table2"
-// 		5 : "Table3"
-// 	]
-// ]
-
 @PointClass base(Monster, FollowingMonster, Sequence) size(-16 -16 0, 16 16 72) studio("models/strooper.mdl") = monster_shocktrooper : "Shock Trooper"
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 10 =
@@ -6969,7 +6992,7 @@
 	spawnflags(Flags) =
 	[
 		32 : "SquadLeader" : 0
-		1024: "Don't Drop Gun" : 0
+		1024: "Don't Drop Gun/Equipment" : 0
 	]
 	netname(string) : "Squad Name"
 	weapons(Choices) : "Weapons" : 1 =
@@ -6994,7 +7017,7 @@
 	]
 	spawnflags(Flags) =
 	[
-		1024: "Don't Drop Gun" : 0
+		1024: "Don't Drop Gun/Equipment" : 0
 	]
 ]
 
@@ -7117,7 +7140,7 @@
 		0 : "On back"
 		1 : "On Stomach"
 		2 : "Sitting"
-		3 : "Hanging"
+		//3 : "Hanging"
 		4 : "Table1"
 		5 : "Table2"
 		6 : "Table3"
@@ -7298,7 +7321,7 @@
 		0 : "On back"
 		1 : "On Stomach"
 		2 : "Sitting"
-		3 : "Hanging"
+		//3 : "Hanging"
 		4 : "Table1"
 		5 : "Table2"
 		6 : "Table3"
@@ -7473,6 +7496,7 @@
 	spawnflags(Flags) =
 	[
 		1 : "Instant On" : 1
+		2 : "Triggerable" : 0 : "Explode when triggered"
 	]
 ]
 @PointClass base(Monster, Sequence) size(-32 -32 -32, 32 32 32) studio("models/turret.mdl") = monster_turret : "Auto Turret"
@@ -7572,11 +7596,13 @@
 	[
 		0 : "On back"
 		1 : "On stomach"
+		2 : "Seated (slide wall)"
 	]
 	sequence(Choices) : "Animation Sequence (editor)" : 15 =
 	[
 		15 : "dieheadshot"
 		19 : "dieforward"
+		26 : "slidewall"
 	]
 ]
 @PointClass base(Monster, Sequence) size(-16 -16 0, 16 16 72) studio("models/zombie_barney.mdl") = monster_zombie_barney : "Barney Zombie"
@@ -7635,11 +7661,13 @@
 	[
 		0 : "On back"
 		1 : "On stomach"
+		2 : "Seated (slide wall)"
 	]
 	sequence(Choices) : "Animation Sequence (editor)" : 15 =
 	[
 		15 : "dieheadshot"
 		19 : "dieforward"
+		26 : "slidewall"
 	]
 ]
 @PointClass base(Monster, Sequence) size(-16 -16 0, 16 16 72) studio("models/zombie_soldier.mdl") = monster_zombie_soldier : "Soldier Zombie"
@@ -7822,7 +7850,7 @@
 		64: "Cyclic backlog" : 0 : "Used with 'Cyclic' flag. Keep track of number of monsters who could not be spawned, e.g. because of blocking. Try to spawn them later. Useful when you want to ensure that the specific number of monsters will spawn."
 		128 : "Reserved (don't use)" : 0 : "Reserved for Sven Co-op 'Wait for script' flag"
 		256 : "Pre-Disaster" : 0 : "The spawned talkmonster (e.g. scientist) will use pre-disaster sentences"
-		1024: "Don't Drop Gun" : 0 : "The spawned monster won't drop items upon death."
+		1024: "Don't Drop Gun/Equipment" : 0 : "The spawned monster won't drop items upon death."
 		4096 : "[Deprecated] Face to player" : 0 : "Use 'Face to' with *player value instead. Spawned monsters will be aligned to the closest player increasing the chance of seeing the player right after the spawn."
 		8192 : "Monster Flag 64" : 0 : "Set spawnflag 64 for spawned monster. E.g. used by vortigaunts as 'wait until provoked'"
 		16384: "No ground check" : 0 : "Don't check if something prevents a monster to fall on ground upon spawning. Useful for spawning flying monsters and those who are supposed to fall on whatever underneath them"
@@ -7833,14 +7861,14 @@
 	]
 	body(integer) : "Body"
 	skin(integer) : "Skin"
-	pose(integer) : "Pose (Only for dead monsters)" : : "Dead pose index. Should match the one in the spawned entity."
+	pose(integer) : "Pose sequence index (Only for dead monsters)" : : "Dead pose sequence index. Should match the one in the spawned entity."
 	gag(Choices) : "Gag" =
 	[
 		0 : "No"
 		1 : "Yes"
 	]
 	head(integer) : "Head" : : "Settable head. Available only for monsters which have a separate body group for heads. The number must match the numbers used in specific monster"
-	respawn_as_playerally(choices) : "Reverse Relationship" : : "Set inverted relationship with players. Sven Co-op compatible parameter. Simple alternative to custom classify." =
+	respawn_as_playerally(choices) : "Reverse Relationship [Sven Co-op compat]" : : "Set inverted relationship with players. Sven Co-op compatible parameter. Simple alternative to custom classify." =
 	[
 		0 : "No"
 		1 : "Yes"
@@ -8105,6 +8133,13 @@
 		"Penguins" : "Penguins"
 		"45acp" : ".45 ACP"
 		"57mm" : "57mm"
+		"nails" : "Nails"
+		"grenades" : "Grenades (grenade launcher)"
+		"fuel" : "Fuel"
+		"cells" : "Cells"
+		"charges" : "Charges"
+		"rounds" : "Rounds"
+		"slugs" : "Slugs"
 	]
 	item_name(string) : "Inventory item name"
 ]
@@ -8303,6 +8338,10 @@
 	]
 	trigger_on_stash(target_destination) : "Fire on Stash"
 	trigger_on_unstash(target_destination) : "Fire on Unstash"
+	spawnflags(Flags) =
+	[
+		2 : "No HUD notifications on unstash" : 0 : "Don't show the notifications in pickup history on unstash"
+	]
 ]
 
 @PointClass base(Targetname) = player_template : "Set a player template (from templates/player.json)"
@@ -8389,7 +8428,7 @@
 	listener(string) : "Listener Type [LE]"
 	listener_radius(integer) : "Listener Search Radius" : : "If not present, it uses Search Radius"
 	volume(string) : "Volume 0-10" : "10"
-	attenuation(Choices) : "Sound Radius" : 0 =
+	attenuation(Choices) : "Sound Radius" : 1 =
 	[
 		0 : "Small Radius"
 		1 : "Medium Radius"
@@ -8419,15 +8458,15 @@
 		2 : "Speaking monster"
 		3 : "Forward my activator"
 	]
-	m_searchPolicy(choices) : "Search policy" : : "Search speaker monster by targetname or classname" =
+	m_searchPolicy(choices) : "Search speaker by..." : : "Search speaker monster by targetname or classname" =
 	[
 		0 : "Targetname, classname"
 		1 : "Targetname only"
 		2 : "Classname only"
 	]
-	m_applySearchRadius(choices) : "Apply speaker search radius" =
+	m_applySearchRadius(choices) : "Test against search radius" =
 	[
-		0 : "Only to Class Name"
+		0 : "When searching by classname"
 		1 : "Always"
 	]
 	search_origin(string) : "Speaker Search Origin (blank = here) [LP]" : : "Search the speaker relative to this position instead of the position of scripted_sentence"
@@ -8438,13 +8477,7 @@
 	]
 ]
 
-@PointClass base(ScriptedSequence) = scripted_sequence : "Scripted Sequence"
-[
-	spawnflags(Flags) =
-	[
-		64: "Override AI"	: 0
-	]
-]
+@PointClass base(ScriptedSequence) = scripted_sequence : "Scripted Sequence" []
 
 @PointClass base(ScriptedSequence) = scripted_action : "Scripted action"
 [
@@ -8460,10 +8493,6 @@
 		6 : "Reload"
 		7 : "Jump"
 		8 : "No action"
-	]
-	spawnflags(Flags) =
-	[
-		64: "Override AI"	: 0
 	]
 ]
 
@@ -8904,7 +8933,7 @@
 		0 : "No change"
 		1 : "Add flag"
 	]
-	dont_drop_gun_flag(choices) : "Don't Drop Gun flag" =
+	dont_drop_gun_flag(choices) : "Don't Drop Gun/Equipment flag" =
 	[
 		-1 : "Remove flag"
 		0 : "No change"
@@ -9235,6 +9264,12 @@
 	master(string) : "Master"
 ]
 
+@PointClass base(Targetx) = trigger_impulse : "Trigger to fire on player's impulse"
+[
+	impulse(integer) : "Impulse [1..50]" : 1
+	master(string) : "Master"
+]
+
 @SolidClass base(Targetname, TriggerCond) = trigger_inout : "Trigger: Activate on entering or leaving"
 [
 	target(target_destination) : "Fire on entering"
@@ -9550,6 +9585,7 @@
 		"" : "None"
 		weapon_camera : "Camera"
 		weapon_radio : "Radio"
+		weapon_tool : "Tool (custom, weapon_tool)"
 	]
 	tooltarget(string) : "Tool Target" : : "Where the player needs to be looking to activate the tool, the best way to get this to work is to target an info_target thats in the general area that should be looked in."
 	master(string) : "Master"
@@ -9613,10 +9649,13 @@
 @PointClass base(Weapon, WeaponInitAmmo) studio("models/w_minigun.mdl") = weapon_minigun : "Minigun" []
 @PointClass base(Weapon, WeaponInitAmmo) studio("models/w_uzi.mdl") = weapon_uzi : "Single UZI" []
 @PointClass base(Weapon, WeaponInitAmmo) = weapon_nailgun : "Nailgun" []
+@PointClass base(Weapon, WeaponInitAmmo) = weapon_grenadelauncher : "Grenade Launcher" []
 
 @PointClass base(Weapon, WeaponInitAmmo) studio("models/w_camera.mdl") = weapon_camera : "Camera" []
 @PointClass base(Weapon, WeaponInitAmmo) studio("models/w_radio.mdl") = weapon_radio : "Radio" []
+@PointClass base(Weapon, WeaponInitAmmo) = weapon_tool : "Tool" []
 
+@PointClass base(Weapon, WeaponInitAmmo) studio() = weapon_melee : "Generic configurable melee" []
 @PointClass base(Weapon, WeaponInitAmmo) studio() = weapon_pistol : "Generic configurable pistol" []
 @PointClass base(Weapon, WeaponInitAmmo) studio() = weapon_pistol2 : "Generic configurable pistol" []
 @PointClass base(Weapon, WeaponInitAmmo) studio() = weapon_smg : "Generic configurable SMG" []

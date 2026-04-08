@@ -47,8 +47,6 @@
 #include	"common_soundscripts.h"
 #include	"visuals_utils.h"
 
-extern DLL_GLOBAL int		g_iSkillLevel;
-
 //=========================================================
 // monster-specific DEFINE's
 //=========================================================
@@ -269,25 +267,29 @@ void CHGrunt::DropMyItems(bool isGibbed)
 		if (!isGibbed) {
 			SetBodygroup( GUN_GROUP, GUN_NONE );
 		}
-		if( FBitSet( pev->weapons, HGRUNT_SHOTGUN ) ) {
-			DropMyItem( "weapon_shotgun", vecGunPos, vecGunAngles, isGibbed );
-		} else if ( FBitSet( pev->weapons, HGRUNT_9MMAR ) ) {
-			DropMyItem( "weapon_9mmAR", vecGunPos, vecGunAngles, isGibbed );
-		}
-		if( FBitSet( pev->weapons, HGRUNT_GRENADELAUNCHER ) ) {
-			DropMyItem( "ammo_ARgrenades", isGibbed ? vecGunPos : BodyTarget( pev->origin ), vecGunAngles, isGibbed );
-		}
-#if FEATURE_MONSTERS_DROP_HANDGRENADES
-		if ( FBitSet (pev->weapons, HGRUNT_HANDGRENADE ) ) {
-			CBaseEntity* pGrenadeEnt = DropMyItem( "weapon_handgrenade", BodyTarget( pev->origin ), vecGunAngles, isGibbed );
-			if (pGrenadeEnt)
-			{
-				CBasePlayerWeapon* pGrenadeWeap = pGrenadeEnt->MyWeaponPointer();
-				if (pGrenadeWeap)
-					pGrenadeWeap->m_iDefaultAmmo = 1;
+
+		if (!DropEquipment(vecGunPos, vecGunAngles, isGibbed))
+		{
+			if( FBitSet( pev->weapons, HGRUNT_SHOTGUN ) ) {
+				DropMyItem( "weapon_shotgun", vecGunPos, vecGunAngles, isGibbed );
+			} else if ( FBitSet( pev->weapons, HGRUNT_9MMAR ) ) {
+				DropMyItem( "weapon_9mmAR", vecGunPos, vecGunAngles, isGibbed );
 			}
-		}
+			if( FBitSet( pev->weapons, HGRUNT_GRENADELAUNCHER ) ) {
+				DropMyItem( "ammo_ARgrenades", isGibbed ? vecGunPos : BodyTarget( pev->origin ), vecGunAngles, isGibbed );
+			}
+#if FEATURE_MONSTERS_DROP_HANDGRENADES
+			if ( FBitSet (pev->weapons, HGRUNT_HANDGRENADE ) ) {
+				CBaseEntity* pGrenadeEnt = DropMyItem( "weapon_handgrenade", BodyTarget( pev->origin ), vecGunAngles, isGibbed );
+				if (pGrenadeEnt)
+				{
+					CBasePlayerWeapon* pGrenadeWeap = pGrenadeEnt->MyWeaponPointer();
+					if (pGrenadeWeap)
+						pGrenadeWeap->m_iDefaultAmmo = 1;
+				}
+			}
 #endif
+		}
 	}
 	pev->weapons = 0;
 }
@@ -441,7 +443,7 @@ bool CHGrunt::CheckRangeAttack2( float flDot, float flDist )
 	{
 		return false;
 	}
-	return CheckRangeAttack2Impl(gSkillData.hgruntGrenadeSpeed, flDot, flDist, FBitSet(pev->weapons, HGRUNT_GRENADELAUNCHER));
+	return CheckRangeAttack2Impl(GetSkillValue("hgrunt_gspeed"), flDot, flDist, FBitSet(pev->weapons, HGRUNT_GRENADELAUNCHER));
 }
 
 bool CHGrunt::CheckRangeAttack2Impl( float grenadeSpeed, float flDot, float flDist, bool contact )
@@ -808,7 +810,7 @@ void CHGrunt::Shoot()
 
 	Vector vecShellVelocity = gpGlobals->v_right * RANDOM_FLOAT( 40, 90 ) + gpGlobals->v_up * RANDOM_FLOAT( 75, 200 ) + gpGlobals->v_forward * RANDOM_FLOAT( -40, 40 );
 	EjectBrass( vecShootOrigin - vecShootDir * 24, vecShellVelocity, pev->angles.y, m_iBrassShell, TE_BOUNCE_SHELL );
-	FireBullets( 1, vecShootOrigin, vecShootDir, VECTOR_CONE_10DEGREES, 2048, gSkillData.monDmgMP5 ); // shoot +-5 degrees
+	FireBullets( 1, vecShootOrigin, vecShootDir, VECTOR_CONE_10DEGREES, 2048, GetSkillValue("9mmAR_bullet") ); // shoot +-5 degrees
 
 	pev->effects |= EF_MUZZLEFLASH;
 
@@ -829,8 +831,8 @@ void CHGrunt::Shotgun()
 	UTIL_MakeVectors( pev->angles );
 
 	Vector vecShellVelocity = gpGlobals->v_right * RANDOM_FLOAT( 40, 90 ) + gpGlobals->v_up * RANDOM_FLOAT( 75, 200 ) + gpGlobals->v_forward * RANDOM_FLOAT( -40, 40 );
-	EjectBrass( vecShootOrigin - vecShootDir * 24, vecShellVelocity, pev->angles.y, m_iShotgunShell, TE_BOUNCE_SHOTSHELL ); 
-	FireBullets( gSkillData.hgruntShotgunPellets, vecShootOrigin, vecShootDir, VECTOR_CONE_15DEGREES, 2048, gSkillData.monDmgBuckshot, 0 ); // shoot +-7.5 degrees
+	EjectBrass( vecShootOrigin - vecShootDir * 24, vecShellVelocity, pev->angles.y, m_iShotgunShell, TE_BOUNCE_SHOTSHELL );
+	FireBullets( GetSkillValue("hgrunt_pellets"), vecShootOrigin, vecShootDir, VECTOR_CONE_15DEGREES, 2048, GetSkillValue("buckshot"), 0 ); // shoot +-7.5 degrees
 
 	pev->effects |= EF_MUZZLEFLASH;
 
@@ -890,11 +892,11 @@ void CHGrunt::HandleAnimEvent( MonsterEvent_t *pEvent )
 				Vector vecToss = g_vecZero;
 				if (m_hTargetEnt != 0 && m_pCine->PreciseAttack())
 				{
-					vecToss = VecCheckToss( pev, GetGunPosition(), m_hTargetEnt->pev->origin, 0.5 );
+					vecToss = VecCheckToss( pev, GetGunPosition(), m_hTargetEnt->pev->origin, 0.5f, 0.0f );
 				}
 				if (vecToss == g_vecZero)
 				{
-					vecToss = (gpGlobals->v_forward*0.5+gpGlobals->v_up*0.5).Normalize()*gSkillData.hgruntGrenadeSpeed;
+					vecToss = (gpGlobals->v_forward*0.5+gpGlobals->v_up*0.5).Normalize()*GetSkillValue("hgrunt_gspeed");
 				}
 				CGrenade::ShootTimed( this, GetGunPosition(), vecToss, 3.5f, GetProjectileOverrides() );
 			}
@@ -902,7 +904,7 @@ void CHGrunt::HandleAnimEvent( MonsterEvent_t *pEvent )
 				CGrenade::ShootTimed( this, GetGunPosition(), m_vecTossVelocity, 3.5f, GetProjectileOverrides() );
 
 			m_fThrowGrenade = false;
-			m_flNextGrenadeCheck = gpGlobals->time + 6;// wait six seconds before even looking again to see if a grenade can be thrown.
+			m_flNextGrenadeCheck = gpGlobals->time + GetSkillValue("hgrunt_gren_throw_delay");
 			// !!!LATER - when in a group, only try to throw grenade if ordered.
 		}
 			break;
@@ -912,24 +914,24 @@ void CHGrunt::HandleAnimEvent( MonsterEvent_t *pEvent )
 			//LRC: firing due to a script?
 			if (m_pCine)
 			{
-				Vector vecToss;
+				Vector vecToss = g_vecZero;
 				if (m_hTargetEnt != 0 && m_pCine->PreciseAttack())
-					vecToss = VecCheckThrow( pev, GetGunPosition(), m_hTargetEnt->pev->origin, gSkillData.hgruntGrenadeSpeed, 0.5 );
-				else
+				{
+					vecToss = VecCheckThrow( pev, GetGunPosition(), m_hTargetEnt->pev->origin, GetSkillValue("hgrunt_gspeed"), 0.5 );
+				}
+
+				if (vecToss == g_vecZero)
 				{
 					// just shoot diagonally up+forwards
 					UTIL_MakeVectors(pev->angles);
-					vecToss = (gpGlobals->v_forward*0.5 + gpGlobals->v_up*0.5).Normalize() * gSkillData.hgruntGrenadeSpeed;
+					vecToss = (gpGlobals->v_forward*0.5 + gpGlobals->v_up*0.5).Normalize() * GetSkillValue("hgrunt_gspeed");
 				}
 				CGrenade::ShootContact( this, GetGunPosition(), vecToss, GetProjectileOverrides() );
 			}
 			else
 				CGrenade::ShootContact( this, GetGunPosition(), m_vecTossVelocity, GetProjectileOverrides() );
 			m_fThrowGrenade = false;
-			if( g_iSkillLevel == SKILL_HARD )
-				m_flNextGrenadeCheck = gpGlobals->time + RANDOM_FLOAT( 2.0f, 5.0f );// wait a random amount of time before shooting again
-			else
-				m_flNextGrenadeCheck = gpGlobals->time + 6.0f;// wait six seconds before even looking again to see if a grenade can be thrown.
+			m_flNextGrenadeCheck = gpGlobals->time + GetSkillValue("hgrunt_gren_launch_delay");
 		}
 			break;
 		case HGRUNT_AE_GREN_DROP:
@@ -952,7 +954,7 @@ void CHGrunt::HandleAnimEvent( MonsterEvent_t *pEvent )
 				PlayShogtunSound();
 			}
 
-			CSoundEnt::InsertSound( bits_SOUND_COMBAT, pev->origin, 384, 0.3 );
+			InsertAISound( bits_SOUND_COMBAT, 384, 0.3 );
 		}
 			break;
 		case HGRUNT_AE_BURST2:
@@ -962,7 +964,7 @@ void CHGrunt::HandleAnimEvent( MonsterEvent_t *pEvent )
 			break;
 		case HGRUNT_AE_KICK:
 		{
-			PerformKick(pEvent->event, gSkillData.hgruntDmgKick);
+			PerformKick(pEvent->event, GetSkillValue("hgrunt_kick"));
 		}
 			break;
 		case HGRUNT_AE_CAUGHT_ENEMY:
@@ -1023,7 +1025,7 @@ void CHGrunt::KeyValue(KeyValueData *pkvd)
 
 void CHGrunt::Spawn()
 {
-	SpawnHelper("models/hgrunt.mdl", gSkillData.hgruntHealth);
+	SpawnHelper("models/hgrunt.mdl", GetSkillValue("hgrunt_health"));
 	if( pev->weapons == 0 )
 	{
 		// initialize to original values
@@ -1082,6 +1084,8 @@ void CHGrunt::PrecacheHelper(const char *modelName)
 	PrecacheMyModel( modelName );
 	PrecacheMyGibModel();
 	RegisterAndPrecacheSoundScript(NPC::swishSoundScript);// because we use the basemonster SWIPE animation event
+
+	PrecacheEquipmentDrop();
 }
 
 void CHGrunt::Precache()
@@ -1285,6 +1289,11 @@ Schedule_t* CHGrunt::ScheduleOnRangeAttack1()
 		// hide!
 		return GetScheduleOfType( SCHED_TAKE_COVER_FROM_ENEMY );
 	}
+}
+
+bool CHGrunt::CanFireWhileRappelling()
+{
+	return FBitSet(pev->weapons, HGRUNT_9MMAR);
 }
 
 float CHGrunt::LimpHealth()
@@ -1984,8 +1993,8 @@ Schedule_t *CHGrunt::GetSchedule()
 		}
 		else
 		{
-			// repel down a rope, 
-			if( m_MonsterState == MONSTERSTATE_COMBAT )
+			// repel down a rope,
+			if( m_MonsterState == MONSTERSTATE_COMBAT && CanFireWhileRappelling() && !HasConditions(bits_COND_ENEMY_OCCLUDED) )
 				return GetScheduleOfType( SCHED_GRUNT_REPEL_ATTACK );
 			else
 				return GetScheduleOfType( SCHED_GRUNT_REPEL );
@@ -2193,7 +2202,7 @@ Schedule_t *CHGrunt::GetScheduleOfType( int Type )
 		{
 			if( InSquad() )
 			{
-				if( g_iSkillLevel == SKILL_HARD && HasConditions( bits_COND_CAN_RANGE_ATTACK2 ) && OccupySlot( bits_SLOTS_HGRUNT_GRENADE ) )
+				if( HasConditions( bits_COND_CAN_RANGE_ATTACK2 ) && GetSkillValue("hgrunt_gren_before_cover") && OccupySlot( bits_SLOTS_HGRUNT_GRENADE ) )
 				{
 					if( FOkToSpeak() )
 					{
@@ -2341,6 +2350,7 @@ void CHGrunt::ReportAIState(ALERT_TYPE level)
 {
 	CFollowingMonster::ReportAIState(level);
 	ALERT(level, "Ammo loaded: %d / %d. ", m_cAmmoLoaded, m_cClipSize);
+	ALERT(level, "Next grenade check: %g (current time is %g). ", m_flNextGrenadeCheck, gpGlobals->time);
 }
 
 void CHGrunt::OnBecomingLeader()
@@ -2451,6 +2461,8 @@ void CHGruntRepel::RepelUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_
 	pGrunt->m_activeAfterCombat = m_activeAfterCombat;
 	pGrunt->m_sizeForGrapple = m_sizeForGrapple;
 	pGrunt->m_gibPolicy = m_gibPolicy;
+	pGrunt->m_triggerOnDeath = m_triggerOnDeath;
+
 	CFollowingMonster* pFollowingMonster = pGrunt->MyFollowingMonsterPointer();
 	if (pFollowingMonster)
 	{

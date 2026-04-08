@@ -25,8 +25,7 @@
 #include "game.h"
 #include "common_soundscripts.h"
 #include "visuals_utils.h"
-
-extern DLL_GLOBAL int		g_iSkillLevel;
+#include "graphic_debug.h"
 
 #define SF_WAITFORTRIGGER	(0x04 | 0x40) // UNDONE: Fix!
 #define SF_NOWRECKAGE		0x08
@@ -74,6 +73,7 @@ public:
 	bool MustDoSmoke(const DamageInfo& damageInfo, const TraceResult* ptr);
 	DamageInfo DefaultHandleTraceAttack(entvars_t *pevInflictor, entvars_t *pevAttacker, const DamageInfo &inputDamageInfo, Vector vecDir, TraceResult *ptr) override;
 	void TraceAttack( entvars_t *pevInflictor,  entvars_t *pevAttacker, const DamageInfo& damageInfo, Vector vecDir, TraceResult *ptr ) override;
+	void ReportAIState(ALERT_TYPE level) override;
 
 	int m_iRockets;
 	float m_flForce;
@@ -205,7 +205,8 @@ const NamedVisual CApache::blastCircleVisual = BuildVisual("Apache.BlastCircle")
 		.Life(0.4f)
 		.BeamParams(32, 0)
 		.RenderColor(255, 255, 192)
-		.Alpha(128);
+		.Alpha(128)
+		.WaveType(Visual::WAVETYPE_CYLINDER);
 
 void CApache::Spawn()
 {
@@ -225,7 +226,7 @@ void CApache::SpawnImpl(const char *modelName)
 
 	pev->flags |= FL_MONSTER;
 	pev->takedamage = DAMAGE_AIM;
-	SetMyHealth( gSkillData.apacheHealth );
+	SetMyHealth( GetSkillValue("apache_health") );
 	pev->max_health = pev->health;
 
 	SetMyFieldOfView(-0.707f); // 270 degrees
@@ -251,7 +252,7 @@ void CApache::SpawnImpl(const char *modelName)
 
 	m_iRockets = 10;
 
-	InitRandomSeeds();
+	InitLootRandomSeed();
 }
 
 void CApache::Precache()
@@ -460,15 +461,11 @@ void CApache::DyingThink()
 		SendSmoke(vecSpot + Vector(0, 0, 512.0f), GetVisual(crashSmokeVisual));
 
 		// blast circle
-		MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, pev->origin );
-			WRITE_BYTE( TE_BEAMCYLINDER );
-			WRITE_CIRCLE( pev->origin, 2000 ); // reach damage radius over .2 seconds
-			WriteBeamVisual(GetVisual(blastCircleVisual));
-		MESSAGE_END();
+		SendBeamWave(pev->origin, 2000, GetVisual(blastCircleVisual), MSG_PVS, pev->origin);
 
 		EmitSoundScript(crashSoundScript);
 
-		RadiusDamage( pev->origin, pev, pev, DamageInfo{300, DMG_BLAST}, CLASS_NONE );
+		RadiusDamage( pev->origin, pev, pev, DamageInfo{GetSkillValue("apache_dmg_blast"), DMG_BLAST}, CLASS_NONE );
 
 		if(/*!( pev->spawnflags & SF_NOWRECKAGE ) && */( pev->flags & FL_ONGROUND ) )
 		{
@@ -535,11 +532,17 @@ void CApache::FlyTouch( CBaseEntity *pOther )
 void CApache::CrashTouch( CBaseEntity *pOther )
 {
 	// only crash if we hit something solid
-	if( pOther->pev->solid == SOLID_BSP )
+	switch(pOther->pev->solid)
 	{
+	case SOLID_BBOX:
+	case SOLID_SLIDEBOX:
+	case SOLID_BSP:
 		SetTouch( NULL );
 		m_flNextRocket = gpGlobals->time;
 		pev->nextthink = gpGlobals->time;
+		break;
+	default:
+		break;
 	}
 }
 
@@ -668,7 +671,7 @@ void CApache::HuntThink()
 		}
 
 		// don't fire rockets and gun on easy mode
-		if( g_iSkillLevel == SKILL_EASY )
+		if (GetSkillValue("apache_rockets_and_gun") == 0.0f)
 			m_flNextRocket = gpGlobals->time + 10.0f;
 	}
 
@@ -676,14 +679,32 @@ void CApache::HuntThink()
 	Vector vecEst = ( gpGlobals->v_forward * 800.0f + pev->velocity ).Normalize();
 	// ALERT( at_console, "%d %d %d %4.2f\n", pev->angles.x < 0.0f, DotProduct( pev->velocity, gpGlobals->v_forward ) > -100.0f, m_flNextRocket < gpGlobals->time, DotProduct( m_vecTarget, vecEst ) );
 
+	auto allyInRange = [this](const Vector& vecLocation, float flDist)
+	{
+		CBaseEntity* pEntity = nullptr;
+		while ((pEntity = UTIL_FindEntityInSphere(pEntity, vecLocation, flDist)) != nullptr)
+		{
+			CBaseMonster* monster = pEntity->MyMonsterPointer();
+			if (monster != nullptr && FBitSet(monster->pev->flags, FL_MONSTER|FL_CLIENT) && monster->pev->deadflag != DEAD_DEAD && IRelationship(monster) == R_AL)
+			{
+				ALERT(at_aiconsole, "%s: Ally %s at search radius.\n", STRING(pev->classname), STRING(monster->pev->classname));
+				return true;
+			}
+		}
+		return false;
+	};
+
 	if( ( m_iRockets % 2 ) == 1 )
 	{
 		FireRocket();
-		m_flNextRocket = gpGlobals->time + 0.5f;
-		if( m_iRockets <= 0 )
+		if (m_iRockets <= 0)
 		{
-			m_flNextRocket = gpGlobals->time + 10.0f;
+			m_flNextRocket = gpGlobals->time + GetSkillValue("apache_rocket_reload_time");
 			m_iRockets = 10;
+		}
+		else
+		{
+			m_flNextRocket = gpGlobals->time + GetSkillValue("apache_rocket_delay");
 		}
 	}
 	else if( pev->angles.x < 0.0f && DotProduct( pev->velocity, gpGlobals->v_forward ) > -100.0f && m_flNextRocket < gpGlobals->time )
@@ -699,17 +720,35 @@ void CApache::HuntThink()
 
 					UTIL_TraceLine( pev->origin, pev->origin + vecEst * 4096.0f, ignore_monsters, edict(), &tr );
 					if( (tr.vecEndPos - m_posTarget ).IsLengthLessThan(512.0f) )
-						FireRocket();
+					{
+						if (!allyInRange(tr.vecEndPos + Vector(0, 0, 32), 256.0f))
+						{
+							FireRocket();
+						}
+						else
+						{
+							m_flNextRocket = gpGlobals->time + 1.0f;
+						}
+					}
 				}
 			}
-			else
+			else if (m_flLastSeen + 15.0f > gpGlobals->time)
 			{
 				TraceResult tr;
 
 				UTIL_TraceLine( pev->origin, pev->origin + vecEst * 4096.0f, dont_ignore_monsters, edict(), &tr );
 				// just fire when close
 				if( ( tr.vecEndPos - m_posTarget ).IsLengthLessThan(512.0f) )
-					FireRocket();
+				{
+					if (!allyInRange(tr.vecEndPos + Vector(0, 0, 32), 384.0f))
+					{
+						FireRocket();
+					}
+					else
+					{
+						m_flNextRocket = gpGlobals->time + 1.0f;
+					}
+				}
 			}
 		}
 	}
@@ -963,7 +1002,7 @@ bool CApache::FireGun()
 	if( DotProduct( vecGun, vecTarget ) > 0.98f )
 	{
 #if 1
-		FireBullets( 1, posGun, vecGun, VECTOR_CONE_4DEGREES, 8192, gSkillData.monDmg12MM, 1 );
+		FireBullets( 1, posGun, vecGun, VECTOR_CONE_4DEGREES, 8192, GetSkillValue("12mm_bullet"), 1 );
 		EmitSoundScript(fireGunSoundScript);
 #else
 		static float flNext;
@@ -1112,6 +1151,13 @@ void CApache::TraceAttack( entvars_t *pevInflictor, entvars_t *pevAttacker, cons
 	}
 }
 
+void CApache::ReportAIState(ALERT_TYPE level)
+{
+	CBaseMonster::ReportAIState(level);
+	ALERT(level, "Rockets: %d; ", m_iRockets);
+	ALERT(level, "Current time: %g; Next rocket time: %g; Last seen enemy time: %g; Prev seen enemy time: %g; ", gpGlobals->time, m_flNextRocket, m_flLastSeen, m_flPrevSeen);
+}
+
 class CApacheHVR : public CGrenade
 {
 public:
@@ -1200,7 +1246,7 @@ void CApacheHVR::IgniteThink()
 	// pev->movetype = MOVETYPE_TOSS;
 
 	// pev->movetype = MOVETYPE_FLY;
-	pev->effects |= EF_LIGHT;
+	SetMyProjectileEffectFlags(EF_LIGHT);
 
 	// make rocket sound
 	EmitSoundScript(rpgSoundScript);

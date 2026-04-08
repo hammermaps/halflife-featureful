@@ -12,6 +12,7 @@ bookToC: false
 * Can be correctly spawned via [monstermaker]({{< ref monstermaker >}}) (notifies the monstermaker about its death). Use a custom `#target` keyvalue parameter so the spawned Apache has the path to follow. See [Configuring the spawned monster]({{< ref "monstermaker/#configuring-the-spawned-monster" >}}) and the **flyers_demo** map in the sample mod.
 * `Death` and `50% Health Remaining` trigger conditions now work for Apache.
 * Apache can use `Fire On Pass` triggers on the path entities.
+* Apache checks for potential friendly fire before firing the rockets.
 
 ### New parameters
 
@@ -21,6 +22,10 @@ bookToC: false
 ### Skill variables
 
 * **sk_apache_health** - monster's health.
+* **sk_apache_dmg_blast** - explosion damage on Apache's crash. Default value is 300.
+* **sk_apache_rockets_and_gun** - whether Apache can fire rockets and gun at the same time. This is 0 on Easy, and 1 on Medium and Hard.
+* **sk_apache_rocket_reload_time** - delay (in seconds) before Apache reloads its rockets after firing all. Default value is 10.
+* **sk_apache_rocket_delay** - minimum delay (in seconds) before Apache can fire another pair of rockets. Default value is 0.5.
 
 ### Reaction to use-type
 
@@ -39,6 +44,10 @@ If you just remove the aircraft (without turning it off first) while it's moving
 ### Default classification
 
 `Human Military`
+
+### Default display name
+
+`Apache`
 
 ### Soundscripts
 

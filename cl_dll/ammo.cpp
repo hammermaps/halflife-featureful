@@ -28,6 +28,8 @@
 #include "ammoregistry.h"
 #include "string_utils.h"
 
+#include "weapons.h"
+
 #if USE_VGUI
 #include "vgui_TeamFortressViewport.h"
 #endif
@@ -47,7 +49,6 @@ int g_weaponselect = 0;
 void WeaponsResource::Init()
 {
 	memset( rgWeapons, 0, sizeof rgWeapons );
-	memset( bucketPreferences, 0, sizeof bucketPreferences );
 	Reset();
 
 	const char* fileName = "features/hud_weapon_layout.cfg";
@@ -56,75 +57,7 @@ void WeaponsResource::Init()
 	if (pfile)
 	{
 		gEngfuncs.Con_DPrintf("Parsing HUD weapon positions from %s\n", fileName);
-
-		int weaponCount = 0;
-		int i = 0;
-		while ( i<fileSize )
-		{
-			if (IsSpaceCharacter(pfile[i]))
-			{
-				++i;
-			}
-			else if (pfile[i] == '/')
-			{
-				++i;
-				ConsumeLine(pfile, i, fileSize);
-			}
-			else
-			{
-				BucketPreference& preference = bucketPreferences[weaponCount];
-				const int weaponNameStart = i;
-				ConsumeNonSpaceCharacters(pfile, i, fileSize);
-				const int weaponNameLength = i - weaponNameStart;
-				if (weaponNameLength > 0 && weaponNameLength < MAX_WEAPON_NAME)
-				{
-					if (weaponCount >= MAX_WEAPONS)
-					{
-						gEngfuncs.Con_DPrintf("Too many entries in %s. Max is %d\n", fileName, MAX_WEAPONS);
-						break;
-					}
-					else
-					{
-						strncpy(preference.szName, pfile + weaponNameStart, weaponNameLength);
-						preference.szName[weaponNameLength] = '\0';
-
-						if (SkipSpaces(pfile, i, fileSize))
-						{
-							if (pfile[i] >= '0' && pfile[i] <= '0' + WEAPON_SLOTS_HARDLIMIT)
-							{
-								const int slotNumber = pfile[i] - '0';
-								preference.iPreferredSlot = slotNumber;
-								++i;
-
-								if (SkipSpaces(pfile, i, fileSize))
-								{
-									if (pfile[i] >= '0' && pfile[i] <= '0' + WEAPON_SLOTS_HARDLIMIT)
-									{
-										const int slotPosNumber = pfile[i] - '0';
-										preference.iPreferredSlotPos = slotPosNumber;
-										++i;
-									}
-									else
-									{
-										gEngfuncs.Con_DPrintf("Bad position in slot value for %s in %s\n", preference.szName, fileName);
-									}
-								}
-							}
-							else
-							{
-								gEngfuncs.Con_DPrintf("Bad slot value for %s in %s\n", preference.szName, fileName);
-							}
-						}
-						weaponCount++;
-					}
-				}
-				else
-				{
-					gEngfuncs.Con_DPrintf("Bad weapon name length in %s\n", fileName);
-				}
-				ConsumeLine(pfile, i, fileSize);
-			}
-		}
+		ParseBucketPreferences(bucketPreferences, pfile, fileSize, fileName);
 		gEngfuncs.COM_FreeFile(pfile);
 	}
 
@@ -141,54 +74,62 @@ void WeaponsResource::Reset()
 
 void WeaponsResource::AddWeapon(WEAPON *wp)
 {
-	// Check user preferences
-	bool foundUserPreference = false;
-	for (const BucketPreference& pref : bucketPreferences)
+	if (rgWeapons[wp->iId].iId == wp->iId)
 	{
-		if (pref.szName[0] == '\0')
-			break;
-
-		if (pref.iPreferredSlot > 0 && strcmp(pref.szName, wp->szName) == 0)
-		{
-			// The user has preferred slot for this weapon
-			wp->iSlot = pref.iPreferredSlot - 1;
-			if (pref.iPreferredSlotPos > 0)
-				wp->iSlotPos = pref.iPreferredSlotPos - 1;
-			else // is position is not specified, to to the end of the bucket
-				wp->iSlotPos = MAX_WEAPON_POSITIONS-1;
-			foundUserPreference = true;
-			break;
-		}
+		wp->iSlot = rgWeapons[wp->iId].iSlot;
+		wp->iSlotPos = rgWeapons[wp->iId].iSlotPos;
 	}
-
-	// Check if there's a registered weapon with such position
-	WEAPON* registeredWeapon = weaponTable[wp->iSlot][wp->iSlotPos];
-	if (registeredWeapon && registeredWeapon->iId != wp->iId)
+	else
 	{
-		const char* weaponName = foundUserPreference ? registeredWeapon->szName : wp->szName;
-		gEngfuncs.Con_DPrintf("Searching unoccupied position for %s at slot %d\n", weaponName, wp->iSlot + 1);
-		int j;
-		for (j=0; j< MAX_WEAPON_POSITIONS; ++j)
+		// Check user preferences
+		bool foundUserPreference = false;
+		for (const BucketPreference& pref : bucketPreferences.list)
 		{
-			if (weaponTable[wp->iSlot][j] == NULL)
+			if (pref.szName[0] == '\0')
+				break;
+
+			if (pref.iPreferredSlot > 0 && strcmp(pref.szName, wp->szName) == 0)
 			{
-				// If it's user preference move the existing weapon to the unoccupied position
-				if (foundUserPreference)
-				{
-					registeredWeapon->iSlotPos = j;
-					weaponTable[wp->iSlot][j] = registeredWeapon;
-				}
-				// otherwise just find unoccupied position for this weapon
-				else
-				{
-					wp->iSlotPos = j;
-				}
+				// The user has preferred slot for this weapon
+				wp->iSlot = pref.iPreferredSlot - 1;
+				if (pref.iPreferredSlotPos > 0)
+					wp->iSlotPos = pref.iPreferredSlotPos - 1;
+				else // is position is not specified, to to the end of the bucket
+					wp->iSlotPos = MAX_WEAPON_POSITIONS-1;
+				foundUserPreference = true;
 				break;
 			}
 		}
-		if (j >= MAX_WEAPON_POSITIONS)
+
+		// Check if there's a registered weapon with such position
+		WEAPON* registeredWeapon = weaponTable[wp->iSlot][wp->iSlotPos];
+		if (registeredWeapon && registeredWeapon->iId != wp->iId)
 		{
-			gEngfuncs.Con_DPrintf("Coulnd't find unoccupied position for %s at slot %d\n", weaponName, wp->iSlot + 1);
+			const char* weaponName = foundUserPreference ? registeredWeapon->szName : wp->szName;
+			gEngfuncs.Con_DPrintf("Searching unoccupied position for %s at slot %d\n", weaponName, wp->iSlot + 1);
+			int j;
+			for (j=0; j< MAX_WEAPON_POSITIONS; ++j)
+			{
+				if (weaponTable[wp->iSlot][j] == NULL)
+				{
+					// If it's user preference move the existing weapon to the unoccupied position
+					if (foundUserPreference)
+					{
+						registeredWeapon->iSlotPos = j;
+						weaponTable[wp->iSlot][j] = registeredWeapon;
+					}
+					// otherwise just find unoccupied position for this weapon
+					else
+					{
+						wp->iSlotPos = j;
+					}
+					break;
+				}
+			}
+			if (j >= MAX_WEAPON_POSITIONS)
+			{
+				gEngfuncs.Con_DPrintf("Coulnd't find unoccupied position for %s at slot %d\n", weaponName, wp->iSlot + 1);
+			}
 		}
 	}
 
@@ -215,14 +156,21 @@ int WeaponsResource::CountAmmo( int iId )
 	return riAmmo[iId];
 }
 
-int WeaponsResource::HasAmmo( WEAPON *p )
+bool WeaponsResource::HasAmmo( WEAPON *p )
 {
 	if( !p )
 		return 0;
 
 	// weapons with no max ammo can always be selected
-	return ( p->iAmmoType <= 0 ) || p->iClip > 0 || CountAmmo( p->iAmmoType )
+	bool result = ( p->iAmmoType <= 0 ) || p->iClip > 0 || CountAmmo( p->iAmmoType )
 		|| CountAmmo( p->iAmmo2Type ) || ( p->iFlags & WEAPON_FLAGS_SELECTONEMPTY );
+
+	if (!result)
+	{
+		const WeaponParameters& params = GetWeaponParameters(p->iId);
+		return params.IsUsableWithoutAmmo();
+	}
+	return result;
 }
 
 void WeaponsResource::LoadWeaponSprites( WEAPON *pWeapon )
@@ -740,6 +688,7 @@ int CHudAmmo::MsgFunc_CurWeapon( const char *pszName, int iSize, void *pbuf )
 	int iState = READ_BYTE();
 	int iId = READ_CHAR();
 	int iClip = READ_SHORT();
+	int iMaxClip = READ_SHORT();
 
 	// detect if we're also on target
 	if( iState > 1 )
@@ -776,6 +725,8 @@ int CHudAmmo::MsgFunc_CurWeapon( const char *pszName, int iSize, void *pbuf )
 		pWeapon->iClip = abs( iClip );
 	else
 		pWeapon->iClip = iClip;
+
+	pWeapon->iMaxClip = iMaxClip;
 
 	if( iState == 0 )	// we're not the current weapon, so update no more
 		return 1;
@@ -843,6 +794,7 @@ int CHudAmmo::MsgFunc_WeaponList( const char *pszName, int iSize, void *pbuf )
 	Weapon.iId = READ_CHAR();
 	Weapon.iFlags = READ_BYTE();
 	Weapon.iClip = 0;
+	Weapon.iMaxClip = 0;
 
 	if( Weapon.iId < 0 || Weapon.iId >= MAX_WEAPONS )
 		return 0;
@@ -1051,7 +1003,7 @@ int CHudAmmo::Draw( float flTime )
 	WEAPON *pw = m_pWeapon; // shorthand
 
 	// SPR_Draw Ammo
-	if( ( pw->iAmmoType <= 0 ) && ( pw->iAmmo2Type <= 0 ) )
+	if( ( pw->iAmmoType <= 0 ) && ( pw->iAmmo2Type <= 0 ) && pw->iMaxClip <= 0 )
 		return 0;
 
 	int iFlags = DHN_DRAWZERO; // draw 0 values
@@ -1073,18 +1025,33 @@ int CHudAmmo::Draw( float flTime )
 
 	// Does weapon have any ammo at all?
 	const AmmoType* ammoType = g_AmmoRegistry.GetByIndex(m_pWeapon->iAmmoType);
-	if( ammoType )
+
+	int rightSideValue = 0;
+	int rightSideMaxValue = 0;
+	if (ammoType)
+	{
+		rightSideValue = gWR.CountAmmo(pw->iAmmoType);
+		rightSideMaxValue = ammoType->maxAmmo;
+	}
+	else if (pw->iMaxClip > 0)
+	{
+		rightSideMaxValue = rightSideValue = pw->iMaxClip;
+	}
+
+	if (rightSideMaxValue > 0)
 	{
 		int ammoWidths = 8;
 		int drawNumberFlag = DHN_3DIGITS;
-		if (ammoType->maxAmmo >= 1000) {
+
+		if (rightSideMaxValue >= 1000)
+		{
 			ammoWidths++;
 			drawNumberFlag |= DHN_4DIGITS;
 		}
 
 		int iIconWidth = m_pWeapon->rcAmmo.right - m_pWeapon->rcAmmo.left;
 
-		if( pw->iClip >= 0 )
+		if (pw->iClip >= 0)
 		{
 			int drawNumberClipFlag = DHN_3DIGITS;
 			if (m_pWeapon->iClip >= 1000) {
@@ -1115,12 +1082,12 @@ int CHudAmmo::Draw( float flTime )
 
 			// GL Seems to need this
 			ScaleColors( r, g, b, a );
-			x = gHUD.DrawHudNumber( x, y, iFlags | drawNumberFlag, gWR.CountAmmo( pw->iAmmoType ), r, g, b );
+			x = gHUD.DrawHudNumber( x, y, iFlags | drawNumberFlag, rightSideValue, r, g, b );
 		}
 		else
 		{
 			ammoWidths = 4;
-			if (ammoType->maxAmmo >= 1000) {
+			if (ammoType && ammoType->maxAmmo >= 1000) {
 				ammoWidths++;
 			}
 
