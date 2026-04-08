@@ -362,6 +362,7 @@ public:
 	int DefaultISoundMask() override;
 	int DefaultClassify() override;
 	const char* DefaultDisplayName() override { return "Alien Slave"; }
+	float DarknessVisionModifier() override { return 0.4f; } // Vortigaunts have better night vision than humans
 	const char* ReverseRelationshipModel() override { return "models/islavef.mdl"; }
 	int IRelationship( CBaseEntity *pTarget ) override;
 	void HandleAnimEvent( MonsterEvent_t *pEvent ) override;

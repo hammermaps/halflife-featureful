@@ -106,6 +106,9 @@ void CBaseMonster::RunAI()
 			Look( m_flDistLook );
 			Listen();// check for audible sounds. 
 
+			// Enhanced AI: update awareness level based on conditions
+			UpdateAwareness();
+
 			// now filter conditions.
 			ClearConditions( IgnoreConditions() );
 

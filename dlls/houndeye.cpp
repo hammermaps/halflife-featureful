@@ -132,6 +132,7 @@ public:
 	int IgnoreConditions() override;
 	int DefaultISoundMask() override;
 	float HearingSensitivity() override;
+	float DarknessVisionModifier() override { return 0.3f; } // Houndeyes see well in the dark
 	bool FInViewCone( CBaseEntity *pEntity ) override;
 	void EXPORT TouchSleeping( CBaseEntity* pToucher );
 	void EXPORT UseSleeping( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );

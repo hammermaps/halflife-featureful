@@ -3684,6 +3684,35 @@ void CBasePlayer::UpdatePlayerSound()
 		{
 			iBodyVolume = 512;
 		}
+
+		// Enhanced AI: Stealth system - modify body volume based on movement state
+		if( npc_enhanced_ai.value != 0 && npc_stealth_system.value != 0 && iBodyVolume > 0 )
+		{
+			if( FBitSet( pev->flags, FL_DUCKING ) )
+			{
+				// Crouching reduces footstep noise by 70%
+				iBodyVolume = (int)( iBodyVolume * 0.3f );
+			}
+			else if( pev->velocity.Length2D() > 270.0f )
+			{
+				// Sprinting is 50% louder
+				iBodyVolume = (int)( iBodyVolume * 1.5f );
+				if( iBodyVolume > 768 )
+					iBodyVolume = 768;
+			}
+
+			// Walking in water is louder (splashing)
+			if( pev->waterlevel >= 1 && pev->waterlevel < 3 )
+			{
+				iBodyVolume = (int)( iBodyVolume * 1.4f );
+			}
+
+			// Add footstep sound type when moving on ground
+			if( iBodyVolume > 0 )
+			{
+				pSound->m_iType |= bits_SOUND_FOOTSTEP;
+			}
+		}
 	}
 	else
 	{

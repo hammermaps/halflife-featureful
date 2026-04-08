@@ -44,6 +44,7 @@
 #include "tex_materials.h"
 #include "ai_debug.h"
 #include "graphic_debug.h"
+#include "player.h"
 
 #define MONSTER_CUT_CORNER_DIST		8 // 8 means the monster's bounding box is contained without the box of the node in WC
 
@@ -169,6 +170,9 @@ TYPEDESCRIPTION	CBaseMonster::m_SaveData[] =
 	DEFINE_FIELD( CBaseMonster, m_equalDislikeTime, FIELD_TIME ),
 	DEFINE_FIELD( CBaseMonster, m_triggerOnDeath, FIELD_STRING ),
 
+	DEFINE_FIELD( CBaseMonster, m_flAwareness, FIELD_FLOAT ),
+	DEFINE_FIELD( CBaseMonster, m_flLastAwarenessUpdate, FIELD_TIME ),
+
 	DEFINE_FIELD( CBaseMonster, m_clearOwnerTime, FIELD_TIME ),
 };
 
@@ -281,72 +285,88 @@ void CBaseMonster::Listen()
 
 	// UNDONE: Clear these here?
 	ClearConditions( bits_COND_HEAR_SOUND | bits_COND_SMELL_FOOD | bits_COND_SMELL );
-	hearingSensitivity = HearingSensitivity();
+
+	// Enhanced AI: use awareness-modified hearing sensitivity
+	if( npc_enhanced_ai.value != 0 )
+		hearingSensitivity = GetEffectiveHearingSensitivity();
+	else
+		hearingSensitivity = HearingSensitivity();
 
 	while( iSound != SOUNDLIST_EMPTY )
 	{
 		pCurrentSound = CSoundEnt::SoundPointerForIndex( iSound );
 
 		if( pCurrentSound &&
-			( pCurrentSound->m_iType & iMySounds )	&&
-			( pCurrentSound->m_vecOrigin - EarPosition() ).IsLengthLessThanOrEqual(pCurrentSound->m_iVolume * hearingSensitivity) )
-
-		//if( ( g_pSoundEnt->m_SoundPool[iSound].m_iType & iMySounds ) && ( g_pSoundEnt->m_SoundPool[iSound].m_vecOrigin - EarPosition()).Length () <= g_pSoundEnt->m_SoundPool[iSound].m_iVolume * hearingSensitivity )
+			( pCurrentSound->m_iType & iMySounds ) )
 		{
- 			// the monster cares about this sound, and it's close enough to hear.
-			//g_pSoundEnt->m_SoundPool[iSound].m_iNextAudible = m_iAudibleList;
-			pCurrentSound->m_iNextAudible = m_iAudibleList;
+			float effectiveVolume = (float)pCurrentSound->m_iVolume;
 
-			if( pCurrentSound->FIsSound() )
+			// Enhanced AI: Sound occlusion through walls
+			if( npc_enhanced_ai.value != 0 && npc_sound_occlusion.value != 0 && pCurrentSound->FIsSound() )
 			{
-				if ((pCurrentSound->m_iType & iMySounds) == bits_SOUND_PLAYER)
+				TraceResult tr;
+				UTIL_TraceLine( pCurrentSound->m_vecOrigin, EarPosition(), ignore_monsters, ignore_glass, ENT( pev ), &tr );
+				if( tr.flFraction < 1.0f )
 				{
-					if (m_pSchedule && (m_pSchedule->iSoundMask & bits_SOUND_PLAYER_IF_NOT_ALLY) == bits_SOUND_PLAYER_IF_NOT_ALLY)
+					// Sound is blocked by world geometry - reduce effective volume
+					effectiveVolume *= 0.25f;
+				}
+			}
+
+			if( ( pCurrentSound->m_vecOrigin - EarPosition() ).IsLengthLessThanOrEqual( effectiveVolume * hearingSensitivity ) )
+			{
+				// the monster cares about this sound, and it's close enough to hear.
+				pCurrentSound->m_iNextAudible = m_iAudibleList;
+
+				if( pCurrentSound->FIsSound() )
+				{
+					if ((pCurrentSound->m_iType & iMySounds) == bits_SOUND_PLAYER)
 					{
-						// TODO: check against the player who produced the sound, not the player class
-						const int relToPlayer = IDefaultRelationship(CLASS_PLAYER);
-						if (relToPlayer != R_AL)
+						if (m_pSchedule && (m_pSchedule->iSoundMask & bits_SOUND_PLAYER_IF_NOT_ALLY) == bits_SOUND_PLAYER_IF_NOT_ALLY)
+						{
+							// TODO: check against the player who produced the sound, not the player class
+							const int relToPlayer = IDefaultRelationship(CLASS_PLAYER);
+							if (relToPlayer != R_AL)
+							{
+								SetConditions( bits_COND_HEAR_SOUND );
+							}
+						}
+						else
 						{
 							SetConditions( bits_COND_HEAR_SOUND );
 						}
 					}
 					else
 					{
+						// this is an audible sound.
 						SetConditions( bits_COND_HEAR_SOUND );
 					}
 				}
 				else
 				{
-					// this is an audible sound.
-					SetConditions( bits_COND_HEAR_SOUND );
+					// if not a sound, must be a smell - determine if it's just a scent, or if it's a food scent
+					if( pCurrentSound->m_iType & ( bits_SOUND_MEAT | bits_SOUND_CARCASS ) )
+					{
+						// the detected scent is a food item, so set both conditions.
+						SetConditions( bits_COND_SMELL_FOOD );
+						SetConditions( bits_COND_SMELL );
+					}
+					else
+					{
+						// just a normal scent. 
+						SetConditions( bits_COND_SMELL );
+					}
 				}
-			}
-			else
-			{
-				// if not a sound, must be a smell - determine if it's just a scent, or if it's a food scent
-				//if( g_pSoundEnt->m_SoundPool[iSound].m_iType & ( bits_SOUND_MEAT | bits_SOUND_CARCASS ) )
-				if( pCurrentSound->m_iType & ( bits_SOUND_MEAT | bits_SOUND_CARCASS ) )
-				{
-					// the detected scent is a food item, so set both conditions.
-					// !!!BUGBUG - maybe a virtual function to determine whether or not the scent is food?
-					SetConditions( bits_COND_SMELL_FOOD );
-					SetConditions( bits_COND_SMELL );
-				}
-				else
-				{
-					// just a normal scent. 
-					SetConditions( bits_COND_SMELL );
-				}
-			}
-			//m_afSoundTypes |= g_pSoundEnt->m_SoundPool[iSound].m_iType;
-			m_afSoundTypes |= pCurrentSound->m_iType;
+				m_afSoundTypes |= pCurrentSound->m_iType;
 
-			m_iAudibleList = iSound;
+				m_iAudibleList = iSound;
+			}
 		}
 
-		//iSound = g_pSoundEnt->m_SoundPool[iSound].m_iNext;
 		if( pCurrentSound )
 			iSound = pCurrentSound->m_iNext;
+		else
+			break;
 	}
 }
 
@@ -371,6 +391,168 @@ bool CBaseMonster::FValidateHintType( short sHint )
 }
 
 //=========================================================
+// Enhanced AI Perception System
+//=========================================================
+
+extern cvar_t npc_enhanced_ai;
+extern cvar_t npc_light_awareness;
+extern cvar_t npc_sound_occlusion;
+extern cvar_t npc_stealth_system;
+
+//=========================================================
+// GetTargetVisibilityFactor - Returns a visibility factor
+// (0.0 to 1.0) based on the target's light level and
+// movement state. Lower light = harder to see.
+//=========================================================
+float CBaseMonster::GetTargetVisibilityFactor( CBaseEntity* pTarget )
+{
+	if( !pTarget )
+		return 1.0f;
+
+	// If enhanced AI or light awareness is disabled, always full visibility
+	if( npc_enhanced_ai.value == 0 || npc_light_awareness.value == 0 )
+		return 1.0f;
+
+	// Get target's illumination (0-255)
+	int lightLevel = pTarget->Illumination();
+
+	// Base visibility from light level
+	float visibilityFactor;
+	if( lightLevel < 24 )
+	{
+		// Very dark - almost invisible
+		visibilityFactor = 0.1f;
+	}
+	else if( lightLevel < 64 )
+	{
+		// Dark - hard to see
+		visibilityFactor = 0.1f + 0.3f * ( (float)( lightLevel - 24 ) / 40.0f );
+	}
+	else if( lightLevel < 128 )
+	{
+		// Dim - reduced visibility
+		visibilityFactor = 0.4f + 0.3f * ( (float)( lightLevel - 64 ) / 64.0f );
+	}
+	else
+	{
+		// Well lit - normal to full visibility
+		visibilityFactor = 0.7f + 0.3f * ( (float)( lightLevel - 128 ) / 127.0f );
+	}
+
+	// Clamp to valid range
+	if( visibilityFactor > 1.0f ) visibilityFactor = 1.0f;
+
+	// If target is a player, check movement and stealth state
+	if( pTarget->IsPlayer() && npc_stealth_system.value != 0 )
+	{
+		float speed = pTarget->pev->velocity.Length2D();
+
+		if( speed < 10.0f )
+		{
+			// Standing still in darkness is very effective camouflage
+			visibilityFactor *= 0.5f;
+		}
+		else if( FBitSet( pTarget->pev->flags, FL_DUCKING ) && speed < 100.0f )
+		{
+			// Crouching and moving slowly - harder to spot
+			visibilityFactor *= 0.7f;
+		}
+
+		// Muzzle flash makes the player instantly visible
+		CBasePlayer* pPlayer = (CBasePlayer*)pTarget;
+		if( pPlayer->m_iWeaponFlash > 0 )
+		{
+			visibilityFactor = 1.0f;
+		}
+	}
+
+	// Apply this monster's darkness vision modifier (aliens may see better in dark)
+	float darknessModifier = DarknessVisionModifier();
+	visibilityFactor = visibilityFactor + ( 1.0f - visibilityFactor ) * ( 1.0f - darknessModifier );
+	if( visibilityFactor > 1.0f ) visibilityFactor = 1.0f;
+
+	// Awareness level affects how well the monster can spot things
+	visibilityFactor *= ( 0.5f + 0.5f * m_flAwareness );
+	if( visibilityFactor > 1.0f ) visibilityFactor = 1.0f;
+
+	return visibilityFactor;
+}
+
+//=========================================================
+// UpdateAwareness - Updates the monster's awareness level
+// based on recent events. Awareness decays over time.
+//=========================================================
+void CBaseMonster::UpdateAwareness()
+{
+	if( npc_enhanced_ai.value == 0 )
+		return;
+
+	float flDeltaTime = gpGlobals->time - m_flLastAwarenessUpdate;
+	if( flDeltaTime <= 0 )
+		return;
+
+	m_flLastAwarenessUpdate = gpGlobals->time;
+
+	// Increase awareness based on conditions
+	if( HasConditions( bits_COND_SEE_ENEMY ) )
+	{
+		m_flAwareness = 1.0f;
+	}
+	else if( HasConditions( bits_COND_HEAR_SOUND ) )
+	{
+		m_flAwareness += 0.3f * flDeltaTime;
+	}
+	else if( HasConditions( bits_COND_LIGHT_DAMAGE | bits_COND_HEAVY_DAMAGE ) )
+	{
+		m_flAwareness = 1.0f;
+	}
+	else if( HasConditions( bits_COND_SEE_HATE | bits_COND_SEE_FEAR | bits_COND_SEE_DISLIKE ) )
+	{
+		m_flAwareness += 0.2f * flDeltaTime;
+	}
+	else
+	{
+		// Decay awareness over time - takes about 15 seconds to go from fully alert to base idle
+		float decayRate;
+		if( m_MonsterState == MONSTERSTATE_COMBAT )
+			decayRate = 0.02f; // Very slow decay in combat
+		else if( m_MonsterState == MONSTERSTATE_ALERT )
+			decayRate = 0.05f; // Slow decay when alert
+		else
+			decayRate = 0.1f; // Faster decay when idle
+
+		m_flAwareness -= decayRate * flDeltaTime;
+	}
+
+	// Clamp awareness
+	float minAwareness = 0.3f; // Base idle awareness
+	if( m_MonsterState == MONSTERSTATE_ALERT )
+		minAwareness = 0.5f;
+	else if( m_MonsterState == MONSTERSTATE_COMBAT )
+		minAwareness = 0.8f;
+
+	if( m_flAwareness < minAwareness )
+		m_flAwareness = minAwareness;
+	if( m_flAwareness > 1.0f )
+		m_flAwareness = 1.0f;
+}
+
+//=========================================================
+// GetEffectiveHearingSensitivity - Returns hearing sensitivity
+// modified by awareness level
+//=========================================================
+float CBaseMonster::GetEffectiveHearingSensitivity()
+{
+	float baseSensitivity = HearingSensitivity();
+
+	if( npc_enhanced_ai.value == 0 )
+		return baseSensitivity;
+
+	// Awareness modulates hearing - alert monsters hear better
+	return baseSensitivity * ( 0.6f + 0.4f * m_flAwareness );
+}
+
+//=========================================================
 // Look - Base class monster function to find enemies or 
 // food by sight. iDistance is distance ( in units ) that the 
 // monster can see.
@@ -387,9 +569,19 @@ void CBaseMonster::Look( int iDistance )
 	int iSighted = 0;
 
 	// DON'T let visibility information from last frame sit around!
-	ClearConditions( bits_COND_SEE_HATE | bits_COND_SEE_DISLIKE | bits_COND_SEE_ENEMY | bits_COND_SEE_FEAR | bits_COND_SEE_NEMESIS | bits_COND_SEE_CLIENT );
+	ClearConditions( bits_COND_SEE_HATE | bits_COND_SEE_DISLIKE | bits_COND_SEE_ENEMY | bits_COND_SEE_FEAR | bits_COND_SEE_NEMESIS | bits_COND_SEE_CLIENT | bits_COND_TARGET_IN_DARKNESS | bits_COND_SELF_IN_DARKNESS );
 
 	m_pLink = NULL;
+
+	// Check if this monster is in darkness
+	if( npc_enhanced_ai.value != 0 && npc_light_awareness.value != 0 )
+	{
+		int myLightLevel = Illumination();
+		if( myLightLevel < 48 )
+		{
+			iSighted |= bits_COND_SELF_IN_DARKNESS;
+		}
+	}
 
 	CBaseEntity *pSightEnt = NULL;// the current visible entity that we're dealing with
 
@@ -426,6 +618,30 @@ void CBaseMonster::Look( int iDistance )
 				// don't check anything else about an entity that can't be seen, or an entity that you don't care about.
 				if( iRelationship != R_NO && FInViewCone( pSightEnt ) && !FBitSet( pSightEnt->pev->flags, FL_NOTARGET ) && FVisible( pSightEnt ) )
 				{
+					// Enhanced AI: Check if target is too far away given lighting conditions
+					if( npc_enhanced_ai.value != 0 && npc_light_awareness.value != 0 )
+					{
+						float visibilityFactor = GetTargetVisibilityFactor( pSightEnt );
+						float distToTarget = ( pSightEnt->pev->origin - pev->origin ).Length();
+						float effectiveSightDist = (float)iDistance * visibilityFactor;
+
+						// Minimum sight distance - can always see very close targets
+						if( effectiveSightDist < 192.0f )
+							effectiveSightDist = 192.0f;
+
+						if( distToTarget > effectiveSightDist )
+						{
+							// Target is too far given lighting - can't see them
+							continue;
+						}
+
+						// Mark if target is in darkness
+						if( visibilityFactor < 0.4f )
+						{
+							iSighted |= bits_COND_TARGET_IN_DARKNESS;
+						}
+					}
+
 					if( pSightEnt->IsPlayer() )
 					{
 						if( pev->spawnflags & SF_MONSTER_WAIT_TILL_SEEN )
@@ -1329,6 +1545,32 @@ bool CBaseMonster::CheckEnemy( CBaseEntity *pEnemy )
 			SetConditions( bits_COND_ENEMY_LOST );
 			ClearConditions( bits_COND_ENEMY_OCCLUDED );
 			return false;
+		}
+
+		// Enhanced AI: In darkness, forget enemies faster
+		if( npc_enhanced_ai.value != 0 && npc_light_awareness.value != 0 && forgetEnemyTime <= 0 )
+		{
+			float visibilityFactor = GetTargetVisibilityFactor( pEnemy );
+			if( visibilityFactor < 0.3f )
+			{
+				// Enemy is in deep darkness and we can't see them - forget quickly (5 seconds)
+				if( m_flLastTimeObservedEnemy + 5.0f <= gpGlobals->time )
+				{
+					SetConditions( bits_COND_ENEMY_LOST );
+					ClearConditions( bits_COND_ENEMY_OCCLUDED );
+					return false;
+				}
+			}
+			else if( visibilityFactor < 0.5f )
+			{
+				// Enemy is in dim area - forget somewhat faster (10 seconds)
+				if( m_flLastTimeObservedEnemy + 10.0f <= gpGlobals->time )
+				{
+					SetConditions( bits_COND_ENEMY_LOST );
+					ClearConditions( bits_COND_ENEMY_OCCLUDED );
+					return false;
+				}
+			}
 		}
 	}
 
@@ -2598,6 +2840,10 @@ void CBaseMonster::MonsterInit()
 
 	m_flDistTooFar = 1024.0f;
 	m_flDistLook = 2048.0f;
+
+	// Initialize enhanced AI perception
+	m_flAwareness = 0.3f;
+	m_flLastAwarenessUpdate = gpGlobals->time;
 
 	// set eye position
 	SetEyePosition();

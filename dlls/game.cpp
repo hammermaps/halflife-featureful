@@ -757,6 +757,12 @@ cvar_t npc_patrol = { "npc_patrol", "1", FCVAR_SERVER };
 cvar_t npc_vanilla_kick_behavior = { "npc_vanilla_kick_behavior", "0", FCVAR_SERVER };
 cvar_t npc_report_fire_animevents = { "npc_report_fire_animevents", "0", FCVAR_SERVER };
 
+// Enhanced AI perception CVARs
+cvar_t npc_enhanced_ai = { "npc_enhanced_ai", "1", FCVAR_SERVER };
+cvar_t npc_light_awareness = { "npc_light_awareness", "1", FCVAR_SERVER };
+cvar_t npc_sound_occlusion = { "npc_sound_occlusion", "1", FCVAR_SERVER };
+cvar_t npc_stealth_system = { "npc_stealth_system", "1", FCVAR_SERVER };
+
 cvar_t mp_chattime	= { "mp_chattime","10", FCVAR_SERVER };
 
 cvar_t pickup_policy = { "pickup_policy","0", FCVAR_SERVER };
@@ -1589,6 +1595,12 @@ void GameDLLInit()
 	CVAR_REGISTER( &npc_patrol );
 	CVAR_REGISTER( &npc_vanilla_kick_behavior );
 	CVAR_REGISTER( &npc_report_fire_animevents );
+
+	// Enhanced AI perception
+	CVAR_REGISTER( &npc_enhanced_ai );
+	CVAR_REGISTER( &npc_light_awareness );
+	CVAR_REGISTER( &npc_sound_occlusion );
+	CVAR_REGISTER( &npc_stealth_system );
 
 	CVAR_REGISTER( &teamplay );
 	CVAR_REGISTER( &fraglimit );
