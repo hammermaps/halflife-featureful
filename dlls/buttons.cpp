@@ -1653,7 +1653,7 @@ void CBaseButton::ButtonBackHome()
 	if( IsSparkingButton() )
 	{
 		SetThink( &CBaseButton::ButtonSpark );
-		pev->nextthink = gpGlobals->time + 0.5f;// no hurry.
+		pev->nextthink = pev->ltime + 0.5f;// no hurry.
 	}
 
 	if (!FStringNull(m_triggerOnReturn))

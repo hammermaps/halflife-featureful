@@ -644,7 +644,7 @@ void CBasePlayerWeapon::AttemptToMaterialize()
 		return;
 	}
 
-	pev->nextthink = gpGlobals->time + time;
+	pev->nextthink = time;
 }
 
 //=========================================================

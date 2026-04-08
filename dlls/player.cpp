@@ -144,6 +144,8 @@ TYPEDESCRIPTION	CBasePlayer::m_playerSaveData[] =
 	DEFINE_FIELD(CBasePlayer, m_movementPreventedTime, FIELD_TIME),
 	DEFINE_FIELD(CBasePlayer, m_armorStrength, FIELD_FLOAT),
 
+	DEFINE_FIELD(CBasePlayer, m_flStartCharge, FIELD_TIME),
+
 	DEFINE_FIELD(CBasePlayer, m_loopedMp3, FIELD_STRING),
 
 	DEFINE_ARRAY(CBasePlayer, m_inventoryItems, FIELD_STRING, MAX_INVENTORY_ITEMS),
@@ -1596,13 +1598,20 @@ void CBasePlayer::WaterMove()
 				pev->dmg += 1;
 				if( pev->dmg > 5 )
 					pev->dmg = 5;
+
+				const float oldHealth = pev->health;
+
 				TakeDamage( VARS( eoNullEntity ), VARS( eoNullEntity ), DamageInfo(pev->dmg, DMG_DROWN) );
 				pev->pain_finished = gpGlobals->time + 1;
 
 				// track drowning damage, give it back when
 				// player finally takes a breath
 
-				m_idrowndmg += (int)pev->dmg;
+				// Account for god mode and other damage mitigation
+				// to avoid counting damage not actually taken.
+				const int drownDamageTaken = (int)Q_max( 0.0f, oldHealth - pev->health );
+
+				m_idrowndmg += drownDamageTaken;
 			} 
 		}
 		else
