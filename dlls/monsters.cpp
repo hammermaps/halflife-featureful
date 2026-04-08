@@ -46,6 +46,40 @@
 #include "graphic_debug.h"
 #include "player.h"
 
+// Enhanced AI perception constants
+#define AI_LIGHT_VERY_DARK		24		// Below this: almost invisible
+#define AI_LIGHT_DARK			64		// Below this: hard to see
+#define AI_LIGHT_DIM			128		// Below this: reduced visibility
+#define AI_LIGHT_DARKNESS_THRESHOLD	48	// Below this: NPC considers itself in darkness
+
+#define AI_VIS_MIN_VERY_DARK	0.1f	// Minimum visibility in very dark areas
+#define AI_VIS_MIN_DARK			0.4f	// Minimum visibility in dark areas
+#define AI_VIS_MIN_DIM			0.7f	// Minimum visibility in dim areas
+#define AI_VIS_STILL_MODIFIER	0.5f	// Standing still in dark multiplier
+#define AI_VIS_CROUCH_MODIFIER	0.7f	// Crouching in dark multiplier
+
+#define AI_AWARENESS_BASE_IDLE		0.3f	// Base awareness when idle
+#define AI_AWARENESS_BASE_ALERT		0.5f	// Base awareness when alert
+#define AI_AWARENESS_BASE_COMBAT	0.8f	// Base awareness when in combat
+#define AI_AWARENESS_HEAR_RATE		0.3f	// Awareness increase rate per second from sounds
+#define AI_AWARENESS_SIGHT_RATE		0.2f	// Awareness increase rate per second from sighting threats
+#define AI_AWARENESS_DECAY_COMBAT	0.02f	// Awareness decay rate in combat
+#define AI_AWARENESS_DECAY_ALERT	0.05f	// Awareness decay rate when alert
+#define AI_AWARENESS_DECAY_IDLE		0.1f	// Awareness decay rate when idle
+
+#define AI_HEARING_AWARENESS_MIN	0.6f	// Minimum hearing sensitivity factor from awareness
+#define AI_HEARING_AWARENESS_RANGE	0.4f	// Range of hearing sensitivity affected by awareness
+
+#define AI_SOUND_WALL_DAMPEN		0.25f	// Sound volume multiplier when blocked by wall
+
+#define AI_DARKNESS_FORGET_FAST		5.0f	// Seconds to forget enemy in deep darkness
+#define AI_DARKNESS_FORGET_SLOW		10.0f	// Seconds to forget enemy in dim area
+#define AI_DARKNESS_VIS_FAST_THRESHOLD	0.3f	// Below this visibility: fast forget
+#define AI_DARKNESS_VIS_SLOW_THRESHOLD	0.5f	// Below this visibility: slow forget
+#define AI_DARKNESS_SIGHT_CONDITION	0.4f	// Below this visibility: target is "in darkness"
+
+#define AI_MIN_EFFECTIVE_SIGHT_DIST	192.0f	// Minimum sight distance (always see very close targets)
+
 #define MONSTER_CUT_CORNER_DIST		8 // 8 means the monster's bounding box is contained without the box of the node in WC
 
 Vector VecBModelOrigin( entvars_t *pevBModel );
@@ -309,7 +343,7 @@ void CBaseMonster::Listen()
 				if( tr.flFraction < 1.0f )
 				{
 					// Sound is blocked by world geometry - reduce effective volume
-					effectiveVolume *= 0.25f;
+					effectiveVolume *= AI_SOUND_WALL_DAMPEN;
 				}
 			}
 
@@ -413,30 +447,34 @@ float CBaseMonster::GetTargetVisibilityFactor( CBaseEntity* pTarget )
 	if( npc_enhanced_ai.value == 0 || npc_light_awareness.value == 0 )
 		return 1.0f;
 
-	// Get target's illumination (0-255)
+	// Get target's illumination (0-255) and clamp to valid range
 	int lightLevel = pTarget->Illumination();
+	if( lightLevel < 0 ) lightLevel = 0;
+	if( lightLevel > 255 ) lightLevel = 255;
 
 	// Base visibility from light level
 	float visibilityFactor;
-	if( lightLevel < 24 )
+	if( lightLevel < AI_LIGHT_VERY_DARK )
 	{
 		// Very dark - almost invisible
-		visibilityFactor = 0.1f;
+		visibilityFactor = AI_VIS_MIN_VERY_DARK;
 	}
-	else if( lightLevel < 64 )
+	else if( lightLevel < AI_LIGHT_DARK )
 	{
 		// Dark - hard to see
-		visibilityFactor = 0.1f + 0.3f * ( (float)( lightLevel - 24 ) / 40.0f );
+		float range = AI_VIS_MIN_DARK - AI_VIS_MIN_VERY_DARK;
+		visibilityFactor = AI_VIS_MIN_VERY_DARK + range * ( (float)( lightLevel - AI_LIGHT_VERY_DARK ) / (float)( AI_LIGHT_DARK - AI_LIGHT_VERY_DARK ) );
 	}
-	else if( lightLevel < 128 )
+	else if( lightLevel < AI_LIGHT_DIM )
 	{
 		// Dim - reduced visibility
-		visibilityFactor = 0.4f + 0.3f * ( (float)( lightLevel - 64 ) / 64.0f );
+		float range = AI_VIS_MIN_DIM - AI_VIS_MIN_DARK;
+		visibilityFactor = AI_VIS_MIN_DARK + range * ( (float)( lightLevel - AI_LIGHT_DARK ) / (float)( AI_LIGHT_DIM - AI_LIGHT_DARK ) );
 	}
 	else
 	{
 		// Well lit - normal to full visibility
-		visibilityFactor = 0.7f + 0.3f * ( (float)( lightLevel - 128 ) / 127.0f );
+		visibilityFactor = AI_VIS_MIN_DIM + ( 1.0f - AI_VIS_MIN_DIM ) * ( (float)( lightLevel - AI_LIGHT_DIM ) / (float)( 255 - AI_LIGHT_DIM ) );
 	}
 
 	// Clamp to valid range
@@ -450,16 +488,17 @@ float CBaseMonster::GetTargetVisibilityFactor( CBaseEntity* pTarget )
 		if( speed < 10.0f )
 		{
 			// Standing still in darkness is very effective camouflage
-			visibilityFactor *= 0.5f;
+			visibilityFactor *= AI_VIS_STILL_MODIFIER;
 		}
 		else if( FBitSet( pTarget->pev->flags, FL_DUCKING ) && speed < 100.0f )
 		{
 			// Crouching and moving slowly - harder to spot
-			visibilityFactor *= 0.7f;
+			visibilityFactor *= AI_VIS_CROUCH_MODIFIER;
 		}
 
 		// Muzzle flash makes the player instantly visible
-		CBasePlayer* pPlayer = (CBasePlayer*)pTarget;
+		// IsPlayer() guarantees this is a CBasePlayer (RTTI not available in this codebase)
+		CBasePlayer* pPlayer = static_cast<CBasePlayer*>( pTarget );
 		if( pPlayer->m_iWeaponFlash > 0 )
 		{
 			visibilityFactor = 1.0f;
@@ -500,7 +539,7 @@ void CBaseMonster::UpdateAwareness()
 	}
 	else if( HasConditions( bits_COND_HEAR_SOUND ) )
 	{
-		m_flAwareness += 0.3f * flDeltaTime;
+		m_flAwareness += AI_AWARENESS_HEAR_RATE * flDeltaTime;
 	}
 	else if( HasConditions( bits_COND_LIGHT_DAMAGE | bits_COND_HEAVY_DAMAGE ) )
 	{
@@ -508,28 +547,28 @@ void CBaseMonster::UpdateAwareness()
 	}
 	else if( HasConditions( bits_COND_SEE_HATE | bits_COND_SEE_FEAR | bits_COND_SEE_DISLIKE ) )
 	{
-		m_flAwareness += 0.2f * flDeltaTime;
+		m_flAwareness += AI_AWARENESS_SIGHT_RATE * flDeltaTime;
 	}
 	else
 	{
-		// Decay awareness over time - takes about 15 seconds to go from fully alert to base idle
+		// Decay awareness over time
 		float decayRate;
 		if( m_MonsterState == MONSTERSTATE_COMBAT )
-			decayRate = 0.02f; // Very slow decay in combat
+			decayRate = AI_AWARENESS_DECAY_COMBAT;
 		else if( m_MonsterState == MONSTERSTATE_ALERT )
-			decayRate = 0.05f; // Slow decay when alert
+			decayRate = AI_AWARENESS_DECAY_ALERT;
 		else
-			decayRate = 0.1f; // Faster decay when idle
+			decayRate = AI_AWARENESS_DECAY_IDLE;
 
 		m_flAwareness -= decayRate * flDeltaTime;
 	}
 
 	// Clamp awareness
-	float minAwareness = 0.3f; // Base idle awareness
+	float minAwareness = AI_AWARENESS_BASE_IDLE;
 	if( m_MonsterState == MONSTERSTATE_ALERT )
-		minAwareness = 0.5f;
+		minAwareness = AI_AWARENESS_BASE_ALERT;
 	else if( m_MonsterState == MONSTERSTATE_COMBAT )
-		minAwareness = 0.8f;
+		minAwareness = AI_AWARENESS_BASE_COMBAT;
 
 	if( m_flAwareness < minAwareness )
 		m_flAwareness = minAwareness;
@@ -549,7 +588,7 @@ float CBaseMonster::GetEffectiveHearingSensitivity()
 		return baseSensitivity;
 
 	// Awareness modulates hearing - alert monsters hear better
-	return baseSensitivity * ( 0.6f + 0.4f * m_flAwareness );
+	return baseSensitivity * ( AI_HEARING_AWARENESS_MIN + AI_HEARING_AWARENESS_RANGE * m_flAwareness );
 }
 
 //=========================================================
@@ -577,7 +616,9 @@ void CBaseMonster::Look( int iDistance )
 	if( npc_enhanced_ai.value != 0 && npc_light_awareness.value != 0 )
 	{
 		int myLightLevel = Illumination();
-		if( myLightLevel < 48 )
+		if( myLightLevel < 0 ) myLightLevel = 0;
+		if( myLightLevel > 255 ) myLightLevel = 255;
+		if( myLightLevel < AI_LIGHT_DARKNESS_THRESHOLD )
 		{
 			iSighted |= bits_COND_SELF_IN_DARKNESS;
 		}
@@ -626,8 +667,8 @@ void CBaseMonster::Look( int iDistance )
 						float effectiveSightDist = (float)iDistance * visibilityFactor;
 
 						// Minimum sight distance - can always see very close targets
-						if( effectiveSightDist < 192.0f )
-							effectiveSightDist = 192.0f;
+						if( effectiveSightDist < AI_MIN_EFFECTIVE_SIGHT_DIST )
+							effectiveSightDist = AI_MIN_EFFECTIVE_SIGHT_DIST;
 
 						if( distToTarget > effectiveSightDist )
 						{
@@ -636,7 +677,7 @@ void CBaseMonster::Look( int iDistance )
 						}
 
 						// Mark if target is in darkness
-						if( visibilityFactor < 0.4f )
+						if( visibilityFactor < AI_DARKNESS_SIGHT_CONDITION )
 						{
 							iSighted |= bits_COND_TARGET_IN_DARKNESS;
 						}
@@ -1551,20 +1592,20 @@ bool CBaseMonster::CheckEnemy( CBaseEntity *pEnemy )
 		if( npc_enhanced_ai.value != 0 && npc_light_awareness.value != 0 && forgetEnemyTime <= 0 )
 		{
 			float visibilityFactor = GetTargetVisibilityFactor( pEnemy );
-			if( visibilityFactor < 0.3f )
+			if( visibilityFactor < AI_DARKNESS_VIS_FAST_THRESHOLD )
 			{
-				// Enemy is in deep darkness and we can't see them - forget quickly (5 seconds)
-				if( m_flLastTimeObservedEnemy + 5.0f <= gpGlobals->time )
+				// Enemy is in deep darkness and we can't see them - forget quickly
+				if( m_flLastTimeObservedEnemy + AI_DARKNESS_FORGET_FAST <= gpGlobals->time )
 				{
 					SetConditions( bits_COND_ENEMY_LOST );
 					ClearConditions( bits_COND_ENEMY_OCCLUDED );
 					return false;
 				}
 			}
-			else if( visibilityFactor < 0.5f )
+			else if( visibilityFactor < AI_DARKNESS_VIS_SLOW_THRESHOLD )
 			{
-				// Enemy is in dim area - forget somewhat faster (10 seconds)
-				if( m_flLastTimeObservedEnemy + 10.0f <= gpGlobals->time )
+				// Enemy is in dim area - forget somewhat faster
+				if( m_flLastTimeObservedEnemy + AI_DARKNESS_FORGET_SLOW <= gpGlobals->time )
 				{
 					SetConditions( bits_COND_ENEMY_LOST );
 					ClearConditions( bits_COND_ENEMY_OCCLUDED );
@@ -2842,7 +2883,7 @@ void CBaseMonster::MonsterInit()
 	m_flDistLook = 2048.0f;
 
 	// Initialize enhanced AI perception
-	m_flAwareness = 0.3f;
+	m_flAwareness = AI_AWARENESS_BASE_IDLE;
 	m_flLastAwarenessUpdate = gpGlobals->time;
 
 	// set eye position

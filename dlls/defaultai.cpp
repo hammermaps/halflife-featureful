@@ -473,17 +473,21 @@ Schedule_t slInvestigateSpot[] =
 // InvestigateSound. Monster walks slowly, stops to listen,
 // then carefully approaches the sound source.
 //=========================================================
+#define CAUTIOUS_LISTEN_BEFORE_MOVE	1.5f	// Seconds to listen before approaching sound
+#define CAUTIOUS_OBSERVE_AT_LOCATION	3.0f	// Seconds to observe at the sound location
+#define ALERT_LISTEN_DURATION		3.0f	// Seconds to listen when in alert state
+
 Task_t tlInvestigateSoundCautious[] =
 {
 	{ TASK_STOP_MOVING, (float)0 },
 	{ TASK_STORE_LASTPOSITION, (float)0 },
 	{ TASK_GET_PATH_TO_BESTSOUND, (float)0 },
 	{ TASK_FACE_IDEAL, (float)0 },
-	{ TASK_WAIT, (float)1.5 },				// Pause and listen first
+	{ TASK_WAIT, CAUTIOUS_LISTEN_BEFORE_MOVE },	// Pause and listen first
 	{ TASK_WALK_PATH, (float)0 },			// Always walk, never run
 	{ TASK_WAIT_FOR_MOVEMENT, (float)0 },
 	{ TASK_PLAY_SEQUENCE, (float)ACT_IDLE },
-	{ TASK_WAIT, (float)3 },				// Wait at location and observe
+	{ TASK_WAIT, CAUTIOUS_OBSERVE_AT_LOCATION },	// Wait at location and observe
 	{ TASK_GET_PATH_TO_LASTPOSITION, (float)0 },
 	{ TASK_WALK_PATH, (float)0 },			// Walk back
 	{ TASK_WAIT_FOR_MOVEMENT, (float)0 },
@@ -516,7 +520,7 @@ Task_t tlAlertListen[] =
 {
 	{ TASK_STOP_MOVING, (float)0 },
 	{ TASK_SET_ACTIVITY, (float)ACT_IDLE },
-	{ TASK_WAIT, (float)3 },				// Stand still and listen
+	{ TASK_WAIT, ALERT_LISTEN_DURATION },		// Stand still and listen
 };
 
 Schedule_t slAlertListen[] =
