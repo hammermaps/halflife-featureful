@@ -88,6 +88,8 @@ typedef enum
 		SCHED_RETREAT_FROM_SPOT,
 		SCHED_RETREAT_FROM_SPOT_FAILED,
 		SCHED_IDLE_FACE,
+		SCHED_INVESTIGATE_SOUND_CAUTIOUS, // Slow, cautious investigation of a sound
+		SCHED_ALERT_LISTEN,	// Stop and listen attentively after hearing a suspicious sound
 
 		LAST_COMMON_SCHEDULE			// Leave this at the bottom
 } SCHEDULE_TYPE;

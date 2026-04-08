@@ -468,6 +468,76 @@ Schedule_t slInvestigateSpot[] =
 	},
 };
 
+//=========================================================
+// InvestigateSoundCautious - A more careful version of 
+// InvestigateSound. Monster walks slowly, stops to listen,
+// then carefully approaches the sound source.
+//=========================================================
+Task_t tlInvestigateSoundCautious[] =
+{
+	{ TASK_STOP_MOVING, (float)0 },
+	{ TASK_STORE_LASTPOSITION, (float)0 },
+	{ TASK_GET_PATH_TO_BESTSOUND, (float)0 },
+	{ TASK_FACE_IDEAL, (float)0 },
+	{ TASK_WAIT, (float)1.5 },				// Pause and listen first
+	{ TASK_WALK_PATH, (float)0 },			// Always walk, never run
+	{ TASK_WAIT_FOR_MOVEMENT, (float)0 },
+	{ TASK_PLAY_SEQUENCE, (float)ACT_IDLE },
+	{ TASK_WAIT, (float)3 },				// Wait at location and observe
+	{ TASK_GET_PATH_TO_LASTPOSITION, (float)0 },
+	{ TASK_WALK_PATH, (float)0 },			// Walk back
+	{ TASK_WAIT_FOR_MOVEMENT, (float)0 },
+	{ TASK_CLEAR_LASTPOSITION, (float)0 },
+};
+
+Schedule_t slInvestigateSoundCautious[] =
+{
+	{
+		tlInvestigateSoundCautious,
+		ARRAYSIZE( tlInvestigateSoundCautious ),
+		bits_COND_NEW_ENEMY |
+		bits_COND_SEE_FEAR |
+		bits_COND_SEE_HATE |
+		bits_COND_SCHEDULE_SUGGESTED |
+		bits_COND_LIGHT_DAMAGE |
+		bits_COND_HEAVY_DAMAGE |
+		bits_COND_HEAR_SOUND,
+		bits_SOUND_DANGER |
+		bits_SOUND_COMBAT,
+		"InvestigateSoundCautious"
+	},
+};
+
+//=========================================================
+// AlertListen - Monster stops and listens carefully.
+// Used when a faint/distant sound is heard.
+//=========================================================
+Task_t tlAlertListen[] =
+{
+	{ TASK_STOP_MOVING, (float)0 },
+	{ TASK_SET_ACTIVITY, (float)ACT_IDLE },
+	{ TASK_WAIT, (float)3 },				// Stand still and listen
+};
+
+Schedule_t slAlertListen[] =
+{
+	{
+		tlAlertListen,
+		ARRAYSIZE( tlAlertListen ),
+		bits_COND_NEW_ENEMY |
+		bits_COND_SEE_ENEMY |
+		bits_COND_SEE_FEAR |
+		bits_COND_SEE_HATE |
+		bits_COND_SCHEDULE_SUGGESTED |
+		bits_COND_LIGHT_DAMAGE |
+		bits_COND_HEAVY_DAMAGE |
+		bits_COND_HEAR_SOUND,
+		bits_SOUND_DANGER |
+		bits_SOUND_COMBAT,
+		"AlertListen"
+	},
+};
+
 Task_t tlMoveToSpot[] =
 {
 	{ TASK_STOP_MOVING, (float)0 },
@@ -1433,6 +1503,8 @@ Schedule_t *CBaseMonster::m_scheduleList[] =
 	slRetreatFromEnemy,
 	slRetreatFromSpot,
 	slIdleFace,
+	slInvestigateSoundCautious,
+	slAlertListen,
 	slFail,
 	slCombatFail
 };
@@ -1707,6 +1779,14 @@ Schedule_t* CBaseMonster::GetScheduleOfType( int Type )
 	case SCHED_IDLE_FACE:
 		{
 			return slIdleFace;
+		}
+	case SCHED_INVESTIGATE_SOUND_CAUTIOUS:
+		{
+			return &slInvestigateSoundCautious[0];
+		}
+	case SCHED_ALERT_LISTEN:
+		{
+			return &slAlertListen[0];
 		}
 	default:
 		{

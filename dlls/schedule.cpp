@@ -2119,6 +2119,11 @@ Schedule_t *CBaseMonster::GetSchedule()
 		{
 			if( HasConditions( bits_COND_HEAR_SOUND ) )
 			{
+				// Enhanced AI: In idle state, if in darkness, just listen cautiously
+				if( npc_enhanced_ai.value != 0 && HasConditions( bits_COND_SELF_IN_DARKNESS ) )
+				{
+					return GetScheduleOfType( SCHED_ALERT_LISTEN );
+				}
 				return GetScheduleOfType( SCHED_ALERT_FACE );
 			}
 			else if( FRouteClear() )
@@ -2209,10 +2214,22 @@ Schedule_t *CBaseMonster::GetSchedule()
 
 			if( HasConditions ( bits_COND_HEAR_SOUND ) )
 			{
+				// Enhanced AI: In darkness, be more cautious when investigating sounds
+				if( npc_enhanced_ai.value != 0 && HasConditions( bits_COND_SELF_IN_DARKNESS ) )
+				{
+					Remember( bits_MEMORY_HEARD_IN_DARK );
+					return GetScheduleOfType( SCHED_INVESTIGATE_SOUND_CAUTIOUS );
+				}
 				return GetScheduleOfType( SCHED_ALERT_FACE );
 			}
 			else
 			{
+				// Enhanced AI: If we recently heard something in darkness, stay alert and listen
+				if( npc_enhanced_ai.value != 0 && HasMemory( bits_MEMORY_HEARD_IN_DARK ) )
+				{
+					Forget( bits_MEMORY_HEARD_IN_DARK );
+					return GetScheduleOfType( SCHED_ALERT_LISTEN );
+				}
 				return GetScheduleOfType( SCHED_ALERT_STAND );
 			}
 			break;
