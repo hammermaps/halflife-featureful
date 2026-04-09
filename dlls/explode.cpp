@@ -315,6 +315,11 @@ void CEnvExplosion::Smoke()
 }
 
 // Enhanced explosion visual effects: dynamic light flash, shockwave ring, smoke, screen shake, and push
+#define EXPLOSION_PUSH_HORIZONTAL	3.0f	// horizontal force multiplier
+#define EXPLOSION_PUSH_UPWARD		1.5f	// additional upward kick multiplier
+#define EXPLOSION_PUNCH_MIN		-3.0f	// min punch angle for players
+#define EXPLOSION_PUNCH_MAX		-1.0f	// max punch angle for players
+
 void ExplosionEffects( const Vector &origin, float magnitude, float radius )
 {
 	if( radius <= 0.0f )
@@ -338,7 +343,8 @@ void ExplosionEffects( const Vector &origin, float magnitude, float radius )
 	// 2. Shockwave ring expanding outward
 	if( g_sModelIndexShockwave )
 	{
-		const float ringRadius = Q_min( radius, 1024.0f );
+		// TE_BEAMCYLINDER uses the second coord set as axis endpoint; Z offset = ring expansion radius
+		const float clampedRadius = Q_min( radius, 1024.0f );
 		MESSAGE_BEGIN( MSG_PAS, SVC_TEMPENTITY, origin );
 			WRITE_BYTE( TE_BEAMCYLINDER );
 			WRITE_COORD( origin.x );
@@ -346,7 +352,7 @@ void ExplosionEffects( const Vector &origin, float magnitude, float radius )
 			WRITE_COORD( origin.z );
 			WRITE_COORD( origin.x );
 			WRITE_COORD( origin.y );
-			WRITE_COORD( origin.z + ringRadius );	// axis and radius
+			WRITE_COORD( origin.z + clampedRadius );	// axis endpoint: Z offset defines expansion radius
 			WRITE_SHORT( g_sModelIndexShockwave );
 			WRITE_BYTE( 0 );		// starting frame
 			WRITE_BYTE( 10 );		// frame rate in 0.1's
@@ -407,12 +413,12 @@ void ExplosionEffects( const Vector &origin, float magnitude, float radius )
 		if( flForce <= 0.0f )
 			continue;
 
-		pEntity->pev->velocity = pEntity->pev->velocity + vecDir * flForce * 3.0f;
-		pEntity->pev->velocity.z += flForce * 1.5f;	// additional upward kick
+		pEntity->pev->velocity = pEntity->pev->velocity + vecDir * flForce * EXPLOSION_PUSH_HORIZONTAL;
+		pEntity->pev->velocity.z += flForce * EXPLOSION_PUSH_UPWARD;
 
 		if( pEntity->IsPlayer() )
 		{
-			pEntity->pev->punchangle.x += RANDOM_FLOAT( -3.0f, -1.0f ) * ( flForce / magnitude );
+			pEntity->pev->punchangle.x += RANDOM_FLOAT( EXPLOSION_PUNCH_MIN, EXPLOSION_PUNCH_MAX ) * ( flForce / magnitude );
 		}
 	}
 }
