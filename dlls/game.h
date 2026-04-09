@@ -186,6 +186,7 @@ extern cvar_t npc_enhanced_ai;
 extern cvar_t npc_light_awareness;
 extern cvar_t npc_sound_occlusion;
 extern cvar_t npc_stealth_system;
+extern cvar_t npc_cover_attack_ai;
 extern cvar_t dmgperscore;
 extern cvar_t allydmgpenalty;
 extern cvar_t npckill;

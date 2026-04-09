@@ -762,6 +762,7 @@ cvar_t npc_enhanced_ai = { "npc_enhanced_ai", "1", FCVAR_SERVER };
 cvar_t npc_light_awareness = { "npc_light_awareness", "1", FCVAR_SERVER };
 cvar_t npc_sound_occlusion = { "npc_sound_occlusion", "1", FCVAR_SERVER };
 cvar_t npc_stealth_system = { "npc_stealth_system", "1", FCVAR_SERVER };
+cvar_t npc_cover_attack_ai = { "npc_cover_attack_ai", "1", FCVAR_SERVER };
 
 cvar_t mp_chattime	= { "mp_chattime","10", FCVAR_SERVER };
 
@@ -1601,6 +1602,7 @@ void GameDLLInit()
 	CVAR_REGISTER( &npc_light_awareness );
 	CVAR_REGISTER( &npc_sound_occlusion );
 	CVAR_REGISTER( &npc_stealth_system );
+	CVAR_REGISTER( &npc_cover_attack_ai );
 
 	CVAR_REGISTER( &teamplay );
 	CVAR_REGISTER( &fraglimit );

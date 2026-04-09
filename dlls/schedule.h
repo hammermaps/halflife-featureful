@@ -90,6 +90,8 @@ typedef enum
 		SCHED_IDLE_FACE,
 		SCHED_INVESTIGATE_SOUND_CAUTIOUS, // Slow, cautious investigation of a sound
 		SCHED_ALERT_LISTEN,	// Stop and listen attentively after hearing a suspicious sound
+		SCHED_TAKE_COVER_AND_ATTACK, // Take cover from enemy, then peek and return fire
+		SCHED_DUCK_AND_RETURN_FIRE, // Duck immediately and return fire (for NPCs with duck capability)
 
 		LAST_COMMON_SCHEDULE			// Leave this at the bottom
 } SCHEDULE_TYPE;

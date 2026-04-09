@@ -542,6 +542,69 @@ Schedule_t slAlertListen[] =
 	},
 };
 
+//=========================================================
+// TakeCoverAndAttack - Take cover from enemy, face the
+// enemy, then allow interruption by attack conditions.
+// This creates a "peek and shoot" behavior.
+//=========================================================
+Task_t tlTakeCoverAndAttack[] =
+{
+	{ TASK_STOP_MOVING, (float)0 },
+	{ TASK_FIND_COVER_FROM_ENEMY, (float)0 },
+	{ TASK_RUN_PATH, (float)0 },
+	{ TASK_WAIT_FOR_MOVEMENT, (float)0 },
+	{ TASK_REMEMBER, (float)bits_MEMORY_INCOVER },
+	{ TASK_FACE_ENEMY, (float)0 },
+	{ TASK_WAIT, (float)0.3 },
+};
+
+Schedule_t slTakeCoverAndAttack[] =
+{
+	{
+		tlTakeCoverAndAttack,
+		ARRAYSIZE( tlTakeCoverAndAttack ),
+		bits_COND_NEW_ENEMY |
+		bits_COND_CAN_RANGE_ATTACK1 |
+		bits_COND_CAN_RANGE_ATTACK2 |
+		bits_COND_CAN_MELEE_ATTACK1 |
+		bits_COND_CAN_MELEE_ATTACK2 |
+		bits_COND_HEAR_SOUND,
+		bits_SOUND_DANGER,
+		"TakeCoverAndAttack"
+	},
+};
+
+//=========================================================
+// DuckAndReturnFire - Duck immediately to reduce profile,
+// face enemy and wait for attack opportunity.
+// Only for NPCs with bits_CAP_DUCK.
+//=========================================================
+Task_t tlDuckAndReturnFire[] =
+{
+	{ TASK_STOP_MOVING, (float)0 },
+	{ TASK_REMEMBER, (float)bits_MEMORY_FLINCHED },
+	{ TASK_SMALL_FLINCH, (float)0 },
+	{ TASK_FACE_ENEMY, (float)0 },
+	{ TASK_WAIT, (float)0.5 },
+};
+
+Schedule_t slDuckAndReturnFire[] =
+{
+	{
+		tlDuckAndReturnFire,
+		ARRAYSIZE( tlDuckAndReturnFire ),
+		bits_COND_CAN_RANGE_ATTACK1 |
+		bits_COND_CAN_RANGE_ATTACK2 |
+		bits_COND_CAN_MELEE_ATTACK1 |
+		bits_COND_CAN_MELEE_ATTACK2 |
+		bits_COND_ENEMY_DEAD |
+		bits_COND_NEW_ENEMY |
+		bits_COND_HEAR_SOUND,
+		bits_SOUND_DANGER,
+		"DuckAndReturnFire"
+	},
+};
+
 Task_t tlMoveToSpot[] =
 {
 	{ TASK_STOP_MOVING, (float)0 },
@@ -1509,6 +1572,8 @@ Schedule_t *CBaseMonster::m_scheduleList[] =
 	slIdleFace,
 	slInvestigateSoundCautious,
 	slAlertListen,
+	slTakeCoverAndAttack,
+	slDuckAndReturnFire,
 	slFail,
 	slCombatFail
 };
@@ -1791,6 +1856,14 @@ Schedule_t* CBaseMonster::GetScheduleOfType( int Type )
 	case SCHED_ALERT_LISTEN:
 		{
 			return &slAlertListen[0];
+		}
+	case SCHED_TAKE_COVER_AND_ATTACK:
+		{
+			return &slTakeCoverAndAttack[0];
+		}
+	case SCHED_DUCK_AND_RETURN_FIRE:
+		{
+			return &slDuckAndReturnFire[0];
 		}
 	default:
 		{
