@@ -2315,9 +2315,22 @@ void CISlave::ReportAIState(ALERT_TYPE level )
 
 #define ISLAVE_OVERCHARGE_RADIUS 384 // Radius to search for nearby alien slaves
 #define ISLAVE_OVERCHARGE_MIN_ALLIES 3 // Minimum nearby slaves needed
-#define ISLAVE_OVERCHARGE_DAMAGE_MULTIPLIER 5.0f // Damage multiplier for overcharge
+#define ISLAVE_OVERCHARGE_DAMAGE_MULTIPLIER 5.0f // Damage multiplier for direct beam overcharge
+#define ISLAVE_OVERCHARGE_AREA_DAMAGE_FACTOR 0.5f // Area damage is half the direct beam damage
 #define ISLAVE_OVERCHARGE_COIL_RADIUS 512 // Much larger coil radius
 #define ISLAVE_OVERCHARGE_ENERGY_DRAIN 20.0f // Energy drained from each nearby slave
+#define ISLAVE_OVERCHARGE_FRAMERATE_FACTOR 0.7f // Slower charge animation (70% speed)
+#define ISLAVE_OVERCHARGE_COOLDOWN_MULTIPLIER 2.0f // Overcharge has twice the normal cooldown
+#define ISLAVE_OVERCHARGE_CHECK_INTERVAL 0.5f // How often to check for nearby slaves (seconds)
+#define ISLAVE_OVERCHARGE_POST_ATTACK_DELAY 2.0f // Delay before re-checking overcharge after attack
+#define ISLAVE_OVERCHARGE_GLOW_INCREMENT 15 // Per-frame glow intensity increase during powerup
+#define ISLAVE_OVERCHARGE_MAX_GLOW_THICKNESS 80 // Maximum glow shell thickness
+#define ISLAVE_OVERCHARGE_SHAKE_AMPLITUDE 8.0f // Screen shake amplitude
+#define ISLAVE_OVERCHARGE_SHAKE_FREQUENCY 80.0f // Screen shake frequency
+#define ISLAVE_OVERCHARGE_SHAKE_DURATION 1.5f // Screen shake duration
+#define ISLAVE_OVERCHARGE_WAVE1_MULTIPLIER 5 // Coil wave 1 (low) radius multiplier
+#define ISLAVE_OVERCHARGE_WAVE2_MULTIPLIER 3 // Coil wave 2 (mid) radius multiplier
+#define ISLAVE_OVERCHARGE_WAVE3_MULTIPLIER 2 // Coil wave 3 (high) radius multiplier
 
 constexpr Color3 OverchargeBeamColor = Color3(100, 180, 255); // Bright blue-white
 constexpr Color3 OverchargeGlowColor = Color3(120, 200, 255); // Bright blue glow
@@ -2500,13 +2513,13 @@ void CISlaveOvercharge::OverchargeCoilBeam()
 
 	// Three waves at different heights for a more dramatic effect
 	const Vector coilOrigin1 = pev->origin + Vector(0, 0, 8.0f);
-	SendBeamWave(coilOrigin1, ISLAVE_OVERCHARGE_COIL_RADIUS * 5, visual, MSG_PAS, pev->origin);
+	SendBeamWave(coilOrigin1, ISLAVE_OVERCHARGE_COIL_RADIUS * ISLAVE_OVERCHARGE_WAVE1_MULTIPLIER, visual, MSG_PAS, pev->origin);
 
 	const Vector coilOrigin2 = pev->origin + Vector(0, 0, 36.0f);
-	SendBeamWave(coilOrigin2, ISLAVE_OVERCHARGE_COIL_RADIUS * 3, visual, MSG_PAS, pev->origin);
+	SendBeamWave(coilOrigin2, ISLAVE_OVERCHARGE_COIL_RADIUS * ISLAVE_OVERCHARGE_WAVE2_MULTIPLIER, visual, MSG_PAS, pev->origin);
 
 	const Vector coilOrigin3 = pev->origin + Vector(0, 0, 64.0f);
-	SendBeamWave(coilOrigin3, ISLAVE_OVERCHARGE_COIL_RADIUS * 2, visual, MSG_PAS, pev->origin);
+	SendBeamWave(coilOrigin3, ISLAVE_OVERCHARGE_COIL_RADIUS * ISLAVE_OVERCHARGE_WAVE3_MULTIPLIER, visual, MSG_PAS, pev->origin);
 }
 
 //=========================================================
@@ -2605,7 +2618,7 @@ void CISlaveOvercharge::PrescheduleThink()
 
 	if( m_flNextOverchargeCheck <= gpGlobals->time )
 	{
-		m_flNextOverchargeCheck = gpGlobals->time + 0.5f;
+		m_flNextOverchargeCheck = gpGlobals->time + ISLAVE_OVERCHARGE_CHECK_INTERVAL;
 		m_iNearbySlaveCount = CountNearbySlaves();
 		m_bOverchargeReady = ( m_iNearbySlaveCount >= ISLAVE_OVERCHARGE_MIN_ALLIES );
 	}
@@ -2651,7 +2664,7 @@ void CISlaveOvercharge::HandleAnimEvent( MonsterEvent_t *pEvent )
 			if (m_iTaskStatus == TASKSTATUS_COMPLETE)
 				break;
 
-			pev->framerate = GetSkillValue("islave_zap_rate") * 0.7f; // Slower charge for overcharge
+			pev->framerate = GetSkillValue("islave_zap_rate") * ISLAVE_OVERCHARGE_FRAMERATE_FACTOR; // Slower charge for overcharge
 
 			UTIL_MakeAimVectors( pev->angles );
 
@@ -2677,7 +2690,7 @@ void CISlaveOvercharge::HandleAnimEvent( MonsterEvent_t *pEvent )
 
 			// Intensify glow during powerup
 			StartOverchargeGlow();
-			pev->renderamt = Q_min((int)pev->renderamt + 15, 80);
+			pev->renderamt = Q_min((int)pev->renderamt + ISLAVE_OVERCHARGE_GLOW_INCREMENT, ISLAVE_OVERCHARGE_MAX_GLOW_THICKNESS);
 
 			SoundScriptParamOverride params;
 			params.OverridePitchShifted(m_iBeams * 10 + 20); // Higher pitched
@@ -2700,10 +2713,10 @@ void CISlaveOvercharge::HandleAnimEvent( MonsterEvent_t *pEvent )
 			OverchargeCoilBeam();
 
 			// Massive screen shake
-			UTIL_ScreenShake( pev->origin, 8.0, 80.0, 1.5, ISLAVE_OVERCHARGE_COIL_RADIUS );
+			UTIL_ScreenShake( pev->origin, ISLAVE_OVERCHARGE_SHAKE_AMPLITUDE, ISLAVE_OVERCHARGE_SHAKE_FREQUENCY, ISLAVE_OVERCHARGE_SHAKE_DURATION, ISLAVE_OVERCHARGE_COIL_RADIUS );
 
 			// Area damage from the coil effect
-			const float coilDmg = GetSkillValue("islave_dmg_zap") * ISLAVE_OVERCHARGE_DAMAGE_MULTIPLIER * 0.5f;
+			const float coilDmg = GetSkillValue("islave_dmg_zap") * ISLAVE_OVERCHARGE_DAMAGE_MULTIPLIER * ISLAVE_OVERCHARGE_AREA_DAMAGE_FACTOR;
 			::RadiusDamage(this, pev->origin, pev, pev, DamageInfo{coilDmg, DMG_SHOCK | DMG_ENERGYBEAM},
 						   ISLAVE_OVERCHARGE_COIL_RADIUS,
 						   RADIUSDAMAGE_SPOT_IS_TARGET_CENTER,
@@ -2718,12 +2731,12 @@ void CISlaveOvercharge::HandleAnimEvent( MonsterEvent_t *pEvent )
 			EmitSoundScript(zapShootSoundScript);
 
 			// Longer cooldown for overcharge
-			m_flNextAttack = gpGlobals->time + GetSkillValue("islave_delay_zap") * 2.0f;
+			m_flNextAttack = gpGlobals->time + GetSkillValue("islave_delay_zap") * ISLAVE_OVERCHARGE_COOLDOWN_MULTIPLIER;
 
 			// Reset overcharge state
 			StopOverchargeGlow();
 			m_bOverchargeReady = false;
-			m_flNextOverchargeCheck = gpGlobals->time + 2.0f; // Brief cooldown before checking again
+			m_flNextOverchargeCheck = gpGlobals->time + ISLAVE_OVERCHARGE_POST_ATTACK_DELAY; // Brief cooldown before checking again
 			break;
 		}
 
