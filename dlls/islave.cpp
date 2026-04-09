@@ -2306,6 +2306,452 @@ void CISlave::ReportAIState(ALERT_TYPE level )
 	}
 }
 
+//=========================================================
+// CISlaveOvercharge - Overcharge variant of the alien slave.
+// When 3+ nearby alien slaves are present, this variant
+// channels their energy into a devastating overcharge attack
+// with massive damage, wider/brighter beam, and full-body glow.
+//=========================================================
+
+#define ISLAVE_OVERCHARGE_RADIUS 384 // Radius to search for nearby alien slaves
+#define ISLAVE_OVERCHARGE_MIN_ALLIES 3 // Minimum nearby slaves needed
+#define ISLAVE_OVERCHARGE_DAMAGE_MULTIPLIER 5.0f // Damage multiplier for direct beam overcharge
+#define ISLAVE_OVERCHARGE_AREA_DAMAGE_FACTOR 0.5f // Area damage is half the direct beam damage
+#define ISLAVE_OVERCHARGE_COIL_RADIUS 512 // Much larger coil radius
+#define ISLAVE_OVERCHARGE_ENERGY_DRAIN 20.0f // Energy drained from each nearby slave
+#define ISLAVE_OVERCHARGE_FRAMERATE_FACTOR 0.7f // Slower charge animation (70% speed)
+#define ISLAVE_OVERCHARGE_COOLDOWN_MULTIPLIER 2.0f // Overcharge has twice the normal cooldown
+#define ISLAVE_OVERCHARGE_CHECK_INTERVAL 0.5f // How often to check for nearby slaves (seconds)
+#define ISLAVE_OVERCHARGE_POST_ATTACK_DELAY 2.0f // Delay before re-checking overcharge after attack
+#define ISLAVE_OVERCHARGE_GLOW_INCREMENT 15 // Per-frame glow intensity increase during powerup
+#define ISLAVE_OVERCHARGE_MAX_GLOW_THICKNESS 80 // Maximum glow shell thickness
+#define ISLAVE_OVERCHARGE_SHAKE_AMPLITUDE 8.0f // Screen shake amplitude
+#define ISLAVE_OVERCHARGE_SHAKE_FREQUENCY 80.0f // Screen shake frequency
+#define ISLAVE_OVERCHARGE_SHAKE_DURATION 1.5f // Screen shake duration
+#define ISLAVE_OVERCHARGE_WAVE1_MULTIPLIER 5 // Coil wave 1 (low) radius multiplier
+#define ISLAVE_OVERCHARGE_WAVE2_MULTIPLIER 3 // Coil wave 2 (mid) radius multiplier
+#define ISLAVE_OVERCHARGE_WAVE3_MULTIPLIER 2 // Coil wave 3 (high) radius multiplier
+
+constexpr Color3 OverchargeBeamColor = Color3(100, 180, 255); // Bright blue-white
+constexpr Color3 OverchargeGlowColor = Color3(120, 200, 255); // Bright blue glow
+constexpr Color3 OverchargeLightColor = Color3(150, 200, 255); // Blue-white light
+
+class CISlaveOvercharge : public CISlave
+{
+public:
+	void Spawn() override;
+	void Precache() override;
+	const char* DefaultDisplayName() override { return "Alien Slave Overcharge"; }
+	void HandleAnimEvent( MonsterEvent_t *pEvent ) override;
+	bool CheckRangeAttack1( float flDot, float flDist ) override;
+	void PrescheduleThink() override;
+
+	int Save( CSave &save ) override;
+	int Restore( CRestore &restore ) override;
+	static TYPEDESCRIPTION m_SaveData[];
+
+	int CountNearbySlaves();
+	void DrainNearbySlaves();
+	void OverchargeZapBeam();
+	void OverchargeCoilBeam();
+	void StartOverchargeGlow();
+	void StopOverchargeGlow();
+
+	float m_flNextOverchargeCheck;
+	bool m_bOverchargeReady;
+	bool m_bOverchargeGlowing;
+	int m_iNearbySlaveCount;
+
+	static const NamedVisual overchargeZapBeamColorVisual;
+	static const NamedVisual overchargeZapBeamVisual;
+	static const NamedVisual overchargeCoilBeamVisual;
+	static const NamedVisual overchargePowerupBeamVisual;
+	static const NamedVisual overchargeLightVisual;
+};
+
+LINK_ENTITY_TO_CLASS( monster_alien_slave_overcharge, CISlaveOvercharge )
+
+TYPEDESCRIPTION CISlaveOvercharge::m_SaveData[] =
+{
+	DEFINE_FIELD( CISlaveOvercharge, m_flNextOverchargeCheck, FIELD_TIME ),
+	DEFINE_FIELD( CISlaveOvercharge, m_bOverchargeReady, FIELD_BOOLEAN ),
+	DEFINE_FIELD( CISlaveOvercharge, m_bOverchargeGlowing, FIELD_BOOLEAN ),
+	DEFINE_FIELD( CISlaveOvercharge, m_iNearbySlaveCount, FIELD_INTEGER ),
+};
+
+IMPLEMENT_SAVERESTORE( CISlaveOvercharge, CISlave )
+
+const NamedVisual CISlaveOvercharge::overchargeZapBeamColorVisual = BuildVisual("VortigauntOvercharge.ZapBeamColor")
+		.RenderColor(OverchargeBeamColor);
+
+const NamedVisual CISlaveOvercharge::overchargeZapBeamVisual = BuildVisual("VortigauntOvercharge.ZapBeam")
+		.Model("sprites/lgtning.spr")
+		.Alpha(255)
+		.BeamParams(120, 30) // Much wider (120 vs 50), slightly more noise
+		.Mixin(&CISlaveOvercharge::overchargeZapBeamColorVisual);
+
+const NamedVisual CISlaveOvercharge::overchargeCoilBeamVisual = BuildVisual("VortigauntOvercharge.CoilBeam")
+		.Model("sprites/lgtning.spr")
+		.Alpha(255)
+		.Framerate(10.0f)
+		.BeamParams(200, 30) // Very wide beam (200 vs 128)
+		.Life(0.4f) // Longer lasting than normal (0.4 vs 0.2)
+		.WaveType(Visual::WAVETYPE_CYLINDER)
+		.Mixin(&CISlaveOvercharge::overchargeZapBeamColorVisual);
+
+const NamedVisual CISlaveOvercharge::overchargePowerupBeamVisual = BuildVisual("VortigauntOvercharge.PowerupBeam")
+		.Model("sprites/lgtning.spr")
+		.Alpha(128) // Brighter than normal (128 vs 64)
+		.BeamParams(50, 60) // Wider arm beams (50 vs 30)
+		.Mixin(&CISlaveOvercharge::overchargeZapBeamColorVisual);
+
+const NamedVisual CISlaveOvercharge::overchargeLightVisual = BuildVisual("VortigauntOvercharge.PowerupLight")
+		.Radius(200) // Larger light radius (200 vs 120)
+		.RenderColor(OverchargeLightColor);
+
+//=========================================================
+// CountNearbySlaves - count alien slaves within radius
+//=========================================================
+int CISlaveOvercharge::CountNearbySlaves()
+{
+	int count = 0;
+	CBaseEntity *pEntity = NULL;
+	while( ( pEntity = UTIL_FindEntityInSphere( pEntity, pev->origin, ISLAVE_OVERCHARGE_RADIUS ) ) != NULL )
+	{
+		if( pEntity == this )
+			continue;
+		if( !pEntity->IsFullyAlive() )
+			continue;
+		if( !FClassnameIs( pEntity->pev, "monster_alien_slave" ) &&
+			!FClassnameIs( pEntity->pev, "monster_vortigaunt" ) &&
+			!FClassnameIs( pEntity->pev, "monster_alien_slave_overcharge" ) )
+			continue;
+		if( IRelationship( pEntity ) >= R_DL )
+			continue;
+		count++;
+	}
+	return count;
+}
+
+//=========================================================
+// DrainNearbySlaves - drain energy from nearby slaves
+// to power the overcharge attack. Creates visual beams
+// from each donor slave to this overcharge slave.
+//=========================================================
+void CISlaveOvercharge::DrainNearbySlaves()
+{
+	CBaseEntity *pEntity = NULL;
+	int drained = 0;
+	while( ( pEntity = UTIL_FindEntityInSphere( pEntity, pev->origin, ISLAVE_OVERCHARGE_RADIUS ) ) != NULL )
+	{
+		if( pEntity == this )
+			continue;
+		if( !pEntity->IsFullyAlive() )
+			continue;
+		if( !FClassnameIs( pEntity->pev, "monster_alien_slave" ) &&
+			!FClassnameIs( pEntity->pev, "monster_vortigaunt" ) &&
+			!FClassnameIs( pEntity->pev, "monster_alien_slave_overcharge" ) )
+			continue;
+		if( IRelationship( pEntity ) >= R_DL )
+			continue;
+		if( drained >= ISLAVE_OVERCHARGE_MIN_ALLIES )
+			break;
+
+		// Drain energy from this slave
+		CISlave *pSlave = static_cast<CISlave*>( pEntity->MyMonsterPointer() );
+		if( pSlave )
+		{
+			pSlave->SpendEnergy( ISLAVE_OVERCHARGE_ENERGY_DRAIN );
+		}
+
+		// Create a visible drain beam from the donor slave to this overcharge slave
+		SendBeam(pEntity->entindex(), entindex(), GetVisual(overchargePowerupBeamVisual), MSG_PAS, pev->origin);
+
+		drained++;
+	}
+}
+
+//=========================================================
+// StartOverchargeGlow - make the overcharge slave glow
+// with a bright blue-white shell effect
+//=========================================================
+void CISlaveOvercharge::StartOverchargeGlow()
+{
+	if( !m_bOverchargeGlowing )
+	{
+		m_bOverchargeGlowing = true;
+		pev->renderfx = kRenderFxGlowShell;
+		pev->rendercolor.x = OverchargeGlowColor.r;
+		pev->rendercolor.y = OverchargeGlowColor.g;
+		pev->rendercolor.z = OverchargeGlowColor.b;
+		pev->renderamt = 40; // Shell thickness
+	}
+}
+
+//=========================================================
+// StopOverchargeGlow - remove the glow effect
+//=========================================================
+void CISlaveOvercharge::StopOverchargeGlow()
+{
+	if( m_bOverchargeGlowing )
+	{
+		m_bOverchargeGlowing = false;
+		pev->renderfx = kRenderFxNone;
+		pev->rendercolor.x = 0;
+		pev->rendercolor.y = 0;
+		pev->rendercolor.z = 0;
+		pev->renderamt = 255;
+	}
+}
+
+//=========================================================
+// OverchargeCoilBeam - massive cylindrical wave effect
+//=========================================================
+void CISlaveOvercharge::OverchargeCoilBeam()
+{
+	const Visual* visual = GetVisual(overchargeCoilBeamVisual);
+
+	// Three waves at different heights for a more dramatic effect
+	const Vector coilOrigin1 = pev->origin + Vector(0, 0, 8.0f);
+	SendBeamWave(coilOrigin1, ISLAVE_OVERCHARGE_COIL_RADIUS * ISLAVE_OVERCHARGE_WAVE1_MULTIPLIER, visual, MSG_PAS, pev->origin);
+
+	const Vector coilOrigin2 = pev->origin + Vector(0, 0, 36.0f);
+	SendBeamWave(coilOrigin2, ISLAVE_OVERCHARGE_COIL_RADIUS * ISLAVE_OVERCHARGE_WAVE2_MULTIPLIER, visual, MSG_PAS, pev->origin);
+
+	const Vector coilOrigin3 = pev->origin + Vector(0, 0, 64.0f);
+	SendBeamWave(coilOrigin3, ISLAVE_OVERCHARGE_COIL_RADIUS * ISLAVE_OVERCHARGE_WAVE3_MULTIPLIER, visual, MSG_PAS, pev->origin);
+}
+
+//=========================================================
+// OverchargeZapBeam - fire the overcharge beam
+// Much wider and more damaging than normal zap
+//=========================================================
+void CISlaveOvercharge::OverchargeZapBeam()
+{
+	UTIL_MakeAimVectors( pev->angles );
+
+	Vector vecSrc = pev->origin + gpGlobals->v_up * 36;
+	Vector vecAim = ShootAtEnemy( vecSrc );
+
+	// Very accurate - all energy is focused
+	vecAim += gpGlobals->v_up * RANDOM_FLOAT( -0.005f, 0.005f );
+
+	TraceResult tr;
+	UTIL_TraceLine( vecSrc, vecSrc + vecAim * 1536, dont_ignore_monsters, ENT( pev ), &tr );
+
+	// Create the overcharge beam from both arms
+	for( int side = -1; side <= 1; side += 2 )
+	{
+		if( m_iBeams >= ISLAVE_MAX_BEAMS )
+			break;
+
+		m_pBeam[m_iBeams] = CreateBeamFromVisual(GetVisual(overchargeZapBeamVisual));
+		if( !m_pBeam[m_iBeams] )
+			continue;
+
+		m_pBeam[m_iBeams]->PointEntInit( tr.vecEndPos, entindex() );
+		m_pBeam[m_iBeams]->SetEndAttachment( AttachmentFromSide(side) );
+		m_pBeam[m_iBeams]->pev->spawnflags |= SF_BEAM_TEMPORARY;
+		m_iBeams++;
+	}
+
+	// Apply massive damage
+	CBaseEntity* pEntity = CBaseEntity::OwnInstance( tr.pHit );
+	if( pEntity != NULL && pEntity->pev->takedamage )
+	{
+		if( IRelationship(pEntity) >= R_DL )
+		{
+			// Overcharge damage: base zap * multiplier
+			const float overchargeDmg = GetSkillValue("islave_dmg_zap") * ISLAVE_OVERCHARGE_DAMAGE_MULTIPLIER;
+			ClearMultiDamage();
+			pEntity->TraceAttack( pev, pev, DamageInfo{overchargeDmg, DMG_SHOCK | DMG_ENERGYBEAM}, vecAim.Normalize(), &tr );
+			ApplyMultiDamage( pev, pev );
+		}
+	}
+
+	// Bright dynamic light at the impact point
+	const Visual* pOverchargeLightVisual = GetVisual(overchargeLightVisual);
+	if( pOverchargeLightVisual )
+	{
+		Visual impactLight = *pOverchargeLightVisual;
+		impactLight.life = 1.0f;
+		impactLight.radius = 250;
+		SendDynLight(tr.vecEndPos, &impactLight);
+	}
+
+	EmitSoundScriptAmbient(tr.vecEndPos, electroSoundScript);
+}
+
+//=========================================================
+// Spawn
+//=========================================================
+void CISlaveOvercharge::Spawn()
+{
+	CISlave::Spawn();
+
+	m_bOverchargeReady = false;
+	m_bOverchargeGlowing = false;
+	m_flNextOverchargeCheck = 0;
+	m_iNearbySlaveCount = 0;
+}
+
+//=========================================================
+// Precache
+//=========================================================
+void CISlaveOvercharge::Precache()
+{
+	CISlave::Precache();
+
+	RegisterVisual(overchargeZapBeamVisual);
+	RegisterVisual(overchargeCoilBeamVisual);
+	RegisterVisual(overchargePowerupBeamVisual);
+	RegisterVisual(overchargeLightVisual);
+}
+
+//=========================================================
+// PrescheduleThink - periodically check if overcharge
+// conditions are met and update glow state
+//=========================================================
+void CISlaveOvercharge::PrescheduleThink()
+{
+	CISlave::PrescheduleThink();
+
+	if( m_flNextOverchargeCheck <= gpGlobals->time )
+	{
+		m_flNextOverchargeCheck = gpGlobals->time + ISLAVE_OVERCHARGE_CHECK_INTERVAL;
+		m_iNearbySlaveCount = CountNearbySlaves();
+		m_bOverchargeReady = ( m_iNearbySlaveCount >= ISLAVE_OVERCHARGE_MIN_ALLIES );
+	}
+
+	// Manage the glow effect based on overcharge readiness
+	if( m_bOverchargeReady && m_hEnemy != 0 )
+	{
+		StartOverchargeGlow();
+	}
+	else
+	{
+		StopOverchargeGlow();
+	}
+}
+
+//=========================================================
+// CheckRangeAttack1 - prefer overcharge when ready
+//=========================================================
+bool CISlaveOvercharge::CheckRangeAttack1( float flDot, float flDist )
+{
+	if( m_flNextAttack > gpGlobals->time )
+		return false;
+
+	// If overcharge is ready, allow attack at longer range
+	if( m_bOverchargeReady && flDist > 64 && flDist <= 1536 )
+		return true;
+
+	return CISlave::CheckRangeAttack1( flDot, flDist );
+}
+
+//=========================================================
+// HandleAnimEvent - override zap shoot to do overcharge
+//=========================================================
+void CISlaveOvercharge::HandleAnimEvent( MonsterEvent_t *pEvent )
+{
+	switch( pEvent->event )
+	{
+	case ISLAVE_AE_ZAP_POWERUP:
+	{
+		if( m_bOverchargeReady && m_hEnemy != 0 )
+		{
+			// Hack to prevent the event from playing again when the animation ends
+			if (m_iTaskStatus == TASKSTATUS_COMPLETE)
+				break;
+
+			pev->framerate = GetSkillValue("islave_zap_rate") * ISLAVE_OVERCHARGE_FRAMERATE_FACTOR; // Slower charge for overcharge
+
+			UTIL_MakeAimVectors( pev->angles );
+
+			if( m_iBeams == 0 )
+			{
+				const Vector vecSrc = pev->origin + gpGlobals->v_forward * 2;
+				const Visual* pLightVisual = GetVisual(overchargeLightVisual);
+				if( pLightVisual )
+				{
+					Visual powerupVis = *pLightVisual;
+					powerupVis.life = (3.0f/pev->framerate);
+					SendDynLight(vecSrc, &powerupVis);
+				}
+			}
+
+			// Create overcharge powerup beams from arms
+			ArmBeam( ISLAVE_LEFT_ARM );
+			ArmBeam( ISLAVE_RIGHT_ARM );
+			BeamGlow();
+
+			// Drain nearby slaves and show channeling beams
+			DrainNearbySlaves();
+
+			// Intensify glow during powerup
+			StartOverchargeGlow();
+			pev->renderamt = Q_min((int)pev->renderamt + ISLAVE_OVERCHARGE_GLOW_INCREMENT, ISLAVE_OVERCHARGE_MAX_GLOW_THICKNESS);
+
+			SoundScriptParamOverride params;
+			params.OverridePitchShifted(m_iBeams * 10 + 20); // Higher pitched
+			EmitSoundScript(zapPowerupSoundScript, params);
+			break;
+		}
+
+		// Fall through to normal powerup if overcharge not ready
+		CISlave::HandleAnimEvent( pEvent );
+		break;
+	}
+	case ISLAVE_AE_ZAP_SHOOT:
+	{
+		if( m_bOverchargeReady && m_hEnemy != 0 )
+		{
+			ClearBeams();
+
+			// Fire overcharge attack: both concentrated beam and area effect
+			OverchargeZapBeam();
+			OverchargeCoilBeam();
+
+			// Massive screen shake
+			UTIL_ScreenShake( pev->origin, ISLAVE_OVERCHARGE_SHAKE_AMPLITUDE, ISLAVE_OVERCHARGE_SHAKE_FREQUENCY, ISLAVE_OVERCHARGE_SHAKE_DURATION, ISLAVE_OVERCHARGE_COIL_RADIUS );
+
+			// Area damage from the coil effect
+			const float coilDmg = GetSkillValue("islave_dmg_zap") * ISLAVE_OVERCHARGE_DAMAGE_MULTIPLIER * ISLAVE_OVERCHARGE_AREA_DAMAGE_FACTOR;
+			::RadiusDamage(this, pev->origin, pev, pev, DamageInfo{coilDmg, DMG_SHOCK | DMG_ENERGYBEAM},
+						   ISLAVE_OVERCHARGE_COIL_RADIUS,
+						   RADIUSDAMAGE_SPOT_IS_TARGET_CENTER,
+						   [this](CBaseEntity* pEntity) {
+				// Don't damage allies
+				const int rel = IRelationship(pEntity);
+				if (rel == R_AL)
+					return false;
+				return true;
+			});
+
+			EmitSoundScript(zapShootSoundScript);
+
+			// Longer cooldown for overcharge
+			m_flNextAttack = gpGlobals->time + GetSkillValue("islave_delay_zap") * ISLAVE_OVERCHARGE_COOLDOWN_MULTIPLIER;
+
+			// Reset overcharge state
+			StopOverchargeGlow();
+			m_bOverchargeReady = false;
+			m_flNextOverchargeCheck = gpGlobals->time + ISLAVE_OVERCHARGE_POST_ATTACK_DELAY; // Brief cooldown before checking again
+			break;
+		}
+
+		// Fall through to normal zap if overcharge not ready
+		CISlave::HandleAnimEvent( pEvent );
+		break;
+	}
+	default:
+		CISlave::HandleAnimEvent( pEvent );
+		break;
+	}
+}
+
+//=========================================================
+
 class CDeadISlave : public CDeadMonster
 {
 public:
