@@ -2119,6 +2119,11 @@ Schedule_t *CBaseMonster::GetSchedule()
 		{
 			if( HasConditions( bits_COND_HEAR_SOUND ) )
 			{
+				// Enhanced AI: In idle state, if in darkness, just listen cautiously
+				if( npc_enhanced_ai.value != 0 && HasConditions( bits_COND_SELF_IN_DARKNESS ) )
+				{
+					return GetScheduleOfType( SCHED_ALERT_LISTEN );
+				}
 				return GetScheduleOfType( SCHED_ALERT_FACE );
 			}
 			else if( FRouteClear() )
@@ -2162,6 +2167,36 @@ Schedule_t *CBaseMonster::GetSchedule()
 
 			if( HasConditions( bits_COND_LIGHT_DAMAGE | bits_COND_HEAVY_DAMAGE ) )
 			{
+				// Enhanced AI: If we have an enemy, transition to combat-aware response
+				if( npc_cover_attack_ai.value != 0 && m_hEnemy != 0 )
+				{
+					float flDist = ( m_vecEnemyLKP - pev->origin ).Length();
+					bool bCanSeeEnemy = HasConditions( bits_COND_SEE_ENEMY );
+
+					// Enemy visible and close: go straight to combat
+					if( bCanSeeEnemy && flDist < 512.0f )
+					{
+						if( HasConditions( bits_COND_CAN_RANGE_ATTACK1 ) )
+						{
+							return GetScheduleOfType( SCHED_RANGE_ATTACK1 );
+						}
+						if( HasConditions( bits_COND_CAN_MELEE_ATTACK1 ) )
+						{
+							return GetScheduleOfType( SCHED_MELEE_ATTACK1 );
+						}
+					}
+
+					// Enemy visible but farther: take cover then peek
+					if( bCanSeeEnemy )
+					{
+						return GetScheduleOfType( SCHED_TAKE_COVER_AND_ATTACK );
+					}
+
+					// Can't see enemy: take cover from the direction of damage
+					return GetScheduleOfType( SCHED_TAKE_COVER_FROM_ORIGIN );
+				}
+
+				// Fallback: original behavior
 				if( fabs( FlYawDiff() ) < ( 1.0f - m_flFieldOfView ) * 60.0f ) // roughly in the correct direction
 				{
 					return GetScheduleOfType( SCHED_TAKE_COVER_FROM_ORIGIN );
@@ -2209,10 +2244,22 @@ Schedule_t *CBaseMonster::GetSchedule()
 
 			if( HasConditions ( bits_COND_HEAR_SOUND ) )
 			{
+				// Enhanced AI: In darkness, be more cautious when investigating sounds
+				if( npc_enhanced_ai.value != 0 && HasConditions( bits_COND_SELF_IN_DARKNESS ) )
+				{
+					Remember( bits_MEMORY_HEARD_IN_DARK );
+					return GetScheduleOfType( SCHED_INVESTIGATE_SOUND_CAUTIOUS );
+				}
 				return GetScheduleOfType( SCHED_ALERT_FACE );
 			}
 			else
 			{
+				// Enhanced AI: If we recently heard something in darkness, stay alert and listen
+				if( npc_enhanced_ai.value != 0 && HasMemory( bits_MEMORY_HEARD_IN_DARK ) )
+				{
+					Forget( bits_MEMORY_HEARD_IN_DARK );
+					return GetScheduleOfType( SCHED_ALERT_LISTEN );
+				}
 				return GetScheduleOfType( SCHED_ALERT_STAND );
 			}
 			break;
@@ -2257,9 +2304,83 @@ Schedule_t *CBaseMonster::GetSchedule()
 			{
 				return GetScheduleOfType( SCHED_WAKE_ANGRY );
 			}
-			else if( HasConditions( bits_COND_LIGHT_DAMAGE ) && !HasMemory( bits_MEMORY_FLINCHED ) )
+			else if( HasConditions( bits_COND_LIGHT_DAMAGE | bits_COND_HEAVY_DAMAGE ) )
 			{
-				return GetScheduleOfType( SCHED_SMALL_FLINCH );
+				// Enhanced AI: Distance-based cover vs. counter-attack decision
+				if( npc_cover_attack_ai.value != 0 && m_hEnemy != 0 )
+				{
+					float flDist = ( m_vecEnemyLKP - pev->origin ).Length();
+					bool bCanSeeEnemy = HasConditions( bits_COND_SEE_ENEMY );
+					bool bHeavyDamage = HasConditions( bits_COND_HEAVY_DAMAGE );
+					float flHealthRatio = pev->health / pev->max_health;
+
+					// Heavy damage or low health: always seek cover first
+					if( bHeavyDamage || flHealthRatio < 0.3f )
+					{
+						if( bCanSeeEnemy )
+						{
+							// Take cover but allow attack interrupts (peek and shoot)
+							return GetScheduleOfType( SCHED_TAKE_COVER_AND_ATTACK );
+						}
+						else
+						{
+							return GetScheduleOfType( SCHED_TAKE_COVER_FROM_ORIGIN );
+						}
+					}
+
+					// Enemy visible and close: counter-attack immediately
+					if( bCanSeeEnemy && flDist < 512.0f )
+					{
+						if( HasConditions( bits_COND_CAN_RANGE_ATTACK1 ) )
+						{
+							return GetScheduleOfType( SCHED_RANGE_ATTACK1 );
+						}
+						if( HasConditions( bits_COND_CAN_MELEE_ATTACK1 ) )
+						{
+							return GetScheduleOfType( SCHED_MELEE_ATTACK1 );
+						}
+						// Can see but can't attack yet — duck if possible, else flinch
+						if( FBitSet( m_afCapability, bits_CAP_DUCK ) && !HasMemory( bits_MEMORY_FLINCHED ) )
+						{
+							return GetScheduleOfType( SCHED_DUCK_AND_RETURN_FIRE );
+						}
+					}
+
+					// Enemy visible, medium distance (512-1024): mixed response
+					if( bCanSeeEnemy && flDist < 1024.0f )
+					{
+						if( RANDOM_LONG( 0, 99 ) < 40 && HasConditions( bits_COND_CAN_RANGE_ATTACK1 ) )
+						{
+							// 40% chance: return fire immediately
+							return GetScheduleOfType( SCHED_RANGE_ATTACK1 );
+						}
+						else
+						{
+							// 60% chance: take cover then attack
+							return GetScheduleOfType( SCHED_TAKE_COVER_AND_ATTACK );
+						}
+					}
+
+					// Enemy visible but far (>1024) or not visible: take cover
+					if( bCanSeeEnemy )
+					{
+						return GetScheduleOfType( SCHED_TAKE_COVER_FROM_ENEMY );
+					}
+					else
+					{
+						return GetScheduleOfType( SCHED_TAKE_COVER_FROM_ORIGIN );
+					}
+				}
+
+				// Fallback: original behavior (flinch or take cover)
+				if( HasConditions( bits_COND_HEAVY_DAMAGE ) )
+				{
+					return GetScheduleOfType( SCHED_TAKE_COVER_FROM_ORIGIN );
+				}
+				if( HasConditions( bits_COND_LIGHT_DAMAGE ) && !HasMemory( bits_MEMORY_FLINCHED ) )
+				{
+					return GetScheduleOfType( SCHED_SMALL_FLINCH );
+				}
 			}
 			else if( !HasConditions( bits_COND_SEE_ENEMY ) )
 			{

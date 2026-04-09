@@ -10,6 +10,7 @@
 #define bits_SOUND_MEAT		( 1 << 4 )// gib or pork chop
 #define bits_SOUND_DANGER	( 1 << 5 )// pending danger. Grenade that is about to explode, explosive barrel that is damaged, falling crate
 #define bits_SOUND_GARBAGE	( 1 << 6 )// trash cans, banana peels, old fast food bags.
+#define bits_SOUND_FOOTSTEP	( 1 << 7 )// footstep sounds from player movement (distinct from generic player sounds)
 
 #define bits_SOUND_REMOVE_FROM_DEFAULT ( 1 << 10 )
 #define bits_SOUND_PLAYER_IF_NOT_ALLY ( bits_SOUND_PLAYER | (1 << 11) )

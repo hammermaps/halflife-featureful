@@ -88,6 +88,10 @@ typedef enum
 		SCHED_RETREAT_FROM_SPOT,
 		SCHED_RETREAT_FROM_SPOT_FAILED,
 		SCHED_IDLE_FACE,
+		SCHED_INVESTIGATE_SOUND_CAUTIOUS, // Slow, cautious investigation of a sound
+		SCHED_ALERT_LISTEN,	// Stop and listen attentively after hearing a suspicious sound
+		SCHED_TAKE_COVER_AND_ATTACK, // Take cover from enemy, then peek and return fire
+		SCHED_DUCK_AND_RETURN_FIRE, // Duck immediately and return fire (for NPCs with duck capability)
 
 		LAST_COMMON_SCHEDULE			// Leave this at the bottom
 } SCHEDULE_TYPE;
@@ -306,6 +310,7 @@ struct WayPoint_t
 #define bits_COND_CAN_RANGE_ATTACK2		( 1 << 12)
 #define bits_COND_CAN_MELEE_ATTACK2		( 1 << 13)
 // #define bits_COND_CAN_RANGE_ATTACK3		( 1 << 14)
+#define bits_COND_TARGET_IN_DARKNESS	( 1 << 14) // target entity is in a dark area, harder to see
 #define bits_COND_PROVOKED				( 1 << 15)
 #define bits_COND_NEW_ENEMY				( 1 << 16)
 #define bits_COND_HEAR_SOUND			( 1 << 17) // there is an interesting sound
@@ -316,6 +321,7 @@ struct WayPoint_t
 #define bits_COND_SEE_NEMESIS			( 1 << 22) // see my nemesis
 #define bits_COND_ENEMY_LOST			( 1 << 23) // did not observe an enemy for a while
 #define bits_COND_SCHEDULE_SUGGESTED	( 1 << 24)
+#define bits_COND_SELF_IN_DARKNESS		( 1 << 25) // monster itself is in a dark area
 
 #define bits_COND_CLIENT_PUSH			( 1 << 26) // Clients can push ally monsters out of their way
 #define bits_COND_NOFIRE				( 1 << 27) // better stop firing (usually as friendly fire is possible)

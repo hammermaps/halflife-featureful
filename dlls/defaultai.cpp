@@ -468,6 +468,145 @@ Schedule_t slInvestigateSpot[] =
 	},
 };
 
+//=========================================================
+// InvestigateSoundCautious - A more careful version of 
+// InvestigateSound. Monster walks slowly, stops to listen,
+// then carefully approaches the sound source.
+//=========================================================
+#define CAUTIOUS_LISTEN_BEFORE_MOVE	1.5f	// Seconds to listen before approaching sound
+#define CAUTIOUS_OBSERVE_AT_LOCATION	3.0f	// Seconds to observe at the sound location
+#define ALERT_LISTEN_DURATION		3.0f	// Seconds to listen when in alert state
+#define COVER_PEEK_DELAY		0.3f	// Seconds to wait in cover before peeking
+#define DUCK_RECOVERY_DELAY		0.5f	// Seconds to stay ducked before returning fire
+
+Task_t tlInvestigateSoundCautious[] =
+{
+	{ TASK_STOP_MOVING, (float)0 },
+	{ TASK_STORE_LASTPOSITION, (float)0 },
+	{ TASK_GET_PATH_TO_BESTSOUND, (float)0 },
+	{ TASK_FACE_IDEAL, (float)0 },
+	{ TASK_WAIT, CAUTIOUS_LISTEN_BEFORE_MOVE },	// Pause and listen first
+	{ TASK_WALK_PATH, (float)0 },			// Always walk, never run
+	{ TASK_WAIT_FOR_MOVEMENT, (float)0 },
+	{ TASK_PLAY_SEQUENCE, (float)ACT_IDLE },
+	{ TASK_WAIT, CAUTIOUS_OBSERVE_AT_LOCATION },	// Wait at location and observe
+	{ TASK_GET_PATH_TO_LASTPOSITION, (float)0 },
+	{ TASK_WALK_PATH, (float)0 },			// Walk back
+	{ TASK_WAIT_FOR_MOVEMENT, (float)0 },
+	{ TASK_CLEAR_LASTPOSITION, (float)0 },
+};
+
+Schedule_t slInvestigateSoundCautious[] =
+{
+	{
+		tlInvestigateSoundCautious,
+		ARRAYSIZE( tlInvestigateSoundCautious ),
+		bits_COND_NEW_ENEMY |
+		bits_COND_SEE_FEAR |
+		bits_COND_SEE_HATE |
+		bits_COND_SCHEDULE_SUGGESTED |
+		bits_COND_LIGHT_DAMAGE |
+		bits_COND_HEAVY_DAMAGE |
+		bits_COND_HEAR_SOUND,
+		bits_SOUND_DANGER |
+		bits_SOUND_COMBAT,
+		"InvestigateSoundCautious"
+	},
+};
+
+//=========================================================
+// AlertListen - Monster stops and listens carefully.
+// Used when a faint/distant sound is heard.
+//=========================================================
+Task_t tlAlertListen[] =
+{
+	{ TASK_STOP_MOVING, (float)0 },
+	{ TASK_SET_ACTIVITY, (float)ACT_IDLE },
+	{ TASK_WAIT, ALERT_LISTEN_DURATION },		// Stand still and listen
+};
+
+Schedule_t slAlertListen[] =
+{
+	{
+		tlAlertListen,
+		ARRAYSIZE( tlAlertListen ),
+		bits_COND_NEW_ENEMY |
+		bits_COND_SEE_ENEMY |
+		bits_COND_SEE_FEAR |
+		bits_COND_SEE_HATE |
+		bits_COND_SCHEDULE_SUGGESTED |
+		bits_COND_LIGHT_DAMAGE |
+		bits_COND_HEAVY_DAMAGE |
+		bits_COND_HEAR_SOUND,
+		bits_SOUND_DANGER |
+		bits_SOUND_COMBAT,
+		"AlertListen"
+	},
+};
+
+//=========================================================
+// TakeCoverAndAttack - Take cover from enemy, face the
+// enemy, then allow interruption by attack conditions.
+// This creates a "peek and shoot" behavior.
+//=========================================================
+Task_t tlTakeCoverAndAttack[] =
+{
+	{ TASK_STOP_MOVING, (float)0 },
+	{ TASK_FIND_COVER_FROM_ENEMY, (float)0 },
+	{ TASK_RUN_PATH, (float)0 },
+	{ TASK_WAIT_FOR_MOVEMENT, (float)0 },
+	{ TASK_REMEMBER, (float)bits_MEMORY_INCOVER },
+	{ TASK_FACE_ENEMY, (float)0 },
+	{ TASK_WAIT, COVER_PEEK_DELAY },
+};
+
+Schedule_t slTakeCoverAndAttack[] =
+{
+	{
+		tlTakeCoverAndAttack,
+		ARRAYSIZE( tlTakeCoverAndAttack ),
+		bits_COND_NEW_ENEMY |
+		bits_COND_CAN_RANGE_ATTACK1 |
+		bits_COND_CAN_RANGE_ATTACK2 |
+		bits_COND_CAN_MELEE_ATTACK1 |
+		bits_COND_CAN_MELEE_ATTACK2 |
+		bits_COND_HEAR_SOUND,
+		bits_SOUND_DANGER,
+		"TakeCoverAndAttack"
+	},
+};
+
+//=========================================================
+// DuckAndReturnFire - Duck immediately to reduce profile,
+// face enemy and wait for attack opportunity.
+// Only for NPCs with bits_CAP_DUCK.
+//=========================================================
+Task_t tlDuckAndReturnFire[] =
+{
+	{ TASK_STOP_MOVING, (float)0 },
+	{ TASK_REMEMBER, (float)bits_MEMORY_FLINCHED },
+	{ TASK_SMALL_FLINCH, (float)0 },
+	{ TASK_FACE_ENEMY, (float)0 },
+	{ TASK_WAIT, DUCK_RECOVERY_DELAY },
+};
+
+Schedule_t slDuckAndReturnFire[] =
+{
+	{
+		tlDuckAndReturnFire,
+		ARRAYSIZE( tlDuckAndReturnFire ),
+		bits_COND_CAN_RANGE_ATTACK1 |
+		bits_COND_CAN_RANGE_ATTACK2 |
+		bits_COND_CAN_MELEE_ATTACK1 |
+		bits_COND_CAN_MELEE_ATTACK2 |
+		bits_COND_ENEMY_DEAD |
+		bits_COND_NEW_ENEMY |
+		bits_COND_HEAR_SOUND,
+		bits_SOUND_DANGER,
+		"DuckAndReturnFire"
+	},
+};
+
 Task_t tlMoveToSpot[] =
 {
 	{ TASK_STOP_MOVING, (float)0 },
@@ -1433,6 +1572,10 @@ Schedule_t *CBaseMonster::m_scheduleList[] =
 	slRetreatFromEnemy,
 	slRetreatFromSpot,
 	slIdleFace,
+	slInvestigateSoundCautious,
+	slAlertListen,
+	slTakeCoverAndAttack,
+	slDuckAndReturnFire,
 	slFail,
 	slCombatFail
 };
@@ -1707,6 +1850,22 @@ Schedule_t* CBaseMonster::GetScheduleOfType( int Type )
 	case SCHED_IDLE_FACE:
 		{
 			return slIdleFace;
+		}
+	case SCHED_INVESTIGATE_SOUND_CAUTIOUS:
+		{
+			return &slInvestigateSoundCautious[0];
+		}
+	case SCHED_ALERT_LISTEN:
+		{
+			return &slAlertListen[0];
+		}
+	case SCHED_TAKE_COVER_AND_ATTACK:
+		{
+			return &slTakeCoverAndAttack[0];
+		}
+	case SCHED_DUCK_AND_RETURN_FIRE:
+		{
+			return &slDuckAndReturnFire[0];
 		}
 	default:
 		{

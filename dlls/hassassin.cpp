@@ -71,6 +71,7 @@ public:
 	const char* DefaultDisplayName() override { return "Female Assassin"; }
 	const char* ReverseRelationshipModel() override { return "models/hassassinf.mdl"; }
 	int DefaultISoundMask() override;
+	float DarknessVisionModifier() override { return 0.5f; } // Assassins are trained for dark operations
 	void Shoot();
 	void HandleAnimEvent( MonsterEvent_t *pEvent ) override;
 	Schedule_t *GetSchedule() override;

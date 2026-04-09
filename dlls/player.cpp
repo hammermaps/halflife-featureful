@@ -3654,6 +3654,13 @@ static void CheckPowerups( entvars_t *pev )
 		return;
 }
 
+// Enhanced AI: Stealth system volume modifiers
+#define STEALTH_CROUCH_VOLUME_MODIFIER	0.3f	// Crouching reduces footstep noise to 30%
+#define STEALTH_SPRINT_VOLUME_MODIFIER	1.5f	// Sprinting increases noise by 50%
+#define STEALTH_SPRINT_SPEED_THRESHOLD	270.0f	// Speed above which sprinting bonus applies
+#define STEALTH_SPRINT_VOLUME_CAP		768		// Maximum volume when sprinting
+#define STEALTH_WATER_VOLUME_MODIFIER	1.4f	// Water movement increases noise by 40%
+
 //=========================================================
 // UpdatePlayerSound - updates the position of the player's
 // reserved sound slot in the sound list.
@@ -3683,6 +3690,35 @@ void CBasePlayer::UpdatePlayerSound()
 		if( iBodyVolume > 512 )
 		{
 			iBodyVolume = 512;
+		}
+
+		// Enhanced AI: Stealth system - modify body volume based on movement state
+		if( npc_enhanced_ai.value != 0 && npc_stealth_system.value != 0 && iBodyVolume > 0 )
+		{
+			if( FBitSet( pev->flags, FL_DUCKING ) )
+			{
+				// Crouching reduces footstep noise
+				iBodyVolume = (int)( iBodyVolume * STEALTH_CROUCH_VOLUME_MODIFIER );
+			}
+			else if( pev->velocity.Length2D() > STEALTH_SPRINT_SPEED_THRESHOLD )
+			{
+				// Sprinting is louder
+				iBodyVolume = (int)( iBodyVolume * STEALTH_SPRINT_VOLUME_MODIFIER );
+				if( iBodyVolume > STEALTH_SPRINT_VOLUME_CAP )
+					iBodyVolume = STEALTH_SPRINT_VOLUME_CAP;
+			}
+
+			// Walking in water is louder (splashing)
+			if( pev->waterlevel >= 1 && pev->waterlevel < 3 )
+			{
+				iBodyVolume = (int)( iBodyVolume * STEALTH_WATER_VOLUME_MODIFIER );
+			}
+
+			// Add footstep sound type when moving on ground
+			if( iBodyVolume > 0 )
+			{
+				pSound->m_iType |= bits_SOUND_FOOTSTEP;
+			}
 		}
 	}
 	else

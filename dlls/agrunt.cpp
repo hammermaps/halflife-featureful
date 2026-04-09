@@ -76,6 +76,7 @@ public:
 	const char* DefaultDisplayName() override { return "Alien Grunt"; }
 	const char* ReverseRelationshipModel() override { return "models/agruntf.mdl"; }
 	int DefaultISoundMask() override;
+	float DarknessVisionModifier() override { return 0.3f; } // Alien Grunts have excellent night vision
 	void HandleAnimEvent( MonsterEvent_t *pEvent ) override;
 	void SetObjectCollisionBox() override
 	{

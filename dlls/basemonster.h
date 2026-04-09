@@ -133,6 +133,9 @@ public:
 	float m_flDistTooFar;	// if enemy farther away than this, bits_COND_ENEMY_TOOFAR set in CheckEnemy
 	float m_flDistLook;	// distance monster sees (Default 2048)
 
+	float m_flAwareness;	// awareness level (0.0 = unaware, 1.0 = fully alert), affects perception
+	float m_flLastAwarenessUpdate;	// last time awareness was updated
+
 	short m_iTriggerCondition;// for scripted AI, this is the condition that will cause the activation of the monster's TriggerTarget
 	short m_iTriggerAltCondition;
 	string_t m_iszTriggerTarget;// name of target that should be fired. 
@@ -343,6 +346,12 @@ public:
 	virtual CSound* PBestSound();
 	virtual CSound* PBestScent();
 	virtual float HearingSensitivity() { return 1.0; }
+
+	// Enhanced AI perception
+	float GetTargetVisibilityFactor( CBaseEntity* pTarget );
+	virtual float DarknessVisionModifier() { return 1.0; } // Override for monsters with better night vision (< 1.0 = less affected by darkness)
+	void UpdateAwareness();
+	float GetEffectiveHearingSensitivity();
 
 	bool FBecomeProne() override;
 	virtual void BarnacleVictimBitten( entvars_t *pevBarnacle );
