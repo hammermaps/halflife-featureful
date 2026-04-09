@@ -49,6 +49,7 @@ DLL_GLOBAL	short g_sModelIndexWExplosion;// holds the index for the underwater e
 DLL_GLOBAL	short g_sModelIndexBubbles;// holds the index for the bubbles model
 DLL_GLOBAL	short g_sModelIndexBloodDrop;// holds the sprite index for the initial blood
 DLL_GLOBAL	short g_sModelIndexBloodSpray;// holds the sprite index for splattered blood
+DLL_GLOBAL	short g_sModelIndexShockwave;// holds the index for the shockwave ring
 
 ItemInfo CBasePlayerWeapon::ItemInfoArray[MAX_WEAPONS];
 
@@ -453,6 +454,7 @@ void W_Precache( CBaseEntity* pWorld )
 
 	g_sModelIndexLaser = PRECACHE_MODEL( g_pModelNameLaser );
 	g_sModelIndexLaserDot = PRECACHE_MODEL( "sprites/laserdot.spr" );
+	g_sModelIndexShockwave = PRECACHE_MODEL( "sprites/shockwave.spr" );
 
 	// used by explosions
 	PRECACHE_MODEL( "models/grenade.mdl" );
