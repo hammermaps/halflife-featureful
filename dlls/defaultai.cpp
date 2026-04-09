@@ -476,6 +476,8 @@ Schedule_t slInvestigateSpot[] =
 #define CAUTIOUS_LISTEN_BEFORE_MOVE	1.5f	// Seconds to listen before approaching sound
 #define CAUTIOUS_OBSERVE_AT_LOCATION	3.0f	// Seconds to observe at the sound location
 #define ALERT_LISTEN_DURATION		3.0f	// Seconds to listen when in alert state
+#define COVER_PEEK_DELAY		0.3f	// Seconds to wait in cover before peeking
+#define DUCK_RECOVERY_DELAY		0.5f	// Seconds to stay ducked before returning fire
 
 Task_t tlInvestigateSoundCautious[] =
 {
@@ -555,7 +557,7 @@ Task_t tlTakeCoverAndAttack[] =
 	{ TASK_WAIT_FOR_MOVEMENT, (float)0 },
 	{ TASK_REMEMBER, (float)bits_MEMORY_INCOVER },
 	{ TASK_FACE_ENEMY, (float)0 },
-	{ TASK_WAIT, (float)0.3 },
+	{ TASK_WAIT, COVER_PEEK_DELAY },
 };
 
 Schedule_t slTakeCoverAndAttack[] =
@@ -585,7 +587,7 @@ Task_t tlDuckAndReturnFire[] =
 	{ TASK_REMEMBER, (float)bits_MEMORY_FLINCHED },
 	{ TASK_SMALL_FLINCH, (float)0 },
 	{ TASK_FACE_ENEMY, (float)0 },
-	{ TASK_WAIT, (float)0.5 },
+	{ TASK_WAIT, DUCK_RECOVERY_DELAY },
 };
 
 Schedule_t slDuckAndReturnFire[] =

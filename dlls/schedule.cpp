@@ -2372,7 +2372,11 @@ Schedule_t *CBaseMonster::GetSchedule()
 					}
 				}
 
-				// Fallback: original behavior (flinch on light damage)
+				// Fallback: original behavior (flinch or take cover)
+				if( HasConditions( bits_COND_HEAVY_DAMAGE ) )
+				{
+					return GetScheduleOfType( SCHED_TAKE_COVER_FROM_ORIGIN );
+				}
 				if( HasConditions( bits_COND_LIGHT_DAMAGE ) && !HasMemory( bits_MEMORY_FLINCHED ) )
 				{
 					return GetScheduleOfType( SCHED_SMALL_FLINCH );
