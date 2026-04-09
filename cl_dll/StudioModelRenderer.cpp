@@ -994,7 +994,7 @@ void CStudioModelRenderer::StudioSetupBones()
 			// Apply client-side effects to the transformation matrix
 			StudioFxTransform( m_pCurrentEntity, (*m_pbonetransform)[i] );
 		} 
-		else 
+		else if( pbones[i].parent >= 0 && pbones[i].parent < m_pStudioHeader->numbones )
 		{
 			ConcatTransforms( (*m_pbonetransform)[pbones[i].parent], bonematrix, (*m_pbonetransform)[i] );
 			ConcatTransforms( (*m_plighttransform)[pbones[i].parent], bonematrix, (*m_plighttransform)[i] );
@@ -1101,7 +1101,7 @@ void CStudioModelRenderer::StudioMergeBones( model_t *m_pSubModel )
 				// Apply client-side effects to the transformation matrix
 				StudioFxTransform( m_pCurrentEntity, (*m_pbonetransform)[i] );
 			} 
-			else 
+			else if( pbones[i].parent >= 0 && pbones[i].parent < m_pStudioHeader->numbones )
 			{
 				ConcatTransforms( (*m_pbonetransform)[pbones[i].parent], bonematrix, (*m_pbonetransform)[i] );
 				ConcatTransforms( (*m_plighttransform)[pbones[i].parent], bonematrix, (*m_plighttransform)[i] );

@@ -805,6 +805,10 @@ void CBreakable::Die()
 
 void CBreakable::DieToActivator( CBaseEntity* pActivator )
 {
+	// Don't allow damage to trigger Die again to prevent spawning multiple copies of items and gibs.
+	if( pev->solid == SOLID_NOT )
+		return;
+
 	Vector vecSpot;// shard origin
 	Vector vecVelocity;// shard velocity
 	char cFlag = 0;
