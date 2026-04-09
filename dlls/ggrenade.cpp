@@ -27,6 +27,7 @@
 #include "decals.h"
 #include "game.h"
 #include "visuals_utils.h"
+#include "explode.h"
 
 //===================grenade
 
@@ -122,6 +123,12 @@ void CGrenade::Explode( TraceResult *pTrace, int bitsDamageType )
 		::RadiusDamage(pev->origin, pev, pevOwner, DamageInfo{damage, bitsDamageType}, exploRadius, CLASS_NONE);
 	else
 		RadiusDamage( pev, pevOwner, DamageInfo{damage, bitsDamageType}, CLASS_NONE );
+
+	// Enhanced explosion effects: light flash, shockwave ring, smoke, screen shake, and push
+	{
+		const float effectRadius = exploRadius > 0 ? exploRadius : damage * DEFAULT_EXPLOSION_RADIUS_MULTIPLIER;
+		ExplosionEffects( pev->origin, damage, effectRadius );
+	}
 
 	if( RANDOM_FLOAT( 0, 1 ) < 0.5f )
 	{

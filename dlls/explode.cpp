@@ -26,6 +26,9 @@
 #include "explode.h"
 #include "locus.h"
 #include "combat.h"
+#include "shake.h"
+#include "global_models.h"
+#include "clamp.h"
 
 // Spark Shower
 class CShower : public CBaseEntity
@@ -271,6 +274,12 @@ void CEnvExplosion::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE
 		::RadiusDamage( pev->origin, pev, pevAttacker, DamageInfo{(float)m_iMagnitude, DMG_BLAST}, radius, CLASS_NONE );
 	}
 
+	// Enhanced explosion effects: light flash, shockwave ring, smoke, screen shake, and push
+	{
+		const float effectRadius = m_iRadius > 0 ? m_iRadius : m_iMagnitude * DEFAULT_EXPLOSION_RADIUS_MULTIPLIER;
+		ExplosionEffects( pev->origin, (float)m_iMagnitude, effectRadius );
+	}
+
 	SetThink( &CEnvExplosion::Smoke );
 	pev->nextthink = gpGlobals->time + 0.3f;
 
@@ -302,6 +311,115 @@ void CEnvExplosion::Smoke()
 	if( !( pev->spawnflags & SF_ENVEXPLOSION_REPEATABLE ) )
 	{
 		UTIL_Remove( this );
+	}
+}
+
+// Enhanced explosion visual effects: dynamic light flash, shockwave ring, smoke, screen shake, and push
+#define EXPLOSION_PUSH_HORIZONTAL	3.0f	// horizontal force multiplier
+#define EXPLOSION_PUSH_UPWARD		1.5f	// additional upward kick multiplier
+#define EXPLOSION_PUNCH_MIN		-3.0f	// min punch angle for players
+#define EXPLOSION_PUNCH_MAX		-1.0f	// max punch angle for players
+
+void ExplosionEffects( const Vector &origin, float magnitude, float radius )
+{
+	if( radius <= 0.0f )
+		radius = magnitude * DEFAULT_EXPLOSION_RADIUS_MULTIPLIER;
+
+	// 1. Bright dynamic light flash
+	const int lightRadius = clamp( (int)( magnitude * 0.3f ), 10, 255 );
+	MESSAGE_BEGIN( MSG_PAS, SVC_TEMPENTITY, origin );
+		WRITE_BYTE( TE_DLIGHT );
+		WRITE_COORD( origin.x );
+		WRITE_COORD( origin.y );
+		WRITE_COORD( origin.z );
+		WRITE_BYTE( lightRadius );	// radius in 10's
+		WRITE_BYTE( 255 );		// r
+		WRITE_BYTE( 220 );		// g
+		WRITE_BYTE( 150 );		// b
+		WRITE_BYTE( 8 );		// life in 10's (0.8 seconds)
+		WRITE_BYTE( 80 );		// decay rate in 10's
+	MESSAGE_END();
+
+	// 2. Shockwave ring expanding outward
+	if( g_sModelIndexShockwave )
+	{
+		// TE_BEAMCYLINDER uses the second coord set as axis endpoint; Z offset = ring expansion radius
+		const float clampedRadius = Q_min( radius, 1024.0f );
+		MESSAGE_BEGIN( MSG_PAS, SVC_TEMPENTITY, origin );
+			WRITE_BYTE( TE_BEAMCYLINDER );
+			WRITE_COORD( origin.x );
+			WRITE_COORD( origin.y );
+			WRITE_COORD( origin.z );
+			WRITE_COORD( origin.x );
+			WRITE_COORD( origin.y );
+			WRITE_COORD( origin.z + clampedRadius );	// axis endpoint: Z offset defines expansion radius
+			WRITE_SHORT( g_sModelIndexShockwave );
+			WRITE_BYTE( 0 );		// starting frame
+			WRITE_BYTE( 10 );		// frame rate in 0.1's
+			WRITE_BYTE( 6 );		// life in 0.1's (0.6 seconds)
+			WRITE_BYTE( 16 );		// line width in 0.1's
+			WRITE_BYTE( 0 );		// noise amplitude
+			WRITE_BYTE( 255 );		// r
+			WRITE_BYTE( 255 );		// g
+			WRITE_BYTE( 200 );		// b
+			WRITE_BYTE( 160 );		// brightness
+			WRITE_BYTE( 0 );		// scroll speed
+		MESSAGE_END();
+	}
+
+	// 3. Additional rising smoke particles at random offsets
+	for( int i = 0; i < 2; i++ )
+	{
+		Vector smokePos = origin;
+		smokePos.x += RANDOM_FLOAT( -64.0f, 64.0f );
+		smokePos.y += RANDOM_FLOAT( -64.0f, 64.0f );
+		smokePos.z += RANDOM_FLOAT( 16.0f, 80.0f );
+
+		MESSAGE_BEGIN( MSG_PAS, SVC_TEMPENTITY, smokePos );
+			WRITE_BYTE( TE_SMOKE );
+			WRITE_COORD( smokePos.x );
+			WRITE_COORD( smokePos.y );
+			WRITE_COORD( smokePos.z );
+			WRITE_SHORT( g_sModelIndexSmoke );
+			WRITE_BYTE( clamp( (int)( magnitude * 0.15f ), 5, 80 ) );	// scale * 10
+			WRITE_BYTE( 8 );		// framerate
+		MESSAGE_END();
+	}
+
+	// 4. Screen shake based on explosion magnitude
+	const float shakeAmplitude = clamp( magnitude * 0.08f, 2.0f, 16.0f );
+	const float shakeDuration = clamp( magnitude * 0.01f, 0.5f, 2.0f );
+	UTIL_ScreenShake( origin, shakeAmplitude, 100.0f, shakeDuration, radius * 1.5f );
+
+	// 5. Push nearby entities away from the explosion (distance-based force)
+	CBaseEntity *pEntity = nullptr;
+	while( ( pEntity = UTIL_FindEntityInSphere( pEntity, origin, radius ) ) != nullptr )
+	{
+		if( pEntity->pev->takedamage == DAMAGE_NO )
+			continue;
+		if( pEntity->IsBSPModel() )
+			continue;
+
+		Vector vecDir = pEntity->Center() - origin;
+		float flDist = vecDir.Length();
+
+		if( flDist == 0.0f )
+			flDist = 1.0f;
+
+		vecDir = vecDir * ( 1.0f / flDist );	// normalize
+
+		// Force falls off linearly with distance: closer = stronger push
+		float flForce = ( 1.0f - ( flDist / radius ) ) * magnitude;
+		if( flForce <= 0.0f )
+			continue;
+
+		pEntity->pev->velocity = pEntity->pev->velocity + vecDir * flForce * EXPLOSION_PUSH_HORIZONTAL;
+		pEntity->pev->velocity.z += flForce * EXPLOSION_PUSH_UPWARD;
+
+		if( pEntity->IsPlayer() )
+		{
+			pEntity->pev->punchangle.x += RANDOM_FLOAT( EXPLOSION_PUNCH_MIN, EXPLOSION_PUNCH_MAX ) * ( flForce / magnitude );
+		}
 	}
 }
 
