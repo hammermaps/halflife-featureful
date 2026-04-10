@@ -11,7 +11,18 @@
 #if OPENGL_AVAILABLE
 
 #if defined (_WIN32)
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#ifndef WIN32_EXTRA_LEAN
+#define WIN32_EXTRA_LEAN
+#endif
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#define HSPRITE WINDOWS_HSPRITE
 #include <windows.h>
+#undef HSPRITE
 #else // _WIN32
 
 #define APIENTRY // __stdcall ?
