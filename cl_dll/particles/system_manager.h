@@ -61,7 +61,7 @@ private:
 public:
 	// creates and destroys a particle system
 	CParticleSystemManager() { 
-		m_flLastSort = 0.0; m_flLastDebug = 0.0;
+		m_flLastSort = gEngfuncs.GetClientTime(); m_flLastDraw = gEngfuncs.GetClientTime(); m_flLastDebug = 0.0;
 		m_pParticleSystems.clear(); m_pParticles.clear(); m_pUnsortedParticles.clear();
 	}
 	~CParticleSystemManager() { RemoveParticles(); RemoveSystems(); RemoveTextures(); }

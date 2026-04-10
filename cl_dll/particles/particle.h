@@ -204,7 +204,7 @@ protected:
 	virtual void Draw( void );
 
 	CGrassParticle(grass_particle_system *pSystem, particle_texture_s *pParticleTexture);
-	~CGrassParticle() { }
+	~CGrassParticle() { delete pSys; pSys = NULL; }
 };
 // forward declare our classes
 class CGrassParticle;
