@@ -56,7 +56,7 @@ CParticleSystem::CParticleSystem()
 CParticleSystem::~CParticleSystem() {}
 
 // adds a particle to the system
-inline void CParticleSystem::AddParticle( CParticle *pParticle )
+void CParticleSystem::AddParticle( CParticle *pParticle )
 {
 	 pParticleManager->AddParticle(pParticle);
 }
@@ -107,7 +107,7 @@ CFlintlockSmokeParticleSystem::CFlintlockSmokeParticleSystem(Vector vPosition) :
 	m_iStartingParticles = STARTING_FLINKLOCK_SMOKE_PARTICLES;
 	m_flSystemMaxAge = FLINTLOCK_SMOKE_SYSTEM_LIFE;
 
-	pParticleTexture = LoadTGA(NULL, const_cast<char*>(FLINTLOCK_SMOKE_PARTICLE));
+	pParticleTexture = LoadTGA(NULL, FLINTLOCK_SMOKE_PARTICLE);
 
 	int n = StartingParticles();
 	for(int i = 0; i < n; i++) {
@@ -121,7 +121,7 @@ CBarrelSmokeParticleSystem::CBarrelSmokeParticleSystem(Vector vPosition, Vector 
 {
 	int i = 0;
 	for(i = 0; i < NUM_DIFFERENT_BARREL_PARTICLES; i++) {
-		pParticleTextures[i] = LoadTGA(NULL, const_cast<char*>(BARREL_SMOKE_PARTICLES[i]));
+		pParticleTextures[i] = LoadTGA(NULL, BARREL_SMOKE_PARTICLES[i]);
 	}
 
 	m_vPosition = vPosition;
@@ -166,7 +166,7 @@ CSparkParticleSystem::CSparkParticleSystem(Vector vPosition, Vector vDirection)	
 	m_iStartingParticles = STARTING_SPARK_PARTICLES;
 	m_flSystemMaxAge = SPARK_SYSTEM_LIFE;
 
-	pParticleTexture = LoadTGA(NULL, const_cast<char*>(SPARK_PARTICLE)); 
+	pParticleTexture = LoadTGA(NULL, SPARK_PARTICLE); 
 
 	int n = StartingParticles();
 	for(int i = 0; i < n; i++) {
@@ -198,7 +198,7 @@ CWhiteSmokeParticleSystem::CWhiteSmokeParticleSystem(Vector vPosition, Vector vD
 	m_iStartingParticles = STARTING_WHITE_SMOKE_PARTICLES;
 	m_flSystemMaxAge = WHITE_SMOKE_SYSTEM_LIFE;
 
-	pParticleTexture = LoadTGA(NULL, const_cast<char*>(WHITE_SMOKE_PARTICLE)); 
+	pParticleTexture = LoadTGA(NULL, WHITE_SMOKE_PARTICLE); 
 
 	int n = StartingParticles();
 	for(int i = 0; i < n; i++) {
@@ -216,7 +216,7 @@ CBrownSmokeParticleSystem::CBrownSmokeParticleSystem(Vector vPosition, Vector vD
 	m_iStartingParticles = STARTING_BROWN_SMOKE_PARTICLES;
 	m_flSystemMaxAge = BROWN_SMOKE_SYSTEM_LIFE;
 
-	pParticleTexture = LoadTGA(NULL, const_cast<char*>(BROWN_SMOKE_PARTICLE)); 
+	pParticleTexture = LoadTGA(NULL, BROWN_SMOKE_PARTICLE); 
 
 	int n = StartingParticles();
 	for(int i = 0; i < n; i++) {

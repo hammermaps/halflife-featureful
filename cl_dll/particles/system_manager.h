@@ -84,8 +84,8 @@ public:
 	void CreateSparkPS(Vector vPosition, Vector vDirection);
 	void CreateWhitePS(Vector vPosition, Vector vDirection);
 	void CreateBrownPS(Vector vPosition, Vector vDirection);
-	void CreateGrassPS(char* sFile, particle_system_management* pSystem );
-	void CreateMappedPS(char* sFile, particle_system_management* pSystem );
+	void CreateGrassPS(const char* sFile, particle_system_management* pSystem );
+	void CreateMappedPS(const char* sFile, particle_system_management* pSystem );
 	void CreatePresetPS(unsigned int iPreset, particle_system_management* pSystem);
 
 	// Adds Particles so we can do the actual drawing
@@ -94,8 +94,8 @@ public:
 	void RemoveParticle( CParticle* pParticle );
 
 	// Allows us to maintain a lookup table of loaded textures
-	void AddTexture(char* sName, particle_texture_s* pTexture);
-	particle_texture_s* HasTexture(char* sName);
+	void AddTexture(const char* sName, particle_texture_s* pTexture);
+	particle_texture_s* HasTexture(const char* sName);
 
 	// Precaches commonly used textures on map load so that we don't have to have pauses while
 	// they are loaded

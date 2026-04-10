@@ -41,7 +41,7 @@
 #if OPENGL_AVAILABLE
 
 // creates a new mapped particle system
-CMappedParticleSystem::CMappedParticleSystem( char *sParticleDefinition, particle_system_management *pSysDetails ) : CParticleSystem()
+CMappedParticleSystem::CMappedParticleSystem( const char *sParticleDefinition, particle_system_management *pSysDetails ) : CParticleSystem()
 {
 	m_sParticleFile = sParticleDefinition;
 	m_iID = pSysDetails->iID;

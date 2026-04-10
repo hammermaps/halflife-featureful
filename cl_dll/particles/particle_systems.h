@@ -67,16 +67,16 @@ protected:
 	inline float TimeSinceLastDraw( void ) const { return (gEngfuncs.GetClientTime() - m_flLastDraw); }
 
 	// returns the number of particles to be created on creation of this system
-	inline unsigned int StartingParticles( void );
+	unsigned int StartingParticles( void );
 	// returns the percentages of particles to be created now
-	inline float NewParticlesCreationDelay( void );
+	float NewParticlesCreationDelay( void );
 	// tests whether this system should be deleted or not
-	virtual inline bool TestSystem( void );
+	virtual bool TestSystem( void );
 	// updates the counters in the system
 	virtual void UpdateSystem( void );
 
 	// adds a particle to this system
-	virtual inline void AddParticle( CParticle *pParticle );
+	virtual void AddParticle( CParticle *pParticle );
 public:
 	// draw all associated particles
 	virtual bool DrawSystem();
@@ -135,17 +135,17 @@ class CMappedParticleSystem : public CParticleSystem
 	// all the details about this system
 	mapped_particle_system *m_pSystem;
 	// the file from which all our settings are loaded
-	char *m_sParticleFile;
+	const char *m_sParticleFile;
 
 	// give all values in the system defaults before loading the file
 	void CreateDefaultParticleSystem( void );
 	// parse the defintion file
 	bool LoadParticleDefinition( void );
 protected:
-	virtual inline bool TestSystem( void );
+	virtual bool TestSystem( void );
 	virtual void UpdateSystem( void );
 public:
-	CMappedParticleSystem( char *sParticleDefinition, particle_system_management *pSysDetails );
+	CMappedParticleSystem( const char *sParticleDefinition, particle_system_management *pSysDetails );
 	~CMappedParticleSystem();
 };
 
@@ -155,7 +155,7 @@ class CGrassParticleSystem : public CParticleSystem
 	friend class CParticleSystemManager;
 
 	// the file from which all our settings are loaded
-	char *m_sParticleFile;
+	const char *m_sParticleFile;
 	// container for all particle types
 	// all particles of that type are contained within
 	vector<grass_particle_types*> m_cGrassTypes;
@@ -166,11 +166,11 @@ class CGrassParticleSystem : public CParticleSystem
 	bool LoadParticleDefinition( particle_system_management *pSysDetails );
 protected:
 	// tests whether this system is ready to die
-	virtual inline bool TestSystem( void ) { return !(m_flSystemMaxAge == 0.01); }
+	virtual bool TestSystem( void ) { return !(m_flSystemMaxAge == 0.01); }
 	// adds a new particle to this system
-	inline void AddParticle( CParticle *pParticle, grass_particle_types *pGrassType );
+	void AddParticle( CParticle *pParticle, grass_particle_types *pGrassType );
 public:
-	CGrassParticleSystem( char *sParticleDefinition, particle_system_management *pSysDetails);
+	CGrassParticleSystem( const char *sParticleDefinition, particle_system_management *pSysDetails);
 	~CGrassParticleSystem();
 };
 #endif

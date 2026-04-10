@@ -253,7 +253,7 @@ void CParticleSystemManager::CreateBrownPS(Vector vPosition, Vector vDirection)
 	AddSystem(new CBrownSmokeParticleSystem(vPosition, vDirection));
 }
 
-void CParticleSystemManager::CreateGrassPS( char* sFile, particle_system_management* pSystem )
+void CParticleSystemManager::CreateGrassPS( const char* sFile, particle_system_management* pSystem )
 {
 	if(pSystem == NULL) {
 		return;
@@ -265,7 +265,7 @@ void CParticleSystemManager::CreateGrassPS( char* sFile, particle_system_managem
 	AddSystem(new CGrassParticleSystem(sFile, pSystem));
 }
 
-void CParticleSystemManager::CreateMappedPS( char* sFile, particle_system_management* pSystem )
+void CParticleSystemManager::CreateMappedPS( const char* sFile, particle_system_management* pSystem )
 {
 	if(pSystem == NULL) {
 		return;
@@ -292,7 +292,7 @@ bool CParticleSystemManager::CheckDrawSystem( void )
 }
 
 // adds a new texture to our cache
-void CParticleSystemManager::AddTexture(char* sName, particle_texture_s *pTexture) {
+void CParticleSystemManager::AddTexture(const char* sName, particle_texture_s *pTexture) {
 	particle_texture_cache *pCacheEntry = new particle_texture_cache;
 	snprintf(pCacheEntry->sTexture, MAX_PARTICLE_PATH-1, "%s", sName);
 	pCacheEntry->pTexture = pTexture;
@@ -301,7 +301,7 @@ void CParticleSystemManager::AddTexture(char* sName, particle_texture_s *pTextur
 }
 
 // check for a texture with the same path
-particle_texture_s* CParticleSystemManager::HasTexture(char* sName) {
+particle_texture_s* CParticleSystemManager::HasTexture(const char* sName) {
 	unsigned int i = 0;
 	unsigned int iTextures = m_pTextures.size();
 	particle_texture_cache *pCacheEntry = NULL;
@@ -319,11 +319,11 @@ particle_texture_s* CParticleSystemManager::HasTexture(char* sName) {
 // cache the most used tgas
 void CParticleSystemManager::PrecacheTextures( void ) {
 	gEngfuncs.Con_Printf("Caching frequently used particles, this may take a few moments\n");
-	LoadTGA(NULL, const_cast<char*>(FLINTLOCK_SMOKE_PARTICLE));
-	LoadTGA(NULL, const_cast<char*>(BARREL_SMOKE_PARTICLES[0]));
-	LoadTGA(NULL, const_cast<char*>(BARREL_SMOKE_PARTICLES[1]));
-	LoadTGA(NULL, const_cast<char*>(BARREL_SMOKE_PARTICLES[2]));
-	LoadTGA(NULL, const_cast<char*>(BROWN_SMOKE_PARTICLE));
+	LoadTGA(NULL, FLINTLOCK_SMOKE_PARTICLE);
+	LoadTGA(NULL, BARREL_SMOKE_PARTICLES[0]);
+	LoadTGA(NULL, BARREL_SMOKE_PARTICLES[1]);
+	LoadTGA(NULL, BARREL_SMOKE_PARTICLES[2]);
+	LoadTGA(NULL, BROWN_SMOKE_PARTICLE);
 	gEngfuncs.Con_Printf("Finished caching frequently used particles, game loading will now continue\n");
 }
 

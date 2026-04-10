@@ -40,7 +40,7 @@
 
 #if OPENGL_AVAILABLE
 
-CGrassParticleSystem::CGrassParticleSystem( char *sParticleDefinition, particle_system_management *pSysDetails ) : CParticleSystem()
+CGrassParticleSystem::CGrassParticleSystem( const char *sParticleDefinition, particle_system_management *pSysDetails ) : CParticleSystem()
 {
 	m_sParticleFile = sParticleDefinition;
 	m_iID = pSysDetails->iID;
@@ -99,7 +99,7 @@ CGrassParticleSystem::~CGrassParticleSystem()
 	m_cGrassTypes.clear();
 }
 
-inline void CGrassParticleSystem::AddParticle( CParticle *pParticle, grass_particle_types *pGrassType )
+void CGrassParticleSystem::AddParticle( CParticle *pParticle, grass_particle_types *pGrassType )
 {
 	pParticleManager->AddParticle(pParticle);
 }

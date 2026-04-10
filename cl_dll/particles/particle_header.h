@@ -67,11 +67,11 @@ extern cvar_t* g_ParticleSorts;
 // this player's position - updated each frame
 extern Vector flPlayerOrigin;
 // sets up ogl for all particles
-extern inline void Particle_InitOpenGL( void );
+extern void Particle_InitOpenGL( void );
 // "closes" opengl again when drawing is done so we don't screw up settings for HL
-extern inline void Particle_FinishOpenGL( void );
+extern void Particle_FinishOpenGL( void );
 // loads a tga to a pointer
-extern particle_texture_s * LoadTGA(particle_texture_s *pTexture, char* filename);
+extern particle_texture_s * LoadTGA(particle_texture_s *pTexture, const char* filename);
 // this is the pointer that all particle systems add themselves to.
 // it must be the only one as it deletes the particle systems
 // and we don't want dangling pointers

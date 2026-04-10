@@ -47,7 +47,7 @@
 static unsigned char cUncompressedHeader[12] = {0,0,2,0,0,0,0,0,0,0,0,0};
 static unsigned char cCompressedHeader[12] = {0,0,10,0,0,0,0,0,0,0,0,0};
 
-particle_texture_s * LoadTGA(particle_texture_s *pTexture, char *filename)
+particle_texture_s * LoadTGA(particle_texture_s *pTexture, const char *filename)
 {
 	particle_texture_s *pCached = pParticleManager->HasTexture(filename);
 	if(pCached)
