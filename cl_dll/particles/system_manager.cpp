@@ -47,6 +47,7 @@ CParticleSystemManager *pParticleManager = NULL;
 cvar_t* g_ParticleCount = NULL;
 cvar_t* g_ParticleDebug = NULL;
 cvar_t* g_ParticleSorts = NULL;
+cvar_t* g_ExplosionDetail = NULL;
 Vector flPlayerOrigin;
 
 // updates all systems
@@ -155,60 +156,263 @@ void CParticleSystemManager::UpdateSystems( void )
 // handles all the preset particle systems
 void CParticleSystemManager::CreatePresetPS(unsigned int iPreset, particle_system_management *pSystem)
 {
-	// cannons, mortar, barrels exploding, etc
-	if(iPreset == iDefaultExplosion) {
+	// cl_expdetail controls explosion/impact detail:
+	// 0 = no particle effects (use engine defaults only)
+	// 1 = basic particle effects (explosions, capture smoke, smoke, fire)
+	// 2 = full detail (all impact types, blood, teleport effects, etc.)
+	int iExpDetail = g_ExplosionDetail ? (int)g_ExplosionDetail->value : 1;
+
+	// Short-circuit: when detail is 0 no presets should spawn
+	if(iExpDetail < 1)
+		return;
+
+	switch(iPreset)
+	{
+	// Cannons, mortar, barrels exploding, etc
+	case iDefaultExplosion:
 		CreateMappedPS("particles/explo1_darksmoke.txt", pSystem);
 		CreateMappedPS("particles/explo1_grounddust.txt", pSystem);
 		CreateMappedPS("particles/explo1_firedust.txt", pSystem);
 		CreateMappedPS("particles/explo1_fire.txt", pSystem);
 		CreateMappedPS("particles/explo1_shockwave.txt", pSystem);
 
-		if(pSystem == NULL) {
-			return;
-		}
+		if(pSystem == NULL)
+			break;
 
 		gEngfuncs.pEventAPI->EV_PlaySound( 0, pSystem->vPosition, 0, "sound/weapons/cannon/cannon_explode.wav", 1.0, ATTN_NONE, 0, PITCH_NORM );
 
-		dlight_t *dl = gEngfuncs.pEfxAPI->CL_AllocDlight (0);
-		VectorCopy (pSystem->vPosition, dl->origin);
-		dl->radius = 500;
-		dl->color.r = 254;
-		dl->color.g = 160;
-		dl->color.b = 24;
-		dl->decay = 0.2;
-		dl->die = (gEngfuncs.GetClientTime() + 0.1);
-	}
-	
-	// Capture Smoke Brits
-	if(iPreset == iDefaultRedSmoke) {
-		CreateMappedPS("particles/capture_red.txt", pSystem);
-
-		if(pSystem == NULL) {
-			return;
+		{
+			dlight_t *dl = gEngfuncs.pEfxAPI->CL_AllocDlight (0);
+			VectorCopy (pSystem->vPosition, dl->origin);
+			dl->radius = 500;
+			dl->color.r = 254;
+			dl->color.g = 160;
+			dl->color.b = 24;
+			dl->decay = 0.2;
+			dl->die = (gEngfuncs.GetClientTime() + 0.1);
 		}
-	}
+		break;
+
+	// Capture Smoke Brits
+	case iDefaultRedSmoke:
+		CreateMappedPS("particles/capture_red.txt", pSystem);
+		break;
 
 	// Capture Smoke Americans
-	if(iPreset == iDefaultBlueSmoke) {
+	case iDefaultBlueSmoke:
 		CreateMappedPS("particles/capture_blue.txt", pSystem);
+		break;
 
-		if(pSystem == NULL) {
-			return;
-		}
-	}
 	// Cannon Fire Smoke
-	if(iPreset == iDefaultCannonSmoke) 
-	{
+	case iDefaultCannonSmoke:
 		CreateBarrelPS(pSystem->vPosition, pSystem->vDirection);
 		CreateMappedPS("particles/explo1_darksmoke.txt", pSystem);
 		CreateMappedPS("particles/explo1_grounddust.txt", pSystem);
 
 		gEngfuncs.pEventAPI->EV_PlaySound( 0, pSystem->vPosition, 0, "sound/weapons/cannon/cannon_fire.wav", 1.0, ATTN_NONE, 0, PITCH_NORM );
-		
-		if(pSystem == NULL) 
+		break;
+
+	// Blood
+	case iDefaultBlood:
+		if(iExpDetail < 2) break;
+		CreateMappedPS(BLOOD_PARTICLE, pSystem);
+		break;
+
+	// Fire on monsters
+	case iDefaultFire:
+		if(iExpDetail < 2) break;
+		CreateMappedPS(FIRE_PARTICLE, pSystem);
+		CreateMappedPS("particles/engine/e_fire_smoke_temp.txt", pSystem);
+		break;
+
+	// Light smoke when monster or weapon falls down
+	case iDefaultDrop:
+		CreateMappedPS(DROP_SMOKE_PARTICLE, pSystem);
+		break;
+
+	// Default wall impact smoke
+	case iDefaultWallSmoke:
+		if(iExpDetail < 2) break;
+		CreateMappedPS(DEFAULT_CHUNK_PARTICLE, pSystem);
+		CreateMappedPS(DEFAULT_IMPACT_PARTICLE, pSystem);
+		break;
+
+	// Long wall impact smoke
+	case iDefaultWallSmokeLong:
+		if(iExpDetail < 2) break;
+		CreateMappedPS("particles/engine/e_impacts_long_chunks.txt", pSystem);
+		CreateMappedPS("particles/engine/e_impacts_long_smoke.txt", pSystem);
+		break;
+
+	// Slime impact
+	case iDefaultHitSlime:
+		if(iExpDetail < 2) break;
+		CreateMappedPS("particles/engine/e_impacts_slime_drops.txt", pSystem);
+		CreateMappedPS("particles/engine/e_impacts_slime_core.txt", pSystem);
+		CreateMappedPS("particles/engine/e_impacts_slime_wave.txt", pSystem);
+		break;
+
+	// Water splash
+	case iDefaultWaterSplash:
+		if(iExpDetail < 2) break;
+		CreateMappedPS("particles/engine/e_impacts_water_drops.txt", pSystem);
+		CreateMappedPS("particles/engine/e_impacts_water_core.txt", pSystem);
+		CreateMappedPS("particles/engine/e_impacts_water_wave.txt", pSystem);
+		break;
+
+	// Smoke grenade smoke
+	case iDefaultSmoke:
+		CreateMappedPS(DEFAULT_SMOKE_PARTICLE, pSystem);
+		break;
+
+	// Flash grenade smoke
+	case iDefaultBangalorSmoke:
+		CreateMappedPS(SMOKE_BENG_PARTICLE, pSystem);
+		break;
+
+	// Grenade/RP tracer smoke
+	case iDefaultTracerSmoke:
+		CreateMappedPS(SMOKE_TRACER_PARTICLE, pSystem);
+		break;
+
+	// Waves
+	case iDefaultWaves:
+		CreateMappedPS(WAVES_PARTICLE, pSystem);
+		break;
+
+	// Final fire (monster burning at final position)
+	case iDefaultFinalFire:
+		CreateMappedPS(FIRE_FINAL_PARTICLE, pSystem);
+		break;
+
+	// Final smoke (smoke for the final fire)
+	case iDefaultFinalSmoke:
+		CreateMappedPS(SMOKE_FINAL_PARTICLE, pSystem);
+		break;
+
+	// Impact blue
+	case iDefaultHitBlue:
+		if(iExpDetail < 2) break;
+		CreateMappedPS(IMPACT_BLUE_PARTICLE, pSystem);
+		break;
+
+	// Impact red
+	case iDefaultHitRed:
+		if(iExpDetail < 2) break;
+		CreateMappedPS(IMPACT_RED_PARTICLE, pSystem);
+		break;
+
+	// Impact yellow
+	case iDefaultHitYellow:
+		if(iExpDetail < 2) break;
+		CreateMappedPS(IMPACT_YELLOW_PARTICLE, pSystem);
+		break;
+
+	// Impact brown
+	case iDefaultHitBrown:
+		if(iExpDetail < 2) break;
+		CreateMappedPS(IMPACT_BROWN_PARTICLE, pSystem);
+		break;
+
+	// Impact black
+	case iDefaultHitBlack:
+		if(iExpDetail < 2) break;
+		CreateMappedPS(IMPACT_BLACK_PARTICLE, pSystem);
+		break;
+
+	// Impact green
+	case iDefaultHitGreen:
+		if(iExpDetail < 2) break;
+		CreateMappedPS(IMPACT_GREEN_PARTICLE, pSystem);
+		break;
+
+	// Human flesh impact
+	case iDefaultHitFleshRed:
+		if(iExpDetail < 2) break;
+		CreateMappedPS(IMPACT_HUMAN_PARTICLE, pSystem);
+		CreateMappedPS(IMPACT_HUMAN_CORE_PARTICLE, pSystem);
+		break;
+
+	// Alien flesh impact
+	case iDefaultHitFleshYellow:
+		if(iExpDetail < 2) break;
+		CreateMappedPS(IMPACT_ALIEN_PARTICLE, pSystem);
+		CreateMappedPS(IMPACT_ALIEN_CORE_PARTICLE, pSystem);
+		break;
+
+	// Wood impact
+	case iDefaultHitWood1:
+		if(iExpDetail < 2) break;
+		CreateMappedPS(IMPACT_WOOD_PARTICLE, pSystem);
+		CreateMappedPS(IMPACT_WOOD_CORE_PARTICLE, pSystem);
+		break;
+
+	// Wood impact variant 2 (same particle files as wood1, separate ID for compatibility)
+	case iDefaultHitWood2:
+		if(iExpDetail < 2) break;
+		CreateMappedPS(IMPACT_WOOD_PARTICLE, pSystem);
+		CreateMappedPS(IMPACT_WOOD_CORE_PARTICLE, pSystem);
+		break;
+
+	// Scorch mark replacement
+	case iDefaultScorch:
+		if(iExpDetail < 2) break;
+		CreateMappedPS("particles/engine/e_scorch.txt", pSystem);
+		break;
+
+	// Red blood pit (emit red blood when dead)
+	case iDefaultBloodRedPit:
+		if(iExpDetail < 2) break;
+		CreateMappedPS("particles/engine/e_bloodpit_red.txt", pSystem);
+		break;
+
+	// Green blood pit (emit yellow/green blood when dead)
+	case iDefaultBloodGreenPit:
+		if(iExpDetail < 2) break;
+		CreateMappedPS("particles/engine/e_bloodpit_green.txt", pSystem);
+		break;
+
+	// Gas canister impact
+	case iDefaultGasCanister:
+		if(iExpDetail < 2) break;
+		CreateMappedPS("particles/engine/e_impacts_gascan_drops.txt", pSystem);
+		CreateMappedPS("particles/engine/e_impacts_gascan_core.txt", pSystem);
+		break;
+
+	// Teleport wave (used by env_warpball)
+	case iDefaultTeleportWave:
+		if(iExpDetail < 2) break;
+		CreateMappedPS("particles/engine/e_teleport_wave.txt", pSystem);
+		CreateMappedPS("particles/engine/e_teleport_portal.txt", pSystem);
+		CreateMappedPS("particles/engine/e_teleport_flare.txt", pSystem);
+
+		if(pSystem == NULL)
+			break;
+
 		{
-			return;
+			dlight_t *dl = gEngfuncs.pEfxAPI->CL_AllocDlight (0);
+			VectorCopy (pSystem->vPosition, dl->origin);
+			dl->radius = 222;
+			dl->color.r = 100;
+			dl->color.g = 160;
+			dl->color.b = 24;
+			dl->decay = 0.2;
+			dl->die = (gEngfuncs.GetClientTime() + 3);
 		}
+		break;
+
+	// Teleport wave 2 (portal image)
+	case iDefaultTeleportWave2:
+		if(iExpDetail < 2) break;
+		CreateMappedPS("particles/engine/e_teleport_portal_img.txt", pSystem);
+		break;
+
+	// Teleport wave 3 (reserved for future use)
+	case iDefaultTeleportWave3:
+		break;
+
+	default:
+		break;
 	}
 }
 
