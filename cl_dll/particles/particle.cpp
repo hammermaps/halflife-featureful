@@ -104,7 +104,7 @@ float CParticle::DistanceToThisPlayer( bool bSquare )
 {
 	// we haven't updated this sort so do so
 	if( sParticle.flLastSort != gEngfuncs.GetClientTime()) {
-		vec3_t vOrigin = sParticle.vPosition;
+		Vector vOrigin = sParticle.vPosition;
 		float deltaX = flPlayerOrigin.x - vOrigin.x;
 		float deltaY = flPlayerOrigin.y - vOrigin.y;
 		float deltaZ = flPlayerOrigin.z - vOrigin.z;
@@ -136,7 +136,7 @@ void CParticle::Draw( void )
 	if (iHealth < 0)
 		return;
 
-	vec3_t vNormal,vForward, vRight, vUp, vPoint, vPosition;
+	Vector vNormal,vForward, vRight, vUp, vPoint, vPosition;
 
 	// We again copy part->origin into another vector to prevent us accidentally messing with it
 	VectorCopy( sParticle.vPosition, vPosition );
@@ -184,7 +184,7 @@ void CParticle::Draw( void )
 }
 
 // Flint Particles
-CFlintParticle::CFlintParticle(vec3_t vPosition, particle_texture_s *pParticleTexture) : CParticle()
+CFlintParticle::CFlintParticle(Vector vPosition, particle_texture_s *pParticleTexture) : CParticle()
 {
 	InitValues(); 
 	sParticle.vPosition = vPosition;
@@ -243,7 +243,7 @@ void CFlintParticle::Update( float flTimeSinceLastDraw )
 }
 
 // Barrel Particles
-CBarrelParticle::CBarrelParticle(vec3_t vPosition, vec3_t vDirection, particle_texture_s *pParticleTexture) : CParticle()
+CBarrelParticle::CBarrelParticle(Vector vPosition, Vector vDirection, particle_texture_s *pParticleTexture) : CParticle()
 {
 	sParticle.vDirection = vDirection;
 	InitValues(); 
@@ -253,7 +253,7 @@ CBarrelParticle::CBarrelParticle(vec3_t vPosition, vec3_t vDirection, particle_t
 	// check lightlevel once when the particle is spawned
 	alight_t lighting;
 	cl_entity_t *LightEntity;
-	vec3_t dir;
+	Vector dir;
 
 	LightEntity = gEngfuncs.GetLocalPlayer();
 
@@ -340,7 +340,7 @@ void CBarrelParticle::Update( float flTimeSinceLastDraw )
 }
 
 // Spark Particles
-CSparkParticle::CSparkParticle(vec3_t vPosition, vec3_t vDirection, particle_texture_s *pParticleTexture) : CParticle()
+CSparkParticle::CSparkParticle(Vector vPosition, Vector vDirection, particle_texture_s *pParticleTexture) : CParticle()
 {
 	InitValues(); 
 	sParticle.vPosition = vPosition;
@@ -373,7 +373,7 @@ void CSparkParticle::Draw( void )
 	if (iHealth < 0)
 		return;
 
-	vec3_t vNormal,vForward, vRight, vUp, vPoint, vPosition;
+	Vector vNormal,vForward, vRight, vUp, vPoint, vPosition;
 
 	VectorCopy( sParticle.vPosition, vPosition );
 
@@ -438,7 +438,7 @@ void CSparkParticle::Update( float flTimeSinceLastDraw )
 }
 
 // White Smoke Particles
-CWhiteSmokeParticle::CWhiteSmokeParticle(vec3_t vPosition, vec3_t vDirection, particle_texture_s *pParticleTexture) : CParticle()
+CWhiteSmokeParticle::CWhiteSmokeParticle(Vector vPosition, Vector vDirection, particle_texture_s *pParticleTexture) : CParticle()
 {
 	sParticle.vDirection = vDirection;
 	InitValues(); 
@@ -447,7 +447,7 @@ CWhiteSmokeParticle::CWhiteSmokeParticle(vec3_t vPosition, vec3_t vDirection, pa
 
 	alight_t lighting;
 	cl_entity_t *LightEntity;
-	vec3_t dir;
+	Vector dir;
 
 	LightEntity = gEngfuncs.GetLocalPlayer();
 

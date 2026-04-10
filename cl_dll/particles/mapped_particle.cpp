@@ -35,8 +35,6 @@
 #include <stdio.h>
 #include <math.h>
 #include "gl_dynamic.h"
-#define HULL_PLANE_SKIP
-#include "com_model.h"
 #include "pm_shared.h"
 #include "pmtrace.h"
 #include "pm_defs.h"
@@ -44,7 +42,7 @@
 
 #if OPENGL_AVAILABLE
 
-extern vec3_t v_angles;
+extern Vector v_angles;
 
 // creates the mapped particle
 CMappedParticle::CMappedParticle(mapped_particle_system *pSystem, particle_texture_s *pParticleTexture) : CParticle()
@@ -123,7 +121,7 @@ void CMappedParticle::InitValues( void )
 	{
 		alight_t lighting;
 		cl_entity_t *LightEntity;
-		vec3_t dir;
+		Vector dir;
 
 		LightEntity = gEngfuncs.GetLocalPlayer();
 
@@ -195,7 +193,7 @@ void CMappedParticle::Draw( void )
 		}
 	}
 
-	vec3_t vPoint, vPosition;
+	Vector vPoint, vPosition;
 
 	VectorCopy( sParticle.vPosition, vPosition );
 
@@ -305,7 +303,7 @@ void CMappedParticle::Update( float flTimeSinceLastDraw )
 		{
 			alight_t lighting;
 			cl_entity_t *LightEntity;
-			vec3_t dir;
+			Vector dir;
 
 			LightEntity = gEngfuncs.GetLocalPlayer();
 
@@ -437,7 +435,7 @@ bool CMappedParticle::Test( void )
 	}
 
 	if (pSys->iParticleCollision != PARTICLE_PASS_THROUGH) {
-		vec3_t vTest[6];
+		Vector vTest[6];
 		for( i = 0; i < 6; i++ )
 			VectorCopy( sParticle.vPosition, vTest[i] );
 

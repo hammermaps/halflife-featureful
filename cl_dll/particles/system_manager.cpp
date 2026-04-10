@@ -47,10 +47,18 @@ CParticleSystemManager *pParticleManager = NULL;
 cvar_t* g_ParticleCount = NULL;
 cvar_t* g_ParticleDebug = NULL;
 cvar_t* g_ParticleSorts = NULL;
+Vector flPlayerOrigin;
 
 // updates all systems
 void CParticleSystemManager::UpdateSystems( void )
 {
+	// Update the player origin each frame
+	cl_entity_t *pLocal = gEngfuncs.GetLocalPlayer();
+	if( pLocal )
+	{
+		flPlayerOrigin = pLocal->origin;
+	}
+
 	CParticleSystem *pSystem = NULL;
 	signed int i = 0;
 	signed int iSystems = (signed)m_pParticleSystems.size();
@@ -205,7 +213,7 @@ void CParticleSystemManager::CreatePresetPS(unsigned int iPreset, particle_syste
 }
 
 // wrappers to create particle systems
-void CParticleSystemManager::CreateFlintPS(vec3_t vPosition)
+void CParticleSystemManager::CreateFlintPS(Vector vPosition)
 {
 	if(CheckDrawSystem() == false)
 		return;
@@ -213,7 +221,7 @@ void CParticleSystemManager::CreateFlintPS(vec3_t vPosition)
 	AddSystem(new CFlintlockSmokeParticleSystem(vPosition));
 }
 
-void CParticleSystemManager::CreateBarrelPS(vec3_t vPosition, vec3_t vDirection)
+void CParticleSystemManager::CreateBarrelPS(Vector vPosition, Vector vDirection)
 {
 	if(CheckDrawSystem() == false)
 		return;
@@ -221,7 +229,7 @@ void CParticleSystemManager::CreateBarrelPS(vec3_t vPosition, vec3_t vDirection)
 	AddSystem(new CBarrelSmokeParticleSystem(vPosition, vDirection));
 }
 
-void CParticleSystemManager::CreateSparkPS(vec3_t vPosition, vec3_t vDirection)
+void CParticleSystemManager::CreateSparkPS(Vector vPosition, Vector vDirection)
 {
 	if(CheckDrawSystem() == false)
 		return;
@@ -229,7 +237,7 @@ void CParticleSystemManager::CreateSparkPS(vec3_t vPosition, vec3_t vDirection)
 	AddSystem(new CSparkParticleSystem(vPosition, vDirection));
 }
 
-void CParticleSystemManager::CreateWhitePS(vec3_t vPosition, vec3_t vDirection)
+void CParticleSystemManager::CreateWhitePS(Vector vPosition, Vector vDirection)
 {
 	if(CheckDrawSystem() == false)
 		return;
@@ -237,7 +245,7 @@ void CParticleSystemManager::CreateWhitePS(vec3_t vPosition, vec3_t vDirection)
 	AddSystem(new CWhiteSmokeParticleSystem(vPosition, vDirection));
 }
 
-void CParticleSystemManager::CreateBrownPS(vec3_t vPosition, vec3_t vDirection)
+void CParticleSystemManager::CreateBrownPS(Vector vPosition, Vector vDirection)
 {
 	if(CheckDrawSystem() == false)
 		return;

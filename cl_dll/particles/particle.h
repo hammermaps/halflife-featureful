@@ -83,7 +83,7 @@ protected:
 	// updates the particle
 	virtual void Update( float flDrawingTime );
 
-	CFlintParticle(vec3_t vPosition, particle_texture_s *pParticleTexture);
+	CFlintParticle(Vector vPosition, particle_texture_s *pParticleTexture);
 	~CFlintParticle() {}
 };
 
@@ -99,7 +99,7 @@ protected:
 	// updates the particle
 	virtual void Update( float flDrawingTime );
 
-	CBarrelParticle(vec3_t vPosition, vec3_t vDirection, particle_texture_s *pParticleTexture);
+	CBarrelParticle(Vector vPosition, Vector vDirection, particle_texture_s *pParticleTexture);
 	~CBarrelParticle() {}
 };
 
@@ -119,7 +119,7 @@ protected:
 	// draws the particle
 	virtual void Draw( void );
 
-	CSparkParticle(vec3_t vPosition, vec3_t vDirection, particle_texture_s *pParticleTexture);
+	CSparkParticle(Vector vPosition, Vector vDirection, particle_texture_s *pParticleTexture);
 	~CSparkParticle() {}
 };
 
@@ -136,7 +136,7 @@ protected:
 	// updates the particle
 	virtual void Update( float flDrawingTime );
 
-	CWhiteSmokeParticle(vec3_t vPosition, vec3_t vDirection, particle_texture_s *pParticleTexture);
+	CWhiteSmokeParticle(Vector vPosition, Vector vDirection, particle_texture_s *pParticleTexture);
 	~CWhiteSmokeParticle() {}
 };
 
@@ -153,8 +153,8 @@ private:
 	bool bIgnoreParticle;
 	bool bCollisionChecked[3];
 	unsigned int iCollisionTimer[3];
-	vec3_t vNormal;
-	vec3_t vRotationVelVar;
+	Vector vNormal;
+	Vector vRotationVelVar;
 protected:
 	friend class CParticleSystem;
 	friend class CMappedParticleSystem;
@@ -185,8 +185,8 @@ private:
 	// internals used by bp which i don't really understand
 	bool m_bCollisionChecked;
 	bool m_bIngoreParticle;
-	vec3_t m_vNormal;
-	vec3_t m_vWaveNormal;
+	Vector m_vNormal;
+	Vector m_vWaveNormal;
 	float m_flLodMinDistance;
 	float m_flLodMaxDistance;
 	float m_flParticleTime;

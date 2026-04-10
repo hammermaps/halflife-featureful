@@ -43,7 +43,7 @@
 
 #if OPENGL_AVAILABLE
 
-extern vec3_t v_angles;
+extern Vector v_angles;
 
 CGrassParticle::CGrassParticle(grass_particle_system *pSystem, particle_texture_s *pParticleTexture) : CParticle()
 {	
@@ -93,7 +93,7 @@ void CGrassParticle::InitValues( void )
 
 	alight_t lighting;
 	cl_entity_t *LightEntity;
-	vec3_t dir;
+	Vector dir;
 
 	LightEntity = gEngfuncs.GetLocalPlayer();
 
@@ -152,8 +152,8 @@ void CGrassParticle::Draw( void )
 		}
 	}
 
-	vec3_t vPoint, vPosition;
-	vec3_t vWaveForward, vWaveRight, vWaveUp;
+	Vector vPoint, vPosition;
+	Vector vWaveForward, vWaveRight, vWaveUp;
 
 	VectorCopy( sParticle.vPosition, vPosition );
 

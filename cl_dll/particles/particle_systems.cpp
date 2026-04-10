@@ -100,7 +100,7 @@ bool CParticleSystem::DrawSystem( void )
 }
 
 // creates a flintlock smoke particle system
-CFlintlockSmokeParticleSystem::CFlintlockSmokeParticleSystem(vec3_t vPosition) : CParticleSystem() 
+CFlintlockSmokeParticleSystem::CFlintlockSmokeParticleSystem(Vector vPosition) : CParticleSystem() 
 {
 	m_vPosition = vPosition;
 
@@ -117,7 +117,7 @@ CFlintlockSmokeParticleSystem::CFlintlockSmokeParticleSystem(vec3_t vPosition) :
 }
 
 // creates a barrel smoke particle system
-CBarrelSmokeParticleSystem::CBarrelSmokeParticleSystem(vec3_t vPosition, vec3_t vDirection)	: CParticleSystem()
+CBarrelSmokeParticleSystem::CBarrelSmokeParticleSystem(Vector vPosition, Vector vDirection)	: CParticleSystem()
 {
 	int i = 0;
 	for(i = 0; i < NUM_DIFFERENT_BARREL_PARTICLES; i++) {
@@ -157,7 +157,7 @@ void CBarrelSmokeParticleSystem::UpdateSystem( void )
 }
 
 // creates a spark particle system
-CSparkParticleSystem::CSparkParticleSystem(vec3_t vPosition, vec3_t vDirection)	: CParticleSystem()
+CSparkParticleSystem::CSparkParticleSystem(Vector vPosition, Vector vDirection)	: CParticleSystem()
 {
 	m_vPosition = vPosition;
 	m_vDirection = vDirection;
@@ -190,7 +190,7 @@ void CSparkParticleSystem::UpdateSystem( void )
 }
 
 // creates a white smoke particle system
-CWhiteSmokeParticleSystem::CWhiteSmokeParticleSystem(vec3_t vPosition, vec3_t vDirection) : CParticleSystem()
+CWhiteSmokeParticleSystem::CWhiteSmokeParticleSystem(Vector vPosition, Vector vDirection) : CParticleSystem()
 {
 	m_vPosition = vPosition;
 	m_vDirection = vDirection;
@@ -208,7 +208,7 @@ CWhiteSmokeParticleSystem::CWhiteSmokeParticleSystem(vec3_t vPosition, vec3_t vD
 }
 
 // creates a brown smoke particle system
-CBrownSmokeParticleSystem::CBrownSmokeParticleSystem(vec3_t vPosition, vec3_t vDirection) : CParticleSystem()
+CBrownSmokeParticleSystem::CBrownSmokeParticleSystem(Vector vPosition, Vector vDirection) : CParticleSystem()
 {
 	m_vPosition = vPosition;
 	m_vDirection = vDirection;

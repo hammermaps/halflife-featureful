@@ -51,17 +51,17 @@ void CParticleEmitter::KeyValue( KeyValueData *pkvd )
 	if( FStrEq( pkvd->szKeyName, "particle_file" ) )
 	{
 		m_iParticleFile = ALLOC_STRING( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "preset_system" ) )
 	{
 		m_iPresetSystem = atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "repeatable" ) )
 	{
 		m_bRepeatable = atoi( pkvd->szValue ) != 0;
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 	{
@@ -159,7 +159,7 @@ void CFuncGrass::KeyValue( KeyValueData *pkvd )
 	if( FStrEq( pkvd->szKeyName, "grass_file" ) )
 	{
 		m_iGrassFile = ALLOC_STRING( pkvd->szValue );
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 	{

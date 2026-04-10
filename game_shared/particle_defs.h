@@ -169,8 +169,8 @@ struct mapped_particle_system {
 	float flParticleLifeVariation;
 	float flSystemLifetime;
 
-	vec3_t vStartingVel;
-	vec3_t vVelocityVar;
+	Vector vStartingVel;
+	Vector vVelocityVar;
 	float flVelocityDampening;
 
 	unsigned int iTransparency;
@@ -192,8 +192,8 @@ struct mapped_particle_system {
 	LIGHT_CHECK iParticleLightCheck;
 	PARTICLE_ALIGN iParticleAlign;
 	
-	vec3_t vRotationVel;
-	vec3_t vRotationVelVarMax;
+	Vector vRotationVel;
+	Vector vRotationVelVarMax;
 
 	bool bWindy;
 	bool bFadeIn;
@@ -202,15 +202,15 @@ struct mapped_particle_system {
 	bool bIgnoreSort;
 
 	// and from the server
-	vec3_t vPostion;
-	vec3_t vDirection;
+	Vector vPostion;
+	Vector vDirection;
 	unsigned int iId;
 };
 
 // holds details about a single texture in the grass particle system
 struct grass_particle_system {
-	vec3_t vAbsMin;
-	vec3_t vAbsMax;
+	Vector vAbsMin;
+	Vector vAbsMax;
 	float flLeaningMin;
 	float flLeaningMax;
 	float flWaveSpeed;
@@ -224,8 +224,8 @@ struct grass_particle_system {
 	bool bIgnoreSort;
 
 	// and from the server
-	vec3_t vPostion;
-	vec3_t vDirection;
+	Vector vPostion;
+	Vector vDirection;
 	unsigned int iId;
 	char sParticleTexture[MAX_PARTICLE_PATH];
 };
@@ -234,10 +234,10 @@ struct grass_particle_system {
 struct base_particle {
 	base_particle() { pTexture = NULL; }
 	~base_particle() { pTexture = NULL; }
-	vec3_t vPosition;
-	vec3_t vVelocity;
-	vec3_t vDirection;
-	vec3_t vWind;
+	Vector vPosition;
+	Vector vVelocity;
+	Vector vDirection;
+	Vector vWind;
 
 	unsigned int iSystemId;
 	unsigned int iRed;
@@ -266,10 +266,10 @@ struct base_particle {
 // management features of the ps
 struct particle_system_management {
 	~particle_system_management() {}
-	vec3_t vPosition;
-	vec3_t vDirection;
-	vec3_t vAbsMin;
-	vec3_t vAbsMax;
+	Vector vPosition;
+	Vector vDirection;
+	Vector vAbsMin;
+	Vector vAbsMax;
 
 	unsigned int iID;
 };

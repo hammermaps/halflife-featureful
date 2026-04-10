@@ -79,11 +79,11 @@ public:
 	void UpdateSystems( void );
 
 	// wrappers to create particle systems
-	void CreateFlintPS(vec3_t vPosition);
-	void CreateBarrelPS(vec3_t vPosition, vec3_t vDirection);
-	void CreateSparkPS(vec3_t vPosition, vec3_t vDirection);
-	void CreateWhitePS(vec3_t vPosition, vec3_t vDirection);
-	void CreateBrownPS(vec3_t vPosition, vec3_t vDirection);
+	void CreateFlintPS(Vector vPosition);
+	void CreateBarrelPS(Vector vPosition, Vector vDirection);
+	void CreateSparkPS(Vector vPosition, Vector vDirection);
+	void CreateWhitePS(Vector vPosition, Vector vDirection);
+	void CreateBrownPS(Vector vPosition, Vector vDirection);
 	void CreateGrassPS(char* sFile, particle_system_management* pSystem );
 	void CreateMappedPS(char* sFile, particle_system_management* pSystem );
 	void CreatePresetPS(unsigned int iPreset, particle_system_management* pSystem);

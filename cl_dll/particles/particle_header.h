@@ -39,6 +39,11 @@
 
 using std::vector;
 
+// HL SDK types (Vector, etc.)
+#include "vector.h"
+#include "const.h"
+#include "com_model.h"
+
 // lets do some forward declaring so we don't get into too much trouble
 class CParticle;
 class CParticleSystem;
@@ -59,8 +64,8 @@ extern cvar_t* g_ParticleCount;
 extern cvar_t* g_ParticleDebug;
 // how many sorts we are going to have a second
 extern cvar_t* g_ParticleSorts;
-// this player's position from pm_shared
-extern "C" vec3_t flPlayerOrigin;
+// this player's position - updated each frame
+extern Vector flPlayerOrigin;
 // sets up ogl for all particles
 extern inline void Particle_InitOpenGL( void );
 // "closes" opengl again when drawing is done so we don't screw up settings for HL

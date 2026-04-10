@@ -56,9 +56,9 @@ protected:
 	float m_flParticleCreationTime;
 
 	// centre of the particle system
-	vec3_t m_vPosition;
+	Vector m_vPosition;
 	// the particle system is moving in which direction?
-	vec3_t m_vDirection;
+	Vector m_vDirection;
 
 	// pointer to the current texture
 	particle_texture_s *pParticleTexture;
@@ -93,7 +93,7 @@ public:
 class CFlintlockSmokeParticleSystem : public CParticleSystem
 {
 	friend class CParticleSystemManager;
-	CFlintlockSmokeParticleSystem(vec3_t vPosition);
+	CFlintlockSmokeParticleSystem(Vector vPosition);
 };
 
 // barrel smoke system
@@ -101,7 +101,7 @@ class CBarrelSmokeParticleSystem : public CParticleSystem
 {
 	particle_texture_s *pParticleTextures[NUM_DIFFERENT_BARREL_PARTICLES];
 	friend class CParticleSystemManager;
-	CBarrelSmokeParticleSystem(vec3_t vPosition, vec3_t vDirection);
+	CBarrelSmokeParticleSystem(Vector vPosition, Vector vDirection);
 	virtual void UpdateSystem( void );
 };
 
@@ -109,7 +109,7 @@ class CBarrelSmokeParticleSystem : public CParticleSystem
 class CSparkParticleSystem : public CParticleSystem
 {
 	friend class CParticleSystemManager;
-	CSparkParticleSystem(vec3_t vPosition, vec3_t vDirection);
+	CSparkParticleSystem(Vector vPosition, Vector vDirection);
 	virtual void UpdateSystem( void );
 };
 
@@ -117,14 +117,14 @@ class CSparkParticleSystem : public CParticleSystem
 class CWhiteSmokeParticleSystem : public CParticleSystem
 {
 	friend class CParticleSystemManager;
-	CWhiteSmokeParticleSystem(vec3_t vPosition, vec3_t vDirection);
+	CWhiteSmokeParticleSystem(Vector vPosition, Vector vDirection);
 };
 
 // brown smoke system
 class CBrownSmokeParticleSystem : public CParticleSystem
 {
 	friend class CParticleSystemManager;
-	CBrownSmokeParticleSystem(vec3_t vPosition, vec3_t vDirection);
+	CBrownSmokeParticleSystem(Vector vPosition, Vector vDirection);
 };
 
 // creates a particle system based on what the mapper wants

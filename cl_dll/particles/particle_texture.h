@@ -79,16 +79,6 @@ extern bool LoadCompressedTGA(particle_texture_s *, FILE *);
 // Global engine <-> studio model rendering code interface
 extern engine_studio_api_t IEngineStudio;		
 
-#ifndef HULL_PLANE_SKIP
-typedef struct alight_s
-{
-	int			ambientlight;	// clip at 128
-	int			shadelight;		// clip at 192 - ambientlight
-	vec3_t		color;
-	float		*plightvec;
-} alight_t;
-#endif
-
 #else // !OPENGL_AVAILABLE
 
 // Stub texture struct for non-OpenGL platforms

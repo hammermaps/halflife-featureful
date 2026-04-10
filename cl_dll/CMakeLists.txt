@@ -174,6 +174,14 @@ set (CLDLL_SOURCES
 	particleman/CFrustum.cpp
 	particleman/CMiniMem.cpp
 	particleman/IParticleMan_Active.cpp
+	particles/particle.cpp
+	particles/particle_systems.cpp
+	particles/mapped_particle.cpp
+	particles/mapped_particles.cpp
+	particles/grass_particle.cpp
+	particles/grass_system.cpp
+	particles/system_manager.cpp
+	particles/tga_loader.cpp
 	../public/safe_snprintf.c
 )
 
@@ -202,7 +210,7 @@ if (USE_VGUI)
 		)
 endif()
 
-include_directories (. hl/ ../dlls ../dlls/wpn_shared ../common ../engine ../pm_shared ../game_shared ../public particleman/)
+include_directories (. hl/ ../dlls ../dlls/wpn_shared ../common ../engine ../pm_shared ../game_shared ../public particleman/ particles/)
 
 if (WIN32)
 	include_directories (../external/)
