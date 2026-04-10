@@ -289,6 +289,73 @@ int __MsgFunc_Snow(const char *pszName, int iSize, void *pbuf)
 	return g_Environment.MsgFunc_Snow( pszName, iSize, pbuf );
 }
 
+// BG Particle System message handlers
+#include "particles/particle_header.h"
+#include "parsemsg.h"
+
+int __MsgFunc_BGParticle(const char *pszName, int iSize, void *pbuf)
+{
+#if OPENGL_AVAILABLE
+	if( !pParticleManager )
+		return 0;
+
+	BEGIN_READ( pbuf, iSize );
+
+	int iPreset = READ_BYTE();
+	particle_system_management pSystem;
+	pSystem.vPosition.x = READ_COORD();
+	pSystem.vPosition.y = READ_COORD();
+	pSystem.vPosition.z = READ_COORD();
+	pSystem.vDirection.x = READ_COORD();
+	pSystem.vDirection.y = READ_COORD();
+	pSystem.vDirection.z = READ_COORD();
+	pSystem.iID = READ_LONG();
+	char *sFile = READ_STRING();
+
+	if( iPreset > 0 )
+	{
+		pParticleManager->CreatePresetPS( iPreset, &pSystem );
+	}
+	else if( sFile && sFile[0] )
+	{
+		pParticleManager->CreateMappedPS( sFile, &pSystem );
+	}
+#endif
+	return 1;
+}
+
+int __MsgFunc_BGGrass(const char *pszName, int iSize, void *pbuf)
+{
+#if OPENGL_AVAILABLE
+	if( !pParticleManager )
+		return 0;
+
+	BEGIN_READ( pbuf, iSize );
+
+	particle_system_management pSystem;
+	pSystem.vPosition.x = READ_COORD();
+	pSystem.vPosition.y = READ_COORD();
+	pSystem.vPosition.z = READ_COORD();
+	pSystem.vDirection.x = READ_COORD();
+	pSystem.vDirection.y = READ_COORD();
+	pSystem.vDirection.z = READ_COORD();
+	pSystem.vAbsMin.x = READ_COORD();
+	pSystem.vAbsMin.y = READ_COORD();
+	pSystem.vAbsMin.z = READ_COORD();
+	pSystem.vAbsMax.x = READ_COORD();
+	pSystem.vAbsMax.y = READ_COORD();
+	pSystem.vAbsMax.z = READ_COORD();
+	pSystem.iID = READ_LONG();
+	char *sFile = READ_STRING();
+
+	if( sFile && sFile[0] )
+	{
+		pParticleManager->CreateGrassPS( sFile, &pSystem );
+	}
+#endif
+	return 1;
+}
+
 //LRC
 int __MsgFunc_KeyedDLight(const char *pszName, int iSize, void *pbuf)
 {
@@ -686,6 +753,8 @@ void CHud::Init()
 	HOOK_MESSAGE( Rain );
 	HOOK_MESSAGE( Snow );
 	HOOK_MESSAGE( KeyedDLight );
+	HOOK_MESSAGE( BGParticle );
+	HOOK_MESSAGE( BGGrass );
 
 	// TFFree CommandMenu
 	HOOK_COMMAND( "+commandmenu", OpenCommandMenu );
@@ -863,6 +932,20 @@ void CHud::Init()
 	m_MessageBox.Init();
 
 	hudRenderer.Init();
+
+	// BG Particle System initialization
+#if OPENGL_AVAILABLE
+	g_ParticleCount = gEngfuncs.pfnRegisterVariable( "cl_particle_count", "100", FCVAR_ARCHIVE );
+	g_ParticleDebug = gEngfuncs.pfnRegisterVariable( "cl_particle_debug", "0", 0 );
+	g_ParticleSorts = gEngfuncs.pfnRegisterVariable( "cl_particle_sorts", "5", FCVAR_ARCHIVE );
+
+	if( pParticleManager )
+	{
+		delete pParticleManager;
+		pParticleManager = NULL;
+	}
+	pParticleManager = new CParticleSystemManager();
+#endif
 
 	gEngfuncs.pfnAddCommand("dump_ammo_types_client", ReportRegisteredAmmoTypes);
 	gEngfuncs.pfnAddCommand("get_message", GetTranslatedMessage);

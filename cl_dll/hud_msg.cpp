@@ -26,6 +26,7 @@
 #include "soundscripts.h"
 
 #include "environment.h"
+#include "particles/particle_header.h"
 
 #define MAX_CLIENTS 32
 
@@ -92,6 +93,16 @@ void CHud::MsgFunc_InitHUD( const char *pszName, int iSize, void *pbuf )
 	pFlare = NULL;	// Vit_amiN: clear egon's beam flare
 
 	g_Environment.Initialize();
+
+	// Clean up BG Particle System on level init
+#if OPENGL_AVAILABLE
+	if( pParticleManager )
+	{
+		pParticleManager->RemoveParticles();
+		pParticleManager->RemoveSystems();
+		pParticleManager->RemoveTextures();
+	}
+#endif
 }
 
 int CHud::MsgFunc_SetFog( const char *pszName, int iSize, void *pbuf )

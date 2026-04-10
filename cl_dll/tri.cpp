@@ -33,6 +33,7 @@ bool m_bCacheFullbrightModels = true;
 #include "com_model.h"
 #include "particleman.h"
 #include "environment.h"
+#include "particle_header.h"
 
 //#define TEST_IT	1
 #if TEST_IT
@@ -194,5 +195,11 @@ void DLLEXPORT HUD_DrawTransparentTriangles()
 	{
 		g_pParticleMan->Update();
 		g_Environment.Update();
+	}
+
+	// BG Particle System update
+	if ( pParticleManager )
+	{
+		pParticleManager->UpdateSystems();
 	}
 }
