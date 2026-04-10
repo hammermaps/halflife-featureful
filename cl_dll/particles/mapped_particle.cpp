@@ -293,6 +293,9 @@ void CMappedParticle::Update( float flTimeSinceLastDraw )
 {
 	flParticleTime += flTimeSinceLastDraw;
 
+	// Always keep distance-to-player fresh so smoke thresholding works for unsorted particles too
+	DistanceToThisPlayer(true);
+
 	if (g_ParticleSorts->value == 0)
 		g_ParticleSorts->value = 1;
 

@@ -53,12 +53,9 @@ particle_texture_s * LoadTGA(particle_texture_s *pTexture, const char *filename)
 	if(pCached)
 		return pCached;
 
-	char sPath[MAX_PARTICLE_PATH];
-	snprintf(sPath, sizeof(sPath), "%s", filename);
-
 	// Use engine's COM_LoadFile to find the file in the game directory
 	int iLength = 0;
-	char *pFileData = (char *)gEngfuncs.COM_LoadFile(sPath, 5, &iLength);
+	char *pFileData = (char *)gEngfuncs.COM_LoadFile(filename, 5, &iLength);
 	
 	if(!pFileData || iLength < (int)sizeof(tga_header))
 	{
@@ -67,29 +64,29 @@ particle_texture_s * LoadTGA(particle_texture_s *pTexture, const char *filename)
 		return NULL;
 	}
 
-	// Write to temp file for FILE* based parsing
-	char sTempPath[512];
-	snprintf(sTempPath, sizeof(sTempPath), "/tmp/bg_particle_%p.tga", (void*)pFileData);
-	FILE *fTmpWrite = fopen(sTempPath, "wb");
-	if(fTmpWrite) {
-		fwrite(pFileData, 1, iLength, fTmpWrite);
-		fclose(fTmpWrite);
-	}
-	gEngfuncs.COM_FreeFile(pFileData);
-
-	FILE *fTGA = fopen(sTempPath, "rb");
+	// Use an anonymous temp file (portable, no predictable path, auto-deleted on close)
+	FILE *fTGA = tmpfile();
 	if(!fTGA)
 	{
-		gEngfuncs.Con_Printf("Could not open temp TGA file: %s\n", sTempPath);
+		gEngfuncs.Con_Printf("Could not create temp file for TGA: %s\n", filename);
+		gEngfuncs.COM_FreeFile(pFileData);
 		return NULL;
 	}
+	if(fwrite(pFileData, 1, iLength, fTGA) != (size_t)iLength)
+	{
+		gEngfuncs.Con_Printf("Could not write temp TGA data: %s\n", filename);
+		fclose(fTGA);
+		gEngfuncs.COM_FreeFile(pFileData);
+		return NULL;
+	}
+	gEngfuncs.COM_FreeFile(pFileData);
+	rewind(fTGA);
 
 	tga_header header;
 	if(fread(&header, sizeof(tga_header), 1, fTGA) == 0)
 	{
 		gEngfuncs.Con_Printf("Could not read TGA header: %s\n", filename);
 		fclose(fTGA);
-		remove(sTempPath);
 		return NULL;
 	}
 
@@ -109,12 +106,10 @@ particle_texture_s * LoadTGA(particle_texture_s *pTexture, const char *filename)
 		gEngfuncs.Con_Printf("Unsupported TGA type: %s\n", filename);
 		fclose(fTGA);
 		delete pTexture;
-		remove(sTempPath);
 		return NULL;
 	}
 
 	fclose(fTGA);
-	remove(sTempPath);
 
 	if(!bLoaded || !pTexture->imageData)
 	{

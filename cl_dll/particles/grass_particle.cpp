@@ -192,6 +192,9 @@ void CGrassParticle::Update(float flTimeSinceLastDraw)
 {
 	m_flParticleTime += flTimeSinceLastDraw;
 	
+	// Always keep distance-to-player fresh so LOD works correctly for unsorted grass particles
+	DistanceToThisPlayer(true);
+
 	if (flTimeSinceLastDraw < 0)
 		flTimeSinceLastDraw = -flTimeSinceLastDraw;
 

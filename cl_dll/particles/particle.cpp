@@ -52,6 +52,8 @@ void Particle_InitOpenGL( void ){
 
 void Particle_FinishOpenGL( void )
 {
+	glDepthMask(true);
+	glDisable(GL_BLEND);
 	glEnable(GL_CULL_FACE);
 }
 

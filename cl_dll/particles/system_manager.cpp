@@ -67,9 +67,7 @@ void CParticleSystemManager::UpdateSystems( void )
 		pSystem = m_pParticleSystems[i];
 		if( pSystem && pSystem->DrawSystem() == false)
 		{
-			delete pSystem;
-			pSystem = NULL;
-			m_pParticleSystems.erase((m_pParticleSystems.begin() + i));
+			RemoveSystem(pSystem->SystemID());
 			i--;
 			iSystems--;
 		}
@@ -113,7 +111,7 @@ void CParticleSystemManager::UpdateSystems( void )
 	// sort and draw the sorted particles list
 	if(iParticles > 0) {
 		float flTimeSinceLastSort = (gEngfuncs.GetClientTime() - m_flLastSort);
-		if((((int)(1 / flTimeSinceLastSort)) < g_ParticleSorts->value)) {
+		if(g_ParticleSorts->value > 0 && flTimeSinceLastSort >= 1.0f / g_ParticleSorts->value) {
 			m_flLastSort = gEngfuncs.GetClientTime();
 			std::sort(m_pParticles.begin(), m_pParticles.end(), less_than);
 		}
@@ -336,13 +334,6 @@ void CParticleSystemManager::RemoveTextures( void ) {
 	for (; i < iTextures; i++) {
 		pCacheEntry = m_pTextures[i];
 		if(pCacheEntry) {
-			if(pCacheEntry->pTexture && pCacheEntry->pTexture->imageData) {
-				delete [] pCacheEntry->pTexture->imageData;
-				pCacheEntry->pTexture->imageData = NULL;
-			}
-			if(pCacheEntry->pTexture && pCacheEntry->pTexture->iID) {
-				glDeleteTextures( 1, pCacheEntry->pTexture->iID );
-			}
 			delete pCacheEntry->pTexture;
 			pCacheEntry->pTexture = NULL;
 		}

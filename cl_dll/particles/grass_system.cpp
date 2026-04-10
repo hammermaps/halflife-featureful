@@ -135,13 +135,14 @@ bool CGrassParticleSystem::LoadParticleDefinition( particle_system_management *p
 		return false;
 	}
 
-	char *sFile = (char *)gEngfuncs.COM_LoadFile(m_sParticleFile, 5, NULL);
-	if(!sFile)
+	char *fileStart = (char *)gEngfuncs.COM_LoadFile(m_sParticleFile, 5, NULL);
+	if(!fileStart)
 	{
 		gEngfuncs.Con_Printf("Bad Grass Particle definition file specified %s\n", m_sParticleFile);
 		return false;
 	}
 
+	char *sFile = fileStart;
 	char sSetting[256];
 	char sValue[256];
 
@@ -157,19 +158,19 @@ bool CGrassParticleSystem::LoadParticleDefinition( particle_system_management *p
 		if(!sFile)
 			break;
 
-		if(!sSetting)
+		if(sSetting[0] == '\0')
 		{
 			gEngfuncs.Con_Printf("Unexpected error in file after %s in %s", sValue, m_sParticleFile);
-			gEngfuncs.COM_FreeFile(sFile);
+			gEngfuncs.COM_FreeFile(fileStart);
 			return false;
 		}
 
 		sFile = gEngfuncs.COM_ParseFile(sFile, sValue);
 
-		if(!sValue)
+		if(!sFile || sValue[0] == '\0')
 		{
 			gEngfuncs.Con_Printf("Unexpected error in file after %s in %s", sSetting, m_sParticleFile);
-			gEngfuncs.COM_FreeFile(sFile);
+			gEngfuncs.COM_FreeFile(fileStart);
 			return false;
 		}
 
@@ -251,7 +252,7 @@ bool CGrassParticleSystem::LoadParticleDefinition( particle_system_management *p
 		}
 	}
 
-	gEngfuncs.COM_FreeFile(sFile);
+	gEngfuncs.COM_FreeFile(fileStart);
 	return true;
 }
 
