@@ -64,6 +64,8 @@ extern cvar_t* g_ParticleCount;
 extern cvar_t* g_ParticleDebug;
 // how many sorts we are going to have a second
 extern cvar_t* g_ParticleSorts;
+// explosion detail level (0 = off, 1 = basic, 2 = full)
+extern cvar_t* g_ExplosionDetail;
 // this player's position - updated each frame
 extern Vector flPlayerOrigin;
 // sets up ogl for all particles

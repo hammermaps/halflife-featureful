@@ -938,6 +938,7 @@ void CHud::Init()
 	g_ParticleCount = gEngfuncs.pfnRegisterVariable( "cl_particle_count", "100", FCVAR_ARCHIVE );
 	g_ParticleDebug = gEngfuncs.pfnRegisterVariable( "cl_particle_debug", "0", 0 );
 	g_ParticleSorts = gEngfuncs.pfnRegisterVariable( "cl_particle_sorts", "5", FCVAR_ARCHIVE );
+	g_ExplosionDetail = gEngfuncs.pfnRegisterVariable( "cl_expdetail", "1", FCVAR_ARCHIVE );
 
 	if( pParticleManager )
 	{

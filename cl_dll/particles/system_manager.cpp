@@ -47,6 +47,7 @@ CParticleSystemManager *pParticleManager = NULL;
 cvar_t* g_ParticleCount = NULL;
 cvar_t* g_ParticleDebug = NULL;
 cvar_t* g_ParticleSorts = NULL;
+cvar_t* g_ExplosionDetail = NULL;
 Vector flPlayerOrigin;
 
 // updates all systems
@@ -155,8 +156,16 @@ void CParticleSystemManager::UpdateSystems( void )
 // handles all the preset particle systems
 void CParticleSystemManager::CreatePresetPS(unsigned int iPreset, particle_system_management *pSystem)
 {
+	// cl_expdetail controls explosion/impact detail:
+	// 0 = no particle effects for explosions and impacts (use engine defaults)
+	// 1 = basic particle effects (explosions, smoke, fire)
+	// 2 = full detail (all impact types, blood, teleport effects, etc.)
+	int iExpDetail = g_ExplosionDetail ? (int)g_ExplosionDetail->value : 1;
+
 	// cannons, mortar, barrels exploding, etc
 	if(iPreset == iDefaultExplosion) {
+		if(iExpDetail < 1)
+			return;
 		CreateMappedPS("particles/explo1_darksmoke.txt", pSystem);
 		CreateMappedPS("particles/explo1_grounddust.txt", pSystem);
 		CreateMappedPS("particles/explo1_firedust.txt", pSystem);
@@ -199,6 +208,8 @@ void CParticleSystemManager::CreatePresetPS(unsigned int iPreset, particle_syste
 	// Cannon Fire Smoke
 	if(iPreset == iDefaultCannonSmoke) 
 	{
+		if(iExpDetail < 1)
+			return;
 		CreateBarrelPS(pSystem->vPosition, pSystem->vDirection);
 		CreateMappedPS("particles/explo1_darksmoke.txt", pSystem);
 		CreateMappedPS("particles/explo1_grounddust.txt", pSystem);
@@ -207,6 +218,355 @@ void CParticleSystemManager::CreatePresetPS(unsigned int iPreset, particle_syste
 		
 		if(pSystem == NULL) 
 		{
+			return;
+		}
+	}
+
+	// Blood
+	if(iPreset == iDefaultBlood) {
+		if(iExpDetail < 2)
+			return;
+		CreateMappedPS("particles/engine/e_blood.txt", pSystem);
+
+		if(pSystem == NULL) {
+			return;
+		}
+	}
+
+	// Fire on monsters
+	if(iPreset == iDefaultFire) {
+		if(iExpDetail < 2)
+			return;
+		CreateMappedPS("particles/engine/e_fire.txt", pSystem);
+		CreateMappedPS("particles/engine/e_fire_smoke_temp.txt", pSystem);
+
+		if(pSystem == NULL) {
+			return;
+		}
+	}
+
+	// Light smoke when monster or weapon falls down
+	if(iPreset == iDefaultDrop) {
+		if(iExpDetail < 1)
+			return;
+		CreateMappedPS("particles/engine/e_drop.txt", pSystem);
+
+		if(pSystem == NULL) {
+			return;
+		}
+	}
+
+	// Default wall impact smoke
+	if(iPreset == iDefaultWallSmoke) {
+		if(iExpDetail < 2)
+			return;
+		CreateMappedPS("particles/engine/e_impacts_chunks.txt", pSystem);
+		CreateMappedPS("particles/engine/e_impacts_smoke.txt", pSystem);
+
+		if(pSystem == NULL) {
+			return;
+		}
+	}
+
+	// Long wall impact smoke
+	if(iPreset == iDefaultWallSmokeLong) {
+		if(iExpDetail < 2)
+			return;
+		CreateMappedPS("particles/engine/e_impacts_long_chunks.txt", pSystem);
+		CreateMappedPS("particles/engine/e_impacts_long_smoke.txt", pSystem);
+
+		if(pSystem == NULL) {
+			return;
+		}
+	}
+
+	// Slime impact
+	if(iPreset == iDefaultHitSlime) {
+		if(iExpDetail < 2)
+			return;
+		CreateMappedPS("particles/engine/e_impacts_slime_drops.txt", pSystem);
+		CreateMappedPS("particles/engine/e_impacts_slime_core.txt", pSystem);
+		CreateMappedPS("particles/engine/e_impacts_slime_wave.txt", pSystem);
+
+		if(pSystem == NULL) {
+			return;
+		}
+	}
+
+	// Water splash
+	if(iPreset == iDefaultWaterSplash) {
+		if(iExpDetail < 2)
+			return;
+		CreateMappedPS("particles/engine/e_impacts_water_drops.txt", pSystem);
+		CreateMappedPS("particles/engine/e_impacts_water_core.txt", pSystem);
+		CreateMappedPS("particles/engine/e_impacts_water_wave.txt", pSystem);
+
+		if(pSystem == NULL) {
+			return;
+		}
+	}
+
+	// Smoke grenade smoke
+	if(iPreset == iDefaultSmoke) {
+		if(iExpDetail < 1)
+			return;
+		CreateMappedPS("particles/engine/e_smoke.txt", pSystem);
+
+		if(pSystem == NULL) {
+			return;
+		}
+	}
+
+	// Flash grenade smoke
+	if(iPreset == iDefaultBangalorSmoke) {
+		if(iExpDetail < 1)
+			return;
+		CreateMappedPS("particles/engine/e_smoke_beng.txt", pSystem);
+
+		if(pSystem == NULL) {
+			return;
+		}
+	}
+
+	// Grenade/RP tracer smoke
+	if(iPreset == iDefaultTracerSmoke) {
+		if(iExpDetail < 1)
+			return;
+		CreateMappedPS("particles/engine/e_smoke_tracer.txt", pSystem);
+
+		if(pSystem == NULL) {
+			return;
+		}
+	}
+		
+	// Waves
+	if(iPreset == iDefaultWaves) {
+		if(iExpDetail < 1)
+			return;
+		CreateMappedPS("particles/engine/e_waves.txt", pSystem);
+
+		if(pSystem == NULL) {
+			return;
+		}
+	}
+
+	// Final fire (monster burning at final position)
+	if(iPreset == iDefaultFinalFire) {
+		if(iExpDetail < 1)
+			return;
+		CreateMappedPS("particles/engine/e_fire_final.txt", pSystem);
+
+		if(pSystem == NULL) {
+			return;
+		}
+	}
+
+	// Final smoke (smoke for the final fire)
+	if(iPreset == iDefaultFinalSmoke) {
+		if(iExpDetail < 1)
+			return;
+		CreateMappedPS("particles/engine/e_fire_smoke.txt", pSystem);
+
+		if(pSystem == NULL) {
+			return;
+		}
+	}
+
+	// Impact blue
+	if(iPreset == iDefaultHitBlue) {
+		if(iExpDetail < 2)
+			return;
+		CreateMappedPS("particles/engine/e_impact_blue.txt", pSystem);
+
+		if(pSystem == NULL) {
+			return;
+		}
+	}
+
+	// Impact red
+	if(iPreset == iDefaultHitRed) {
+		if(iExpDetail < 2)
+			return;
+		CreateMappedPS("particles/engine/e_impact_red.txt", pSystem);
+
+		if(pSystem == NULL) {
+			return;
+		}
+	}
+
+	// Impact yellow
+	if(iPreset == iDefaultHitYellow) {
+		if(iExpDetail < 2)
+			return;
+		CreateMappedPS("particles/engine/e_impact_yellow.txt", pSystem);
+
+		if(pSystem == NULL) {
+			return;
+		}
+	}
+
+	// Impact brown
+	if(iPreset == iDefaultHitBrown) {
+		if(iExpDetail < 2)
+			return;
+		CreateMappedPS("particles/engine/e_impact_brown.txt", pSystem);
+
+		if(pSystem == NULL) {
+			return;
+		}
+	}
+
+	// Impact black
+	if(iPreset == iDefaultHitBlack) {
+		if(iExpDetail < 2)
+			return;
+		CreateMappedPS("particles/engine/e_impact_black.txt", pSystem);
+
+		if(pSystem == NULL) {
+			return;
+		}
+	}
+		
+	// Impact green
+	if(iPreset == iDefaultHitGreen) {
+		if(iExpDetail < 2)
+			return;
+		CreateMappedPS("particles/engine/e_impact_green_core.txt", pSystem);
+
+		if(pSystem == NULL) {
+			return;
+		}
+	}
+		
+	// Human flesh impact
+	if(iPreset == iDefaultHitFleshRed) {
+		if(iExpDetail < 2)
+			return;
+		CreateMappedPS("particles/engine/e_impact_flesh_human.txt", pSystem);
+		CreateMappedPS("particles/engine/e_impact_flesh_human_core.txt", pSystem);
+
+		if(pSystem == NULL) {
+			return;
+		}
+	}
+		
+	// Alien flesh impact
+	if(iPreset == iDefaultHitFleshYellow) {
+		if(iExpDetail < 2)
+			return;
+		CreateMappedPS("particles/engine/e_impact_flesh_alien.txt", pSystem);
+		CreateMappedPS("particles/engine/e_impact_flesh_alien_core.txt", pSystem);
+
+		if(pSystem == NULL) {
+			return;
+		}
+	}
+		
+	// Wood impact
+	if(iPreset == iDefaultHitWood1) {
+		if(iExpDetail < 2)
+			return;
+		CreateMappedPS("particles/engine/e_impact_wood.txt", pSystem);
+		CreateMappedPS("particles/engine/e_impact_wood_core.txt", pSystem);
+
+		if(pSystem == NULL) {
+			return;
+		}
+	}
+
+	// Wood impact variant 2 (same as wood1)
+	if(iPreset == iDefaultHitWood2) {
+		if(iExpDetail < 2)
+			return;
+		CreateMappedPS("particles/engine/e_impact_wood.txt", pSystem);
+		CreateMappedPS("particles/engine/e_impact_wood_core.txt", pSystem);
+
+		if(pSystem == NULL) {
+			return;
+		}
+	}
+
+	// Scorch mark replacement
+	if(iPreset == iDefaultScorch) {
+		if(iExpDetail < 2)
+			return;
+		CreateMappedPS("particles/engine/e_scorch.txt", pSystem);
+
+		if(pSystem == NULL) {
+			return;
+		}
+	}
+
+	// Red blood pit (emit red blood when dead)
+	if(iPreset == iDefaultBloodRedPit) {
+		if(iExpDetail < 2)
+			return;
+		CreateMappedPS("particles/engine/e_bloodpit_red.txt", pSystem);
+
+		if(pSystem == NULL) {
+			return;
+		}
+	}
+		
+	// Green blood pit (emit yellow/green blood when dead)
+	if(iPreset == iDefaultBloodGreenPit) {
+		if(iExpDetail < 2)
+			return;
+		CreateMappedPS("particles/engine/e_bloodpit_green.txt", pSystem);
+
+		if(pSystem == NULL) {
+			return;
+		}
+	}
+
+	// Gas canister impact
+	if(iPreset == iDefaultGasCanister) {
+		if(iExpDetail < 2)
+			return;
+		CreateMappedPS("particles/engine/e_impacts_gascan_drops.txt", pSystem);
+		CreateMappedPS("particles/engine/e_impacts_gascan_core.txt", pSystem);
+
+		if(pSystem == NULL) {
+			return;
+		}
+	}
+
+	// Teleport wave (used by env_warpball)
+	if(iPreset == iDefaultTeleportWave) {
+		if(iExpDetail < 2)
+			return;
+		CreateMappedPS("particles/engine/e_teleport_wave.txt", pSystem);
+		CreateMappedPS("particles/engine/e_teleport_portal.txt", pSystem);
+		CreateMappedPS("particles/engine/e_teleport_flare.txt", pSystem);
+
+		if(pSystem == NULL) {
+			return;
+		}
+
+		dlight_t *dl = gEngfuncs.pEfxAPI->CL_AllocDlight (0);
+		VectorCopy (pSystem->vPosition, dl->origin);
+		dl->radius = 222;
+		dl->color.r = 100;
+		dl->color.g = 160;
+		dl->color.b = 24;
+		dl->decay = 0.2;
+		dl->die = (gEngfuncs.GetClientTime() + 3);
+	}
+
+	// Teleport wave 2 (portal image)
+	if(iPreset == iDefaultTeleportWave2) {
+		if(iExpDetail < 2)
+			return;
+		CreateMappedPS("particles/engine/e_teleport_portal_img.txt", pSystem);
+
+		if(pSystem == NULL) {
+			return;
+		}
+	}
+
+	// Teleport wave 3 (reserved)
+	if(iPreset == iDefaultTeleportWave3) {
+		if(pSystem == NULL) {
 			return;
 		}
 	}

@@ -60,6 +60,31 @@ const char SPARK_PARTICLE[MAX_PARTICLE_PATH] = "particles/spark01.tga";
 const char WHITE_SMOKE_PARTICLE[MAX_PARTICLE_PATH] = "particles/smoke3.tga";
 const char BROWN_SMOKE_PARTICLE[MAX_PARTICLE_PATH] = "particles/brownsmoke.tga";
 
+// additional engine particle paths (from am_src_rebirth)
+const char BLOOD_PARTICLE[MAX_PARTICLE_PATH] = "particles/engine/e_blood.txt";
+const char FIRE_PARTICLE[MAX_PARTICLE_PATH] = "particles/engine/e_fire.txt";
+const char DROP_SMOKE_PARTICLE[MAX_PARTICLE_PATH] = "particles/engine/e_drop.txt";
+const char DEFAULT_CHUNK_PARTICLE[MAX_PARTICLE_PATH] = "particles/engine/e_impacts_chunks.txt";
+const char DEFAULT_IMPACT_PARTICLE[MAX_PARTICLE_PATH] = "particles/engine/e_impacts_smoke.txt";
+const char DEFAULT_SMOKE_PARTICLE[MAX_PARTICLE_PATH] = "particles/engine/e_smoke.txt";
+const char SMOKE_BENG_PARTICLE[MAX_PARTICLE_PATH] = "particles/engine/e_smoke_beng.txt";
+const char SMOKE_TRACER_PARTICLE[MAX_PARTICLE_PATH] = "particles/engine/e_smoke_tracer.txt";
+const char WAVES_PARTICLE[MAX_PARTICLE_PATH] = "particles/engine/e_waves.txt";
+const char FIRE_FINAL_PARTICLE[MAX_PARTICLE_PATH] = "particles/engine/e_fire_final.txt";
+const char SMOKE_FINAL_PARTICLE[MAX_PARTICLE_PATH] = "particles/engine/e_fire_smoke.txt";
+const char IMPACT_BLUE_PARTICLE[MAX_PARTICLE_PATH] = "particles/engine/e_impact_blue.txt";
+const char IMPACT_RED_PARTICLE[MAX_PARTICLE_PATH] = "particles/engine/e_impact_red.txt";
+const char IMPACT_YELLOW_PARTICLE[MAX_PARTICLE_PATH] = "particles/engine/e_impact_yellow.txt";
+const char IMPACT_BROWN_PARTICLE[MAX_PARTICLE_PATH] = "particles/engine/e_impact_brown.txt";
+const char IMPACT_BLACK_PARTICLE[MAX_PARTICLE_PATH] = "particles/engine/e_impact_black.txt";
+const char IMPACT_GREEN_PARTICLE[MAX_PARTICLE_PATH] = "particles/engine/e_impact_green_core.txt";
+const char IMPACT_HUMAN_PARTICLE[MAX_PARTICLE_PATH] = "particles/engine/e_impact_flesh_human.txt";
+const char IMPACT_HUMAN_CORE_PARTICLE[MAX_PARTICLE_PATH] = "particles/engine/e_impact_flesh_human_core.txt";
+const char IMPACT_ALIEN_PARTICLE[MAX_PARTICLE_PATH] = "particles/engine/e_impact_flesh_alien.txt";
+const char IMPACT_ALIEN_CORE_PARTICLE[MAX_PARTICLE_PATH] = "particles/engine/e_impact_flesh_alien_core.txt";
+const char IMPACT_WOOD_PARTICLE[MAX_PARTICLE_PATH] = "particles/engine/e_impact_wood.txt";
+const char IMPACT_WOOD_CORE_PARTICLE[MAX_PARTICLE_PATH] = "particles/engine/e_impact_wood_core.txt";
+
 // maximum life of particle systems in seconds
 const unsigned int FLINTLOCK_SMOKE_SYSTEM_LIFE = 10;
 const unsigned int BARREL_SMOKE_SYSTEM_LIFE = 9;
@@ -85,6 +110,38 @@ const unsigned int iDefaultExplosion = 1;
 const unsigned int iDefaultRedSmoke = 2;
 const unsigned int iDefaultBlueSmoke = 3;
 const unsigned int iDefaultCannonSmoke = 4;
+
+const unsigned int iDefaultBlood = 5;
+const unsigned int iDefaultFire = 6;
+const unsigned int iDefaultDrop = 7;
+const unsigned int iDefaultWallSmoke = 8;
+const unsigned int iDefaultSmoke = 9;
+const unsigned int iDefaultBangalorSmoke = 10;
+const unsigned int iDefaultTracerSmoke = 11;
+const unsigned int iDefaultWaves = 12;
+const unsigned int iDefaultFinalFire = 13;
+const unsigned int iDefaultFinalSmoke = 14;
+
+const unsigned int iDefaultHitBlue = 15;
+const unsigned int iDefaultHitRed = 16;
+const unsigned int iDefaultHitYellow = 17;
+const unsigned int iDefaultHitBrown = 18;
+const unsigned int iDefaultHitBlack = 19;
+const unsigned int iDefaultHitGreen = 20;
+const unsigned int iDefaultHitFleshRed = 21;
+const unsigned int iDefaultHitFleshYellow = 22;
+const unsigned int iDefaultHitWood1 = 23;
+const unsigned int iDefaultHitWood2 = 24;
+const unsigned int iDefaultScorch = 25;
+const unsigned int iDefaultBloodRedPit = 26;
+const unsigned int iDefaultBloodGreenPit = 27;
+const unsigned int iDefaultHitSlime = 28;
+const unsigned int iDefaultWallSmokeLong = 29;
+const unsigned int iDefaultWaterSplash = 30;
+const unsigned int iDefaultGasCanister = 31;
+const unsigned int iDefaultTeleportWave = 32;
+const unsigned int iDefaultTeleportWave2 = 33;
+const unsigned int iDefaultTeleportWave3 = 34;
 
 
 // defines the shape of where the particles are emitted
