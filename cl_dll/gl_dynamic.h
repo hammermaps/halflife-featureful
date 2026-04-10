@@ -11,7 +11,7 @@
 #if OPENGL_AVAILABLE
 
 #if defined (_WIN32)
-
+#include <windows.h>
 #else // _WIN32
 
 #define APIENTRY // __stdcall ?
