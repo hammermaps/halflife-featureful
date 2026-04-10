@@ -111,7 +111,7 @@ void CParticleSystemManager::UpdateSystems( void )
 	// sort and draw the sorted particles list
 	if(iParticles > 0) {
 		float flTimeSinceLastSort = (gEngfuncs.GetClientTime() - m_flLastSort);
-		if(g_ParticleSorts->value > 0 && flTimeSinceLastSort >= 1.0f / g_ParticleSorts->value) {
+		if(g_ParticleSorts->value > 0 && flTimeSinceLastSort * g_ParticleSorts->value >= 1.0f) {
 			m_flLastSort = gEngfuncs.GetClientTime();
 			std::sort(m_pParticles.begin(), m_pParticles.end(), less_than);
 		}
