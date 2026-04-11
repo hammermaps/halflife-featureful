@@ -97,7 +97,7 @@ jobs:
       uses: actions/cache@v4
       with:
         path: ~/.cache/ccache
-        key: ccache-linux-${{ matrix.vgui_build }}-${{ github.sha }}
+        key: ccache-linux-${{ matrix.vgui_build }}-${{ hashFiles('CMakeLists.txt', 'dlls/CMakeLists.txt', 'cl_dll/CMakeLists.txt') }}
         restore-keys: |
           ccache-linux-${{ matrix.vgui_build }}-
           ccache-linux-
@@ -128,7 +128,7 @@ jobs:
       uses: actions/cache@v4
       with:
         path: ${{ runner.temp }}\sccache
-        key: sccache-windows-${{ matrix.vgui_build }}-${{ github.sha }}
+        key: sccache-windows-${{ matrix.vgui_build }}-${{ hashFiles('CMakeLists.txt', 'dlls/CMakeLists.txt', 'cl_dll/CMakeLists.txt') }}
         restore-keys: |
           sccache-windows-${{ matrix.vgui_build }}-
           sccache-windows-

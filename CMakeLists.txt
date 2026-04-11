@@ -25,21 +25,6 @@ set (CMAKE_CXX_STANDARD 11)
 # 3.9 added captures in if(MATCHES)
 cmake_minimum_required(VERSION 3.9)
 
-# Use ccache or sccache if available for faster incremental builds
-if(NOT CMAKE_C_COMPILER_LAUNCHER AND NOT CMAKE_CXX_COMPILER_LAUNCHER)
-	find_program(CCACHE_EXECUTABLE ccache)
-	find_program(SCCACHE_EXECUTABLE sccache)
-	if(CCACHE_EXECUTABLE)
-		set(CMAKE_C_COMPILER_LAUNCHER "${CCACHE_EXECUTABLE}" CACHE STRING "C compiler launcher")
-		set(CMAKE_CXX_COMPILER_LAUNCHER "${CCACHE_EXECUTABLE}" CACHE STRING "C++ compiler launcher")
-		message(STATUS "Using ccache: ${CCACHE_EXECUTABLE}")
-	elseif(SCCACHE_EXECUTABLE)
-		set(CMAKE_C_COMPILER_LAUNCHER "${SCCACHE_EXECUTABLE}" CACHE STRING "C compiler launcher")
-		set(CMAKE_CXX_COMPILER_LAUNCHER "${SCCACHE_EXECUTABLE}" CACHE STRING "C++ compiler launcher")
-		message(STATUS "Using sccache: ${SCCACHE_EXECUTABLE}")
-	endif()
-endif()
-
 if(NOT ${CMAKE_VERSION} VERSION_LESS "3.15.0")
 	cmake_policy(SET CMP0091 NEW)
 endif()
@@ -54,6 +39,21 @@ include(VSForceXPToolchain) # Force XP toolchain for Visual Studio
 include(CheckIPOSupported)
 
 project (HLSDK-FEATUREFUL)
+
+# Use ccache or sccache if available for faster incremental builds
+if(NOT CMAKE_C_COMPILER_LAUNCHER AND NOT CMAKE_CXX_COMPILER_LAUNCHER)
+	find_program(CCACHE_EXECUTABLE ccache)
+	find_program(SCCACHE_EXECUTABLE sccache)
+	if(CCACHE_EXECUTABLE)
+		set(CMAKE_C_COMPILER_LAUNCHER "${CCACHE_EXECUTABLE}" CACHE STRING "C compiler launcher")
+		set(CMAKE_CXX_COMPILER_LAUNCHER "${CCACHE_EXECUTABLE}" CACHE STRING "C++ compiler launcher")
+		message(STATUS "Using ccache: ${CCACHE_EXECUTABLE}")
+	elseif(SCCACHE_EXECUTABLE)
+		set(CMAKE_C_COMPILER_LAUNCHER "${SCCACHE_EXECUTABLE}" CACHE STRING "C compiler launcher")
+		set(CMAKE_CXX_COMPILER_LAUNCHER "${SCCACHE_EXECUTABLE}" CACHE STRING "C++ compiler launcher")
+		message(STATUS "Using sccache: ${SCCACHE_EXECUTABLE}")
+	endif()
+endif()
 
 #--------------
 # USER DEFINES \
