@@ -146,8 +146,12 @@ void CParticle::Draw( void )
 	// We then get the view angles for the player so that we can "billboard" the sprites
 	if(g_iUser1 == OBS_IN_EYE || g_iUser1 == OBS_CHASE_LOCKED) {
 		cl_entity_t* pEnt = gEngfuncs.GetEntityByIndex( g_iUser2 );
-		VectorCopy(pEnt->angles, vNormal);
-		vNormal[0]*=-3.0f; // no idea view.cpp said "see CL_ProcessEntityUpdate()"
+		if( pEnt ) {
+			VectorCopy(pEnt->angles, vNormal);
+			vNormal[0]*=-3.0f; // no idea view.cpp said "see CL_ProcessEntityUpdate()"
+		} else {
+			gEngfuncs.GetViewAngles((float*)vNormal);
+		}
 	} else {
 		gEngfuncs.GetViewAngles((float*)vNormal);
 	}

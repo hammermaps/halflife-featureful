@@ -82,9 +82,11 @@ void CMappedParticle::InitValues( void )
 		sParticle.vPosition.y = sParticle.vPosition.y + gEngfuncs.pfnRandomFloat( -(float)(pSys->iPlaneYLength/2), (float)(pSys->iPlaneYLength/2));
 	} else if(pSys->iSystemShape == SHAPE_AROUND_PLAYER) {
 		cl_entity_t* m_pPlayer = gEngfuncs.GetLocalPlayer();
-		sParticle.vPosition.x = (m_pPlayer->origin.x + gEngfuncs.pfnRandomFloat( -(float)(pSys->iPlaneXLength), (float)(pSys->iPlaneXLength) ));
-		sParticle.vPosition.y = (m_pPlayer->origin.y + gEngfuncs.pfnRandomFloat( -(float)(pSys->iPlaneYLength), (float)(pSys->iPlaneYLength)));
-		sParticle.vPosition.z = (m_pPlayer->origin.z + 450.0);
+		if( m_pPlayer ) {
+			sParticle.vPosition.x = (m_pPlayer->origin.x + gEngfuncs.pfnRandomFloat( -(float)(pSys->iPlaneXLength), (float)(pSys->iPlaneXLength) ));
+			sParticle.vPosition.y = (m_pPlayer->origin.y + gEngfuncs.pfnRandomFloat( -(float)(pSys->iPlaneYLength), (float)(pSys->iPlaneYLength)));
+			sParticle.vPosition.z = (m_pPlayer->origin.z + 450.0);
+		}
 	}
 
 	if(pSys->bWindy == true) {
@@ -201,8 +203,12 @@ void CMappedParticle::Draw( void )
 	{
 		if(g_iUser1 == OBS_IN_EYE || g_iUser1 == OBS_CHASE_LOCKED) {
 			cl_entity_t* pEnt = gEngfuncs.GetEntityByIndex( g_iUser2 );
-			VectorCopy(pEnt->angles, vNormal);
-			vNormal[0]*=-3.0f;
+			if( pEnt ) {
+				VectorCopy(pEnt->angles, vNormal);
+				vNormal[0]*=-3.0f;
+			} else {
+				vNormal = v_angles;
+			}
 		} else {
 			vNormal = v_angles;
 		}
@@ -217,8 +223,12 @@ void CMappedParticle::Draw( void )
 	if (pSys->iParticleAlign == LOCKED_Z) {
 		if(g_iUser1 == OBS_IN_EYE || g_iUser1 == OBS_CHASE_LOCKED) {
 			cl_entity_t* pEnt = gEngfuncs.GetEntityByIndex( g_iUser2 );
-			VectorCopy(pEnt->angles, vNormal);
-			vNormal[0]*=-3.0f;
+			if( pEnt ) {
+				VectorCopy(pEnt->angles, vNormal);
+				vNormal[0]*=-3.0f;
+			} else {
+				gEngfuncs.GetViewAngles((float*)vNormal);
+			}
 		} else {
 			gEngfuncs.GetViewAngles((float*)vNormal);
 		}
