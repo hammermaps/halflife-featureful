@@ -277,7 +277,83 @@ This documentation lists possible optimizations for the Half-Life Featureful SDK
 - **Const member functions**: Mark where possible
 - **Const references**: For large parameter objects
 
-## Prioritization
+## 13. BG Particle System Optimizations
+
+The BG particle system (ported from *Battle Grounds*) lives in `cl_dll/particles/`. The following system-specific optimizations were identified through direct code analysis.
+
+### 13.1 OpenGL Rendering Efficiency
+
+- **Replace immediate mode with vertex arrays / VBOs**: Each particle issues its own `glBegin(GL_QUADS)` / `glEnd()` pair. With hundreds of active particles this produces an equal number of draw calls.
+  - Fix: Batch all particles sharing the same texture into a single `glBegin` block or VBO.
+  - Location: `cl_dll/particles/particle.cpp:163-185` (CParticle::Draw), `particle.cpp:390-412` (CSparkParticle::Draw)
+  - Benefit: Massive GPU throughput improvement – N draw calls reduced to 1 per texture
+
+- **Compute view vectors once per frame**: `AngleVectors()` and `gEngfuncs.GetViewAngles()` are currently called once **per particle**, even though the camera direction does not change within a frame.
+  - Fix: Compute `vForward`, `vRight`, `vUp` once in `UpdateSystems()` and pass them as parameters or frame-global variables.
+  - Location: `cl_dll/particles/particle.cpp:147-156`
+  - Benefit: Eliminates N×`AngleVectors` calls per frame (N = active particle count)
+
+- **Texture-state batching**: Particles are sorted purely by distance, causing frequent `glBindTexture` switches. A two-level sort (texture first, distance tiers second) would reduce OpenGL state changes.
+  - Location: `cl_dll/particles/system_manager.cpp:113-138`
+  - Benefit: Fewer OpenGL state changes, better GPU cache utilization
+
+- **Cache `flSize * flScale` locally**: In `CParticle::Draw()` the product `sParticle.flSize * sParticle.flScale` is recomputed for each of the 4 corners twice, yielding 8 multiplications per particle. A single local variable would cut this to 1.
+  - Location: `cl_dll/particles/particle.cpp:166-183`
+
+### 13.2 Data Structure Improvements
+
+- **`vector::erase(begin()+i)` → swap-and-pop-back**: `RemoveParticle`, `RemoveParticles`, `RemoveSystems`, and `RemoveTextures` all use `erase(begin()+i)`, which shifts all subsequent elements (O(n) per removal). Since ordering does not matter during removal, swapping the target with the last element and calling `pop_back()` achieves O(1) removal.
+  - Location: `cl_dll/particles/system_manager.cpp:566-679`
+  - Benefit: Mass-removal complexity reduced from O(n²) to O(n)
+
+- **Texture cache: `vector` → `std::unordered_map`**: `HasTexture()` performs a linear scan through a `vector<particle_texture_cache*>` using `stricmp`. This function is called every frame per active system inside `UpdateSystem`.
+  - Fix: Replace with `std::unordered_map<std::string, particle_texture_s*>` using a lowercased key.
+  - Location: `cl_dll/particles/system_manager.cpp:506-518`
+  - Benefit: O(n) → O(1) texture lookup
+
+- **Particle memory pool**: Every particle is individually heap-allocated with `new` and freed with `delete`. Explosions spawn and destroy many short-lived particles simultaneously.
+  - Fix: A freelist / object pool for `CMappedParticle`, `CFlintParticle`, etc.
+  - Location: `cl_dll/particles/system_manager.cpp:106`, `mapped_particles.cpp:106,113`
+  - Benefit: Less heap fragmentation, faster allocation, better cache locality
+
+### 13.3 Per-Frame Computation
+
+- **`LoadTGA` called every frame**: `CMappedParticleSystem::UpdateSystem()` calls `LoadTGA(NULL, m_pSystem->sParticleTexture)` on every update. The result is already cached via `HasTexture()`, but the string scan still runs every frame.
+  - Fix: Cache the texture pointer in the system object after the first load; only call `LoadTGA` during initialization.
+  - Location: `cl_dll/particles/mapped_particles.cpp:97`
+  - Benefit: Eliminates a `stricmp` scan per active system per frame
+
+- **`fmod` instead of `while` loop for rotation wrap**: All `Update()` methods contain `while (sParticle.flCurrentRotation > 360) { flCurrentRotation -= 360; }`. Because rotation steps per frame are small, the loop body executes at most once in practice. An `if` or `fmod` is semantically clearer and marginally faster.
+  - Location: `cl_dll/particles/particle.cpp:240-242, 337-339, 435-437, 528-530`
+
+- **Cache `gEngfuncs.GetClientTime()` per frame**: `TimeSinceLastDraw()` and `DistanceToThisPlayer()` both call `gEngfuncs.GetClientTime()` internally. Caching this value once in `UpdateSystems()` and passing it as a parameter avoids redundant calls.
+  - Location: `cl_dll/particles/system_manager.cpp:60`, `cl_dll/particles/particle.cpp:108`
+
+### 13.4 Culling and LOD
+
+- **Distance-based particle culling**: There is no maximum render distance for particles. Very distant particles are fully updated and drawn regardless of distance.
+  - Fix: In `UpdateSystems()`, skip (or reduce update rate of) particles where `flSquareDistanceToPlayer` exceeds a configurable threshold.
+  - Location: `cl_dll/particles/system_manager.cpp:86-139`
+
+- **View frustum culling**: Particles outside the camera frustum are fully processed. A simple frustum AABB check before `Update()`/`Draw()` would skip invisible particles entirely.
+  - Location: `cl_dll/particles/system_manager.cpp:86-139`
+
+- **Leverage existing grass LOD fields**: `CGrassParticle` already has `m_flLodMinDistance` / `m_flLodMaxDistance` fields loaded from config, but they are not used to fully cull particles beyond `m_flLodMaxDistance`.
+  - Location: `cl_dll/particles/grass_particle.cpp`
+
+### 13.5 Memory Layout
+
+- **Share system data for grass particles**: `CGrassParticleSystem` creates a full `grass_particle_system` copy for each individual grass particle via `new` + `memcpy`. Since most fields are identical across particles of the same type, using a shared const base pointer with per-particle deltas would significantly reduce memory usage.
+  - Location: `cl_dll/particles/grass_system.cpp:65-66`
+  - Benefit: Greatly reduced memory footprint for dense grass areas
+
+- **Hot/cold split for `base_particle` struct**: The `base_particle` struct in `game_shared/particle_defs.h` mixes frequently-updated fields (position, velocity, age) with rarely-used ones (color components, texture pointer). Splitting them improves CPU cache efficiency during the update loop.
+  - Location: `game_shared/particle_defs.h`
+
+- **Store `GLuint` directly instead of as a pointer**: `particle_texture_s::iID` is declared as `GLuint*` – a pointer to a single integer stored on the heap. Storing `GLuint` directly in the struct eliminates one heap allocation and one level of indirection per texture.
+  - Location: `cl_dll/particles/particle_texture.h:53`
+
+
 
 ### High Priority (Quick Wins)
 1. Enable LTO for Release builds (easy, big impact)
@@ -342,7 +418,7 @@ This documentation lists possible optimizations for the Half-Life Featureful SDK
 
 ## Summary
 
-This list contains over **50 concrete optimization opportunities** in 12 categories:
+This list contains over **65 concrete optimization opportunities** in 13 categories:
 - **Build System**: 10+ optimizations
 - **Code Quality**: 8+ improvements
 - **Performance**: 15+ optimizations
@@ -351,6 +427,7 @@ This list contains over **50 concrete optimization opportunities** in 12 categor
 - **Assets**: 3+ optimizations
 - **Tooling**: 6+ improvements
 - **CI/CD**: 4+ optimizations
+- **BG Particle System**: 15+ optimizations
 
 Implementing all optimizations could lead to:
 - **50-70% faster builds**
