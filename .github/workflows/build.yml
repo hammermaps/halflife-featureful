@@ -92,17 +92,27 @@ jobs:
     - name: Download steam-runtime
       if: startsWith(matrix.os, 'ubuntu') && steps.cache-steam-runtime.outputs.cache-hit != 'true'
       run: wget --no-verbose https://repo.steampowered.com/steamrt-images-scout/snapshots/${{ env.STEAMRT_SNAPSHOT }}/com.valvesoftware.SteamRuntime.Sdk-i386-scout-sysroot.tar.gz
+    - name: Cache ccache (Linux)
+      if: startsWith(matrix.os, 'ubuntu')
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/ccache
+        key: ccache-linux-${{ matrix.vgui_build }}-${{ github.sha }}
+        restore-keys: |
+          ccache-linux-${{ matrix.vgui_build }}-
+          ccache-linux-
     - name: Install steam runtime
       if: startsWith(matrix.os, 'ubuntu')
       run: |
         sudo apt update
+        sudo apt-get install -y ccache
         ./steam-runtime/setup_chroot.sh --i386 --tarball ./com.valvesoftware.SteamRuntime.Sdk-i386-scout-sysroot.tar.gz
         sudo sed -i 's/groups=sudo/groups=adm/g' /etc/schroot/chroot.d/steamrt_scout_i386.conf
 
     - name: Build on Linux
       if: startsWith(matrix.os, 'ubuntu')
       run: |
-        schroot --chroot steamrt_scout_i386 -- cmake -GNinja -DCMAKE_BUILD_TYPE=Release -DPOLLY=ON -B build -S . -DCMAKE_EXE_LINKER_FLAGS="-Wl,--no-undefined" -DUSE_VGUI=${{ env.USE_VGUI }} -DCMAKE_INSTALL_PREFIX="$PWD/dist"
+        schroot --chroot steamrt_scout_i386 -- cmake -GNinja -DCMAKE_BUILD_TYPE=Release -DPOLLY=ON -B build -S . -DCMAKE_EXE_LINKER_FLAGS="-Wl,--no-undefined" -DUSE_VGUI=${{ env.USE_VGUI }} -DCMAKE_INSTALL_PREFIX="$PWD/dist" -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
         if [ ${{ env.USE_VGUI == 'ON' }} ]; then cp vgui_support/vgui-dev/lib/vgui.so build/cl_dll; cp vgui_support/vgui-dev/lib/vgui.so build ; fi
         schroot --chroot steamrt_scout_i386 -- cmake --build build --target all
         schroot --chroot steamrt_scout_i386 -- cmake --build build --target install
@@ -113,10 +123,32 @@ jobs:
       with:
         arch: x86
 
+    - name: Cache sccache (Windows)
+      if: startsWith(matrix.os, 'windows')
+      uses: actions/cache@v4
+      with:
+        path: ${{ runner.temp }}\sccache
+        key: sccache-windows-${{ matrix.vgui_build }}-${{ github.sha }}
+        restore-keys: |
+          sccache-windows-${{ matrix.vgui_build }}-
+          sccache-windows-
+
+    - name: Install sccache (Windows)
+      if: startsWith(matrix.os, 'windows')
+      shell: pwsh
+      run: |
+        $version = "0.14.0"
+        $url = "https://github.com/mozilla/sccache/releases/download/v${version}/sccache-v${version}-x86_64-pc-windows-msvc.zip"
+        Invoke-WebRequest -Uri $url -OutFile sccache.zip
+        Expand-Archive sccache.zip -DestinationPath sccache_dir
+        $sccachePath = (Resolve-Path "sccache_dir\sccache-v${version}-x86_64-pc-windows-msvc").Path
+        echo "$sccachePath" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+        echo "SCCACHE_DIR=${{ runner.temp }}\sccache" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
     - name: Build on Windows
       if: startsWith(matrix.os, 'windows')
       run: |
-        cmake -G Ninja -DCMAKE_BUILD_TYPE=Release -B build -S . -DUSE_VGUI=${{ env.USE_VGUI }} -DCMAKE_INSTALL_PREFIX="dist"
+        cmake -G Ninja -DCMAKE_BUILD_TYPE=Release -B build -S . -DUSE_VGUI=${{ env.USE_VGUI }} -DCMAKE_INSTALL_PREFIX="dist" -DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache
         cmake --build build --target all
         cmake --build build --target install
 
