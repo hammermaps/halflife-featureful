@@ -12,6 +12,7 @@
 // -- Particle Emitter --
 
 LINK_ENTITY_TO_CLASS( env_particles, CParticleEmitter )
+LINK_ENTITY_TO_CLASS( env_particleemitter, CParticleEmitter )
 
 int gmsgBGParticle = 0;
 int gmsgBGGrass = 0;
@@ -48,7 +49,7 @@ void CParticleEmitter::Precache( void )
 
 void CParticleEmitter::KeyValue( KeyValueData *pkvd )
 {
-	if( FStrEq( pkvd->szKeyName, "particle_file" ) )
+	if( FStrEq( pkvd->szKeyName, "particle_file" ) || FStrEq( pkvd->szKeyName, "definition_file" ) )
 	{
 		m_iParticleFile = ALLOC_STRING( pkvd->szValue );
 		pkvd->fHandled = true;
