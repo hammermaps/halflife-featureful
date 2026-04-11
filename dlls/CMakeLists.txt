@@ -252,6 +252,13 @@ endif()
 add_library (${SVDLL_LIBRARY} SHARED ${SVDLL_SOURCES})
 target_link_libraries(${SVDLL_LIBRARY} vcs_info)
 
+if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.16")
+	target_precompile_headers(${SVDLL_LIBRARY} PRIVATE
+		"$<$<COMPILE_LANGUAGE:CXX>:extdll.h>"
+		"$<$<COMPILE_LANGUAGE:CXX>:util.h>"
+		"$<$<COMPILE_LANGUAGE:CXX>:cbase.h>")
+endif()
+
 set_target_properties (${SVDLL_LIBRARY} PROPERTIES POSITION_INDEPENDENT_CODE 1)
 
 if(APPLE AND NOT "${SERVER_LIBRARY_NAME_OSX}" STREQUAL "")

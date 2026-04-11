@@ -40,6 +40,21 @@ include(CheckIPOSupported)
 
 project (HLSDK-FEATUREFUL)
 
+# Use ccache or sccache if available for faster incremental builds
+if(NOT CMAKE_C_COMPILER_LAUNCHER AND NOT CMAKE_CXX_COMPILER_LAUNCHER)
+	find_program(CCACHE_EXECUTABLE ccache)
+	find_program(SCCACHE_EXECUTABLE sccache)
+	if(CCACHE_EXECUTABLE)
+		set(CMAKE_C_COMPILER_LAUNCHER "${CCACHE_EXECUTABLE}" CACHE STRING "C compiler launcher")
+		set(CMAKE_CXX_COMPILER_LAUNCHER "${CCACHE_EXECUTABLE}" CACHE STRING "C++ compiler launcher")
+		message(STATUS "Using ccache: ${CCACHE_EXECUTABLE}")
+	elseif(SCCACHE_EXECUTABLE)
+		set(CMAKE_C_COMPILER_LAUNCHER "${SCCACHE_EXECUTABLE}" CACHE STRING "C compiler launcher")
+		set(CMAKE_CXX_COMPILER_LAUNCHER "${SCCACHE_EXECUTABLE}" CACHE STRING "C++ compiler launcher")
+		message(STATUS "Using sccache: ${SCCACHE_EXECUTABLE}")
+	endif()
+endif()
+
 #--------------
 # USER DEFINES \
 ################\
@@ -187,12 +202,18 @@ if(VITA)
 	add_compile_options(-fno-use-cxa-atexit)
 endif()
 
-if(LTO)
+string(TOUPPER "${CMAKE_BUILD_TYPE}" _BUILD_TYPE_UPPER)
+if(LTO OR _BUILD_TYPE_UPPER STREQUAL "RELEASE")
 	check_ipo_supported(RESULT HAVE_LTO OUTPUT LTO_ERROR)
 	if(HAVE_LTO)
-		message(STATUS "IPO / LTO enabled")
+		if(LTO)
+			message(STATUS "IPO / LTO enabled")
+		else()
+			message(STATUS "IPO / LTO auto-enabled for Release build")
+		endif()
 	else()
 		message(STATUS "IPO / LTO not supported: ${LTO_ERROR}")
+		set(HAVE_LTO FALSE)
 	endif()
 endif()
 
