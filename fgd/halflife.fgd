@@ -172,6 +172,39 @@
 		8: "Hover in the air, ignore brush collision"
 	]
 	master(string) : "Master" : : "Block picking up until master is activated"
+
+	renderfx(choices) :"Render FX" : : "Gives objects special render effects. Think of it as modifying whatever the Render Mode puts out. The options are as follows:" =
+	[
+		0: "Normal"
+		1: "Slow Pulse"
+		2: "Fast Pulse"
+		3: "Slow Wide Pulse"
+		4: "Fast Wide Pulse"
+		9: "Slow Strobe"
+		10: "Fast Strobe"
+		11: "Faster Strobe"
+		12: "Slow Flicker"
+		13: "Fast Flicker"
+		5: "Slow Fade Away"
+		6: "Fast Fade Away"
+		7: "Slow Become Solid"
+		8: "Fast Become Solid"
+		14: "Constant Glow"
+		15: "Distort"
+		16: "Hologram (Distort + fade)"
+		19: "Glow Shell"
+	]
+	rendermode(choices) : "Render Mode" : : "Controls the type of rendering that is used for an object. Options are:" =
+	[
+		0: "Normal"
+		1: "Color"
+		2: "Texture"
+		3: "Glow"
+		4: "Solid"
+		5: "Additive"
+	]
+	renderamt(integer) : "FX Amount (1 - 255)"
+	rendercolor(color255) : "FX Color (R G B)"
 ]
 @BaseClass size(-16 -16 0, 16 16 32) color(0 0 200) base(Pickup) = Weapon []
 @BaseClass base(Pickup) = Item
