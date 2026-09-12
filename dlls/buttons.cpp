@@ -863,6 +863,15 @@ public:
 
 	bool IsAllowedToSpeak() override { return true; }
 	bool IsUsefulToDisplayHint(CBaseEntity *pPlayer) override {
+		if (m_toggle_state == TS_GOING_UP || m_toggle_state == TS_GOING_DOWN)
+			return false;
+
+		if (FBitSet(pev->spawnflags, SF_BUTTON_TOGGLE) && m_toggleAgainTime > gpGlobals->time)
+			return false;
+
+		if (m_toggle_state == TS_AT_TOP && !FBitSet(pev->spawnflags, SF_BUTTON_TOGGLE))
+			return false;
+
 		return !FBitSet(pev->spawnflags, SF_BUTTON_PLAYER_CANT_USE|SF_BUTTON_PLAYER_CANT_USE_OLD);
 	}
 

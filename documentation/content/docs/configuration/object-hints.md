@@ -108,7 +108,7 @@ Both `"interaction"` and `"scan"` has 3 properties to refer to visual hints that
 
 * `"default"` - this hint will be used if others two are not defined or the conditions for them are not met.
 * `"locked"` - this hint will be used if the entity is locked by master. If set to `null` or empty string, the hint won't show at all when the entity is locked.
-* `"unusable"` - this hint will be used if the object is "unusable" for the player. If set to `null` or empty string, the hint won't show at all when the entity is "unusable". The exact meaning depends on the entity. E.g. wall chargers are "unusable" when they're depleted. Eye scanners are unusable when they won't grant access to the player.
+* `"unusable"` - this hint will be used while the object is "unusable" for the player. If set to `null` or empty string, the hint won't show at all when the entity is "unusable". The exact meaning depends on the entity. E.g. wall chargers are unusable when they're depleted. Eye scanners are unusable when they won't grant access to the player. Buttons are unusable while they're moving or waiting for return.
 
 ### Mapping between entity classnames and hint templates
 
