@@ -20,7 +20,7 @@ def configure(conf):
 			conf.fatal("Could not find hl.def")
 
 def build(bld):
-	excluded_files = ['Wxdebug.cpp', 'voice_gamemgr.cpp']
+	excluded_files = ['Wxdebug.cpp']
 
 	source = bld.path.ant_glob('**/*.cpp', excl=excluded_files)
 	source += bld.path.parent.ant_glob('game_shared/*.cpp')
@@ -31,11 +31,6 @@ def build(bld):
 
 	defines = ['SERVER_DLL']
 	defines += bld.env.EXPORT_DEFINES_LIST
-
-	if bld.env.USE_VOICEMGR:
-		source += ['voice_gamemgr.cpp']
-	else:
-		defines += ['NO_VOICEGAMEMGR']
 
 	includes = [
 		'.',
@@ -72,4 +67,3 @@ def build(bld):
 		install_path = install_path,
 		idx = bld.get_taskgen_count()
 	)
-

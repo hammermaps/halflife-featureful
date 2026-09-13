@@ -45,3 +45,6 @@ local.properties
 *.mdl
 *.spr
 *.wav
+
+#Finder cache
+.DS_Store

@@ -26,10 +26,8 @@
 cvar_t *cl_scoreboard_bg;
 cvar_t *cl_showpacketloss;
 
-
-#if USE_VGUI
 #include "vgui_TeamFortressViewport.h"
-#endif
+#include "vgui_SpectatorPanel.h"
 
 DECLARE_COMMAND( m_Scoreboard, ShowScores )
 DECLARE_COMMAND( m_Scoreboard, HideScores )
@@ -94,6 +92,17 @@ int SCOREBOARD_WIDTH = 320;
 // Y positions
 #define ROW_RANGE_MIN 15
 #define ROW_RANGE_MAX ( ScreenHeight - 50 )
+#define TOP_PADDING 5
+
+static int TopLevelGap()
+{
+	return g_iUser1 ? (YRES_HD(PANEL_HEIGHT) + TOP_PADDING) : ROW_RANGE_MIN;
+}
+
+static int ScoreboardHeight()
+{
+	return g_iUser1 ? (ScreenHeight - YRES_HD(PANEL_HEIGHT)*2) : ROW_RANGE_MAX;
+}
 
 int CHudScoreboard::Draw( float fTime )
 {
@@ -104,10 +113,8 @@ int CHudScoreboard::Draw( float fTime )
 
 	if( !m_iShowscoresHeld && (showToDead ? gHUD.m_Health.m_iHealth > 0 : true) && !gHUD.m_iIntermission )
 		return 1;
-#if USE_VGUI
 	if (gViewPort && gViewPort->IsScoreBoardVisible())
 		return 1;
-#endif
 
 	gHUD.GetAllPlayersInfo();
 
@@ -130,7 +137,7 @@ int CHudScoreboard::Draw( float fTime )
 	const int RowGap = CHud::UtfText::LineHeight();
 
 	// print the heading line
-	int ypos = ROW_RANGE_MIN + ( list_slot * RowGap );
+	int ypos = TopLevelGap() + ( list_slot * RowGap );
 	int xpos = NAME_RANGE_MIN + xpos_rel;
 
 	FAR_RIGHT = can_show_packetloss ? PL_RANGE_MAX : PING_RANGE_MAX;
@@ -143,7 +150,7 @@ int CHudScoreboard::Draw( float fTime )
 	}
 
 	if( cl_scoreboard_bg && cl_scoreboard_bg->value )
-		gHUD.DrawDarkRectangle( xpos - 5, ypos - 5, FAR_RIGHT, ROW_RANGE_MAX );
+		gHUD.DrawDarkRectangle( xpos - 5, ypos - TOP_PADDING, FAR_RIGHT, ScoreboardHeight() );
 	if( !gHUD.m_Teamplay )
 		CHud::UtfText::DrawString( xpos, ypos, NAME_RANGE_MAX + xpos_rel, "Player", 255, 140, 0 );
 	else
@@ -160,7 +167,7 @@ int CHudScoreboard::Draw( float fTime )
 	}
 
 	list_slot += 1.2f;
-	ypos = ROW_RANGE_MIN + ( list_slot * RowGap );
+	ypos = TopLevelGap() + ( list_slot * RowGap );
 	// xpos = NAME_RANGE_MIN + xpos_rel;
 	FillRGBA( xpos - 4, ypos, FAR_RIGHT -2, 1, 255, 140, 0, 255 );  // draw the seperator line
 
@@ -187,10 +194,10 @@ int CHudScoreboard::Draw( float fTime )
 		// draw out the best team
 		team_info_t *team_info = &g_TeamInfo[best_team];
 
-		ypos = ROW_RANGE_MIN + ( list_slot * RowGap );
+		ypos = TopLevelGap() + ( list_slot * RowGap );
 
 		// check we haven't drawn too far down
-		if( ypos > ROW_RANGE_MAX )  // don't draw to close to the lower border
+		if( ypos > ScoreboardHeight() )  // don't draw to close to the lower border
 			break;
 
 		xpos = NAME_RANGE_MIN + xpos_rel;
@@ -314,10 +321,10 @@ int CHudScoreboard::DrawPlayers( int xpos_rel, float list_slot, int nameoffset, 
 		// draw out the best player
 		hud_player_info_t *pl_info = &g_PlayerInfoList[best_player];
 
-		int ypos = ROW_RANGE_MIN + ( list_slot * RowGap );
+		int ypos = TopLevelGap() + ( list_slot * RowGap );
 
 		// check we haven't drawn too far down
-		if( ypos > ROW_RANGE_MAX )  // don't draw to close to the lower border
+		if( ypos > ScoreboardHeight() )  // don't draw to close to the lower border
 			break;
 
 		int xpos = NAME_RANGE_MIN + xpos_rel;
@@ -416,10 +423,8 @@ int CHudScoreboard::MsgFunc_ScoreInfo( const char *pszName, int iSize, void *pbu
 		//Dont go bellow 0!
 		if( g_PlayerExtraInfo[cl].teamnumber < 0 )
 			g_PlayerExtraInfo[cl].teamnumber = 0;
-#if USE_VGUI
 		if (gHUD.UseVguiScoreBoard() && gViewPort)
 			gViewPort->UpdateOnPlayerInfo();
-#endif
 	}
 
 	return 1;

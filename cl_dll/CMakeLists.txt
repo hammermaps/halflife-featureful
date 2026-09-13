@@ -51,8 +51,8 @@ if (GOLDSOURCE_SUPPORT)
 	add_definitions(-DGOLDSOURCE_SUPPORT)
 endif()
 
-if (USE_VGUI)
-	add_definitions(-DUSE_VGUI)
+if (USE_STATIC_FREEVGUI)
+	add_definitions(-DINTERNAL_VGUI_SUPPORT)
 endif()
 
 set (CLDLL_SOURCES
@@ -182,51 +182,38 @@ set (CLDLL_SOURCES
 	../public/safe_snprintf.c
 )
 
-if (USE_VGUI)
-	list(APPEND CLDLL_SOURCES
-		vgui_int.cpp
-		vgui_ClassMenu.cpp
-		vgui_ConsolePanel.cpp
-		vgui_ControlConfigPanel.cpp
-		vgui_CustomObjects.cpp
-		vgui_MOTDWindow.cpp
-		vgui_SchemeManager.cpp
-		vgui_ScorePanel.cpp
-		vgui_TeamFortressViewport.cpp
-		vgui_SpectatorPanel.cpp
-		vgui_teammenu.cpp
-		voice_status.cpp
-		vgui_checkbutton2.cpp
-		vgui_grid.cpp
-		vgui_helpers.cpp
-		vgui_listbox.cpp
-		vgui_loadtga.cpp
-		vgui_scrollbar2.cpp
-		vgui_slider2.cpp
-		voice_banmgr.cpp
-		)
-endif()
+list(APPEND CLDLL_SOURCES
+	vgui_int.cpp
+	vgui_ClassMenu.cpp
+	vgui_ConsolePanel.cpp
+	vgui_ControlConfigPanel.cpp
+	vgui_CustomObjects.cpp
+	vgui_MOTDWindow.cpp
+	vgui_SchemeManager.cpp
+	vgui_ScorePanel.cpp
+	vgui_TeamFortressViewport.cpp
+	vgui_SpectatorPanel.cpp
+	vgui_teammenu.cpp
+	voice_status.cpp
+	vgui_checkbutton2.cpp
+	vgui_grid.cpp
+	vgui_helpers.cpp
+	vgui_listbox.cpp
+	vgui_loadtga.cpp
+	vgui_scrollbar2.cpp
+	vgui_slider2.cpp
+	voice_banmgr.cpp
+	voice_status.cpp
+)
 
 include_directories (. hl/ ../dlls ../dlls/wpn_shared ../common ../engine ../pm_shared ../game_shared ../public particleman/)
 
-if (WIN32)
+if (GOLDSOURCE_SUPPORT)
 	include_directories (../external/)
 endif()
 
-if (USE_VGUI)
-	SET(CMAKE_SKIP_RPATH TRUE)
-	link_directories(${CMAKE_SOURCE_DIR}/vgui_support/vgui-dev/lib)
-	include_directories(../vgui_support/vgui-dev/include)
-else()
-	include_directories(../utils/fake_vgui/include)
-endif()
 
-if(USE_VOICEMGR)
-	#set(CLDLL_SOURCES
-	#	${CLDLL_SOURCES}
-	#	../game_shared/voice_banmgr.cpp
-	#	../game_shared/voice_status.cpp)
-endif()
+include_directories(../utils/vgui/include)
 
 add_library (${CLDLL_LIBRARY} SHARED ${CLDLL_SOURCES})
 target_link_libraries(${CLDLL_LIBRARY} vcs_info)
@@ -235,18 +222,7 @@ if (GOLDSOURCE_SUPPORT)
 	target_link_libraries( ${CLDLL_LIBRARY} ${CMAKE_DL_LIBS} )
 endif()
 
-if (USE_VGUI)
-	if (WIN32)
-		add_library(vgui SHARED IMPORTED)
-		set_property(TARGET vgui PROPERTY IMPORTED_LOCATION "${CMAKE_SOURCE_DIR}/vgui_support/vgui-dev/lib/win32_vc6/vgui.dll")
-		set_property(TARGET vgui PROPERTY IMPORTED_IMPLIB "${CMAKE_SOURCE_DIR}/vgui_support/vgui-dev/lib/win32_vc6/vgui.lib")
-		target_link_libraries(${CLDLL_LIBRARY} vgui)
-	elseif(APPLE)
-		target_link_libraries(${CLDLL_LIBRARY} "-Wl,--no-undefined -L${CMAKE_SOURCE_DIR}/vgui_support/vgui-dev/lib vgui.dylib")
-	else()
-		target_link_libraries(${CLDLL_LIBRARY} :vgui.so)
-	endif()
-endif()
+target_link_libraries(${CLDLL_LIBRARY} vgui)
 
 if(WIN32)
 	target_link_libraries( ${CLDLL_LIBRARY} user32.lib )
@@ -259,8 +235,6 @@ set_target_properties (${CLDLL_LIBRARY} PROPERTIES
 	POSITION_INDEPENDENT_CODE 1)
 
 set_target_postfix(${CLDLL_LIBRARY})
-
-set_property(TARGET ${CLDLL_LIBRARY} PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 
 if(HAVE_LTO)
 	set_property(TARGET ${CLDLL_LIBRARY} PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)

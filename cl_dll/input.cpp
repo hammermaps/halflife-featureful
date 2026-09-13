@@ -30,9 +30,7 @@ extern "C"
 
 #include <set>
 
-#if USE_VGUI
 #include "vgui_TeamFortressViewport.h"
-#endif
 
 extern "C" 
 {
@@ -447,10 +445,8 @@ int DLLEXPORT HUD_Key_Event( int down, int keynum, const char *pszCurrentBinding
 			return 0;
 	}
 
-#if USE_VGUI
 	if (gViewPort)
 		return gViewPort->KeyInput(down, keynum, pszCurrentBinding);
-#endif
 	return 1;
 }
 
@@ -719,13 +715,11 @@ void IN_Impulse()
 void IN_ScoreDown()
 {
 	KeyDown( &in_score );
-#if USE_VGUI
 	if ( gEngfuncs.GetMaxClients() > 1 && gHUD.UseVguiScoreBoard() && gViewPort )
 	{
 		gViewPort->ShowScoreBoard();
 		return;
 	}
-#endif
 	if (gEngfuncs.GetMaxClients() > 1)
 		gHUD.m_Scoreboard.UserCmd_ShowScores();
 	else
@@ -735,12 +729,10 @@ void IN_ScoreDown()
 void IN_ScoreUp()
 {
 	KeyUp( &in_score );
-#if USE_VGUI
 	if ( gViewPort )
 	{
 		gViewPort->HideScoreBoard();
 	}
-#endif
 	if (gEngfuncs.GetMaxClients() > 1)
 		gHUD.m_Scoreboard.UserCmd_HideScores();
 	else
@@ -949,11 +941,9 @@ void DLLEXPORT CL_CreateMove( float frametime, struct usercmd_s *cmd, int active
 
 	autofuncs::handle_autojump(cmd);
 
-#if USE_VGUI
 	// If they're in a modal dialog, ignore the attack button.
 	if(GetClientVoiceMgr()->IsInSquelchMode())
 		cmd->buttons &= ~IN_ATTACK;
-#endif
 
 	// Using joystick?
 	if( in_joystick->value )

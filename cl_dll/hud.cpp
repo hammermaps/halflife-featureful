@@ -24,10 +24,8 @@
 #include "parsetext.h"
 #include "arraysize.h"
 #include "clamp.h"
-#if USE_VGUI
 #include "vgui_int.h"
 #include "vgui_TeamFortressViewport.h"
-#endif
 
 #include "demo.h"
 #include "demo_api.h"
@@ -185,7 +183,6 @@ static void CreateBooleanCvarConditionally(cvar_t*& cvarPtr, const char* name, c
 		cvarPtr = 0;
 }
 
-#if USE_VGUI
 #include "vgui_ScorePanel.h"
 
 class CHLVoiceStatusHelper : public IVoiceStatusHelper
@@ -231,7 +228,6 @@ public:
 	}
 };
 static CHLVoiceStatusHelper g_VoiceStatusHelper;
-#endif
 
 extern client_sprite_t *GetSpriteList( client_sprite_t *pList, const char *psz, int iRes, int iCount );
 
@@ -467,88 +463,70 @@ int __MsgFunc_Mirror( const char *pszName, int iSize, void *pbuf )
 // TFFree Command Menu
 void __CmdFunc_OpenCommandMenu()
 {
-#if USE_VGUI
 	if ( gViewPort )
 	{
 		gViewPort->ShowCommandMenu( gViewPort->m_StandardMenu );
 	}
-#endif
 }
 
 // TFC "special" command
 void __CmdFunc_InputPlayerSpecial()
 {
-#if USE_VGUI
 	if ( gViewPort )
 	{
 		gViewPort->InputPlayerSpecial();
 	}
-#endif
 }
 
 void __CmdFunc_CloseCommandMenu()
 {
-#if USE_VGUI
 	if ( gViewPort )
 	{
 		gViewPort->InputSignalHideCommandMenu();
 	}
-#endif
 }
 
 void __CmdFunc_ForceCloseCommandMenu()
 {
-#if USE_VGUI
 	if ( gViewPort )
 	{
 		gViewPort->HideCommandMenu();
 	}
-#endif
 }
 
 // TFFree Command Menu Message Handlers
 int __MsgFunc_ValClass( const char *pszName, int iSize, void *pbuf )
 {
-#if USE_VGUI
 	if (gViewPort)
 			return gViewPort->MsgFunc_ValClass( pszName, iSize, pbuf );
-#endif
 	return 0;
 }
 
 int __MsgFunc_TeamNames( const char *pszName, int iSize, void *pbuf )
 {
-#if USE_VGUI
 	if (gViewPort)
 		return gViewPort->MsgFunc_TeamNames( pszName, iSize, pbuf );
-#endif
 	return 0;
 }
 
 int __MsgFunc_Feign( const char *pszName, int iSize, void *pbuf )
 {
-#if USE_VGUI
 	if (gViewPort)
 		return gViewPort->MsgFunc_Feign( pszName, iSize, pbuf );
-#endif
 	return 0;
 }
 
 int __MsgFunc_Detpack( const char *pszName, int iSize, void *pbuf )
 {
-#if USE_VGUI
 	if (gViewPort)
 		return gViewPort->MsgFunc_Detpack( pszName, iSize, pbuf );
-#endif
 	return 0;
 }
 
 int __MsgFunc_VGUIMenu( const char *pszName, int iSize, void *pbuf )
 {
-#if USE_VGUI
 	if (gViewPort)
 		return gViewPort->MsgFunc_VGUIMenu( pszName, iSize, pbuf );
-#endif
 	return 0;
 }
 
@@ -557,13 +535,11 @@ int __MsgFunc_MOTD(const char *pszName, int iSize, void *pbuf)
 	bool finished = gHUD.m_MOTD.HandleMOTDMessage(pszName, iSize, pbuf);
 	if (finished)
 	{
-#if USE_VGUI
 		if (gHUD.UseVguiMOTD() && gViewPort)
 		{
 			gViewPort->ShowMOTD();
 			return 1;
 		}
-#endif
 		gHUD.m_MOTD.m_bShow = true;
 	}
 
@@ -572,28 +548,22 @@ int __MsgFunc_MOTD(const char *pszName, int iSize, void *pbuf)
 
 int __MsgFunc_BuildSt( const char *pszName, int iSize, void *pbuf )
 {
-#if USE_VGUI
 	if (gViewPort)
 		return gViewPort->MsgFunc_BuildSt( pszName, iSize, pbuf );
-#endif
 	return 0;
 }
 
 int __MsgFunc_RandomPC( const char *pszName, int iSize, void *pbuf )
 {
-#if USE_VGUI
 	if (gViewPort)
 		return gViewPort->MsgFunc_RandomPC( pszName, iSize, pbuf );
-#endif
 	return 0;
 }
  
 int __MsgFunc_ServerName( const char *pszName, int iSize, void *pbuf )
 {
-#if USE_VGUI
 	if (gViewPort)
 		return gViewPort->MsgFunc_ServerName( pszName, iSize, pbuf );
-#endif
 	return 0;
 }
 
@@ -610,23 +580,18 @@ int __MsgFunc_TeamScore(const char *pszName, int iSize, void *pbuf)
 int __MsgFunc_TeamInfo(const char *pszName, int iSize, void *pbuf)
 {
 	int result = gHUD.m_Scoreboard.MsgFunc_TeamInfo( pszName, iSize, pbuf );
-#if USE_VGUI
 	if (gViewPort)
 		gViewPort->m_pScoreBoard->Update();
-#endif
 	return result;
 }
 
 int __MsgFunc_Spectator( const char *pszName, int iSize, void *pbuf )
 {
-#if USE_VGUI
 	if (gViewPort)
 		return gViewPort->MsgFunc_Spectator( pszName, iSize, pbuf );
-#endif
 	return 0;
 }
 
-#if USE_VGUI
 int __MsgFunc_SpecFade(const char *pszName, int iSize, void *pbuf)
 {
 	if (gViewPort)
@@ -641,14 +606,11 @@ int __MsgFunc_ResetFade(const char *pszName, int iSize, void *pbuf)
 	return 0;
 
 }
-#endif
 
 int __MsgFunc_AllowSpec( const char *pszName, int iSize, void *pbuf )
 {
-#if USE_VGUI
 	if (gViewPort)
 		return gViewPort->MsgFunc_AllowSpec( pszName, iSize, pbuf );
-#endif
 	return 0;
 }
 
@@ -766,6 +728,7 @@ void CHud::Init()
 	HOOK_MESSAGE( BuildSt );
 	HOOK_MESSAGE( RandomPC );
 	HOOK_MESSAGE( ServerName );
+
 	HOOK_MESSAGE( MOTD );
 
 	HOOK_MESSAGE( ScoreInfo );
@@ -775,10 +738,8 @@ void CHud::Init()
 	HOOK_MESSAGE( Spectator );
 	HOOK_MESSAGE( AllowSpec );
 
-#if USE_VGUI
 	HOOK_MESSAGE( SpecFade );
 	HOOK_MESSAGE( ResetFade );
-#endif
 
 	// VGUI Menus
 	HOOK_MESSAGE( VGUIMenu );
@@ -920,9 +881,7 @@ void CHud::Init()
 	m_TextMessage.Init();
 	m_StatusIcons.Init();
 	m_Nightvision.Init();
-#if USE_VGUI
 	GetClientVoiceMgr()->Init(&g_VoiceStatusHelper, (vgui::Panel**)&gViewPort);
-#endif
 
 	m_MOTD.Init();
 	m_Scoreboard.Init();
@@ -1485,9 +1444,7 @@ void CHud::VidInit()
 	m_AmmoSecondary.VidInit();
 	m_TextMessage.VidInit();
 	m_StatusIcons.VidInit();
-#if USE_VGUI
 	GetClientVoiceMgr()->VidInit();
-#endif
 	m_MOTD.VidInit();
 	m_Scoreboard.VidInit();
 	m_Journal.VidInit();
@@ -2114,20 +2071,12 @@ int CHud::TopRightInventoryCoordinate()
 
 bool CHud::UseVguiMOTD()
 {
-#if USE_VGUI
 	return m_pCvarMOTDVGUI && m_pCvarMOTDVGUI->value;
-#else
-	return false;
-#endif
 }
 
 bool CHud::UseVguiScoreBoard()
 {
-#if USE_VGUI
 	return m_pCvarScoreboardVGUI && m_pCvarScoreboardVGUI->value;
-#else
-	return false;
-#endif
 }
 
 bool CHud::HandleClientButton(int button)

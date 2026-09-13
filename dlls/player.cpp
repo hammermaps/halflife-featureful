@@ -1944,7 +1944,7 @@ void CBasePlayer::StartObserver( Vector vecPosition, Vector vecViewAngle )
 	// Clear out the status bar
 	m_fInitHUD = true;
 
-	pev->team = 0;
+	m_szTeamName[0] = '\0';
 	MESSAGE_BEGIN( MSG_ALL, gmsgTeamInfo );
 		WRITE_BYTE( ENTINDEX(edict()) );
 		WRITE_STRING( "" );
@@ -4426,6 +4426,8 @@ void CBasePlayer::Spawn()
 	{
 		maxAmmo = 0;
 	}
+
+	SET_VIEW(edict(), edict());
 
 	g_pGameRules->PlayerSpawn( this );
 }

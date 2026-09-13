@@ -38,10 +38,8 @@
 
 #include "vcs_info.h"
 
-#if USE_VGUI
 #include "vgui_int.h"
 #include "vgui_TeamFortressViewport.h"
-#endif
 
 #include "cl_fx.h"
 
@@ -60,14 +58,6 @@ IParticleMan *g_pParticleMan = NULL;
 
 void CL_LoadParticleMan();
 void CL_UnloadParticleMan();
-
-#if GOLDSOURCE_SUPPORT && (XASH_WIN32 || XASH_LINUX || XASH_APPLE) && XASH_X86
-#define USE_FAKE_VGUI	!USE_VGUI
-#if USE_FAKE_VGUI
-#include "VGUI_Panel.h"
-#include "VGUI_App.h"
-#endif
-#endif
 
 #include "pm_shared.h"
 
@@ -169,9 +159,8 @@ void* LoadLibFunc(void* lib, const char *name)
 cl_enginefunc_t gEngfuncs;
 CHud gHUD;
 CmdKeys g_DefaultCmdKeys;
-#if USE_VGUI
+
 TeamFortressViewport *gViewPort = NULL;
-#endif
 mobile_engfuncs_t *gMobileEngfuncs = NULL;
 
 void InitInput();
@@ -438,6 +427,12 @@ static void ApplyDefaultKeyBindings()
 	g_DefaultCmdKeys.Clear();
 }
 
+#if defined( INTERNAL_VGUI_SUPPORT )
+// declare InitVGUISupportAPI so that linker doesn't remove it because nothing references it
+extern "C" void InitVGUISupportAPI( void *api );
+void *g_pKeepVGUISupport = (void *)InitVGUISupportAPI;
+#endif
+
 /*
 ========================== 
     Initialize
@@ -584,48 +579,6 @@ int *HUD_GetRect()
 	return extent;
 }
 
-#if USE_FAKE_VGUI
-class TeamFortressViewport : public vgui::Panel
-{
-public:
-	TeamFortressViewport(int x,int y,int wide,int tall);
-	void Initialize();
-
-	void paintBackground() override;
-	void *operator new( size_t stAllocateBlock );
-};
-
-static TeamFortressViewport* gViewPort = NULL;
-
-TeamFortressViewport::TeamFortressViewport(int x, int y, int wide, int tall) : Panel(x, y, wide, tall)
-{
-	gViewPort = this;
-	Initialize();
-}
-
-void TeamFortressViewport::Initialize()
-{
-	//vgui::App::getInstance()->setCursorOveride( vgui::App::getInstance()->getScheme()->getCursor(vgui::Scheme::scu_none) );
-}
-
-void TeamFortressViewport::paintBackground()
-{
-//	int wide, tall;
-//	getParent()->getSize( wide, tall );
-//	setSize( wide, tall );
-	int extents[4];
-	getParent()->getAbsExtents(extents[0],extents[1],extents[2],extents[3]);
-	gEngfuncs.VGui_ViewportPaintBackground(extents);
-}
-
-void *TeamFortressViewport::operator new( size_t stAllocateBlock )
-{
-	void *mem = ::operator new( stAllocateBlock );
-	memset( mem, 0, stAllocateBlock );
-	return mem;
-}
-#endif
-
 /*
 ==========================
 	HUD_VidInit
@@ -652,27 +605,7 @@ int DLLEXPORT HUD_VidInit()
 	gHUD.VidInit();
 	EV_VidInit();
 	LoadDefaultSprites();
-#if USE_FAKE_VGUI
-	vgui::Panel* root=(vgui::Panel*)gEngfuncs.VGui_GetPanel();
-	if (root) {
-		gEngfuncs.Con_Printf( "Root VGUI panel exists\n" );
-		root->setBgColor(128,128,0,0);
-
-		if (gViewPort != NULL)
-		{
-			gViewPort->Initialize();
-		}
-		else
-		{
-			gViewPort = new TeamFortressViewport(0,0,root->getWide(),root->getTall());
-			gViewPort->setParent(root);
-		}
-	} else {
-		gEngfuncs.Con_Printf( "Root VGUI panel does not exist\n" );
-	}
-#elif USE_VGUI
 	VGui_Startup();
-#endif
 
 #if OPENGL_AVAILABLE
 	gEngfuncs.Con_DPrintf("Hardware Mode: %d\n", gHUD.m_iHardwareMode);
@@ -823,9 +756,7 @@ void DLLEXPORT HUD_Init()
 	InitInput();
 	ParseDefaultShortcuts(g_DefaultCmdKeys, "default_keys.cfg");
 	gHUD.Init();
-#if USE_VGUI
 	Scheme_Init();
-#endif
 
 	HOOK_MESSAGE( UseSound );
 	HOOK_MESSAGE( SaveDisable );
@@ -902,14 +833,7 @@ void DLLEXPORT HUD_Frame( double time )
 		ApplyDefaultKeyBindings();
 	}
 
-#if USE_VGUI
 	GetClientVoiceMgr()->Frame(time);
-#elif USE_FAKE_VGUI
-	if (!gViewPort)
-		gEngfuncs.VGui_ViewportPaintBackground(HUD_GetRect());
-#else
-	gEngfuncs.VGui_ViewportPaintBackground(HUD_GetRect());
-#endif
 
 	CHud::Renderer().HUD_Frame(time);
 }
@@ -924,9 +848,7 @@ Called when a player starts or stops talking.
 
 void DLLEXPORT HUD_VoiceStatus( int entindex, qboolean bTalking )
 {
-#if USE_VGUI
 	GetClientVoiceMgr()->UpdateSpeakerStatus(entindex, bTalking);
-#endif
 }
 
 /*

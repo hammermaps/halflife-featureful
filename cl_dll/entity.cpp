@@ -669,9 +669,7 @@ void DLLEXPORT HUD_CreateEntities()
 	gHUD.objectHintManager.Update();
 	gHUD.keyedDlightManager.Update();
 
-#if USE_VGUI
 	GetClientVoiceMgr()->CreateEntities();
-#endif
 }
 
 /*

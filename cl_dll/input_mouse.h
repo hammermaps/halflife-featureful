@@ -22,6 +22,7 @@ public:
 	virtual void IN_ResetMouse() = 0;
 	virtual void Joy_AdvancedUpdate() = 0;
 	virtual void IgnoreNextMouseDelta() = 0;
+	virtual void IN_SetVisibleMouse( bool visible ) = 0;
 };
 
 class FWGSInput : public AbstractInput
@@ -41,6 +42,7 @@ public:
 	void IN_ResetMouse() override {}
 	void Joy_AdvancedUpdate() override {}
 	void IgnoreNextMouseDelta() override {}
+	void IN_SetVisibleMouse( bool visible ) override {}
 
 protected:
 	float ac_forwardmove;
@@ -86,6 +88,7 @@ public:
 	void IN_ResetMouse() override;
 	void Joy_AdvancedUpdate() override;
 	void IgnoreNextMouseDelta() override;
+	void IN_SetVisibleMouse( bool visible ) override;
 
 protected:
 	void IN_GetMouseDelta( int *pOutX, int *pOutY);
