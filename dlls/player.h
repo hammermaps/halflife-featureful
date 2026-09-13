@@ -535,6 +535,7 @@ public:
 	BYTE m_timeBasedDmgModifiers[CDMG_TIMEBASED];
 
 	bool m_settingsLoaded;
+	bool m_playerSpawnTriggered;
 	bool m_buddha;
 	short m_iSatchelControl;
 	short m_iPreferNewGrenadePhysics;

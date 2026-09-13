@@ -729,6 +729,8 @@ void CHalfLifeMultiplay::PlayerSpawn( CBasePlayer *pPlayer )
 	iOldAutoWepSwitch = pPlayer->m_iAutoWepSwitch;
 	pPlayer->m_iAutoWepSwitch = 1;
 
+	pPlayer->m_playerSpawnTriggered = false;
+
 	if (IsCoOp() && keepinventory.value && RestorePlayerState(pPlayer))
 		return;
 

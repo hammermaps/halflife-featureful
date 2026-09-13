@@ -145,6 +145,7 @@ TYPEDESCRIPTION	CBasePlayer::m_playerSaveData[] =
 	DEFINE_FIELD(CBasePlayer, m_iItemsBits, FIELD_INTEGER),
 	DEFINE_ARRAY(CBasePlayer, m_timeBasedDmgModifiers, FIELD_CHARACTER, CDMG_TIMEBASED),
 	DEFINE_FIELD(CBasePlayer, m_settingsLoaded, FIELD_BOOLEAN),
+	DEFINE_FIELD(CBasePlayer, m_playerSpawnTriggered, FIELD_BOOLEAN),
 	DEFINE_FIELD(CBasePlayer, m_buddha, FIELD_BOOLEAN),
 	DEFINE_FIELD(CBasePlayer, m_suppressedCapabilities, FIELD_INTEGER),
 	DEFINE_FIELD(CBasePlayer, m_maxSpeedOverride, FIELD_FLOAT),
@@ -5655,8 +5656,11 @@ void CBasePlayer::UpdateClientData()
 			}
 		}
 
-		if( g_pGameRules->IsMultiplayer() )
+		if (g_pGameRules->IsMultiplayer() && !m_playerSpawnTriggered)
+		{
+			m_playerSpawnTriggered = true;
 			FireTargets( "game_playerspawn", this, this );
+		}
 
 		// Send flashlight status
 		MESSAGE_BEGIN( MSG_ONE, gmsgFlashlight, NULL, pev );

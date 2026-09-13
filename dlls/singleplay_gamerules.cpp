@@ -243,8 +243,12 @@ void CHalfLifeRules::PlayerThink( CBasePlayer *pPlayer )
 			}
 		}
 
-		FireTargets( "game_playerspawn", pPlayer, pPlayer );
 		pPlayer->m_settingsLoaded = true;
+	}
+	if (!pPlayer->m_fInitHUD && !pPlayer->m_playerSpawnTriggered)
+	{
+		pPlayer->m_playerSpawnTriggered = true;
+		FireTargets( "game_playerspawn", pPlayer, pPlayer );
 	}
 }
 
