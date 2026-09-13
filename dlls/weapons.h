@@ -250,9 +250,9 @@ public:
 	// called by CBasePlayerWeapons ItemPostFrame()
 	virtual void PrimaryAttack() { return; }				// do "+ATTACK"
 	virtual void SecondaryAttack() { return; }			// do "+ATTACK2"
-	void PerformReloadSubstitute();
 	bool CanReload();
 	virtual void Reload() { return; }						// do "+RELOAD"
+	virtual void ReloadSubstitute() { return; }
 	virtual void WeaponIdle() { return; }					// called when no buttons pressed
 	virtual int UpdateClientData( CBasePlayer *pPlayer );		// sends hud info to client dll, if things have changed
 	virtual void GetWeaponData(weapon_data_t& data) {}
@@ -381,7 +381,9 @@ public:
 	void SecondaryAttack() override;
 	int GetReloadAnim(const WeaponParameters::ReloadAnimArray& arr);
 	bool PerformReload();
+	void PerformReloadSubstitute();
 	void Reload() override;
+	void ReloadSubstitute() override;
 	void SendIdleAnimation();
 	void WeaponIdle() override;
 	bool CanHolster() override;

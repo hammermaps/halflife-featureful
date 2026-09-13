@@ -2291,9 +2291,13 @@ For [manual_reload](#manual_reload) weapons it becomes a delay between ammo tran
 
 A boolean. Don't allow reloading until the weapon's [cycle_time](#cycle_time) has passed after the last fire. This is used by shotguns to ensure that reloading doesn't interrupt 'pump action' part of the fire animation.
 
+This also affects [reload_substitute](#reload_substitute).
+
 ### laser_suspend_time
 
-A boolean. Hide the laser spot (if any) for this amount of time (in seconds).
+Hide the laser spot (if any) for this amount of time (in seconds).
+
+This also affects [reload_substitute](#reload_substitute).
 
 ### ammo_count
 

@@ -385,7 +385,7 @@ void CBasePlayerWeapon::ItemPostFrame()
 	}
 	else if ( (m_pPlayer->pev->button & IN_RELOAD) && !UsesClip() && !m_fInReload && !FBitSet(m_pPlayer->pev->flags, FL_FROZEN) )
 	{
-		PerformReloadSubstitute();
+		ReloadSubstitute();
 	}
 	else if( !( m_pPlayer->pev->button & ( IN_ATTACK | IN_ATTACK2 ) ) )
 	{
@@ -509,27 +509,6 @@ bool CBasePlayerWeapon::CanReload()
 		return m_pPlayer->m_rgAmmo[PrimaryAmmoIndex()] >= ammoCountMin;
 	}
 	return true;
-}
-
-void CBasePlayerWeapon::PerformReloadSubstitute()
-{
-	if (m_flNextReloadSubstitute <= UTIL_WeaponTimeBase())
-	{
-		const WeaponParameters& params = MyParameters();
-
-		const bool inAltMode = InAltMode();
-		const int anim = params.reloadSubstitute.animIndex.Get(inAltMode);
-		if (anim >= 0)
-		{
-			const float endTime = UTIL_WeaponTimeBase() + params.reloadSubstitute.duration.Get(inAltMode);
-			m_flTimeWeaponIdle = Q_max(m_flTimeWeaponIdle, endTime);
-			m_ForceSendAnimations = true;
-			SendWeaponAnim(params.reloadSubstitute.animIndex.Get(inAltMode));
-			m_ForceSendAnimations = false;
-
-			m_flNextReloadSubstitute = endTime;
-		}
-	}
 }
 
 bool CBasePlayerWeapon::UsesClip()
@@ -2478,9 +2457,61 @@ bool CConfigurableWeapon::PerformReload()
 	return result;
 }
 
+void CConfigurableWeapon::PerformReloadSubstitute()
+{
+	if (m_flNextReloadSubstitute > UTIL_WeaponTimeBase())
+		return;
+
+	const WeaponParameters& params = MyParameters();
+	const bool empty = Emptied();
+	const bool altMode = InAltMode();
+
+	if (params.reload.waitForRecoil.Get(altMode, empty) && m_flNextPrimaryAttack > UTIL_WeaponTimeBase())
+		return;
+
+	if (m_chargingAttack)
+		return;
+
+	if (m_shouldPlayCooldownAfterFire)
+		return;
+
+	if (PerformCooldown(m_chargingAltFire))
+		return;
+
+#if !CLIENT_DLL
+	if (m_pLaser)
+	{
+		const float reloadDuration = params.reloadSubstitute.duration.Get(altMode);
+		const float suspendLaserTime = params.reload.suspendLaserSpotTime.Get(altMode, empty);
+		const float suspendDuration = Q_max(reloadDuration, suspendLaserTime);
+		if (suspendDuration > 0.0f)
+		{
+			m_pLaser->Suspend(suspendDuration);
+		}
+	}
+#endif
+
+	const int anim = params.reloadSubstitute.animIndex.Get(altMode);
+	if (anim >= 0)
+	{
+		const float endTime = UTIL_WeaponTimeBase() + params.reloadSubstitute.duration.Get(altMode);
+		m_flTimeWeaponIdle = Q_max(m_flTimeWeaponIdle, endTime);
+		m_ForceSendAnimations = true;
+		SendWeaponAnim(params.reloadSubstitute.animIndex.Get(altMode));
+		m_ForceSendAnimations = false;
+
+		m_flNextReloadSubstitute = endTime;
+	}
+}
+
 void CConfigurableWeapon::Reload()
 {
 	PerformReload();
+}
+
+void CConfigurableWeapon::ReloadSubstitute()
+{
+	PerformReloadSubstitute();
 }
 
 void CConfigurableWeapon::SendIdleAnimation()
