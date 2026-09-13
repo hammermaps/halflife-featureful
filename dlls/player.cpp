@@ -2954,10 +2954,6 @@ void CBasePlayer::PreThink()
 		{
 			SET_VIEW(edict(), viewEntity->edict());
 		}
-		else
-		{
-			SET_VIEW(edict(), edict());
-		}
 	}
 
 	for (int i=0; i<MAX_MESSAGE_BOXES; ++i)
@@ -4432,8 +4428,6 @@ void CBasePlayer::Spawn()
 	}
 
 	g_pGameRules->PlayerSpawn( this );
-
-	m_bResetViewEntity = true;
 }
 
 void CBasePlayer::Precache()
