@@ -14,7 +14,7 @@ void SkipSpaceCharacters(const char* text, int& i, const int length)
 bool SkipSpacesAndTabs(const char *text, int& i, const int length)
 {
 	int start = i;
-	while (i<length && text[i] == ' ' || text[i] == '\t')
+	while (i<length && (text[i] == ' ' || text[i] == '\t'))
 	{
 		++i;
 	}
