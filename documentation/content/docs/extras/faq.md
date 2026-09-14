@@ -50,10 +50,6 @@ Yes. But it's up to you to figure out how to properly port the features you're i
 
 In theory yes. We didn't break anything multiplayer-related and the multiplayer environment is usually taken into account when making changes and designing new entities. Some of the changes were even introduced purely for multiplayer. But the main focus of this SDK is being a base for singleplayer mods.
 
-### Why this SDK is built without VGUI by default?
-
-It's to increase the portability of produced binaries among custom Xash3D versions that don't include support for VGUI. Most singleplayer mods don't use VGUI anyway, but it still can be enabled in the build configuration.
-
 ### Does it work on Android?
 
 The releases include the **apk** for Android launcher. The application allows to set a game directory so in theory it can be used to play the clean (i.e. without code changes) featureful-based mod that didn't have an official release on Android.

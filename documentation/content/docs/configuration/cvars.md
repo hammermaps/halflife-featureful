@@ -83,8 +83,10 @@ See [blood visual effects]({{< ref "visual-effects/#blood" >}})
 
 ### Multiplayer
 
-* `cl_motd_vgui` - whether the VGUI interface is preferred for MOTD (Message Of The Day) over the non-VGUI one (used in multiplayer). The client library must be built with VGUI support.
-* `cl_scoreboard_vgui` - whether the VGUI interface is preferred for Scoreboard in multiplayer. The client library must be built with VGUI support.
+* `cl_motd_vgui` - whether the VGUI interface is preferred for MOTD (Message Of The Day) over the non-VGUI one.
+* `cl_scoreboard_vgui` - whether the VGUI interface is preferred for Scoreboard.
+
+The non-VGUI versions of GUI elements have the advantage that they can show the utf-8 texts (e.g. non-latin player's nicknames), while VGUI supports only one-byte encodings.
 
 ## Server CVars
 
