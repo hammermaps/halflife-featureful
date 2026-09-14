@@ -97,6 +97,7 @@ void ClearStringPool()
 
 std::set<std::string> g_precachedModels;
 std::set<std::string> g_precachedSounds;
+std::string g_savedBadPrecachedSound;
 bool g_warnedAboutModelLimit = false;
 bool g_warnedAboutSoundLimit = false;
 
@@ -182,6 +183,20 @@ int PRECACHE_SOUND(const char* name)
 			g_warnedAboutSoundLimit = true;
 			ALERT(at_console, "The number of precached sounds is exceeding the maximum number on GoldSource (512) which will result in failure\n");
 			ReportPrecachedResources(g_precachedSounds, "sounds", 0);
+
+			if (!g_fIsXash3D && g_precachedSounds.size() == 512 && !g_savedBadPrecachedSound.empty())
+			{
+				g_engfuncs.pfnPrecacheSound(g_savedBadPrecachedSound.c_str());
+				g_savedBadPrecachedSound.clear();
+			}
+		}
+
+		// Nasty GoldSource bug that makes game crash when exactly 511 sounds are precached
+		if (!g_fIsXash3D && g_precachedSounds.size() == 511 && g_savedBadPrecachedSound.empty())
+		{
+			ALERT(at_warning, "511 precached sounds are reached. Protecting against crash on GoldSource\n");
+			g_savedBadPrecachedSound = name;
+			return 0;
 		}
 	}
 	return g_engfuncs.pfnPrecacheSound(name);
@@ -203,6 +218,8 @@ void ClearPrecachedModels()
 void ClearPrecachedSounds()
 {
 	g_precachedSounds.clear();
+	g_warnedAboutSoundLimit = false;
+	g_savedBadPrecachedSound.clear();
 }
 
 static void ReportPrecachedResources(const std::set<std::string>& precachedResources, const char* resourceName)
