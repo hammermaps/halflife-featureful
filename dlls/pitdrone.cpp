@@ -422,7 +422,7 @@ bool CPitdrone::CheckRangeAttack1(float flDot, float flDist)
 		else
 		{
 			// not moving, so spit again pretty soon.
-			m_flNextSpitTime = gpGlobals->time + 1;
+			m_flNextSpitTime = gpGlobals->time + 0.5f;
 		}
 
 		return true;
@@ -1099,6 +1099,9 @@ Schedule_t* CPitdrone::GetScheduleOfType(int Type)
 		break;
 	case SCHED_VICTORY_DANCE:
 		return slPDroneVictoryDance;
+		break;
+	case SCHED_CHASE_ENEMY_FAILED:
+		m_flNextSpitTime = gpGlobals->time;
 		break;
 	}
 

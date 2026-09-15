@@ -833,6 +833,9 @@ Schedule_t* CGonome::GetScheduleOfType(int Type)
 	case SCHED_VICTORY_DANCE:
 		return &slGonomeVictoryDance[0];
 		break;
+	case SCHED_CHASE_ENEMY_FAILED:
+		m_flNextThrowTime = gpGlobals->time;
+		break;
 	default:
 		break;
 	}

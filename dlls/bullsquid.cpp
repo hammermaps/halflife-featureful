@@ -1323,6 +1323,9 @@ Schedule_t *CBullsquid::GetScheduleOfType( int Type )
 	case SCHED_VICTORY_DANCE:
 		return slSquidVictoryDance;
 		break;
+	case SCHED_CHASE_ENEMY_FAILED:
+		m_flNextSpitTime = gpGlobals->time;
+		break;
 	}
 
 	return CBaseMonster::GetScheduleOfType( Type );
