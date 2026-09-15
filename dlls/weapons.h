@@ -143,6 +143,9 @@ public:
 	int		Restore( CRestore &restore ) override;
 	static	TYPEDESCRIPTION m_SaveData[];
 #endif
+	bool ShouldCollide(CBaseEntity *pOther) {
+		return pOther->MyWeaponPointer() == nullptr;
+	}
 	virtual int WeaponId() const = 0;
 	bool IsEnabledInMod() override;
 	virtual void PrecacheDefaultModelSounds() {}
