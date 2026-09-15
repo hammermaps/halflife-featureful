@@ -1568,7 +1568,7 @@ TakeDamageResult CBaseMonster::DeadTakeDamage( entvars_t *pevInflictor, entvars_
 			return takeDamageResult.SetKilledResult(killedResult).SetTookDamageToHealth();
 		}
 		// Accumulate corpse gibbing damage, so you can gib with multiple hits
-		pev->health -= damageInfo.damage * 0.1f;
+		pev->health -= damageInfo.damage * GetSkillValue("dead_takedamage_factor");
 		takeDamageResult.SetTookDamageToHealth();
 	}
 

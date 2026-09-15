@@ -8,6 +8,10 @@ Half-Life Featureful introduces a lot of new monsters, as well as many changes t
 
 For the list of monsters refer to [entities page]({{< ref "entity-guide#monster-entities" >}}).
 
+## Skill variables
+
+* **sk_dead_takedamage_factor** - the incoming damage factor for dead monsters. Default value is 0.1 (this is what makes corpses so long to destroy in Half-Life). When the incoming damage exceeds the corpse's health it gets destroyed regardless of this skill variable.
+
 ## Common behavior changes
 
 * After battle, in alert state, monsters try to freeroam and investigate danger sounds if `npc_active_after_combat` is set.
