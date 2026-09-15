@@ -427,17 +427,20 @@ void CXenTree::HandleAnimEvent( MonsterEvent_t *pEvent )
 
 			UTIL_MakeVectorsPrivate( pev->angles, forward, NULL, NULL );
 
+			TraceHullAttackParams params;
+			params.punchAngle.x = 15;
+			params.knockForward = 100.0f;
+			params.damageInfo = DamageInfo(25, DMG_CRUSH | DMG_SLASH);
+			SetTraceHullAttackParamsFromTemplate(pEvent->event, params);
+
 			for( int i = 0; i < count; i++ )
 			{
-				if( pList[i] != this )
+				CBaseEntity* pHurt = pList[i];
+
+				if( pHurt != this && pHurt->pev->owner != edict() )
 				{
-					if( pList[i]->pev->owner != edict() )
-					{
-						sound = true;
-						pList[i]->TakeDamage( pev, pev, DamageInfo(25, DMG_CRUSH | DMG_SLASH) );
-						pList[i]->pev->punchangle.x = 15;
-						pList[i]->pev->velocity = pList[i]->pev->velocity + forward * 100;
-					}
+					sound = true;
+					ImitateTraceHullAttack(pHurt, params);
 				}
 			}
 

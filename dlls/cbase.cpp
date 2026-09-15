@@ -2237,6 +2237,104 @@ void CBaseEntity::ApplyPunchAngle(const Vector &punchAngle)
 		pev->punchangle.z = punchAngle.z;
 }
 
+bool CBaseEntity::SetTraceHullAttackParamsFromTemplate(int eventIndex, TraceHullAttackParams& params)
+{
+	const EntTemplate* entTemplate = GetMyEntTemplate();
+	if (entTemplate)
+	{
+		const EntTemplate::TraceHullAttack* attack = entTemplate->GetTraceHullAttackForEvent(eventIndex);
+		if (attack)
+		{
+			if (attack->distance)
+			{
+				params.distance = *attack->distance;
+			}
+			if (attack->height)
+			{
+				if (attack->heightIsFactor)
+					params.height = pev->size.z * *attack->height;
+				else
+					params.height = *attack->height;
+			}
+
+			attack->punchAngle.UpdateVector(params.punchAngle);
+
+			{
+				const EntTemplate::TraceHullAttack::Knock& knock = attack->knock;
+				if (knock.forward)
+				{
+					params.knockForward = *knock.forward;
+				}
+				if (knock.right)
+				{
+					params.knockRight = *knock.right;
+				}
+				if (knock.up)
+				{
+					params.knockUp = *knock.up;
+				}
+				if (!indeterminate(knock.playerOnly))
+				{
+					params.knockPlayerOnly = (bool)knock.playerOnly;
+				}
+			}
+
+			ApplyDamageInfoPatch(params.damageInfo, attack->damageInfo);
+
+			if (!indeterminate(attack->spawnBlood))
+			{
+				params.spawnBlood = (bool)attack->spawnBlood;
+			}
+
+			if (!attack->hitSoundScript.empty())
+			{
+				params.hitSoundScript = attack->hitSoundScript.c_str();
+			}
+			if (!attack->missSoundScript.empty())
+			{
+				params.missSoundScript = attack->missSoundScript.c_str();
+			}
+
+			return true;
+		}
+	}
+	return false;
+}
+
+TakeDamageResult CBaseEntity::ImitateTraceHullAttack(CBaseEntity* pHurt, const TraceHullAttackParams& params)
+{
+	pHurt->ApplyPunchAngle(params.punchAngle);
+
+	const bool applyKnock = params.knockPlayerOnly ? pHurt->IsPlayer() : FBitSet(pHurt->pev->flags, FL_MONSTER|FL_CLIENT);
+	if (applyKnock)
+	{
+		pHurt->pev->velocity = pHurt->pev->velocity +
+							   gpGlobals->v_forward * params.knockForward +
+							   gpGlobals->v_right * params.knockRight +
+							   gpGlobals->v_up * params.knockUp;
+	}
+
+	TakeDamageResult takeDamageResult = pHurt->TakeDamage( pev, pev, params.damageInfo );
+
+	if (params.spawnBlood && takeDamageResult.TookDamageToHealth())
+	{
+		const int bloodColor = pHurt->BloodColor();
+		if (bloodColor != DONT_BLEED)
+		{
+			const Vector startPoint = Center();
+			const Vector targetPoint = pHurt->Center();
+			TraceResult tr;
+			UTIL_TraceLine(startPoint, targetPoint, dont_ignore_monsters, edict(), &tr);
+			if (tr.pHit == pHurt->edict())
+			{
+				SendBloodEffect(tr.vecEndPos, (startPoint - targetPoint).Normalize(), bloodColor, 25);
+			}
+		}
+	}
+
+	return takeDamageResult;
+}
+
 void CBaseEntity::InsertAISound(int iType, const Vector &vecOrigin, int iVolume, float flDuration)
 {
 	CSoundEnt::InsertSound(this, iType, vecOrigin, iVolume, flDuration);

@@ -246,6 +246,27 @@ struct ProjectileParameters
 	Vector up{0.0f, 0.0f, 1.0f};
 };
 
+struct TraceHullAttackParams
+{
+	float distance = 70.0f;
+	optional<float> height;
+	Vector punchAngle{};
+	float knockForward = 0.0f;
+	float knockRight = 0.0f;
+	float knockUp = 0.0f;
+	bool knockPlayerOnly = false;
+	bool skipAllies = false;
+	bool useAimVectors = true;
+	bool allowRetry = true;
+	DamageInfo damageInfo{0.0f, DMG_SLASH};
+	bool spawnBlood = false;
+	optional<Vector> bloodOrigin;
+	float verticalDistance = 0.0f;
+
+	const char* hitSoundScript = nullptr;
+	const char* missSoundScript = nullptr;
+};
+
 #define SF_ITEM_TOUCH_ONLY 128
 #define SF_ITEM_USE_ONLY 256 //  ITEM_USE_ONLY = BUTTON_USE_ONLY = DOOR_USE_ONLY!!!
 
@@ -697,6 +718,8 @@ public:
 	void ApplyDamageInfoPatch(DamageInfo& curDamageInfo, const DamageInfoPatch& damageInfo);
 	void ApplyRadiusDamageInfoPatch(RadiusDamageInfo& curRadiusDamageInfo, const RadiusDamageInfoPatch& radiusDamageInfo);
 	void ApplyPunchAngle(const Vector& punchAngle);
+	bool SetTraceHullAttackParamsFromTemplate(int eventIndex, TraceHullAttackParams& params);
+	TakeDamageResult ImitateTraceHullAttack(CBaseEntity* pHurt, const TraceHullAttackParams& params);
 
 	void InsertAISound(int iType, const Vector &vecOrigin, int iVolume, float flDuration);
 	void InsertAISound(int iType, int iVolume, float flDuration);

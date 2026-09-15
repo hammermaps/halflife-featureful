@@ -29,27 +29,6 @@ struct CheckMeleeAttackParams
 	float dot = 0.7f;
 };
 
-struct TraceHullAttackParams
-{
-	float distance = 70.0f;
-	optional<float> height;
-	Vector punchAngle{};
-	float knockForward = 0.0f;
-	float knockRight = 0.0f;
-	float knockUp = 0.0f;
-	bool knockPlayerOnly = false;
-	bool skipAllies = false;
-	bool useAimVectors = true;
-	bool allowRetry = true;
-	DamageInfo damageInfo{0.0f, DMG_SLASH};
-	bool spawnBlood = false;
-	optional<Vector> bloodOrigin;
-	float verticalDistance = 0.0f;
-
-	const char* hitSoundScript = nullptr;
-	const char* missSoundScript = nullptr;
-};
-
 struct LeapAttackStartParams
 {
 	int animationEvent{-1};
@@ -423,7 +402,6 @@ public:
 	// Leap attack related end
 	//
 
-	bool SetTraceHullAttackParamsFromTemplate(int eventIndex, TraceHullAttackParams& params);
 	std::pair<TraceResult, Vector> CheckTraceHullAttack(const TraceHullAttackParams& params, float height, const Vector& aimAngles);
 	CBaseEntity* PerformTraceHullAttack(const TraceHullAttackParams& params);
 	bool FacingIdeal();

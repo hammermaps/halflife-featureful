@@ -415,10 +415,13 @@ void CArcher::HandleAnimEvent( MonsterEvent_t *pEvent )
 
 			if ( DotProduct(dir, face) > 0.7f )
 			{
-				pEnemy->TakeDamage( pev, pev, DamageInfo(GetSkillValue("archer_dmg_bite"), DMG_SLASH) );
+				TraceHullAttackParams params;
+				params.punchAngle.x = 5;
+				params.punchAngle.z = -12;
+				params.damageInfo = DamageInfo(GetSkillValue("archer_dmg_bite"), DMG_SLASH);
+				SetTraceHullAttackParamsFromTemplate(pEvent->event, params);
 
-				Vector punchAngle{5, 0, -12};
-				pEnemy->ApplyPunchAngle(punchAngle);
+				ImitateTraceHullAttack(pEnemy, params);
 			}
 		}
 	}
