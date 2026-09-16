@@ -42,6 +42,7 @@ Half-Life Featureful is not just SDK in vacuum. It's a result of working on the 
 * [Christmas hikikomori](https://www.moddb.com/mods/christmas-hikikomori)
 * [Janitorial Escapism](https://www.moddb.com/mods/janitorial-escapism)
 * [The Tough Duty](https://www.moddb.com/mods/the-tough-duty)
+* [A Million Acres, Yet to End](https://www.moddb.com/mods/a-million-acres-yet-to-end)
 
 ### Projects in development
 
@@ -56,6 +57,7 @@ Half-Life Featureful is not just SDK in vacuum. It's a result of working on the 
 * [Half-Life: Sleep-Derived](https://www.moddb.com/mods/half-life-sleep-deprived)
 * [Half-Life: Static Interference](https://www.moddb.com/mods/half-life-static-interference) - demo avaialble.
 * [Specific impulse](https://www.moddb.com/mods/specific-impulse) - demo available.
+* [ULTRA-FORCE](https://www.moddb.com/mods/ultra-force) - demo available.
 
 ## Compatibility with other mods and addons
 
