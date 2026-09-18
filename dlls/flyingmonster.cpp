@@ -298,6 +298,11 @@ Vector CFlyingMonster::DoProbe(const Vector &Probe, const Vector& myVelocity)
 		Vector NormalToProbeAndWallNormal = CrossProduct(ProbeDir, WallNormal);
 		Vector SteeringVector = CrossProduct( NormalToProbeAndWallNormal, ProbeDir);
 
+		if (SteeringVector.IsLengthLessThan(0.001f))
+		{
+			return Vector{};
+		}
+
 		float SteeringForce = m_flightSpeed * (1-frac) * (DotProduct(WallNormal.Normalize(), myVelocity.Normalize()));
 		if (SteeringForce < 0.0)
 		{
