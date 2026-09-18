@@ -2391,7 +2391,7 @@
 
 @PointClass base(Targetname, RenderFields) size(-16 -16 -16, 16 16 16) color(100 100 0) = env_render : "Render Controls"
 [
-	target(target_destination) : "Target to affect [LE]"
+	target(target_generic) : "Target to affect [LE]"
 	message(string) : "FX Amount factor [LR]"
 	m_fScale(string) : "Scale (0 = no change) [LR]"
 	frags(string) : "Fade Time (secs)"
@@ -2727,8 +2727,8 @@
 @PointClass base(Targetname) color(128 128 255) = env_state : "Local State. Can be used as Master entity"
 [
 	target(target_destination) : "Fire On State Change (on & off)" : : "Fire this target when the state of env_state changes. It sends On or Off use-type depending on the new state"
-	noise1(target_destination) : "Fire when turned on"
-	noise2(target_destination) : "Fire when turned off"
+	noise1(target_destination) : "Fire when turned on (toggle)"
+	noise2(target_destination) : "Fire when turned off (toggle)"
 	turnontime(string) : "Time taken to turn on"
 	turnofftime(string) : "Time taken to turn off"
 	master(string) : "Master"
@@ -8135,7 +8135,7 @@
 		8 : "Once only" : 0
 		16 : "Reserved (don't use)" : 0 : "Reserved for Spirit 'Start on' flag"
 		32 : "Reserved (don't use)" : 0 : "Reserved for Spirit 'Debug mode' flag"
-		1024 : "Instant" : 0 : "When called, start instantly on the same frame (only if there're targets with 0 delay)"
+		1024 : "Instant (start on current frame)" : 0 : "When called, start instantly on the same frame (only if there're targets with 0 delay)"
 	]
 ]
 
@@ -9687,7 +9687,7 @@
 
 @BaseClass = Random
 [
-	target_count(integer) : "Target Count" : : "Amount of random targets you have specified. This is now optional and left for compatibility with Sven Co-op trigger_random"
+	target_count(integer) : "Target Count (optional, Sven Co-op compat)" : : "Amount of random targets you have specified. This is now optional and left for compatibility with Sven Co-op trigger_random"
 	target1(target_destination) : "Target 1"
 	target2(target_destination) : "Target 2"
 	target3(target_destination) : "Target 3"
