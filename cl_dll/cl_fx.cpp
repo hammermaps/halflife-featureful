@@ -311,6 +311,11 @@ void FX_Spray(Vector pos, Vector dir, int modelIndex, int count, int speed, floa
 		pTemp->entity.baseline.origin[1] = dir[1] + Com_RandomFloat( -noise, noise );
 		pTemp->entity.baseline.origin[2] = dir[2] + Com_RandomFloat( 0, znoise );
 		pTemp->entity.baseline.origin *= Com_RandomFloat(( speed * 0.8f ), ( speed * 1.2f ));
+
+		if (pmodel->type == mod_studio)
+		{
+			VectorAngles(pTemp->entity.baseline.origin, pTemp->entity.angles);
+		}
 	}
 }
 
