@@ -3298,6 +3298,11 @@
 	_minlight(integer) : "Minimum light level"
 	spawnorigin(string) : "X Y Z - Move here after lighting" : "0 0 0"
 	dmg(integer) : "Damage inflicted when blocked" : 0
+	m_iObeyTriggerMode(choices) : "Obey Trigger Mode" : : "Originally func_rotating doesn't interpret use-types. This parameter allows to take use-type (on and off) into account" =
+	[
+		0 : "No"
+		1 : "Yes"
+	]
 ]
 
 @SolidClass base(BaseTank, ZHLT) = func_tank : "Brush Gun Turret"

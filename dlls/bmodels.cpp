@@ -392,6 +392,9 @@ public:
 	float m_flVolume;
 	float m_pitch;
 	int m_sounds;
+	bool m_iObeyTriggerMode;
+	bool m_currentState;
+	bool m_playingSound;
 };
 
 TYPEDESCRIPTION	CFuncRotating::m_SaveData[] =
@@ -400,7 +403,9 @@ TYPEDESCRIPTION	CFuncRotating::m_SaveData[] =
 	DEFINE_FIELD( CFuncRotating, m_flAttenuation, FIELD_FLOAT ),
 	DEFINE_FIELD( CFuncRotating, m_flVolume, FIELD_FLOAT ),
 	DEFINE_FIELD( CFuncRotating, m_pitch, FIELD_FLOAT ),
-	DEFINE_FIELD( CFuncRotating, m_sounds, FIELD_INTEGER )
+	DEFINE_FIELD( CFuncRotating, m_sounds, FIELD_INTEGER ),
+	DEFINE_FIELD( CFuncRotating, m_iObeyTriggerMode, FIELD_BOOLEAN ),
+	DEFINE_FIELD( CFuncRotating, m_currentState, FIELD_BOOLEAN )
 };
 
 IMPLEMENT_SAVERESTORE( CFuncRotating, CBaseEntity )
@@ -434,6 +439,11 @@ void CFuncRotating::KeyValue( KeyValueData* pkvd )
 	else if( FStrEq( pkvd->szKeyName, "sounds" ) )
 	{
 		m_sounds = atoi( pkvd->szValue );
+		pkvd->fHandled = true;
+	}
+	else if( FStrEq( pkvd->szKeyName, "m_iObeyTriggerMode" ) )
+	{
+		m_iObeyTriggerMode = atoi( pkvd->szValue ) != 0;
 		pkvd->fHandled = true;
 	}
 	else 
@@ -508,9 +518,12 @@ void CFuncRotating::Spawn()
 	//	if( pev->dmg == 0 )
 	//		pev->dmg = 2;
 
+	m_currentState = false;
+
 	// instant-use brush?
 	if( FBitSet( pev->spawnflags, SF_BRUSH_ROTATE_INSTANT ) )
 	{
+		m_currentState = true;
 		SetThink( &CBaseEntity::SUB_CallUseToggle );
 		pev->nextthink = pev->ltime + 1.5f;	// leave a magic delay for client to start up
 	}
@@ -565,7 +578,8 @@ void CFuncRotating::Precache()
 		PRECACHE_SOUND( szSoundFile );
 	pev->noiseRunning = MAKE_STRING( szSoundFile );
 
-	if( pev->avelocity != g_vecZero )
+	const bool shouldRestartSound = m_iObeyTriggerMode ? m_currentState : pev->avelocity != g_vecZero;
+	if (shouldRestartSound)
 	{
 		// if fan was spinning, and we went through transition or save/restore,
 		// make sure we restart the sound.  1.5 sec delay is magic number. KDB
@@ -698,6 +712,7 @@ void CFuncRotating::SpinDown()
 		// stop sound, we're done
 		EMIT_SOUND_DYN( ENT( pev ), CHAN_STATIC, STRING( pev->noiseRunning /* Stop */ ),
 				0, 0, SND_STOP, (int)m_pitch );
+		m_playingSound = false;
 
 		SetThink( &CFuncRotating::Rotate );
 		Rotate();
@@ -718,12 +733,19 @@ void CFuncRotating::Rotate()
 //=========================================================
 void CFuncRotating::RotatingUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 {
+	const bool shouldToggle = m_iObeyTriggerMode ? ShouldToggle(useType, m_currentState) : true;
+	if (!shouldToggle)
+		return;
+
 	// is this a brush that should accelerate and decelerate when turned on/off (fan)?
 	if( FBitSet ( pev->spawnflags, SF_BRUSH_ACCDCC ) )
 	{
+		m_currentState = !m_currentState;
+		const bool shouldSpinDown = m_iObeyTriggerMode ? !m_currentState : pev->avelocity != g_vecZero;
 		// fan is spinning, so stop it.
-		if( pev->avelocity != g_vecZero )
+		if (shouldSpinDown)
 		{
+			m_currentState = false;
 			SetThink( &CFuncRotating::SpinDown );
 			//EMIT_SOUND_DYN( ENT( pev ), CHAN_WEAPON, STRING( pev->noiseStop ),
 			//	m_flVolume, m_flAttenuation, 0, m_pitch );
@@ -732,16 +754,20 @@ void CFuncRotating::RotatingUse( CBaseEntity *pActivator, CBaseEntity *pCaller, 
 		}
 		else// fan is not moving, so start it
 		{
+			m_currentState = true;
 			SetThink( &CFuncRotating::SpinUp );
 			EMIT_SOUND_DYN( ENT( pev ), CHAN_STATIC, STRING( pev->noiseRunning ),
-				0.01f, m_flAttenuation, 0, FANPITCHMIN );
+				0.01f, m_flAttenuation, m_playingSound ? SND_CHANGE_PITCH : 0, FANPITCHMIN );
+			m_playingSound = true;
 
 			pev->nextthink = pev->ltime + 0.1f;
 		}
 	}
-	else if( !FBitSet( pev->spawnflags, SF_BRUSH_ACCDCC ) )//this is a normal start/stop brush.
+	else //this is a normal start/stop brush.
 	{
-		if( pev->avelocity != g_vecZero )
+		m_currentState = !m_currentState;
+		const bool shouldSpinDown = m_iObeyTriggerMode ? !m_currentState : pev->avelocity != g_vecZero;
+		if (shouldSpinDown)
 		{
 			// play stopping sound here
 			SetThink( &CFuncRotating::SpinDown );
@@ -755,7 +781,8 @@ void CFuncRotating::RotatingUse( CBaseEntity *pActivator, CBaseEntity *pCaller, 
 		else
 		{
 			EMIT_SOUND_DYN( ENT( pev ), CHAN_STATIC, STRING( pev->noiseRunning ),
-				m_flVolume, m_flAttenuation, 0, FANPITCHMAX );
+				m_flVolume, m_flAttenuation, m_playingSound ? SND_CHANGE_PITCH : 0, FANPITCHMAX );
+			m_playingSound = true;
 			pev->avelocity = pev->movedir * pev->speed;
 
 			SetThink( &CFuncRotating::Rotate );
