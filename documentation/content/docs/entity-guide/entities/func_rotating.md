@@ -1,6 +1,7 @@
 ---
 bookHidden: true
 bookToC: false
+entityCategory: solid
 ---
 
 # func_rotating

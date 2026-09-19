@@ -37,6 +37,8 @@ The monster utilizes the melee (bite) attack and the short range lightning attac
 ### Visuals
 
 * **Archer.ZapBeam** - zap beam.
+* **Archer.PowerupLight** - an entity light created when the archer starts powering its zap attack. This is either played on the first attachment (if the model has one) or in front of the monster's center.
+* **Archer.ZapLight** - an entity light created at the moment of zap attack (when beam is created). This is either played on the first attachment (if the model has one) or in front of the monster's center.
 
 ### Attacks
 

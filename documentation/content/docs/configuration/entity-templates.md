@@ -1895,10 +1895,16 @@ Properties:
 * `"start_sequence"` - the name of the jump animation sequence to use. Ideally the animation shouldn't displace the model (in the editor it should look like the monster is playing the jump animation while staying in the same place). The animation definitely should not include forward/backward/side motion. If this is not defined the monster will play its idle animation or its default jump animation (currently only [monster_human_assassin]({{< ref monster_human_assassin >}}) uses jump animation by default).
 * `"animation_event"` - the id of animation event that applies the pre-calculated jump velocity to the monster. This must be a unique animation event id that is not used by a monster for any other purpose. This event must be defined on the sequence referenced by `"start_sequence"` property.
 * `"start_frame_fraction"` - a fraction of animation where to apply the pre-calculated jump velocity to the monster. This must be the value between 0 and 1. This is an alternative to `"animation_event"` (these properties can't be defined together), for cases when editing the model events is not an option.
+* `"up_sequence"` - an optional animation sequence to play after the `"start_sequence"` has finished and the monster's vertical velocity is still positive (i.e. monster still goes up). Depending on the duration of the jump starting animation and the maximum height the monster can jump to this sequence may never play. This can be a looped animation. The [monster_human_assassin]({{< ref monster_human_assassin >}}) has it set to `"fly_up"` by default.
+* `"down_sequence"` - an optional animation sequence to play after the `"start_sequence"` has finished (or after `"up_sequence"` if it had a chance to play). Depending on the duration of the previous animation and the maximum height the monster can jump to this sequence may never play. This can be a looped animation. The [monster_human_assassin]({{< ref monster_human_assassin >}}) has it set to `"fly_down"` by default.
 
 {{% details title="Example" %}}
 
-In this example we set the jumping ability for [monster_alien_slave]({{< ref monster_alien_slave >}}) and [monster_houndeye]({{< ref monster_houndeye >}}) on all difficulties. Note: the `jump` animation in the default **models/islave.mdl** features some vertical motion by itself, so this sequence serves here just as an example.
+In this example we set the jumping ability for [monster_alien_slave]({{< ref monster_alien_slave >}}) and [monster_houndeye]({{< ref monster_houndeye >}}) on all difficulties.
+
+{{% hint warning %}}
+The `jump` animation in the default **models/islave.mdl** features some horizontal motion by itself, so this sequence serves here just as an example.
+{{% /hint %}}
 
 ```json
 {

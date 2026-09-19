@@ -14,17 +14,14 @@ Most mapping or resource-handling tutorials you can find for Half-Life are proba
 
 ## FGD
 
-There're currently two fgds distributed with the sample mod (and in the dev-only package):
+We strive to support all modern level editors for Half-Life. The FGD format is slightly different for each level editor, so we distribute several FGDs in the sample mod (and in the dev-only package):
 
-* **halflife_featureful.fgd** - FGD for JACK level editor.
-* **halflife_featureful-tb.fgd** - FGD for Trenchbroom level editor.
+* **halflife_featureful.fgd** - FGD for [JACK](https://developer.valvesoftware.com/wiki/J.A.C.K.).
+* **halflife_featureful-tb.fgd** - FGD for [Trenchbroom](https://developer.valvesoftware.com/wiki/TrenchBroom).
+* **halflife_featureful-nr.fgd** - FGD for [NetRadiant-Custom](https://developer.valvesoftware.com/wiki/NetRadiant-Custom).
 
 {{% hint warning %}}
-**zhlt.fgd** which is specific to vhlt/zhlt map compilers is not distributed with the Featureful SDK. Don't forget to add it to the fgd list in JACK!
-{{% /hint %}}
-
-{{% hint info %}}
-As Trenchbroom can't specify multiple fgds per profile you would need to manually add the contents of **zhlt.fgd** into **halflife_featureful-tb.fgd** in case you're using the vhlt/zhlt map compilers and want to use their special features.
+**zhlt.fgd** which is specific to vhlt/zhlt map compilers is not distributed with the Featureful SDK. Don't forget to add it to the fgd list in the level editor!
 {{% /hint %}}
 
 ## Recommendations
