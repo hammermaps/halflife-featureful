@@ -1,54 +1,62 @@
 diff --git a/src/zhlt-vluzacn/hlrad/transfers.cpp b/src/zhlt-vluzacn/hlrad/transfers.cpp
-index 179f17a..7608af8 100644
+index 179f17a..7534bcf 100644
 --- a/src/zhlt-vluzacn/hlrad/transfers.cpp
 +++ b/src/zhlt-vluzacn/hlrad/transfers.cpp
-@@ -10,6 +10,55 @@
+@@ -10,6 +10,63 @@
  #include <sys/stat.h>
  #endif
  
 +/*
 + * =============
++ * HashBytes
++ *
++ * Folds len bytes at data into an FNV-1a 64-bit hash.
++ * =============
++ */
++static inline void HashBytes(uint64_t& hash, const void* data, size_t len)
++{
++    const uint64_t        prime = 0x100000001b3ULL;
++    const unsigned char*  bytes = (const unsigned char*)data;
++    size_t                i;
++
++    for (i = 0; i < len; i++)
++    {
++        hash ^= bytes[i];
++        hash *= prime;
++    }
++}
++
++/*
++ * =============
 + * GeometryChecksum
 + *
 + * FNV-1a 64-bit hash over the geometry-derived fields of every patch
-+ * (origin, area, owning face), in patch order. Stored in the .inc
-+ * incremental transfer cache alongside the patch count, and recomputed
-+ * on read, so a geometry edit that keeps the same patch count (e.g. a
-+ * brush moved without changing face/patch topology) still invalidates
++ * (origin, area, owning face, and the full winding point list), in patch
++ * order. Stored in the .inc incremental transfer cache alongside the
++ * patch count, and recomputed on read, so a geometry edit that keeps the
++ * same patch count (e.g. a brush moved, or rotated in place around its
++ * own centroid, without changing face/patch topology) still invalidates
 + * the cache instead of silently reusing a stale transfer matrix.
 + * =============
 + */
 +static uint64_t GeometryChecksum(const long numpatches)
 +{
 +    uint64_t        hash = 0xcbf29ce484222325ULL; // FNV-1a 64-bit offset basis
-+    const uint64_t  prime = 0x100000001b3ULL;
 +    patch_t*        patch;
 +    long            patchcount = numpatches;
 +
 +    for (patch = g_patches; patchcount-- > 0; patch++)
 +    {
-+        const unsigned char* bytes;
-+        size_t          i;
++        HashBytes(hash, &patch->origin, sizeof(patch->origin));
++        HashBytes(hash, &patch->area, sizeof(patch->area));
++        HashBytes(hash, &patch->faceNumber, sizeof(patch->faceNumber));
 +
-+        bytes = (const unsigned char*)&patch->origin;
-+        for (i = 0; i < sizeof(patch->origin); i++)
++        if (patch->winding)
 +        {
-+            hash ^= bytes[i];
-+            hash *= prime;
-+        }
++            unsigned int numpoints = patch->winding->m_NumPoints;
 +
-+        bytes = (const unsigned char*)&patch->area;
-+        for (i = 0; i < sizeof(patch->area); i++)
-+        {
-+            hash ^= bytes[i];
-+            hash *= prime;
-+        }
-+
-+        bytes = (const unsigned char*)&patch->faceNumber;
-+        for (i = 0; i < sizeof(patch->faceNumber); i++)
-+        {
-+            hash ^= bytes[i];
-+            hash *= prime;
++            HashBytes(hash, &numpoints, sizeof(numpoints));
++            HashBytes(hash, patch->winding->m_Points, numpoints * sizeof(vec3_t));
 +        }
 +    }
 +
@@ -58,7 +66,7 @@ index 179f17a..7608af8 100644
  /*
   * =============
   * writetransfers
-@@ -25,6 +74,7 @@ void            writetransfers(const char* const transferfile, const long total_
+@@ -25,6 +82,7 @@ void            writetransfers(const char* const transferfile, const long total_
      {
          unsigned        amtwritten;
          patch_t*        patch;
@@ -66,7 +74,7 @@ index 179f17a..7608af8 100644
  
          Log("Writing transfers file [%s]\n", transferfile);
  
-@@ -34,6 +84,13 @@ void            writetransfers(const char* const transferfile, const long total_
+@@ -34,6 +92,13 @@ void            writetransfers(const char* const transferfile, const long total_
              goto FailedWrite;
          }
  
@@ -80,7 +88,7 @@ index 179f17a..7608af8 100644
          long patchcount = total_patches;
          for (patch = g_patches; patchcount-- > 0; patch++)
          {
-@@ -115,6 +172,7 @@ bool            readtransfers(const char* const transferfile, const long numpatc
+@@ -115,6 +180,7 @@ bool            readtransfers(const char* const transferfile, const long numpatc
  {
      FILE*           file;
      long            total_patches;
@@ -88,7 +96,7 @@ index 179f17a..7608af8 100644
  
      file = fopen(transferfile, "rb");
      if (file != NULL)
-@@ -134,6 +192,17 @@ bool            readtransfers(const char* const transferfile, const long numpatc
+@@ -134,6 +200,17 @@ bool            readtransfers(const char* const transferfile, const long numpatc
              goto FailedRead;
          }
  

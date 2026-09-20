@@ -23,8 +23,11 @@ instead of failing the build.
 ## Patches
 
 - `0001-hlrad-incremental-geometry-checksum.patch` — adds a geometry
-  checksum (patch origin/area/face, FNV-1a) to hlrad's `-incremental`
-  transfer cache (`.inc` file). Without this, the cache is only
-  invalidated when the *patch count* changes; a brush move that happens
-  to keep the same patch count is silently accepted and produces stale
-  bounce lighting. See `hlrad/transfers.cpp`'s `GeometryChecksum()`.
+  checksum (FNV-1a over each patch's origin/area/face and full winding
+  point list) to hlrad's `-incremental` transfer cache (`.inc` file).
+  Without this, the cache is only invalidated when the *patch count*
+  changes; a brush move (or in-place rotation around its own centroid)
+  that happens to keep the same patch count is silently accepted and
+  produces stale bounce lighting. See `hlrad/transfers.cpp`'s
+  `GeometryChecksum()`. Regression-tested by
+  `tools/test-hlrad-incremental.sh`.

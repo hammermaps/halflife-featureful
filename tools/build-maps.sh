@@ -6,18 +6,35 @@
 # Usage:
 #   ./build-maps.sh                # fast dev compile (fast vis, sparse rad, no bounce)
 #   ./build-maps.sh full           # full-quality compile (full vis, extra rad, bounces)
+#   ./build-maps.sh lightonly      # entities/lighting-only re-run (see below), needs an
+#                                   # existing .bsp from a prior fast/full build
 #   ./build-maps.sh <name>         # compile only mod/featureful/maps/<name>.map
 #   ./build-maps.sh full <name>    # combine both
 #
 # Run ./build-vhlt.sh first to build the compiler binaries.
 #
-# hlrad runs with -incremental, which caches the patch transfer matrix in a
-# <mapname>.inc file next to the .bsp and reuses it on the next compile,
-# skipping the most expensive step of the rad pass (GatherLight's patch
-# visibility computation). hlrad only auto-invalidates the cache when the
-# patch count changed; a geometry edit that keeps the same patch count can
-# go undetected, so delete the .inc file by hand after non-trivial geometry
-# changes if lighting looks wrong.
+# hlrad runs with -incremental (fast/full/lightonly alike), which caches the
+# patch transfer matrix in a <mapname>.inc file next to the .bsp and reuses
+# it on the next compile, skipping the most expensive step of the rad pass
+# (GatherLight's patch visibility computation). This only actually saves
+# anything when radiosity bounces run at all - the "fast" preset uses
+# -bounce 0, which skips the transfer/vismatrix step entirely, so .inc is
+# never written or read there; only "full" and "lightonly" benefit.
+#
+# patches/vhlt/0001-hlrad-incremental-geometry-checksum.patch makes the
+# cache detect a geometry change that keeps the same patch count (e.g. a
+# brush moved or rotated in place) instead of silently reusing a stale
+# transfer matrix - see that patch's header comment for details.
+#
+# IMPORTANT: hlcsg deletes any existing .inc on every *normal* run
+# (common/log.cpp: ResetTmpFiles(), skipped only for -onlyents). So under
+# the default "fast"/"full" full-chain compile, the .inc cache never
+# survives to the next build-maps.sh invocation anyway - it only pays off
+# within "lightonly", which runs hlcsg -onlyents (entity/keyvalue changes
+# only, e.g. tuning a light entity's brightness) instead of a full
+# recompile, so ResetTmpFiles never fires and the cache from the last
+# fast/full build is reused. "lightonly" does NOT pick up brush/geometry
+# edits - re-run "fast" or "full" for those.
 
 set -euo pipefail
 
@@ -57,8 +74,8 @@ if [[ ! -f "$VALVE_DIR/zhlt.wad" ]]; then
 fi
 
 quality="fast"
-if [[ "${1:-}" == "full" ]]; then
-	quality="full"
+if [[ "${1:-}" == "full" || "${1:-}" == "lightonly" ]]; then
+	quality="$1"
 	shift
 fi
 
@@ -83,15 +100,26 @@ for mapfile in "${maps[@]}"; do
 	mapname="${mapfile%.map}"
 	echo "=== Compiling $(basename "$mapfile") ($quality) ==="
 
-	"$VHLT_BIN/hlcsg" -wadautodetect "$mapname"
-	"$VHLT_BIN/hlbsp" "$mapname"
-
-	if [[ "$quality" == "full" ]]; then
-		"$VHLT_BIN/hlvis" -full "$mapname"
+	if [[ "$quality" == "lightonly" ]]; then
+		if [[ ! -f "$mapname.bsp" ]]; then
+			echo "$(basename "$mapname").bsp not found - run a full/fast build first." >&2
+			exit 1
+		fi
+		"$VHLT_BIN/hlcsg" -wadautodetect -onlyents "$mapname"
 		"$VHLT_BIN/hlrad" -extra -bounce 8 -vismatrix sparse -incremental -lights "$VHLT_TOOLS/lights.rad" "$mapname"
 	else
-		"$VHLT_BIN/hlvis" -fast "$mapname"
-		"$VHLT_BIN/hlrad" -bounce 0 -vismatrix sparse -incremental -lights "$VHLT_TOOLS/lights.rad" "$mapname"
+		"$VHLT_BIN/hlcsg" -wadautodetect "$mapname"
+		"$VHLT_BIN/hlbsp" "$mapname"
+
+		if [[ "$quality" == "full" ]]; then
+			"$VHLT_BIN/hlvis" -full "$mapname"
+			"$VHLT_BIN/hlrad" -extra -bounce 8 -vismatrix sparse -incremental -lights "$VHLT_TOOLS/lights.rad" "$mapname"
+		else
+			"$VHLT_BIN/hlvis" -fast "$mapname"
+			# No -incremental here: -bounce 0 skips hlrad's transfer/vismatrix
+			# step entirely, so there would be nothing to cache.
+			"$VHLT_BIN/hlrad" -bounce 0 -vismatrix sparse -lights "$VHLT_TOOLS/lights.rad" "$mapname"
+		fi
 	fi
 
 	echo "=== Done: $(basename "$mapname").bsp ==="

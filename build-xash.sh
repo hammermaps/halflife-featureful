@@ -34,29 +34,14 @@ elif [[ "${1:-}" == "update" ]]; then
 	shift
 fi
 
+source "$(pwd)/tools/lib/apply-patches.sh"
+
 cd "$XASH_DIR"
 
 # Apply local patches (patches/xash3d/*.patch, *.diff) before configuring/building.
 # Idempotent: a patch that's already applied (source tree reused between runs)
 # is detected via --reverse --check and skipped instead of failing.
-shopt -s nullglob
-patches=("$PATCH_DIR"/*.patch "$PATCH_DIR"/*.diff)
-shopt -u nullglob
-if [[ ${#patches[@]} -gt 0 ]]; then
-	IFS=$'\n' patches=($(sort <<<"${patches[*]}")); unset IFS
-	echo "Applying patches from $PATCH_DIR"
-	for p in "${patches[@]}"; do
-		if git apply --check "$p" 2>/dev/null; then
-			git apply "$p"
-			echo "  applied: $(basename "$p")"
-		elif git apply --reverse --check "$p" 2>/dev/null; then
-			echo "  already applied, skipping: $(basename "$p")"
-		else
-			echo "  FAILED to apply: $(basename "$p")" >&2
-			exit 1
-		fi
-	done
-fi
+apply_patches_from "$PATCH_DIR"
 
 # 32-bit build on a 64-bit x86 host needs the i386 pkg-config path set,
 # matching the FWGS README's Debian/Ubuntu 32-bit build instructions.

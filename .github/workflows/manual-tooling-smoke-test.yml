@@ -1,0 +1,54 @@
+name: manual tooling smoke test
+
+# Manual smoke test for this repo's custom dev-loop scripts:
+# build-dev.sh, build-xash.sh (+ patches/xash3d), tools/build-vhlt.sh
+# (+ patches/vhlt), and tools/test-hlrad-incremental.sh.
+#
+# This does NOT build or run the actual mod gamedir (mod/featureful/) -
+# its maps/models/sounds/sprites are private, hand-placed assets that are
+# not part of this repository (mod/ is git-ignored), so there is nothing
+# for a fresh checkout to install or launch. What this workflow DOES
+# verify, against a clean checkout:
+#   - the mod's server/client DLLs still build via build-dev.sh
+#   - the Xash3D FWGS engine still builds via build-xash.sh, with
+#     patches/xash3d applied
+#   - VHLT-V34 still builds via tools/build-vhlt.sh, with patches/vhlt
+#     applied, using a small self-contained sealed test room
+#     (tools/testdata/ci_test_room.map) that needs no external/copyrighted
+#     assets
+#   - the hlrad incremental-cache geometry-checksum patch still behaves
+#     correctly (tools/test-hlrad-incremental.sh)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  tooling-smoke-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          submodules: recursive
+
+      - name: Install 32-bit and engine build dependencies
+        run: |
+          sudo dpkg --add-architecture i386
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            git build-essential gcc-multilib g++-multilib cmake python3 \
+            libsdl2-dev:i386 libfreetype-dev:i386 libopus-dev:i386 \
+            libbz2-dev:i386 libvorbis-dev:i386 libopusfile-dev:i386 \
+            libogg-dev:i386
+
+      - name: Build mod DLLs (build-dev.sh)
+        run: ./build-dev.sh
+
+      - name: Build Xash3D FWGS engine (build-xash.sh)
+        run: ./build-xash.sh
+
+      - name: Build VHLT-V34 map compilers (tools/build-vhlt.sh)
+        run: ./tools/build-vhlt.sh
+
+      - name: Regression test hlrad -incremental geometry checksum
+        run: ./tools/test-hlrad-incremental.sh
