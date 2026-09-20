@@ -38,11 +38,13 @@ All configuration files are optional. If something is missing the defaults are p
 {{% /hint %}}
 
 {{% hint info %}}
-Running the game in [developer mode]({{< ref "developing-the-mod/#recommendations" >}}) makes JSON files being re-parsed on the level restart, level transition or when the saved game is loaded. This is helpful when you do some configuration editing and testing as it doesn't require relaunching the game.
+Running the game in [developer mode]({{< ref "developing-the-mod/#recommendations" >}}) makes JSON files and **features/featureful_client.cfg** being re-parsed on the level restart, level transition or when the saved game is loaded. This is helpful when you do some configuration editing and testing as it doesn't require relaunching the game.
 {{% /hint %}}
 
 {{% hint warning %}}
 If you modify *featureful_* files you must restart the game in order for these changes to take effect.
+
+Modifications to **features/featureful_client.cfg** are applied in the developer mode, but only partially - the client cvars and commands that depend on features won't be created or removed.
 {{% /hint %}}
 
 ## File format

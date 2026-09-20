@@ -787,7 +787,7 @@ void CHud::RecacheValues()
 	}
 	else
 	{
-		if (clientFeatures.hud_color_configurable)
+		if (clientFeatures.hud_color_configurable && m_pCvarHudRed && m_pCvarHudGreen && m_pCvarHudBlue)
 		{
 			int hudR = m_pCvarHudRed->value;
 			int hudG = m_pCvarHudGreen->value;

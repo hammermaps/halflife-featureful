@@ -1299,6 +1299,7 @@ void CHud::VidInit()
 		if (IsDeveloperModeOn())
 		{
 			gEngfuncs.Con_DPrintf("Re-parsing mod client configs\n");
+			ParseClientFeatures();
 			ParseModConfigs();
 		}
 	}
