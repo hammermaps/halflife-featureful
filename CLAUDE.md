@@ -53,6 +53,17 @@ Requires `libgtest-dev` (or gtest discoverable by CMake) installed on the system
 
 When adding a new `dlls`/`cl_dll`/`game_shared` source file that a test needs, add it to the `add_executable(test ...)` source list in `tests/CMakeLists.txt` explicitly.
 
+### Always run tests/binaries under gdb
+
+Run the GoogleTest binary and any runtime smoke test (engine, dedicated server, graphical client) under `gdb` rather than directly, so a crash produces a full backtrace instead of a bare exit code:
+
+```bash
+gdb -q -batch -ex run -ex bt --args ./tests/build/test [--gtest_filter=...]
+gdb -q -batch -ex run -ex bt --args ./xash3d -dedicated -game featureful +map <mapname> -log
+```
+
+For a long-running process that doesn't exit on its own (dedicated server, graphical client), start gdb in the background and send `SIGTERM` to the *inferior* PID (not gdb's own PID) once you're done observing it — gdb passes the signal through, the process exits, and `bt`/status still get printed cleanly.
+
 ### Local test/dev mod directory (`mod/`)
 
 `mod/featureful/` is a local, git-ignored, installed sample-mod gamedir (produced by `cmake --build ... --target install` with `-DGAMEDIR=featureful`) used for manually testing built binaries in a real engine — not a source directory. It contains the built `hl.dll`/`hl.so` and `client.dll`/`client.so` alongside the sample mod's `features/*.cfg`/`*.json`, `templates/*.json`, `maps/`, `models/`, `sound/`, and `sprites/`. It is not tracked by git; treat it as build/test output, not something to edit by hand or commit.
@@ -90,6 +101,12 @@ If a change to the mod requires modifying the Xash3D engine itself (not this rep
 3. Revert the working tree change in `xash3d-fwgs/` (`git checkout -- <file>`) so the checkout matches upstream again — `build-xash.sh` applies the patch itself on the next run.
 
 `patches/xash3d/*.patch`/`*.diff` are applied (in alphabetical order, so prefix with `000N-` if order matters) right after cloning/updating the engine and before `./waf configure`/`./waf build`. Application is idempotent — a patch already present in the checkout is detected and skipped rather than failing the build. See `patches/xash3d/README.md` for the exact format.
+
+`xash3d-fwgs/` (the engine clone itself) is git-ignored, same as `mod/` and `build*/` — it's fetched by `build-xash.sh`, not committed.
+
+### Known benign warning: "SV_LoadProgs: couldn't get physics API"
+
+Every dedicated-server/engine start under Xash3D logs `Warning: SV_LoadProgs: couldn't get physics API`. This is expected, not a bug: `Server_GetPhysicsInterface()` in `dlls/cbase.cpp` is exported only so the game DLL can detect at runtime whether it's running under Xash3D (`g_fIsXash3D = true`) and fix up a collision-behavior flag (`g_hasCorrectShouldCollide`); it deliberately returns `0` so the engine does *not* actually initialize Xash3D's extended physics API (`engine/server/sv_phys.c: SV_InitPhysicsAPI`), which this classic-GoldSource-style SDK doesn't use. The engine logs the `0` return as a warning regardless of intent — safe to ignore.
 
 ## Architecture
 
