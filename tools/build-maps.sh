@@ -35,6 +35,12 @@
 # recompile, so ResetTmpFiles never fires and the cache from the last
 # fast/full build is reused. "lightonly" does NOT pick up brush/geometry
 # edits - re-run "fast" or "full" for those.
+#
+# All tools run with -threads $(nproc): this VHLT-V34 fork's POSIX
+# ThreadSetDefault() (common/threads.cpp) always falls back to 1 thread
+# unless -threads is passed explicitly (unlike e.g. github.com/FreeSlave/vhlt,
+# which auto-detects the core count on Linux/BSD/macOS) - without this flag
+# every compile here would silently run single-threaded.
 
 set -euo pipefail
 
@@ -45,6 +51,7 @@ VHLT_BIN="$(pwd)/VHLT-V34/src/zhlt-vluzacn/bin"
 VHLT_TOOLS="$(pwd)/VHLT-V34/tools"
 MAPS_DIR="$ROOT/mod/featureful/maps"
 VALVE_DIR="$ROOT/mod/valve"
+NPROC="$(nproc)"
 
 for tool in hlcsg hlbsp hlvis hlrad; do
 	if [[ ! -x "$VHLT_BIN/$tool" ]]; then
@@ -105,20 +112,20 @@ for mapfile in "${maps[@]}"; do
 			echo "$(basename "$mapname").bsp not found - run a full/fast build first." >&2
 			exit 1
 		fi
-		"$VHLT_BIN/hlcsg" -wadautodetect -onlyents "$mapname"
-		"$VHLT_BIN/hlrad" -extra -bounce 8 -vismatrix sparse -incremental -lights "$VHLT_TOOLS/lights.rad" "$mapname"
+		"$VHLT_BIN/hlcsg" -threads "$NPROC" -wadautodetect -onlyents "$mapname"
+		"$VHLT_BIN/hlrad" -threads "$NPROC" -extra -bounce 8 -vismatrix sparse -incremental -lights "$VHLT_TOOLS/lights.rad" "$mapname"
 	else
-		"$VHLT_BIN/hlcsg" -wadautodetect "$mapname"
-		"$VHLT_BIN/hlbsp" "$mapname"
+		"$VHLT_BIN/hlcsg" -threads "$NPROC" -wadautodetect "$mapname"
+		"$VHLT_BIN/hlbsp" -threads "$NPROC" "$mapname"
 
 		if [[ "$quality" == "full" ]]; then
-			"$VHLT_BIN/hlvis" -full "$mapname"
-			"$VHLT_BIN/hlrad" -extra -bounce 8 -vismatrix sparse -incremental -lights "$VHLT_TOOLS/lights.rad" "$mapname"
+			"$VHLT_BIN/hlvis" -threads "$NPROC" -full "$mapname"
+			"$VHLT_BIN/hlrad" -threads "$NPROC" -extra -bounce 8 -vismatrix sparse -incremental -lights "$VHLT_TOOLS/lights.rad" "$mapname"
 		else
-			"$VHLT_BIN/hlvis" -fast "$mapname"
+			"$VHLT_BIN/hlvis" -threads "$NPROC" -fast "$mapname"
 			# No -incremental here: -bounce 0 skips hlrad's transfer/vismatrix
 			# step entirely, so there would be nothing to cache.
-			"$VHLT_BIN/hlrad" -bounce 0 -vismatrix sparse -lights "$VHLT_TOOLS/lights.rad" "$mapname"
+			"$VHLT_BIN/hlrad" -threads "$NPROC" -bounce 0 -vismatrix sparse -lights "$VHLT_TOOLS/lights.rad" "$mapname"
 		fi
 	fi
 

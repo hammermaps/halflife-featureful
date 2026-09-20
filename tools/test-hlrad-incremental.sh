@@ -22,6 +22,7 @@ cd "$(dirname "${BASH_SOURCE[0]}")"
 
 VHLT_BIN="$(pwd)/VHLT-V34/src/zhlt-vluzacn/bin"
 VHLT_TOOLS="$(pwd)/VHLT-V34/tools"
+NPROC="$(nproc)"
 SRC_MAP="$(pwd)/testdata/ci_test_room.map"
 
 for tool in hlcsg hlbsp hlvis hlrad; do
@@ -50,18 +51,18 @@ fail() {
 }
 
 echo "=== Building a fresh baseline (csg -> bsp -> vis -> rad -incremental) ==="
-"$VHLT_BIN/hlcsg" -wadautodetect "$MAP" >/dev/null
-"$VHLT_BIN/hlbsp" "$MAP" >/dev/null
+"$VHLT_BIN/hlcsg" -threads "$NPROC" -wadautodetect "$MAP" >/dev/null
+"$VHLT_BIN/hlbsp" -threads "$NPROC" "$MAP" >/dev/null
 [[ ! -f "$MAP.pts" ]] || fail "test room map leaks (found $MAP.pts) - fix tools/testdata/ci_test_room.map"
-"$VHLT_BIN/hlvis" -fast "$MAP" >/dev/null
-"$VHLT_BIN/hlrad" -extra -bounce 8 -vismatrix sparse -incremental -lights "$VHLT_TOOLS/lights.rad" "$MAP" >"$WORKDIR/hlrad_baseline.log" 2>&1
+"$VHLT_BIN/hlvis" -threads "$NPROC" -fast "$MAP" >/dev/null
+"$VHLT_BIN/hlrad" -threads "$NPROC" -extra -bounce 8 -vismatrix sparse -incremental -lights "$VHLT_TOOLS/lights.rad" "$MAP" >"$WORKDIR/hlrad_baseline.log" 2>&1
 
 [[ -f "$MAP.inc" ]] || fail "baseline run did not produce $MAP.inc"
 grep -q "Writing transfers file" "$WORKDIR/hlrad_baseline.log" || fail "baseline run did not write the transfer cache"
 echo "OK: baseline .inc created"
 
 echo "=== Re-running hlrad unchanged: cache must be accepted ==="
-"$VHLT_BIN/hlrad" -extra -bounce 8 -vismatrix sparse -incremental -lights "$VHLT_TOOLS/lights.rad" "$MAP" >"$WORKDIR/hlrad_valid.log" 2>&1
+"$VHLT_BIN/hlrad" -threads "$NPROC" -extra -bounce 8 -vismatrix sparse -incremental -lights "$VHLT_TOOLS/lights.rad" "$MAP" >"$WORKDIR/hlrad_valid.log" 2>&1
 
 grep -q "Reading transfers file" "$WORKDIR/hlrad_valid.log" || fail "valid re-run did not attempt to read the cache"
 grep -q "Finished reading transfers file" "$WORKDIR/hlrad_valid.log" || fail "valid, unmodified cache was rejected (false positive)"
@@ -85,7 +86,7 @@ with open(path, "r+b") as f:
 PYEOF
 
 echo "=== Re-running hlrad with a corrupted cache: must be rejected as stale ==="
-"$VHLT_BIN/hlrad" -extra -bounce 8 -vismatrix sparse -incremental -lights "$VHLT_TOOLS/lights.rad" "$MAP" >"$WORKDIR/hlrad_stale.log" 2>&1
+"$VHLT_BIN/hlrad" -threads "$NPROC" -extra -bounce 8 -vismatrix sparse -incremental -lights "$VHLT_TOOLS/lights.rad" "$MAP" >"$WORKDIR/hlrad_stale.log" 2>&1
 
 grep -q "is stale (geometry changed), recomputing" "$WORKDIR/hlrad_stale.log" || fail "corrupted checksum was NOT detected - regression in the geometry checksum patch!"
 grep -q "Writing transfers file" "$WORKDIR/hlrad_stale.log" || fail "stale cache was detected but not recomputed/rewritten"
