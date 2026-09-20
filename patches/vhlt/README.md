@@ -57,3 +57,23 @@ instead of failing the build.
     behavior` warning we saw building this project. Split into two
     explicit loops over `vecs[0]` and `vecs[1]`; behaviorally identical
     on every real compiler, just removes the UB.
+
+- `0003-posix-auto-detect-thread-count.patch` — this VHLT-V34 fork's
+  POSIX `ThreadSetDefault()` (`common/threads.cpp`) always fell back to
+  1 thread unless `-threads` was passed explicitly: `common/threads.h`
+  hardcoded `DEFAULT_NUMTHREADS 1` for `SYSTEM_POSIX`, so the (already
+  present but unreachable) auto-detect branch in `ThreadSetDefault()`
+  was dead code on Linux — every `hlcsg`/`hlbsp`/`hlvis`/`hlrad` run
+  silently used a single core unless a caller passed `-threads`
+  explicitly (e.g. J.A.C.K.'s bundled Build Programs configs don't).
+  Ports the working auto-detection from
+  [`github.com/FreeSlave/vhlt`](https://github.com/FreeSlave/vhlt) (a
+  different personal fork of the same Vluzacn ZHLT v34 base):
+  `sched_getaffinity`/`CPU_COUNT` on Linux, `sysctlbyname` on
+  macOS/BSD, `sysconf(_SC_NPROCESSORS_ONLN)` as the generic Unix
+  fallback. Sets `DEFAULT_NUMTHREADS -1` ("not set manually") for
+  POSIX, matching the Windows side, which already auto-detected via
+  `GetSystemInfo()`. Verified: `hlcsg`/`hlrad` report `threads [ 8 ]`
+  with no `-threads` flag on an 8-core machine; `hlrad -extra -bounce 8`
+  on the demo map dropped from ~51s to ~12s once actually using all
+  cores.
