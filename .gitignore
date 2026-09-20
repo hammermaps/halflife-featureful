@@ -11,6 +11,7 @@
 build/
 build-dev/
 mod/
+xash3d-fwgs/
 CMakeLists.txt.*
 cmake_install.cmake
 *.orig
