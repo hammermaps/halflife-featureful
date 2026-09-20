@@ -53,6 +53,10 @@ Requires `libgtest-dev` (or gtest discoverable by CMake) installed on the system
 
 When adding a new `dlls`/`cl_dll`/`game_shared` source file that a test needs, add it to the `add_executable(test ...)` source list in `tests/CMakeLists.txt` explicitly.
 
+### Local test/dev mod directory (`mod/`)
+
+`mod/featureful/` is a local, git-ignored, installed sample-mod gamedir (produced by `cmake --build ... --target install` with `-DGAMEDIR=featureful`) used for manually testing built binaries in a real engine — not a source directory. It contains the built `hl.dll`/`hl.so` and `client.dll`/`client.so` alongside the sample mod's `features/*.cfg`/`*.json`, `templates/*.json`, `maps/`, `models/`, `sound/`, and `sprites/`. It is not tracked by git; treat it as build/test output, not something to edit by hand or commit.
+
 ## Architecture
 
 ### Client/server split (classic GoldSource model)
