@@ -10,6 +10,7 @@
 #include "fx_flags.h"
 #include "pi_constant.h"
 
+#include "const.h"
 #include "skill.h"
 
 #include "rapidjson/writer.h"

@@ -143,7 +143,7 @@ public:
 	int		Restore( CRestore &restore ) override;
 	static	TYPEDESCRIPTION m_SaveData[];
 #endif
-	bool ShouldCollide(CBaseEntity *pOther) {
+	bool ShouldCollide(CBaseEntity *pOther) override {
 		return pOther->MyWeaponPointer() == nullptr;
 	}
 	virtual int WeaponId() const = 0;
