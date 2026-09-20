@@ -104,6 +104,10 @@ If a change to the mod requires modifying the Xash3D engine itself (not this rep
 
 `xash3d-fwgs/` (the engine clone itself) is git-ignored, same as `mod/` and `build*/` — it's fetched by `build-xash.sh`, not committed.
 
+### Map compiler tools (`tools/`)
+
+`tools/build-vhlt.sh` clones (if missing) and builds [VHLT-V34](https://github.com/twhl-community/VHLT-V34) — the `hlcsg`/`hlbsp`/`hlvis`/`hlrad`/`ripent` map compiler suite needed to compile `.map` sources into `.bsp` for this SDK's maps. It's a plain `make`-based Linux build (`tools/VHLT-V34/src/zhlt-vluzacn/Makefile`), no CMake/waf involved. Outputs land in `tools/VHLT-V34/src/zhlt-vluzacn/bin/`. `./tools/build-vhlt.sh clean` rebuilds from scratch, `./tools/build-vhlt.sh update` pulls upstream first. Like `xash3d-fwgs/`, `tools/VHLT-V34/` is a git-ignored clone, not committed.
+
 ### Known benign warning: "SV_LoadProgs: couldn't get physics API"
 
 Every dedicated-server/engine start under Xash3D logs `Warning: SV_LoadProgs: couldn't get physics API`. This is expected, not a bug: `Server_GetPhysicsInterface()` in `dlls/cbase.cpp` is exported only so the game DLL can detect at runtime whether it's running under Xash3D (`g_fIsXash3D = true`) and fix up a collision-behavior flag (`g_hasCorrectShouldCollide`); it deliberately returns `0` so the engine does *not* actually initialize Xash3D's extended physics API (`engine/server/sv_phys.c: SV_InitPhysicsAPI`), which this classic-GoldSource-style SDK doesn't use. The engine logs the `0` return as a warning regardless of intent — safe to ignore.
