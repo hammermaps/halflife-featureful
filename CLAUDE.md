@@ -131,6 +131,34 @@ It runs with `WADROOT=mod` so `hlcsg` resolves the wad paths baked into each `.m
 
 **Lighting quality (`patches/vhlt/0004-double-lightmap-resolution-xash3d.patch`):** doubles lightmap resolution everywhere (8 texels per luxel instead of 16) via a per-texinfo flag bit (`TEX_EXTRA_LIGHTMAP`) that this project's `xash3d-fwgs` already reads independently of the BSP file version — deliberately *not* using VHLT's own dormant `ZHLT_XASH2` flag, which would also bump `BSPVERSION` to `31` and get rejected outright by `Mod_LoadBmodelLumps` (only accepts 29/30/`QBSP2_VERSION`). Unconditional, since this project only targets Xash3D (never classic GoldSource/Software renderer, which the removed 16-texel-step limit existed for). See `patches/vhlt/README.md` for the full derivation.
 
+### Planned, not yet implemented: full 32-bit BSP2 indices in VHLT
+
+**Goal:** lift the classic 16-bit-index-derived limits (`MAX_MAP_CLIPNODES`/`MAX_MAP_NODES` 32767, `MAX_MAP_LEAFS` 8192–32760, `MAX_MAP_VERTS`/`MAX_MAP_FACES`/`MAX_MAP_MARKSURFACES` 65535, all in `common/bspfile.h`) almost entirely, by having VHLT emit Quake's `QBSP2_VERSION` format ("BSP2", fourcc `'2'<<24|'P'<<16|'S'<<8|'B'`) instead of classic `HLBSP_VERSION` (30). **Investigated and scoped; not started.**
+
+**Why this is the right target format** (not the narrower `bsp30ext`/`TEX_EXTRA_LIGHTMAP`-style extension used by patch 0004): this project's `xash3d-fwgs` already has *complete* engine-side support for `QBSP2_VERSION` — parallel 32-bit struct variants exist for every relevant lump in `xash3d-fwgs/common/bspfile.h`:
+
+| Lump | Classic (16-bit-ish) | BSP2 (32-bit) |
+|---|---|---|
+| nodes | `dnode_t` (`int16_t children[2]`, `int16_t mins/maxs[3]`, `uint16_t firstface/numfaces`) | `dnode32_t` (all `int32_t`/`float`) |
+| leafs | `dleaf_t` (`int16_t mins/maxs[3]`, `uint16_t firstmarksurface/nummarksurfaces`) | `dleaf32_t` (all `int32_t`/`float`) |
+| clipnodes | `dclipnode_t` (`int16_t children[2]`) | `dclipnode32_t` (`int32_t children[2]`) |
+| marksurfaces | `dmarkface_t` = `uint16_t` | `dmarkface32_t` = `int32_t` |
+| faces | `dface_t` (`uint16_t planenum`, `int16_t numedges/texinfo`) | `dface32_t` (all `int32_t`) |
+| edges | `dedge_t` (`uint16_t v[2]`) | `dedge32_t` (`int32_t v[2]`) |
+
+`Mod_LoadBmodelLumps` (`engine/common/mod_bmodel.c`) already branches on `bmod->version == QBSP2_VERSION` throughout to pick the right struct size for each of these — this is *not* new engine work, purely a VHLT output-format problem.
+
+**What's actually missing, concretely, in `tools/VHLT-V34/src/zhlt-vluzacn`:**
+1. `common/bspfile.h`/`bspfile.cpp` — add the 32-bit struct variants and a `BSPVERSION`-selectable read/write path for every lump above (currently only ever reads/writes the classic 16-bit-ish structs).
+2. `hlbsp` — internally builds and writes nodes/leafs/clipnodes/marksurfaces/faces/edges; every write site needs a 32-bit-capable path (or the internal representation needs to become 32-bit-native with a narrowing step only for classic-format output).
+3. `hlvis` — portal generation reads/writes leaf and node data for PVS computation.
+4. `hlrad` — reads faces/leafs for lighting placement, writes marksurfaces-adjacent data back.
+5. Decide the CLI surface: a `-bsp2`/similar flag on all four tools (matching how other Quake-family compiler forks, e.g. ericw-tools, expose BSP2 output) vs. making it the unconditional default like patch 0004 did for lightmap resolution.
+
+**Risk:** this is comparable in scope to the “BSP2 support” work done by mature, dedicated Quake compiler forks — not a small patch. A struct-size or endianness mistake in any one of the ~6 lump types would silently corrupt compiled maps rather than fail loudly, so this needs careful, incremental verification (compile a real map at each step, diff the resulting `.bsp` lump-by-lump against a known-good classic-format compile of the same map) rather than a one-shot rewrite.
+
+**Editor side:** J.A.C.K.'s "Maximum world size" (Options dialog) is a **per-game-profile setting explicitly meant to match the compiler's limit** (per its own manual: "note that this is also a compiler limit"), not a separate hard ceiling — once VHLT's real limit changes, just raise this setting in the Featureful game profile to match. No editor-side blocker.
+
 ### CI smoke test for the custom tooling (`manual-tooling-smoke-test.yml`)
 
 `.github/workflows/manual-tooling-smoke-test.yml` (manual `workflow_dispatch` only) builds `build-dev.sh`, `build-xash.sh`, and `tools/build-vhlt.sh` end to end on a clean checkout, then runs `tools/test-hlrad-incremental.sh`. It deliberately does **not** attempt to build or launch the actual `mod/featureful` gamedir — that content (maps, models, sounds, sprites) is private, hand-placed by whoever set up their local `mod/`, not part of this repository, so a fresh checkout has none of it. Keep any future CI-facing tooling checks self-contained the same way `ci_test_room.map` is, rather than assuming `mod/` is populated.
