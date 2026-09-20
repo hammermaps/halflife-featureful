@@ -1,0 +1,63 @@
+diff --git a/src/zhlt-vluzacn/common/bspfile.h b/src/zhlt-vluzacn/common/bspfile.h
+index 662d027..b30d94f 100644
+--- a/src/zhlt-vluzacn/common/bspfile.h
++++ b/src/zhlt-vluzacn/common/bspfile.h
+@@ -92,13 +92,21 @@
+ // room for its mipmaps.'  This value is primarily used to catch damanged or invalid textures
+ // in a wad file
+ 
+-#ifdef ZHLT_XASH2
++// This project only targets Xash3D FWGS (never classic GoldSource/Software
++// renderer/HLDS), so the doubled lightmap resolution (8 texels per luxel
++// instead of 16) is unconditional rather than gated behind ZHLT_XASH2 -
++// which also bumps BSPVERSION to 31, a header value this project's engine
++// (engine/common/mod_bmodel.c: Mod_LoadBmodelLumps) doesn't recognize and
++// would reject outright. Xash3D FWGS instead supports finer lightmaps via
++// a per-texinfo flag bit (TEX_EXTRA_LIGHTMAP, set in hlcsg/textures.cpp)
++// on an ordinary BSPVERSION-30 file, so the map stays fully compatible
++// with this project's own engine build without touching the file version.
++// MAX_SURFACE_EXTENT is doubled to 64 (not just kept at 16) so the maximum
++// physical face size before lightmap subdivision (MAX_SURFACE_EXTENT *
++// TEXTURE_STEP) stays the same or larger than before, rather than forcing
++// more, smaller lightmap patches at the new finer texel step.
+ #define TEXTURE_STEP        8
+ #define MAX_SURFACE_EXTENT  64
+-#else
+-#define TEXTURE_STEP        16 // this constant was previously defined in lightmap.cpp. --vluzacn
+-#define MAX_SURFACE_EXTENT  16 // if lightmap extent exceeds 16, the map will not be able to load in 'Software' renderer and HLDS. //--vluzacn
+-#endif
+ 
+ #ifdef ZHLT_LARGERANGE
+ #define ENGINE_ENTITY_RANGE 4096.0
+@@ -266,6 +274,12 @@ typedef struct texinfo_s
+ texinfo_t;
+ 
+ #define TEX_SPECIAL     1                                  // sky or slime or null, no lightmap or 256 subdivision
++// Matches Xash3D FWGS's texinfo_t.flags bit (common/bspfile.h: TEX_EXTRA_LIGHTMAP,
++// BIT(3)) - tells the engine to sample this face's lightmap at 8 texels per
++// luxel instead of the default 16, which is what our doubled TEXTURE_STEP
++// above actually produces. Set unconditionally in hlcsg/textures.cpp since
++// this fork's TEXTURE_STEP is always 8 now.
++#define TEX_EXTRA_LIGHTMAP 8
+ #ifdef ZHLT_HIDDENSOUNDTEXTURE
+ #define TEX_SHOULDHIDE  16384 // this flag is temporary; it might be set after CSG, but will be dropped after BSP
+ #endif
+diff --git a/src/zhlt-vluzacn/hlcsg/textures.cpp b/src/zhlt-vluzacn/hlcsg/textures.cpp
+index d0b199f..71e2dbd 100644
+--- a/src/zhlt-vluzacn/hlcsg/textures.cpp
++++ b/src/zhlt-vluzacn/hlcsg/textures.cpp
+@@ -1056,6 +1056,14 @@ int             TexinfoForBrushTexture(const plane_t* const plane, brush_texture
+ 		// actually only 'sky' and 'aaatrigger' needs this. --vluzacn
+         tx.flags |= TEX_SPECIAL;
+     }
++    else
++    {
++        // Tell the engine to sample this face's lightmap at the doubled
++        // resolution our TEXTURE_STEP/MAX_SURFACE_EXTENT (common/bspfile.h)
++        // actually produces. TEX_SPECIAL faces (sky/aaatrigger) have no
++        // lightmap at all, so there's nothing to flag for them.
++        tx.flags |= TEX_EXTRA_LIGHTMAP;
++    }
+ #ifdef ZHLT_HIDDENSOUNDTEXTURE
+ 	if (shouldhide)
+ 	{

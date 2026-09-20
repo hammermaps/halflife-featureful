@@ -77,3 +77,30 @@ instead of failing the build.
   with no `-threads` flag on an 8-core machine; `hlrad -extra -bounce 8`
   on the demo map dropped from ~51s to ~12s once actually using all
   cores.
+
+- `0004-double-lightmap-resolution-xash3d.patch` — doubles lightmap
+  resolution (8 texels per luxel instead of 16) for every face,
+  unconditionally: `common/bspfile.h`'s `TEXTURE_STEP`/
+  `MAX_SURFACE_EXTENT` change from `16`/`16` to `8`/`64` (the same pair
+  of values stock VHLT's own dormant `ZHLT_XASH2` build flag already
+  used — doubling `MAX_SURFACE_EXTENT` alongside halving `TEXTURE_STEP`
+  keeps the maximum physical face size before lightmap subdivision the
+  same or larger, rather than forcing more/smaller lightmap patches),
+  and `hlcsg/textures.cpp` sets a new `TEX_EXTRA_LIGHTMAP` texinfo flag
+  bit (matching Xash3D FWGS's `common/bspfile.h: TEX_EXTRA_LIGHTMAP`,
+  `BIT(3)`) on every non-`TEX_SPECIAL` face so the engine actually
+  samples at the finer step.
+  **Deliberately does *not* use `ZHLT_XASH2`** — that flag also bumps
+  `BSPVERSION` to `31`, which this project's actual `xash3d-fwgs`
+  (`engine/common/mod_bmodel.c: Mod_LoadBmodelLumps`) doesn't recognize
+  and would reject outright (`case HLBSP_VERSION`/`Q1BSP_VERSION`/
+  `QBSP2_VERSION` only, `default:` errors). `TEX_EXTRA_LIGHTMAP` is a
+  per-texinfo flag bit the engine reads independently of the file's
+  BSP version, so this stays on an ordinary `BSPVERSION 30` file, fully
+  compatible with this project's engine build. Since this project only
+  targets Xash3D FWGS (never classic GoldSource/Software renderer/HLDS,
+  which is what the removed `16`/`16` comment warned about), the change
+  is unconditional rather than gated behind a build flag. Verified via
+  gdb-wrapped `hlcsg`/`hlbsp`/`hlvis`/`hlrad` runs on the demo map (no
+  crash) and visually in-game (sharper lighting, no lightmap artifacts
+  or corruption).
