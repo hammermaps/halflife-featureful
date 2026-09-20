@@ -30,6 +30,9 @@ CMakeFiles
 CMakeCache.txt
 Makefile
 
+# Folder
+halflife-updated-gm
+
 # Android Studio/Gradle
 .gradle/
 .externalNativeBuild
