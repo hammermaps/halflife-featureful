@@ -1,0 +1,108 @@
+diff --git a/src/zhlt-vluzacn/hlrad/transfers.cpp b/src/zhlt-vluzacn/hlrad/transfers.cpp
+index 179f17a..7608af8 100644
+--- a/src/zhlt-vluzacn/hlrad/transfers.cpp
++++ b/src/zhlt-vluzacn/hlrad/transfers.cpp
+@@ -10,6 +10,55 @@
+ #include <sys/stat.h>
+ #endif
+ 
++/*
++ * =============
++ * GeometryChecksum
++ *
++ * FNV-1a 64-bit hash over the geometry-derived fields of every patch
++ * (origin, area, owning face), in patch order. Stored in the .inc
++ * incremental transfer cache alongside the patch count, and recomputed
++ * on read, so a geometry edit that keeps the same patch count (e.g. a
++ * brush moved without changing face/patch topology) still invalidates
++ * the cache instead of silently reusing a stale transfer matrix.
++ * =============
++ */
++static uint64_t GeometryChecksum(const long numpatches)
++{
++    uint64_t        hash = 0xcbf29ce484222325ULL; // FNV-1a 64-bit offset basis
++    const uint64_t  prime = 0x100000001b3ULL;
++    patch_t*        patch;
++    long            patchcount = numpatches;
++
++    for (patch = g_patches; patchcount-- > 0; patch++)
++    {
++        const unsigned char* bytes;
++        size_t          i;
++
++        bytes = (const unsigned char*)&patch->origin;
++        for (i = 0; i < sizeof(patch->origin); i++)
++        {
++            hash ^= bytes[i];
++            hash *= prime;
++        }
++
++        bytes = (const unsigned char*)&patch->area;
++        for (i = 0; i < sizeof(patch->area); i++)
++        {
++            hash ^= bytes[i];
++            hash *= prime;
++        }
++
++        bytes = (const unsigned char*)&patch->faceNumber;
++        for (i = 0; i < sizeof(patch->faceNumber); i++)
++        {
++            hash ^= bytes[i];
++            hash *= prime;
++        }
++    }
++
++    return hash;
++}
++
+ /*
+  * =============
+  * writetransfers
+@@ -25,6 +74,7 @@ void            writetransfers(const char* const transferfile, const long total_
+     {
+         unsigned        amtwritten;
+         patch_t*        patch;
++        uint64_t        geochecksum;
+ 
+         Log("Writing transfers file [%s]\n", transferfile);
+ 
+@@ -34,6 +84,13 @@ void            writetransfers(const char* const transferfile, const long total_
+             goto FailedWrite;
+         }
+ 
++        geochecksum = GeometryChecksum(total_patches);
++        amtwritten = fwrite(&geochecksum, sizeof(geochecksum), 1, file);
++        if (amtwritten != 1)
++        {
++            goto FailedWrite;
++        }
++
+         long patchcount = total_patches;
+         for (patch = g_patches; patchcount-- > 0; patch++)
+         {
+@@ -115,6 +172,7 @@ bool            readtransfers(const char* const transferfile, const long numpatc
+ {
+     FILE*           file;
+     long            total_patches;
++    uint64_t        stored_geochecksum;
+ 
+     file = fopen(transferfile, "rb");
+     if (file != NULL)
+@@ -134,6 +192,17 @@ bool            readtransfers(const char* const transferfile, const long numpatc
+             goto FailedRead;
+         }
+ 
++        amtread = fread(&stored_geochecksum, sizeof(stored_geochecksum), 1, file);
++        if (amtread != 1)
++        {
++            goto FailedRead;
++        }
++        if (stored_geochecksum != GeometryChecksum(total_patches))
++        {
++            Log("Incremental file [%s] is stale (geometry changed), recomputing\n", transferfile);
++            goto FailedRead;
++        }
++
+         long patchcount = total_patches;
+         for (patch = g_patches; patchcount-- > 0; patch++)
+         {

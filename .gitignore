@@ -13,6 +13,7 @@ build-dev/
 mod/
 xash3d-fwgs/
 tools/VHLT-V34/
+tools/JACK/
 CMakeLists.txt.*
 cmake_install.cmake
 *.orig

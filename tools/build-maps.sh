@@ -10,6 +10,14 @@
 #   ./build-maps.sh full <name>    # combine both
 #
 # Run ./build-vhlt.sh first to build the compiler binaries.
+#
+# hlrad runs with -incremental, which caches the patch transfer matrix in a
+# <mapname>.inc file next to the .bsp and reuses it on the next compile,
+# skipping the most expensive step of the rad pass (GatherLight's patch
+# visibility computation). hlrad only auto-invalidates the cache when the
+# patch count changed; a geometry edit that keeps the same patch count can
+# go undetected, so delete the .inc file by hand after non-trivial geometry
+# changes if lighting looks wrong.
 
 set -euo pipefail
 
@@ -80,10 +88,10 @@ for mapfile in "${maps[@]}"; do
 
 	if [[ "$quality" == "full" ]]; then
 		"$VHLT_BIN/hlvis" -full "$mapname"
-		"$VHLT_BIN/hlrad" -extra -bounce 8 -vismatrix sparse -lights "$VHLT_TOOLS/lights.rad" "$mapname"
+		"$VHLT_BIN/hlrad" -extra -bounce 8 -vismatrix sparse -incremental -lights "$VHLT_TOOLS/lights.rad" "$mapname"
 	else
 		"$VHLT_BIN/hlvis" -fast "$mapname"
-		"$VHLT_BIN/hlrad" -bounce 0 -vismatrix sparse -lights "$VHLT_TOOLS/lights.rad" "$mapname"
+		"$VHLT_BIN/hlrad" -bounce 0 -vismatrix sparse -incremental -lights "$VHLT_TOOLS/lights.rad" "$mapname"
 	fi
 
 	echo "=== Done: $(basename "$mapname").bsp ==="
