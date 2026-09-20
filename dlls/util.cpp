@@ -187,7 +187,6 @@ int PRECACHE_SOUND(const char* name)
 			if (!g_fIsXash3D && g_precachedSounds.size() == 512 && !g_savedBadPrecachedSound.empty())
 			{
 				g_engfuncs.pfnPrecacheSound(g_savedBadPrecachedSound.c_str());
-				g_savedBadPrecachedSound.clear();
 			}
 		}
 
