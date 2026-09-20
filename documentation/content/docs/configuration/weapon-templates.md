@@ -1712,6 +1712,8 @@ For melee weapons it's a "swing" sound. See also: [hit_body_sound](#hit_body_sou
 
 Configure spray effect played upon firing a weapon. The spray is a number of sprites (or models) fired roughly in the shooting direction. This is used by [weapon_sporelauncher]({{< ref weapon_sporelauncher >}}) by default and it's similar to the spray effect of bullsquid's spit.
 
+This is purely a visual effect - it doesn't affect gameplay.
+
 ```json
 {
     "weapon_shotgun": {
@@ -1733,6 +1735,14 @@ Configure spray effect played upon firing a weapon. The spray is a number of spr
                 "count": 6,
                 "speed": 300,
                 "spread": 0.5
+            }
+        }
+    },
+    "weapon_sporelauncher": {
+        "fire": {
+            "spray": {
+                "bounce_sound_type": "shotgun_shell",
+                "flags": ["collideworld", "fadeout"]
             }
         }
     }
@@ -1776,6 +1786,22 @@ The array of spray flags. Possible item values:
 * `"fadeout"` - whether the spray particles should fade out.
 * `"randombody"` - whether the model body should be randomized (works only with .mdl).
 * `"nogravity"` - don't apply gravity to the spray particles.
+
+#### bounce_sound_type
+
+Bounce sound played by the spray particles when they hit something (this works only for sprays that can hit things so the `"collideworld"` flag should be set). The sets of sound waves as well as chance of playing, volume and pitch properties are predefined in the engine.
+
+Possible values:
+
+* `null` or `""` - no bounce sound
+* `"glass"`
+* `"metal"`
+* `"flesh"`
+* `"wood"`
+* `"concrete"`
+* `"shrap"` - a ricochet/shrapnel
+* `"shell"` - regular bullet shell
+* `"shotgun_shell"`
 
 ### spread
 

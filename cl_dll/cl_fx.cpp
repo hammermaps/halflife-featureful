@@ -242,7 +242,7 @@ void FX_SparkShower(Vector pos, const SparkEffectParams& params)
 	pTemp->entity.curstate.fuser3 = params.sparkScaleMax;
 }
 
-void FX_Spray(Vector pos, Vector dir, int modelIndex, int count, int speed, float noise, int rendermode, color24 color, IntRange renderamt, int renderfx, float scale, float framerate, int flags, const FloatRange& life)
+void FX_Spray(Vector pos, Vector dir, int modelIndex, int count, int speed, float noise, int rendermode, color24 color, IntRange renderamt, int renderfx, float scale, float framerate, int flags, const FloatRange& life, int bounceSound)
 {
 	model_t	*pmodel = gEngfuncs.pfnGetModelByIndex(modelIndex);
 	if (!pmodel)
@@ -316,14 +316,16 @@ void FX_Spray(Vector pos, Vector dir, int modelIndex, int count, int speed, floa
 		{
 			VectorAngles(pTemp->entity.baseline.origin, pTemp->entity.angles);
 		}
+
+		pTemp->hitSound = bounceSound;
 	}
 }
 
-void FX_Spray(Vector pos, Vector dir, int modelIndex, int count, int speed, float noise, const Visual& visual, int flags)
+void FX_Spray(Vector pos, Vector dir, int modelIndex, int count, int speed, float noise, const Visual& visual, int flags, int bounceSound)
 {
 	FX_Spray(pos, dir, modelIndex, count, speed, noise,
 		visual.rendermode, MakeColor24(visual.rendercolor.r, visual.rendercolor.g, visual.rendercolor.b), visual.renderamt, visual.renderfx,
-		RandomizeNumberFromRange(visual.scale), RandomizeNumberFromRange(visual.framerate), flags, visual.life);
+		RandomizeNumberFromRange(visual.scale), RandomizeNumberFromRange(visual.framerate), flags, visual.life, bounceSound);
 }
 
 void FX_BloodSpray(const Vector& org, int colorIndex, int modelIndex, float size)

@@ -425,7 +425,7 @@ int __MsgFunc_Spray( const char* pszName, int iSize, void *pbuf )
 	float framerate = READ_SHORT() * 0.1f;
 	int flags = READ_BYTE();
 
-	FX_Spray(pos, dir, modelIndex, count, speed, spread / 100.0f, rendermode, color, IntRange(aMin, aMax), renderfx, scale, framerate, flags, FloatRange{});
+	FX_Spray(pos, dir, modelIndex, count, speed, spread / 100.0f, rendermode, color, IntRange(aMin, aMax), renderfx, scale, framerate, flags, FloatRange{}, 0);
 
 	return 1;
 }

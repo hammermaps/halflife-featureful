@@ -690,6 +690,7 @@ struct WeaponParameters
 		WeaponModeValue<int> spraySpeed{210};
 		WeaponModeValue<float> spraySpread{0.25f};
 		WeaponModeValue<int> sprayFlags{0};
+		WeaponModeValue<int> sprayBounceSound{0};
 
 		WeaponModeValue<bool> preventMovement{false};
 		WeaponModeValue<AbsoluteValueOrFactor> playerMaxSpeed;

@@ -836,6 +836,9 @@ R"(
 						"items": {
 							"enum": ["collideworld", "animate", "animated", "fadeout", "randombody", "nogravity"]
 						}
+					},
+					"bounce_sound_type": {
+						"enum": [null, "", "glass", "metal", "flesh", "wood", "shrap", "shotgun_shell", "shell", "concrete"]
 					}
 				},
 				"additionalProperties": false

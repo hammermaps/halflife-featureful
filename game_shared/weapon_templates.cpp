@@ -1114,6 +1114,44 @@ void WeaponTemplateSystem::ParseWeaponTemplate(WeaponParameters& params, const r
 						}
 					}
 				});
+
+				HandleJSONMember(value, "bounce_sound_type", [&](const Value& value) {
+					if (value.IsNull())
+					{
+						fire.sprayBounceSound.Materialize(altMode) = 0;
+					}
+					else if (value.IsString())
+					{
+						const char* str = value.GetString();
+						if (*str == '\0')
+						{
+							fire.sprayBounceSound.Materialize(altMode) = 0;
+						}
+						else
+						{
+							static const std::pair<const char*, int> bounceSoundTypes[] = {
+								{"glass", BOUNCE_GLASS},
+								{"metal", BOUNCE_METAL},
+								{"flesh", BOUNCE_FLESH},
+								{"wood", BOUNCE_WOOD},
+								{"concrete", BOUNCE_CONCRETE},
+								{"shrap", BOUNCE_SHRAP},
+								{"shell", BOUNCE_SHELL},
+								{"shotgun_shell", BOUNCE_SHOTSHELL},
+							};
+
+							for (const auto& p : bounceSoundTypes)
+							{
+								if (strcmp(str, p.first) == 0)
+								{
+									fire.sprayBounceSound.Materialize(altMode) = p.second;
+									break;
+								}
+							}
+						}
+					}
+				});
+
 			});
 
 			HandleJSONMember(value, "viewmodel_beams", [&](const Value& value) {

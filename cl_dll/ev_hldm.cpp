@@ -815,7 +815,7 @@ static void EV_PerformWeaponFire(event_args_t *args)
 		int sprayModelIndex = gEngfuncs.pEventAPI->EV_FindModelIndex(sprayVisual.model);
 		if (sprayModelIndex)
 		{
-			FX_Spray(vecSpitPos, vecSpitDir, sprayModelIndex, sprayCount, fire.spraySpeed.Get(altMode), fire.spraySpread.Get(altMode), sprayVisual, fire.sprayFlags.Get(altMode));
+			FX_Spray(vecSpitPos, vecSpitDir, sprayModelIndex, sprayCount, fire.spraySpeed.Get(altMode), fire.spraySpread.Get(altMode), sprayVisual, fire.sprayFlags.Get(altMode), fire.sprayBounceSound.Get(altMode));
 		}
 	}
 
