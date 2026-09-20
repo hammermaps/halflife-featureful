@@ -41,6 +41,14 @@
 # unless -threads is passed explicitly (unlike e.g. github.com/FreeSlave/vhlt,
 # which auto-detects the core count on Linux/BSD/macOS) - without this flag
 # every compile here would silently run single-threaded.
+#
+# "full"/"lightonly" hlrad runs with -customshadowwithbounce -rgbtransfers:
+# switches the bounce pass from monochrome-averaged light transfers to full
+# RGB transfers (GatherRGBLight instead of GatherLight), so colored light
+# actually bounces/bleeds with its own color, and custom (opaque-entity)
+# shadows are respected during the bounce pass too. Off by default in
+# stock hlrad; there's no reason not to have it on for anything but a
+# quick "fast" dev-loop preview.
 
 set -euo pipefail
 
@@ -113,14 +121,14 @@ for mapfile in "${maps[@]}"; do
 			exit 1
 		fi
 		"$VHLT_BIN/hlcsg" -threads "$NPROC" -wadautodetect -onlyents "$mapname"
-		"$VHLT_BIN/hlrad" -threads "$NPROC" -extra -bounce 8 -vismatrix sparse -incremental -lights "$VHLT_TOOLS/lights.rad" "$mapname"
+		"$VHLT_BIN/hlrad" -threads "$NPROC" -extra -bounce 8 -vismatrix sparse -incremental -customshadowwithbounce -rgbtransfers -lights "$VHLT_TOOLS/lights.rad" "$mapname"
 	else
 		"$VHLT_BIN/hlcsg" -threads "$NPROC" -wadautodetect "$mapname"
 		"$VHLT_BIN/hlbsp" -threads "$NPROC" "$mapname"
 
 		if [[ "$quality" == "full" ]]; then
 			"$VHLT_BIN/hlvis" -threads "$NPROC" -full "$mapname"
-			"$VHLT_BIN/hlrad" -threads "$NPROC" -extra -bounce 8 -vismatrix sparse -incremental -lights "$VHLT_TOOLS/lights.rad" "$mapname"
+			"$VHLT_BIN/hlrad" -threads "$NPROC" -extra -bounce 8 -vismatrix sparse -incremental -customshadowwithbounce -rgbtransfers -lights "$VHLT_TOOLS/lights.rad" "$mapname"
 		else
 			"$VHLT_BIN/hlvis" -threads "$NPROC" -fast "$mapname"
 			# No -incremental here: -bounce 0 skips hlrad's transfer/vismatrix
