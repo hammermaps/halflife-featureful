@@ -1,0 +1,96 @@
+diff --git a/src/zhlt-vluzacn/common/blockmem.cpp b/src/zhlt-vluzacn/common/blockmem.cpp
+index a4e2330..fc97ef4 100644
+--- a/src/zhlt-vluzacn/common/blockmem.cpp
++++ b/src/zhlt-vluzacn/common/blockmem.cpp
+@@ -48,9 +48,11 @@ bool            FreeBlock(void* pointer)
+ {
+     HANDLE          h;
+ 
++    // Freeing a null pointer is a normal no-op (same as free(NULL)), not a
++    // bug worth warning about - this is a routine cleanup-path call.
+     if (!pointer)
+     {
+-        Warning("Freeing a null pointer");
++        return true;
+     }
+ 
+     h = GlobalHandle(pointer);
+@@ -134,10 +136,8 @@ void*           AllocBlock(const unsigned long size)
+ // =====================================================================================
+ bool            FreeBlock(void* pointer)
+ {
+-    if (!pointer)
+-    {
+-        Warning("Freeing a null pointer");
+-    }
++    // Freeing a null pointer is a normal no-op (same as free(NULL)), not a
++    // bug worth warning about - this is a routine cleanup-path call.
+     free(pointer);
+     return true;
+ }
+diff --git a/src/zhlt-vluzacn/common/bspfile.cpp b/src/zhlt-vluzacn/common/bspfile.cpp
+index cd35d3d..71c0bd0 100644
+--- a/src/zhlt-vluzacn/common/bspfile.cpp
++++ b/src/zhlt-vluzacn/common/bspfile.cpp
+@@ -277,10 +277,19 @@ static void     SwapBSPFile(const bool todisk)
+     //      
+     for (i = 0; i < g_numtexinfo; i++)
+     {
+-        for (j = 0; j < 8; j++)
++        // vecs is float[2][4]; swap both rows explicitly instead of walking
++        // vecs[0][0..7], which reads past the end of vecs[0] into vecs[1]'s
++        // memory (relies on the two rows being contiguous - undefined
++        // behavior, and the source of a real "iteration invokes undefined
++        // behavior" compiler warning even though it happens to work here).
++        for (j = 0; j < 4; j++)
+         {
+             g_texinfo[i].vecs[0][j] = LittleFloat(g_texinfo[i].vecs[0][j]);
+         }
++        for (j = 0; j < 4; j++)
++        {
++            g_texinfo[i].vecs[1][j] = LittleFloat(g_texinfo[i].vecs[1][j]);
++        }
+         g_texinfo[i].miptex = LittleLong(g_texinfo[i].miptex);
+         g_texinfo[i].flags = LittleLong(g_texinfo[i].flags);
+     }
+diff --git a/src/zhlt-vluzacn/common/threads.cpp b/src/zhlt-vluzacn/common/threads.cpp
+index 32d4c12..48b8951 100644
+--- a/src/zhlt-vluzacn/common/threads.cpp
++++ b/src/zhlt-vluzacn/common/threads.cpp
+@@ -86,22 +86,29 @@ int             GetThreadWork()
+     f = THREADTIMES_SIZE * dispatch / workcount;
+     if (pacifier)
+     {
+-#ifdef ZHLT_CONSOLE
+-		PrintConsole
+-#else
+-        printf
+-#endif
+-			("\r%6d /%6d", dispatch, workcount);
+ #ifdef ZHLT_PROGRESSFILE // AJM
+         if (g_progressfile)
+         {
+-            
++
+ 
+         }
+ #endif
+ 
+         if (f != oldf)
+         {
++            // Only print the dispatch/workcount counter when the percentage
++            // bucket actually advances (same gate as the time-estimate print
++            // below), instead of on every single work item. Under -j-many
++            // threads this used to serialize every worker on the mutex plus
++            // stdout I/O for every patch/face, and produced enormous,
++            // mostly-redundant compile logs.
++#ifdef ZHLT_CONSOLE
++			PrintConsole
++#else
++            printf
++#endif
++				("\r%6d /%6d", dispatch, workcount);
++
+             ct = I_FloatTime();
+             /* Fill in current time for threadtimes record */
+             for (i = oldf; i <= f; i++)
