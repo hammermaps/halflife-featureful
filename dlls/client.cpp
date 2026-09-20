@@ -813,9 +813,9 @@ void ClientCommand( edict_t *pEntity )
 			pPlayer->CloseMessageBox(atoi(CMD_ARGV(1)));
 		}
 	}
-	else if ( FStrEq( pcmd, "make_start_following" ) || FStrEq( pcmd, "make_stop_following" ) )
+	else if ( FStrEq(pcmd, "make_start_following") || FStrEq(pcmd, "request_start_following") || FStrEq(pcmd, "make_stop_following") || FStrEq(pcmd, "request_stop_following") )
 	{
-		const bool startFollowing = FStrEq( pcmd, "make_start_following" );
+		const bool startFollowing = FStrEq(pcmd, "make_start_following") || FStrEq(pcmd, "request_start_following");
 
 		if (CanRunCheatCommand(pev))
 		{

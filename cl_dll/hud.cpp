@@ -912,8 +912,8 @@ void CHud::Init()
 	gEngfuncs.pfnAddCommand("teleport_to", nullptr);
 	gEngfuncs.pfnAddCommand("recruit_followers", nullptr);
 	gEngfuncs.pfnAddCommand("disband_followers", nullptr);
-	gEngfuncs.pfnAddCommand("make_stop_following", nullptr);
-	gEngfuncs.pfnAddCommand("make_start_following", nullptr);
+	gEngfuncs.pfnAddCommand("request_stop_following", nullptr);
+	gEngfuncs.pfnAddCommand("request_start_following", nullptr);
 	gEngfuncs.pfnAddCommand("buddha", nullptr);
 	gEngfuncs.pfnAddCommand("ent_remove_all", nullptr);
 	gEngfuncs.pfnAddCommand("ent_remove", nullptr);
