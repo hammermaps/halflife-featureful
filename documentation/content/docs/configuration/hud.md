@@ -61,6 +61,16 @@ Like in base Half-Life the HUD elements for weapons are defined in **sprites/wea
 When adding new entries to the weapon's hud txt file, don't forget to increase the number in the beginning to update the number of entries to read.
 {{% /hint %}}
 
+### Positioning
+
+The HUD elements positioning configuration is currently very limited.
+
+Some related features in **features/featureful_client.cfg**:
+
+* `health_vertical_align`
+* `armor_vertical_align`
+* `weaponmode_vertical_align`
+
 ### Speedometer
 
 The speedometer can be useful for debugging and for speedrunning.

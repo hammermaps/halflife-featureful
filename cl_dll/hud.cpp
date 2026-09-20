@@ -132,6 +132,9 @@ ClientFeatures::ClientFeatures()
 	use_divider_sprite = false;
 	weaponmode_uses_hud_color = false;
 
+	health_vertical_align = VerticalAlign::DEFAULT;
+	armor_vertical_align = VerticalAlign::DEFAULT;
+
 	fullbright_textures = true;
 }
 
@@ -1086,6 +1089,11 @@ void CHud::ParseClientFeatures()
 		{ "weaponmode_uses_hud_color", clientFeatures.weaponmode_uses_hud_color },
 		{ "fullbright_textures", clientFeatures.fullbright_textures },
 	};
+	KeyValueDefinition<ClientFeatures::VerticalAlign> verticalAligns[] = {
+		{ "health_vertical_align", clientFeatures.health_vertical_align },
+		{ "armor_vertical_align", clientFeatures.armor_vertical_align },
+		{ "weaponmode_vertical_align", clientFeatures.weaponmode_vertical_align },
+	};
 
 	char valueBuf[CLIENT_FEATURE_VALUE_LENGTH+1];
 	int i = 0;
@@ -1188,6 +1196,31 @@ void CHud::ParseClientFeatures()
 				if (strcmp(keyName, booleans[i].name) == 0)
 				{
 					ParseBoolean(valueBuf, booleans[i].value);
+					shouldContinue = false;
+					break;
+				}
+			}
+			for (i = 0; shouldContinue && i<ARRAYSIZE(verticalAligns); ++i)
+			{
+				if (strcmp(keyName, verticalAligns[i].name) == 0)
+				{
+					if (stricmp(valueBuf, "default") == 0)
+					{
+						verticalAligns[i].value = ClientFeatures::VerticalAlign::DEFAULT;
+					}
+					else if (stricmp(valueBuf, "middle") == 0)
+					{
+						verticalAligns[i].value = ClientFeatures::VerticalAlign::MIDDLE;
+					}
+					else if (stricmp(valueBuf, "bottom") == 0)
+					{
+						verticalAligns[i].value = ClientFeatures::VerticalAlign::BOTTOM;
+					}
+					else if (stricmp(valueBuf, "top") == 0)
+					{
+						verticalAligns[i].value = ClientFeatures::VerticalAlign::TOP;
+					}
+
 					shouldContinue = false;
 					break;
 				}

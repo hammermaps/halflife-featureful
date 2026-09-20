@@ -991,7 +991,7 @@ int CHudAmmo::Draw( float flTime )
 	const int AmmoWidth = gHUD.GetSpriteRect( gHUD.m_HUD_number_0 ).right - gHUD.GetSpriteRect( gHUD.m_HUD_number_0 ).left;
 	const int iBarWidth = useDividerSprite ? (gHUD.GetSpriteRect(m_HUD_divider).right - gHUD.GetSpriteRect(m_HUD_divider).left) : AmmoWidth / 10;
 
-	int x, y, hudR, hudG, hudB;
+	int x, hudR, hudG, hudB;
 
 	const int a = (int)Q_max(gHUD.MinHUDAlpha(), m_fFade);
 	UnpackRGB(hudR, hudG, hudB, gHUD.HUDColor());
@@ -1004,9 +1004,8 @@ int CHudAmmo::Draw( float flTime )
 	if( m_fFade > 0 )
 		m_fFade -= ( (float)gHUD.m_flTimeDelta * 20.0f );
 
-	// Does this weapon have a clip?
-	y = CHud::Renderer().PerceviedScreenHeight() - gHUD.m_iFontHeight - gHUD.m_iFontHeight / 2;
-	y += gHUD.m_iHudNumbersYOffset; // a1ba: fix HL25 HUD vertical inconsistensy
+	const int y = CHud::Renderer().PerceviedScreenHeight() - gHUD.m_iFontHeight - gHUD.m_iFontHeight / 2
+		+ gHUD.m_iHudNumbersYOffset; // a1ba: fix HL25 HUD vertical inconsistensy
 
 	auto DrawDividerBar = [&](int x, int y, int r, int g, int b, int a)
 	{
@@ -1023,7 +1022,7 @@ int CHudAmmo::Draw( float flTime )
 	};
 
 	HSPRITE modeSprite = pw->inAltMode ? m_pWeapon->hAltMode : m_pWeapon->hMode;
-	wrect_t modeRect = pw->inAltMode ? m_pWeapon->rcAltMode : m_pWeapon->rcMode;
+	const wrect_t modeRect = pw->inAltMode ? m_pWeapon->rcAltMode : m_pWeapon->rcMode;
 
 	auto DrawWeaponMode = [&](int x, int y)
 	{
@@ -1039,6 +1038,31 @@ int CHudAmmo::Draw( float flTime )
 			r = g = b = 255;
 		}
 		CHud::Renderer().SPR_DrawAuto(modeSprite, r, g, b, x, y, &modeRect);
+	};
+
+	auto GetWeaponModeY = [&y, &modeRect]()
+	{
+		const int modeHeight = modeRect.bottom - modeRect.top;
+		const int numberY = y;
+
+		int yMode;
+		switch(gHUD.clientFeatures.weaponmode_vertical_align)
+		{
+		case ClientFeatures::VerticalAlign::MIDDLE:
+			yMode = numberY + gHUD.m_iFontHeight / 2 - modeHeight / 2;
+			break;
+		case ClientFeatures::VerticalAlign::BOTTOM:
+			yMode = numberY + gHUD.m_iFontHeight - modeHeight;
+			break;
+		case ClientFeatures::VerticalAlign::TOP:
+			yMode = numberY;
+			break;
+		default:
+			yMode = numberY + gHUD.m_iFontHeight - modeHeight;
+			break;
+		}
+
+		return yMode;
 	};
 
 	if (pw->iAmmoType > 0)
@@ -1116,9 +1140,7 @@ int CHudAmmo::Draw( float flTime )
 				DrawDividerBar(xMode, y, hudR, hudG, hudB, a);
 				xMode -= AmmoWidth / 2 + (modeRect.right - modeRect.left);
 
-				int yMode = CHud::Renderer().PerceviedScreenHeight() - (modeRect.bottom - modeRect.top) - gHUD.m_iFontHeight / 2;
-
-				DrawWeaponMode(xMode, yMode);
+				DrawWeaponMode(xMode, GetWeaponModeY());
 			}
 		}
 	}
@@ -1127,9 +1149,8 @@ int CHudAmmo::Draw( float flTime )
 		if (modeSprite)
 		{
 			int xMode = CHud::Renderer().PerceviedScreenWidth() - (modeRect.right - modeRect.left) - AmmoWidth / 2;
-			int yMode = CHud::Renderer().PerceviedScreenHeight() - (modeRect.bottom - modeRect.top) - gHUD.m_iFontHeight / 2;
 
-			DrawWeaponMode(xMode, yMode);
+			DrawWeaponMode(xMode, GetWeaponModeY());
 		}
 	}
 
@@ -1151,15 +1172,15 @@ int CHudAmmo::Draw( float flTime )
 				drawNumberFlag |= DHN_4DIGITS;
 			}
 
-			y -= gHUD.m_iFontHeight + gHUD.m_iFontHeight / 4;
+			const int ammo2Y = y - (gHUD.m_iFontHeight + gHUD.m_iFontHeight / 4);
 			x = CHud::Renderer().PerceviedScreenWidth() - ammoWidths * AmmoWidth - iIconWidth;
-			x = gHUD.DrawHudNumber( x, y, iFlags | drawNumberFlag, gWR.CountAmmo( pw->iAmmo2Type ), scaledR, scaledG, scaledB );
+			x = gHUD.DrawHudNumber( x, ammo2Y, iFlags | drawNumberFlag, gWR.CountAmmo( pw->iAmmo2Type ), scaledR, scaledG, scaledB );
 
 			// Draw the ammo Icon
 			if (m_pWeapon->hAmmo2)
 			{
 				int iOffset = ( m_pWeapon->rcAmmo2.bottom - m_pWeapon->rcAmmo2.top) / 8;
-				CHud::Renderer().SPR_DrawAdditive( m_pWeapon->hAmmo2, scaledR, scaledG, scaledB, x, y - iOffset, &m_pWeapon->rcAmmo2 );
+				CHud::Renderer().SPR_DrawAdditive( m_pWeapon->hAmmo2, scaledR, scaledG, scaledB, x, ammo2Y - iOffset, &m_pWeapon->rcAmmo2 );
 			}
 		}
 	}

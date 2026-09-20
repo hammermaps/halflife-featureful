@@ -1000,6 +1000,14 @@ struct ClientFeatures
 {
 	ClientFeatures();
 
+	enum class VerticalAlign : unsigned short
+	{
+		DEFAULT,
+		MIDDLE,
+		BOTTOM,
+		TOP,
+	};
+
 	int hud_color;
 	bool hud_color_configurable;
 	ConfigurableBoundedValue hud_min_alpha;
@@ -1046,6 +1054,10 @@ struct ClientFeatures
 	char bucket_slot_sprite[MAX_SPRITE_NAME_LENGTH];
 	bool use_divider_sprite;
 	bool weaponmode_uses_hud_color;
+
+	VerticalAlign health_vertical_align;
+	VerticalAlign armor_vertical_align;
+	VerticalAlign weaponmode_vertical_align;
 
 	bool fullbright_textures;
 };

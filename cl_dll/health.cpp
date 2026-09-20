@@ -260,12 +260,33 @@ int CHudHealth::DrawHealth(bool drawSeparator)
 	int y = CHud::Renderer().PerceviedScreenHeight() - gHUD.m_iFontHeight - gHUD.m_iFontHeight / 2;
 	int x = CrossWidth / 2;
 
-	CHud::Renderer().SPR_DrawAdditive( gHUD.GetSprite( m_HUD_cross ), r, g, b, x, y, &gHUD.GetSpriteRect( m_HUD_cross ) );
+	const wrect_t crossRect = gHUD.GetSpriteRect(m_HUD_cross);
+	const int numberY = y + gHUD.m_iHudNumbersYOffset;
+	const int healthHeight = crossRect.bottom - crossRect.top;
+
+	int healthY;
+	switch(gHUD.clientFeatures.health_vertical_align)
+	{
+	case ClientFeatures::VerticalAlign::MIDDLE:
+		healthY = numberY + gHUD.m_iFontHeight / 2 - healthHeight / 2;
+		break;
+	case ClientFeatures::VerticalAlign::BOTTOM:
+		healthY = numberY + gHUD.m_iFontHeight - healthHeight;
+		break;
+	case ClientFeatures::VerticalAlign::TOP:
+		healthY = numberY;
+		break;
+	default:
+		healthY = y;
+		break;
+	}
+
+	CHud::Renderer().SPR_DrawAdditive( gHUD.GetSprite( m_HUD_cross ), r, g, b, x, healthY, &crossRect );
 
 	x += CrossWidth;
 
 	const int digitFlag = m_iHealth >= 1000 ? DHN_4DIGITS : DHN_3DIGITS;
-	x = gHUD.DrawHudNumber( x, y + gHUD.m_iHudNumbersYOffset, digitFlag | DHN_DRAWZERO, m_iHealth, r, g, b );
+	x = gHUD.DrawHudNumber( x, numberY, digitFlag | DHN_DRAWZERO, m_iHealth, r, g, b );
 
 	x += HealthWidth / 2;
 
@@ -276,7 +297,7 @@ int CHudHealth::DrawHealth(bool drawSeparator)
 		if (gHUD.clientFeatures.use_divider_sprite && m_HUD_divider != -1)
 		{
 			const wrect_t& rect = gHUD.GetSpriteRect(m_HUD_divider);
-			const int dividerY = y + gHUD.m_iHudNumbersYOffset + gHUD.m_iFontHeight / 2 - (rect.bottom - rect.top) / 2;
+			const int dividerY = numberY + gHUD.m_iFontHeight / 2 - (rect.bottom - rect.top) / 2;
 			CHud::Renderer().SPR_DrawAdditiveWithAlphaScale(gHUD.GetSprite(m_HUD_divider), r, g, b, a, x, dividerY, &rect);
 		}
 		else
@@ -284,7 +305,7 @@ int CHudHealth::DrawHealth(bool drawSeparator)
 			int iHeight = gHUD.m_iFontHeight;
 			int iWidth = HealthWidth / 10;
 
-			CHud::Renderer().FillRGBA( x, y + gHUD.m_iHudNumbersYOffset, iWidth, iHeight, r, g, b, a );
+			CHud::Renderer().FillRGBA( x, numberY, iWidth, iHeight, r, g, b, a );
 		}
 	}
 
@@ -322,22 +343,40 @@ void CHudHealth::DrawArmor(int startX)
 	UnpackRGB( r, g, b, gHUD.HUDColor() );
 	ScaleColors( r, g, b, a );
 
-	int iOffset = ( suitEmptyRect.bottom - suitEmptyRect.top ) / 6;
-
 	int y = CHud::Renderer().PerceviedScreenHeight() - gHUD.m_iFontHeight - gHUD.m_iFontHeight / 2;
 	int x = gHUD.DrawArmorNearHealth() ? startX : CHud::Renderer().PerceviedScreenWidth() / 5;
 
-	CHud::Renderer().SPR_DrawAdditive( gHUD.GetSprite(m_HUD_suit_empty), r, g, b,  x, y - iOffset, &suitEmptyRect );
+	const int numberY = y + gHUD.m_iHudNumbersYOffset;
+	const int armorHeight = suitEmptyRect.bottom - suitEmptyRect.top;
+
+	int armorY;
+	switch(gHUD.clientFeatures.armor_vertical_align)
+	{
+	case ClientFeatures::VerticalAlign::MIDDLE:
+		armorY = numberY + gHUD.m_iFontHeight / 2 - armorHeight / 2;
+		break;
+	case ClientFeatures::VerticalAlign::BOTTOM:
+		armorY = numberY + gHUD.m_iFontHeight - armorHeight;
+		break;
+	case ClientFeatures::VerticalAlign::TOP:
+		armorY = numberY;
+		break;
+	default:
+		armorY = y - armorHeight / 6;
+		break;
+	}
+
+	CHud::Renderer().SPR_DrawAdditive( gHUD.GetSprite(m_HUD_suit_empty), r, g, b,  x, armorY, &suitEmptyRect );
 
 	if( rc.bottom > rc.top )
 	{
-		CHud::Renderer().SPR_DrawAdditive( gHUD.GetSprite(m_HUD_suit_full), r, g, b, x, y - iOffset + ( rc.top - suitFullRect.top ), &rc );
+		CHud::Renderer().SPR_DrawAdditive( gHUD.GetSprite(m_HUD_suit_full), r, g, b, x, armorY + ( rc.top - suitFullRect.top ), &rc );
 	}
 
 	x += ( suitEmptyRect.right - suitEmptyRect.left );
 
 	const int digitFlag = m_iBat >= 1000 ? DHN_4DIGITS : DHN_3DIGITS;
-	x = gHUD.DrawHudNumber( x, y + gHUD.m_iHudNumbersYOffset, digitFlag | DHN_DRAWZERO, m_iBat, r, g, b );
+	x = gHUD.DrawHudNumber( x, numberY, digitFlag | DHN_DRAWZERO, m_iBat, r, g, b );
 }
 
 void CHudHealth::CalcDamageDirection( Vector vecFrom )
