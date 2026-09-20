@@ -4,6 +4,10 @@ Half-Life SDK for GoldSource & Xash3D with some bugfixes and features that can b
 
 See [Documentation](https://freeslave.github.io/halflife-featureful/).
 
+# Project goal (this branch)
+
+The goal of this branch is to rebuild all entities from **Gunman Chronicles** (monsters, weapons, items, and other gameplay entities) on top of the Featureful SDK and make them usable in mods built with it — integrated with the SDK's existing data-driven configuration systems (weapon templates, entity templates, soundscripts, skill data, etc., see [Documentation](https://freeslave.github.io/halflife-featureful/)) rather than hardcoded one-offs.
+
 # Obtaining source code
 
 Either clone the repository via [git](`https://git-scm.com/downloads`) or just download ZIP via **Code** button on github. The first option is more preferable as it also allows you to search through the repo history, switch between branches and clone the vgui submodule.
