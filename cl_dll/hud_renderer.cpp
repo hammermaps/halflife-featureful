@@ -379,3 +379,9 @@ HudSpriteRenderer& HudSpriteRenderer::RelativeScale(float multiplier)
 		currentScale = 1.0f;
 	return *this;
 }
+
+HudSpriteRenderer& HudSpriteRenderer::AbsoluteScale(float scale)
+{
+	currentScale = scale;
+	return *this;
+}
