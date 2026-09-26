@@ -579,6 +579,7 @@ public:
 
 	bool m_forceCollideWithCorpses;
 	bool m_hidePickups;
+	bool m_inSuicide;
 
 	void NotifyPickup(const char* pickupName);
 

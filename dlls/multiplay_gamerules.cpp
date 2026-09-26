@@ -872,7 +872,7 @@ void CHalfLifeMultiplay::DeathNotice( CBasePlayer *pVictim, entvars_t *pKiller, 
 	const char *tau = "tau_cannon";
 	const char *gluon = "gluon gun";
 
-	if( pevInflictor )
+	if (!pVictim->m_inSuicide && pevInflictor)
 	{
 		if( pKiller->flags & FL_CLIENT )
 		{
