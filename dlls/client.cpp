@@ -901,6 +901,13 @@ void ClientCommand( edict_t *pEntity )
 			}
 		}
 	}
+	else if ( FStrEq(pcmd, "reset_screenfade" ) )
+	{
+		if (CanRunCheatCommand(pev))
+		{
+			UTIL_ScreenFade(pPlayer, Vector{}, 0, 0, 0, 0, true);
+		}
+	}
 	else if( g_pGameRules->ClientCommand( GetClassPtr( (CBasePlayer *)pev ), pcmd ) )
 	{
 		// MenuSelect returns true only if the command is properly handled,  so don't print a warning

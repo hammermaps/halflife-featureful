@@ -919,6 +919,7 @@ void CHud::Init()
 	gEngfuncs.pfnAddCommand("ent_remove", nullptr);
 	gEngfuncs.pfnAddCommand("noclip_fast", nullptr);
 	gEngfuncs.pfnAddCommand("toggle_frozen", nullptr);
+	gEngfuncs.pfnAddCommand("reset_screenfade", nullptr);
 
 	MsgFunc_ResetHUD( 0, 0, NULL );
 	ClientCmd( "richpresence_gamemode\n" );
