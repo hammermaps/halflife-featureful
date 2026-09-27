@@ -11,6 +11,14 @@ Should be triggered again to let player regain control.
 
 See [player_capabilities]({{< ref player_capabilities >}}) for more granular control over what player can or can't do.
 
+{{% hint warning %}}
+The "frozen" status is transferred between levels. Make sure the player doesn't end up in frozen state after changelevel unless it's a deliberate choice.
+{{% /hint %}}
+
+{{% hint info %}}
+The "frozen" status can be enabled and disabled via the `toggle_frozen` command when cheats are enabled.
+{{% /hint %}}
+
 ### New parameters
 
 * `Use type` - how this entity interprets the input when getting trigged. By default it's always 'Toggle' (freeze or unfreeze player depending on the current state). 'Unfreeze' means the player will either be unfrozen or nothing happen if player is already unfrozen. 'Freeze' means the player will either be frozen or nothing happen if player is already frozen. The 'Copy input' makes the entity interpret the input type ('On' is to freeze the player, 'Off' is to unfreez, and 'Toggle' is to toggle the state).

@@ -885,6 +885,22 @@ void ClientCommand( edict_t *pEntity )
 			}
 		}
 	}
+	else if ( FStrEq(pcmd, "toggle_frozen" ) )
+	{
+		if (CanRunCheatCommand(pev))
+		{
+			if (FBitSet(pev->flags, FL_FROZEN))
+			{
+				ClearBits(pev->flags, FL_FROZEN);
+				ClientPrint(pev, HUD_PRINTCONSOLE, "UNFROZEN\n");
+			}
+			else
+			{
+				SetBits(pev->flags, FL_FROZEN);
+				ClientPrint(pev, HUD_PRINTCONSOLE, "FROZEN\n");
+			}
+		}
+	}
 	else if( g_pGameRules->ClientCommand( GetClassPtr( (CBasePlayer *)pev ), pcmd ) )
 	{
 		// MenuSelect returns true only if the command is properly handled,  so don't print a warning
