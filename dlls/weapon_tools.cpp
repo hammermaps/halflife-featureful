@@ -36,6 +36,7 @@ WeaponParameters CCameraTool::GetDefaultParameters() const
 	params.worldModel = "models/w_camera.mdl";
 	params.viewModel = "models/v_camera.mdl";
 	params.playerModel = "models/p_camera.mdl";
+	params.playerAnimExt = "trip";
 
 	params.idleAnims.main = WeaponParameters::IdleAnimArray{
 		WeaponParameters::IdleAnim{CAMERA_IDLE, 1.0f, 1.0f}
@@ -93,6 +94,7 @@ WeaponParameters CRadioTool::GetDefaultParameters() const
 	params.worldModel = "models/w_radio.mdl";
 	params.viewModel = "models/v_radio.mdl";
 	params.playerModel = "models/p_radio.mdl";
+	params.playerAnimExt = "hive";
 
 	params.idleAnims.main = WeaponParameters::IdleAnimArray{
 		WeaponParameters::IdleAnim{RADIO_IDLE, 1.0f, 1.0f}
