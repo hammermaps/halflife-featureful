@@ -1173,10 +1173,8 @@ void CTriggerCDAudio::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TY
 
 void PlayCDTrack( int iTrack )
 {
-	edict_t *pClient;
-
 	// manually find the single player.
-	pClient = g_engfuncs.pfnPEntityOfEntIndex( 1 );
+	CBaseEntity* pClient = UTIL_PlayerByIndex(1);
 
 	// Can't play if the client is not connected!
 	if( !pClient )
@@ -1190,14 +1188,14 @@ void PlayCDTrack( int iTrack )
 
 	if( iTrack == -1 )
 	{
-		CLIENT_COMMAND( pClient, "cd stop\n" );
+		CLIENT_COMMAND( pClient->edict(), "cd stop\n" );
 	}
 	else
 	{
 		char string[64];
 
 		sprintf( string, "cd play %3d\n", iTrack );
-		CLIENT_COMMAND( pClient, string );
+		CLIENT_COMMAND( pClient->edict(), string );
 	}
 }
 
