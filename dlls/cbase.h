@@ -165,6 +165,7 @@ private:
 		GOT_LIGHT_DAMAGE = (1 << 1),
 		GOT_HEAVY_DAMAGE = (1 << 2),
 		WAS_ALREADY_DEAD = (1 << 3),
+		DEATH_PREVENTED = (1 << 4)
 	};
 	int _flags = 0;
 	optional<KilledResult> _killedResult;
@@ -210,6 +211,14 @@ public:
 	}
 	inline bool WasAlreadyDead() const {
 		return (_flags & WAS_ALREADY_DEAD) != 0;
+	}
+
+	inline TakeDamageResult& SetDeathPrevented() {
+		_flags |= DEATH_PREVENTED;
+		return *this;
+	}
+	inline bool DeathPrevented() const {
+		return (_flags & DEATH_PREVENTED) != 0;
 	}
 };
 
@@ -678,7 +687,7 @@ public:
 	virtual bool HandleDoorBlockage(CBaseEntity* pDoor) { return false; }
 
 	virtual void BeforeApplyDamageToHealth(float flDamage) {}
-	bool ApplyDamageToHealth(const DamageInfo& damageInfo, entvars_t *pevAttacker);
+	bool ApplyDamageToHealth(const DamageInfo& damageInfo, entvars_t *pevAttacker, TakeDamageResult& result);
 
 	virtual bool IsUsefulToDisplayHint(CBaseEntity* pPlayer) { return true; }
 	virtual bool IsLockedByMaster() { return false; }

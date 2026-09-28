@@ -987,7 +987,7 @@ void CBaseEntity::SUB_FadeOut()
 
 extern int gmsgCombatText;
 
-bool CBaseEntity::ApplyDamageToHealth(const DamageInfo& damageInfo, entvars_t *pevAttacker)
+bool CBaseEntity::ApplyDamageToHealth(const DamageInfo& damageInfo, entvars_t *pevAttacker, TakeDamageResult& result)
 {
 	BeforeApplyDamageToHealth(damageInfo.damage);
 
@@ -1028,8 +1028,14 @@ bool CBaseEntity::ApplyDamageToHealth(const DamageInfo& damageInfo, entvars_t *p
 			pev->health = Q_max(damageInfo.healthFloor, 1.0f);
 			pev->health = Q_min(healthBeforeDamage, pev->health);
 		}
+		result.SetDeathPrevented();
 	}
-	return pev->health < healthBeforeDamage;
+	if (pev->health < healthBeforeDamage)
+	{
+		result.SetTookDamageToHealth();
+		return true;
+	}
+	return false;
 }
 
 //=========================================================
@@ -1406,9 +1412,8 @@ TakeDamageResult CBaseMonster::TakeDamage( entvars_t *pevInflictor, entvars_t *p
 	if ((m_MonsterState == MONSTERSTATE_SCRIPT && takeDamagePolicy == SCRIPT_TAKE_DAMAGE_POLICY_NONLETHAL))
 		damageInfo.SetNonLethal();
 
-	if (ApplyDamageToHealth(damageInfo, pevAttacker))
+	if (ApplyDamageToHealth(damageInfo, pevAttacker, takeDamageResult))
 	{
-		takeDamageResult.SetTookDamageToHealth();
 		m_lastHurtTime = gpGlobals->time;
 	}
 

@@ -728,8 +728,7 @@ TakeDamageResult CBaseEntity::TakeDamage( entvars_t *pevInflictor, entvars_t *pe
 		pev->velocity = pev->velocity + vecDir * flForce;
 	}
 
-	if (ApplyDamageToHealth(damageInfo, pevAttacker))
-		takeDamageResult.SetTookDamageToHealth();
+	ApplyDamageToHealth(damageInfo, pevAttacker, takeDamageResult);
 
 	if( pev->health <= 0 )
 	{
