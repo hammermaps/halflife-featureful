@@ -1081,8 +1081,6 @@ TakeDamageResult CApache::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAtt
 	*/
 
 	// ALERT( at_console, "%.0f\n", flDamage );
-	if (damageInfo.nonLethal)
-		SetNonLethalHealthThreshold();
 	TakeDamageResult result = CBaseEntity::TakeDamage( pevInflictor, pevAttacker, damageInfo );
 
 	//Are we damaged at all?

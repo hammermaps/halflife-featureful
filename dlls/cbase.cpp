@@ -641,12 +641,6 @@ int CBaseEntity::TakeHealth(CBaseEntity *pHealer, float flHealth, int healType )
 	return (int)flHealth;
 }
 
-void CBaseEntity::SetNonLethalHealthThreshold()
-{
-	if (m_healthMinThreshold <= 0.0f)
-		m_healthMinThreshold = 1.0f;
-}
-
 DamageInfo CBaseEntity::TransformDamageInfo(entvars_t *pevInflictor, entvars_t *pevAttacker, const DamageInfo& inputDamageInfo)
 {
 	if (inputDamageInfo.ignoreTransform)
@@ -734,7 +728,7 @@ TakeDamageResult CBaseEntity::TakeDamage( entvars_t *pevInflictor, entvars_t *pe
 		pev->velocity = pev->velocity + vecDir * flForce;
 	}
 
-	if (ApplyDamageToHealth(damageInfo.damage, pevAttacker))
+	if (ApplyDamageToHealth(damageInfo, pevAttacker))
 		takeDamageResult.SetTookDamageToHealth();
 
 	if( pev->health <= 0 )

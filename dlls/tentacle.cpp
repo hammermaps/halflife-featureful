@@ -1019,7 +1019,7 @@ TakeDamageResult CTentacle::TakeDamage( entvars_t *pevInflictor, entvars_t *pevA
 		return takeDamageResult;
 
 	PainReaction(damageInfo);
-	if (ApplyDamageToHealth(damageInfo.damage, pevAttacker))
+	if (ApplyDamageToHealth(damageInfo, pevAttacker))
 	{
 		takeDamageResult.SetTookDamageToHealth();
 		if (pev->health <= 0)

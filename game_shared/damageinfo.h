@@ -19,7 +19,7 @@ struct DamageInfo
 	float damage = 0.0f;
 	int type = DMG_GENERIC;
 	int gibPolicy = GIB_NORMAL;
-	bool nonLethal = false; // this damage shouldn't kill player or monster
+	float healthFloor = 0.0f;
 	bool timedNonLethal = false;
 	bool ignoreArmor = false; // ignore player's armor, deal damage to health only
 	bool timedIgnoreArmor = false;
@@ -38,7 +38,19 @@ struct DamageInfo
 		return *this;
 	}
 	DamageInfo& SetNonLethal(bool enable = true) {
-		nonLethal = enable;
+		if (enable)
+		{
+			if (healthFloor <= 0.0f)
+				healthFloor = 1.0f;
+		}
+		else
+		{
+			healthFloor = 0.0f;
+		}
+		return *this;
+	}
+	DamageInfo& SetHealthFloor(float threshold) {
+		healthFloor = threshold;
 		return *this;
 	}
 	DamageInfo& SetTimedNonLethal(bool enable = true) {

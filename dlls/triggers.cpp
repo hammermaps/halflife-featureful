@@ -1591,10 +1591,7 @@ void CTriggerHurt::DoDamage(CBaseEntity *pTarget, float fldmg)
 		if (pev->spawnflags & SF_TRIGGER_HURT_NO_PUNCH)
 			damageInfo.SetNoPunch();
 
-		const float minHealthThreshold = pev->dmg_save;
-		if (minHealthThreshold > 0) {
-			pTarget->m_healthMinThreshold = minHealthThreshold;
-		}
+		damageInfo.SetHealthFloor(pev->dmg_save);
 
 		pTarget->TakeDamage( pev, pev, damageInfo );
 	}
@@ -6747,10 +6744,7 @@ void CTriggerHurtRemote::DoDamage(CBaseEntity* pTarget)
 			damageInfo.SetNoPunch();
 		damageInfo.noPlayerPush = true;
 
-		const float minHealthThreshold = pev->dmg_save;
-		if (minHealthThreshold > 0) {
-			pTarget->m_healthMinThreshold = minHealthThreshold;
-		}
+		damageInfo.SetHealthFloor(pev->dmg_save);
 
 		entvars_t* pevAttacker = pActivator != 0 ? pActivator->pev : pev;
 		if (FBitSet(pev->spawnflags, SF_TRIGGER_HURT_REMOTE_INSTANT_KILL))

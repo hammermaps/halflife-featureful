@@ -987,9 +987,9 @@ void CBaseEntity::SUB_FadeOut()
 
 extern int gmsgCombatText;
 
-bool CBaseEntity::ApplyDamageToHealth(float flDamage, entvars_t *pevAttacker)
+bool CBaseEntity::ApplyDamageToHealth(const DamageInfo& damageInfo, entvars_t *pevAttacker)
 {
-	BeforeApplyDamageToHealth(flDamage);
+	BeforeApplyDamageToHealth(damageInfo.damage);
 
 	if (pevAttacker && pevAttacker != pev && FBitSet(pevAttacker->flags, FL_CLIENT))
 	{
@@ -1007,7 +1007,7 @@ bool CBaseEntity::ApplyDamageToHealth(float flDamage, entvars_t *pevAttacker)
 		}
 		MESSAGE_BEGIN(MSG_ONE, gmsgCombatText, pos, pevAttacker);
 		WRITE_VECTOR(pos);
-		WRITE_LONG(flDamage * 100);
+		WRITE_LONG(damageInfo.damage * 100);
 		WRITE_BYTE(textType);
 		MESSAGE_END();
 	}
@@ -1015,20 +1015,19 @@ bool CBaseEntity::ApplyDamageToHealth(float flDamage, entvars_t *pevAttacker)
 	const float healthBeforeDamage = pev->health;
 
 	// do the damage
-	pev->health -= flDamage;
+	pev->health -= damageInfo.damage;
 
-	if (m_healthMinThreshold > 0 && pev->health < m_healthMinThreshold)
+	if (damageInfo.healthFloor > 0.0f && pev->health < damageInfo.healthFloor)
 	{
 		if (IsPlayer())
 		{
-			pev->health = Q_max((int)m_healthMinThreshold, 1);
+			pev->health = Q_max((int)damageInfo.healthFloor, 1);
 		}
 		else
 		{
-			pev->health = Q_max(m_healthMinThreshold, 1.0f);
+			pev->health = Q_max(damageInfo.healthFloor, 1.0f);
 			pev->health = Q_min(healthBeforeDamage, pev->health);
 		}
-		m_healthMinThreshold = 0.0f;
 	}
 	return pev->health < healthBeforeDamage;
 }
@@ -1361,9 +1360,6 @@ TakeDamageResult CBaseMonster::TakeDamage( entvars_t *pevInflictor, entvars_t *p
 
 	PainReaction(damageInfo);
 
-	//!!!LATER - make armor consideration here!
-	float flTake = damageInfo.damage;
-
 	// set damage type sustained
 	m_bitsDamageType |= damageInfo.type;
 
@@ -1384,7 +1380,7 @@ TakeDamageResult CBaseMonster::TakeDamage( entvars_t *pevInflictor, entvars_t *p
 		if( pevInflictor )
 			pev->dmg_inflictor = ENT( pevInflictor );
 
-		pev->dmg_take += flTake;
+		pev->dmg_take += damageInfo.damage;
 
 		// check for godmode or invincibility
 		if( pev->flags & FL_GODMODE )
@@ -1405,12 +1401,12 @@ TakeDamageResult CBaseMonster::TakeDamage( entvars_t *pevInflictor, entvars_t *p
 		}
 	}
 
-	AddScoreForDamage(pevAttacker, this, flTake);
+	AddScoreForDamage(pevAttacker, this, damageInfo.damage);
 
-	if ((m_MonsterState == MONSTERSTATE_SCRIPT && takeDamagePolicy == SCRIPT_TAKE_DAMAGE_POLICY_NONLETHAL) || damageInfo.nonLethal)
-		SetNonLethalHealthThreshold();
+	if ((m_MonsterState == MONSTERSTATE_SCRIPT && takeDamagePolicy == SCRIPT_TAKE_DAMAGE_POLICY_NONLETHAL))
+		damageInfo.SetNonLethal();
 
-	if (ApplyDamageToHealth(flTake, pevAttacker))
+	if (ApplyDamageToHealth(damageInfo, pevAttacker))
 	{
 		takeDamageResult.SetTookDamageToHealth();
 		m_lastHurtTime = gpGlobals->time;

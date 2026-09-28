@@ -1181,10 +1181,7 @@ TakeDamageResult CBaseTurret::TakeDamage( entvars_t *pevInflictor, entvars_t *pe
 
 	AddScoreForDamage(pevAttacker, this, dmgInfo.damage);
 
-	if (damageInfo.nonLethal)
-		SetNonLethalHealthThreshold();
-
-	if (ApplyDamageToHealth(dmgInfo.damage, pevAttacker))
+	if (ApplyDamageToHealth(dmgInfo, pevAttacker))
 		takeDamageResult.SetTookDamageToHealth();
 
 	if( pev->health <= 0 )
@@ -1420,10 +1417,7 @@ TakeDamageResult CSentry::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAtt
 
 	AddScoreForDamage(pevAttacker, this, dmgInfo.damage);
 
-	if (dmgInfo.nonLethal)
-		SetNonLethalHealthThreshold();
-
-	if (ApplyDamageToHealth(dmgInfo.damage, pevAttacker))
+	if (ApplyDamageToHealth(dmgInfo, pevAttacker))
 		takeDamageResult.SetTookDamageToHealth();
 
 	if( pev->health <= 0 )

@@ -678,9 +678,7 @@ public:
 	virtual bool HandleDoorBlockage(CBaseEntity* pDoor) { return false; }
 
 	virtual void BeforeApplyDamageToHealth(float flDamage) {}
-	bool ApplyDamageToHealth(float flDamage, entvars_t *pevAttacker);
-	void SetNonLethalHealthThreshold();
-	float m_healthMinThreshold;
+	bool ApplyDamageToHealth(const DamageInfo& damageInfo, entvars_t *pevAttacker);
 
 	virtual bool IsUsefulToDisplayHint(CBaseEntity* pPlayer) { return true; }
 	virtual bool IsLockedByMaster() { return false; }
