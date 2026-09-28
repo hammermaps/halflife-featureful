@@ -93,6 +93,8 @@ TYPEDESCRIPTION	CBasePlayer::m_playerSaveData[] =
 	DEFINE_FIELD( CBasePlayer, m_adrenalines, FIELD_INTEGER ),
 	DEFINE_FIELD( CBasePlayer, m_flNextRevive, FIELD_TIME ),
 	DEFINE_FIELD( CBasePlayer, m_preventAdrenalineRevival, FIELD_BOOLEAN ),
+	DEFINE_FIELD( CBasePlayer, m_adrenalineEndTime, FIELD_TIME ),
+	DEFINE_FIELD( CBasePlayer, m_adrenalineDeathSaves, FIELD_INTEGER ),
 
 	DEFINE_FIELD( CBasePlayer, m_afPhysicsFlags, FIELD_INTEGER ),
 
