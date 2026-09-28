@@ -40,9 +40,6 @@ public:
 	int WeaponId() const override { return WEAPON_PYTHON; }
 	bool GetItemInfo(ItemInfo *p) override;
 	WeaponParameters GetDefaultParameters() const override;
-	void Reload() override;
-	void WeaponIdle() override;
-	float m_flSoundDelay;
 };
 
 LINK_ENTITY_TO_CLASS( weapon_python, CPython )
@@ -136,23 +133,4 @@ void CPython::PrecacheDefaultModelSounds()
 {
 	PRECACHE_SOUND( "items/9mmclip1.wav" );
 	PRECACHE_SOUND( "weapons/357_reload1.wav" );
-}
-
-void CPython::Reload()
-{
-	bool result = PerformReload();
-	if (result)
-	{
-		m_flSoundDelay = 1.5f;
-	}
-}
-
-void CPython::WeaponIdle()
-{
-	if( m_flSoundDelay != 0 && m_flSoundDelay <= UTIL_WeaponTimeBase() )
-	{
-		EMIT_SOUND( ENT( m_pPlayer->pev ), CHAN_WEAPON, "weapons/357_reload1.wav", RANDOM_FLOAT( 0.8f, 0.9f ), ATTN_NORM );
-		m_flSoundDelay = 0.0f;
-	}
-	CConfigurableWeapon::WeaponIdle();
 }
