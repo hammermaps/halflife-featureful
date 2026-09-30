@@ -171,6 +171,8 @@ public:
 	int					m_adrenalines;
 	int					m_iClientAdrenalines;
 	float				m_flNextRevive;
+	float				m_adrenalineEndTime;
+	int					m_adrenalineDeathSaves;
 	bool				m_preventAdrenalineRevival;
 
 	bool				m_fKnownItem;		// True when a new item needs to be added
@@ -579,6 +581,7 @@ public:
 
 	bool m_forceCollideWithCorpses;
 	bool m_hidePickups;
+	bool m_inSuicide;
 
 	void NotifyPickup(const char* pickupName);
 

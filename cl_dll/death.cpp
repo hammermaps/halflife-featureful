@@ -92,16 +92,20 @@ int CHudDeathNotice::Draw( float flTime )
 {
 	int x, y, r, g, b;
 
-	int gap = 20;
-
 	const wrect_t& sprite = gHUD.GetSpriteRect(m_HUD_d_skull);
-	gap = sprite.bottom - sprite.top;
+	const int spriteHeight = sprite.bottom - sprite.top;
+	const int textLineHeight = CHud::UtfText::LineHeight();
 
-	SCREENINFO screenInfo;
+	float scale = 1.0f;
+	if (spriteHeight > 0 && textLineHeight > spriteHeight)
+	{
+		scale = textLineHeight / spriteHeight;
+	}
 
-	screenInfo.iSize = sizeof(SCREENINFO);
-	gEngfuncs.pfnGetScreenInfo(&screenInfo);
-	gap = Q_max( gap, screenInfo.iCharHeight );
+	HudSpriteRenderer& renderer = gHUD.hudRenderer.AbsoluteScale(scale);
+	const int renderSpriteHeight = spriteHeight * scale;
+
+	int gap = Q_max(textLineHeight, renderSpriteHeight) + 2;
 
 	for( int i = 0; i < MAX_DEATHNOTICES; i++ )
 	{
@@ -127,7 +131,9 @@ int CHudDeathNotice::Draw( float flTime )
 			y = YRES( DEATHNOTICE_TOP ) + 2 + ( gap * i );  //!!!
 
 			int id = ( rgDeathNoticeList[i].iId == -1 ) ? m_HUD_d_skull : rgDeathNoticeList[i].iId;
-			x = ScreenWidth - ConsoleStringLen( rgDeathNoticeList[i].szVictim ) - ( gHUD.GetSpriteRect(id).right - gHUD.GetSpriteRect(id).left ) - 4;
+			const int spriteWidth = gHUD.GetSpriteRect(id).right - gHUD.GetSpriteRect(id).left;
+
+			x = ScreenWidth - ConsoleStringLen( rgDeathNoticeList[i].szVictim ) - renderer.ScaleScreen(spriteWidth) - 4;
 
 			if( !rgDeathNoticeList[i].iSuicide )
 			{
@@ -136,7 +142,7 @@ int CHudDeathNotice::Draw( float flTime )
 				// Draw killers name
 				if( rgDeathNoticeList[i].KillerColor )
 					DrawSetTextColor( rgDeathNoticeList[i].KillerColor[0], rgDeathNoticeList[i].KillerColor[1], rgDeathNoticeList[i].KillerColor[2] );
-				x = 5 + DrawConsoleString( x, y + 4, rgDeathNoticeList[i].szKiller );
+				x = 5 + DrawConsoleString( x, y + (gap - textLineHeight) / 2, rgDeathNoticeList[i].szKiller );
 			}
 
 			r = 255; g = 80; b = 0;
@@ -146,17 +152,16 @@ int CHudDeathNotice::Draw( float flTime )
 			}
 
 			// Draw death weapon
-			SPR_Set( gHUD.GetSprite(id), r, g, b );
-			SPR_DrawAdditive( 0, x, y, &gHUD.GetSpriteRect(id) );
+			renderer.SPR_DrawAdditive(gHUD.GetSprite(id), r, g, b, renderer.UnscaleScreen(x), renderer.UnscaleScreen(y + (gap - renderSpriteHeight) / 2), &gHUD.GetSpriteRect(id));
 
-			x += ( gHUD.GetSpriteRect(id).right - gHUD.GetSpriteRect(id).left );
+			x += renderer.ScaleScreen(spriteWidth);
 
 			// Draw victims name (if it was a player that was killed)
 			if( !rgDeathNoticeList[i].iNonPlayerKill )
 			{
 				if( rgDeathNoticeList[i].VictimColor )
 					DrawSetTextColor( rgDeathNoticeList[i].VictimColor[0], rgDeathNoticeList[i].VictimColor[1], rgDeathNoticeList[i].VictimColor[2] );
-				x = DrawConsoleString( x, y + 4, rgDeathNoticeList[i].szVictim );
+				x = DrawConsoleString( x, y + (gap - textLineHeight) / 2, rgDeathNoticeList[i].szVictim );
 			}
 		}
 	}

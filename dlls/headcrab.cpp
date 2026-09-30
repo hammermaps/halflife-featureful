@@ -921,7 +921,7 @@ TakeDamageResult CShockRoach::TakeDamage( entvars_t *pevInflictor, entvars_t *pe
 	DamageInfo dmgInfo = damageInfo;
 	if (IsStillSpawning())
 	{
-		dmgInfo.nonLethal = true;
+		dmgInfo.SetNonLethal();
 	}
 	return CBaseMonster::TakeDamage( pevInflictor, pevAttacker, dmgInfo );
 }

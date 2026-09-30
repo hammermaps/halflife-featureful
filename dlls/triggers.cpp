@@ -1173,10 +1173,8 @@ void CTriggerCDAudio::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TY
 
 void PlayCDTrack( int iTrack )
 {
-	edict_t *pClient;
-
 	// manually find the single player.
-	pClient = g_engfuncs.pfnPEntityOfEntIndex( 1 );
+	CBaseEntity* pClient = UTIL_PlayerByIndex(1);
 
 	// Can't play if the client is not connected!
 	if( !pClient )
@@ -1190,14 +1188,14 @@ void PlayCDTrack( int iTrack )
 
 	if( iTrack == -1 )
 	{
-		CLIENT_COMMAND( pClient, "cd stop\n" );
+		CLIENT_COMMAND( pClient->edict(), "cd stop\n" );
 	}
 	else
 	{
 		char string[64];
 
 		sprintf( string, "cd play %3d\n", iTrack );
-		CLIENT_COMMAND( pClient, string );
+		CLIENT_COMMAND( pClient->edict(), string );
 	}
 }
 
@@ -1591,10 +1589,7 @@ void CTriggerHurt::DoDamage(CBaseEntity *pTarget, float fldmg)
 		if (pev->spawnflags & SF_TRIGGER_HURT_NO_PUNCH)
 			damageInfo.SetNoPunch();
 
-		const float minHealthThreshold = pev->dmg_save;
-		if (minHealthThreshold > 0) {
-			pTarget->m_healthMinThreshold = minHealthThreshold;
-		}
+		damageInfo.SetHealthFloor(pev->dmg_save);
 
 		pTarget->TakeDamage( pev, pev, damageInfo );
 	}
@@ -2437,6 +2432,7 @@ void CChangeLevel::ChangeLevelNow( CBaseEntity *pActivator )
 		strcpy( st_szNextSpot, m_szLandmarkName );
 		gpGlobals->vecLandmarkOffset = VARS( pentLandmark )->origin;
 	}
+	SET_VIEW(pPlayer->edict(), pPlayer->edict());
 	//ALERT( at_console, "Level touches %d levels\n", ChangeList( levels, 16 ) );
 	ALERT( at_console, "CHANGE LEVEL: %s %s\n", st_szNextMap, st_szNextSpot );
 	g_pGameRules->BeforeChangeLevel(st_szNextMap);
@@ -6746,10 +6742,7 @@ void CTriggerHurtRemote::DoDamage(CBaseEntity* pTarget)
 			damageInfo.SetNoPunch();
 		damageInfo.noPlayerPush = true;
 
-		const float minHealthThreshold = pev->dmg_save;
-		if (minHealthThreshold > 0) {
-			pTarget->m_healthMinThreshold = minHealthThreshold;
-		}
+		damageInfo.SetHealthFloor(pev->dmg_save);
 
 		entvars_t* pevAttacker = pActivator != 0 ? pActivator->pev : pev;
 		if (FBitSet(pev->spawnflags, SF_TRIGGER_HURT_REMOTE_INSTANT_KILL))

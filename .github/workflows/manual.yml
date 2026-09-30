@@ -79,12 +79,6 @@ jobs:
         ./steam-runtime/setup_chroot.sh --i386 --tarball ./com.valvesoftware.SteamRuntime.Sdk-i386-scout-sysroot.tar.gz
         sudo sed -i 's/groups=sudo/groups=adm/g' /etc/schroot/chroot.d/steamrt_scout_i386.conf
 
-    - name: Copy vgui.so
-      if: startsWith(matrix.os, 'ubuntu')
-      run: |
-        mkdir -p build/cl_dll
-        cp vgui_support/vgui-dev/lib/vgui.so build/cl_dll
-        cp vgui_support/vgui-dev/lib/vgui.so build
     - name: Build on Linux
       if: startsWith(matrix.os, 'ubuntu')
       run: |

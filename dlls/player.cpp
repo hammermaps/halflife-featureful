@@ -93,6 +93,8 @@ TYPEDESCRIPTION	CBasePlayer::m_playerSaveData[] =
 	DEFINE_FIELD( CBasePlayer, m_adrenalines, FIELD_INTEGER ),
 	DEFINE_FIELD( CBasePlayer, m_flNextRevive, FIELD_TIME ),
 	DEFINE_FIELD( CBasePlayer, m_preventAdrenalineRevival, FIELD_BOOLEAN ),
+	DEFINE_FIELD( CBasePlayer, m_adrenalineEndTime, FIELD_TIME ),
+	DEFINE_FIELD( CBasePlayer, m_adrenalineDeathSaves, FIELD_INTEGER ),
 
 	DEFINE_FIELD( CBasePlayer, m_afPhysicsFlags, FIELD_INTEGER ),
 
@@ -859,7 +861,25 @@ TakeDamageResult CBasePlayer::TakeDamage( entvars_t *pevInflictor, entvars_t *pe
 
 	// this cast to INT is critical!!! If a player ends up with 0.5 health, the engine will get that
 	// as an int (zero) and think the player is dead! (this will incite a clientside screentilt, etc)
+
+	bool adrenalineSave = false;
+	if (dmgInfo.healthFloor <= 0.0f)
+	{
+		const bool canBeSavedByAdrenaline = !FBitSet(dmgInfo.type, DMG_FALL|DMG_DROWN|DMG_CRUSH);
+
+		if (canBeSavedByAdrenaline && m_adrenalineEndTime && m_adrenalineEndTime > gpGlobals->time && m_adrenalineDeathSaves > 0)
+		{
+			dmgInfo.SetNonLethal();
+			adrenalineSave = true;
+		}
+	}
+
 	TakeDamageResult takeDamageResult = CBaseMonster::TakeDamage( pevInflictor, pevAttacker, dmgInfo );
+
+	if (takeDamageResult.DeathPrevented() && adrenalineSave)
+	{
+		m_adrenalineDeathSaves--;
+	}
 
 	const bool fTookDamage = takeDamageResult.TookDamageToHealth() && !takeDamageResult.Killed();
 
@@ -1445,16 +1465,16 @@ void CBasePlayer::SetAnimation( PLAYER_ANIM playerAnim )
 		break;
 	case PLAYER_IDLE:
 	case PLAYER_WALK:
-		if( !FBitSet( pev->flags, FL_ONGROUND ) && ( m_Activity == ACT_HOP || m_Activity == ACT_LEAP ) )	// Still jumping
-		{
-			m_IdealActivity = m_Activity;
-		}
-		else if( pev->waterlevel > WL_Feet )
+		if( pev->waterlevel > WL_Feet )
 		{
 			if( speed == 0 )
 				m_IdealActivity = ACT_HOVER;
 			else
 				m_IdealActivity = ACT_SWIM;
+		}
+		else if( !FBitSet( pev->flags, FL_ONGROUND ) && ( m_Activity == ACT_HOP || m_Activity == ACT_LEAP ) )	// Still jumping
+		{
+			m_IdealActivity = m_Activity;
 		}
 		else
 		{
@@ -3012,6 +3032,9 @@ void CBasePlayer::PreThink()
 
 				if (m_pActiveItem)
 					m_pActiveItem->Deploy();
+
+				m_adrenalineEndTime = gpGlobals->time + GetSkillValue("adrenaline_duration");
+				m_adrenalineDeathSaves = static_cast<int>(GetSkillValue("adrenaline_deathsaves"));
 
 				m_flNextRevive = 0.0f;
 			}

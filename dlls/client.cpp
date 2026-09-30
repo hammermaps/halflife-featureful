@@ -179,7 +179,9 @@ void ClientKill( edict_t *pEntity )
 
 	// have the player kill themself
 	pev->health = 0;
+	pl->m_inSuicide = true;
 	pl->Killed( pev, pev, GIB_NEVER );
+	pl->m_inSuicide = false;
 
 	//pev->modelindex = g_ulModelIndexPlayer;
 	//pev->frags -= 2;		// extra penalty
@@ -881,6 +883,29 @@ void ClientCommand( edict_t *pEntity )
 				pev->movetype = MOVETYPE_WALK;
 				g_engfuncs.pfnSetPhysicsKeyValue( pEntity, "ncf", "0" );
 			}
+		}
+	}
+	else if ( FStrEq(pcmd, "toggle_frozen" ) )
+	{
+		if (CanRunCheatCommand(pev))
+		{
+			if (FBitSet(pev->flags, FL_FROZEN))
+			{
+				ClearBits(pev->flags, FL_FROZEN);
+				ClientPrint(pev, HUD_PRINTCONSOLE, "UNFROZEN\n");
+			}
+			else
+			{
+				SetBits(pev->flags, FL_FROZEN);
+				ClientPrint(pev, HUD_PRINTCONSOLE, "FROZEN\n");
+			}
+		}
+	}
+	else if ( FStrEq(pcmd, "reset_screenfade" ) )
+	{
+		if (CanRunCheatCommand(pev))
+		{
+			UTIL_ScreenFade(pPlayer, Vector{}, 0, 0, 0, 0, true);
 		}
 	}
 	else if( g_pGameRules->ClientCommand( GetClassPtr( (CBasePlayer *)pev ), pcmd ) )

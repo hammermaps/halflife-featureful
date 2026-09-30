@@ -50,6 +50,7 @@ public:
 
 	HudSpriteRenderer& DefaultScale();
 	HudSpriteRenderer& RelativeScale(float multiplier);
+	HudSpriteRenderer& AbsoluteScale(float scale);
 private:
 	void RecalcHUDScale();
 

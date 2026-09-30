@@ -7,6 +7,10 @@ bookToC: false
 
 [TWHL](https://twhl.info/wiki/page/env_fade)
 
+{{% hint info %}}
+To instantly remove the fade effect use `reset_screenfade` console command (only if cheats are enabled).
+{{% /hint %}}
+
 ### Changes
 
 * The fade effect is now getting saved and restored so it doesn't get lost upon save-reload.

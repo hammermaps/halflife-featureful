@@ -774,6 +774,77 @@ Required sounds:
 * **weapons/he_bounce-1.wav**
 {{% /details_header %}}
 
+## Condition Zero Deleted Scenes
+
+The templates for Condition Zero Deleted Scenes weapons are stored in the **templates/weapons/czds/** directory. Not all weapons are implemented yet. Condition Zero Deleted Scenes includes all the weapons from Counter Strike - for them refer to [Counter Strike](#counter-strike) templates presetes.
+
+{{% details_header title="Camera" %}}
+```json
+{
+    "weapon_tool": "czds/camera"
+}
+```
+
+The photocamera tool. Implemented natively as [weapon_camera]({{< ref weapon_camera >}}). This template is provided for a reference.
+
+Required models:
+
+* **w_camera.mdl**
+* **v_camera.mdl**
+* **p_camera.mdl**
+
+Required sounds:
+
+* **weapons/camera-1.wav**
+* **weapons/camera_sliderelease.wav**
+{{% /details_header %}}
+
+{{% details_header title="Radio" %}}
+```json
+{
+    "weapon_tool": "czds/radio"
+}
+```
+
+The walkie-talkie tool. Implemented natively as [weapon_radio]({{< ref weapon_radio >}}). This template is provided for a reference.
+
+Required models:
+
+* **w_radio.mdl**
+* **v_radio.mdl**
+* **p_radio.mdl**
+
+Required sounds:
+
+* **weapons/radio_draw.wav**
+* **weapons/radio_use.wav**
+{{% /details_header %}}
+
+{{% details_header title="M60" %}}
+```json
+{
+    "weapon_minigun": "czds/m60"
+}
+```
+
+Required models:
+
+* **w_m60.mdl**
+* **v_m60.mdl**
+* **p_m60.mdl**
+* **rshell.mdl**
+
+Required sounds:
+
+* **weapons/m60-1.wav**
+* **weapons/m60-2.wav**
+* **weapons/m60_boxout.wav**
+* **weapons/m60_boxin.wav**
+* **weapons/m60_chain.wav**
+* **weapons/m60_coverup.wav**
+* **weapons/m60_coverdown.wav**
+{{% /details_header %}}
+
 ## Deathmatch Classic
 
 The templates for Deathmatch Classic weapons are stored in the **templates/weapons/dmc/** directory. Not all weapons are implemented yet.
