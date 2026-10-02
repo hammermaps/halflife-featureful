@@ -6825,7 +6825,18 @@ void CBasePlayer::DropPlayerItemImpl(CBasePlayerWeapon *pWeapon, int dropType, f
 
 	ClearWeaponBit(pWeapon->WeaponId());// take item off hud
 
-	CWeaponBox *pWeaponBox = (CWeaponBox *)CBaseEntity::Create( "weaponbox", pev->origin + gpGlobals->v_forward * 10, pev->angles, edict() );
+
+	const char* worldModel = pWeapon->MyWorldModel();
+
+	CWeaponBox *pWeaponBox = (CWeaponBox *)CBaseEntity::CreateNoSpawn( "weaponbox", pev->origin + gpGlobals->v_forward * 10, pev->angles, edict() );
+	if (!pWeaponBox)
+		return;
+
+	pWeaponBox->pev->model = MAKE_STRING(worldModel);
+
+	pWeaponBox = (CWeaponBox*)DispatchSpawnAutoClean(pWeaponBox);
+	if (!pWeaponBox)
+		return;
 
 	pWeaponBox->SetWeaponModel(pWeapon);
 	pWeaponBox->pev->angles.x = 0;
