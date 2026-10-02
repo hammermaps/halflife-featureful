@@ -10,6 +10,7 @@
 #include "const_sound.h"
 #include "template_property_types.h"
 #include "json_config.h"
+#include "optional.h"
 
 #define WARPBALL_RED_DEFAULT 77
 #define WARPBALL_GREEN_DEFAULT 210
@@ -81,11 +82,11 @@ struct WarpballLight
 		color(),
 		radius(192),
 		life(1.5f) {}
-	Color3 color;
+	optional<Color3> color;
 	int radius;
 	float life;
 	inline bool IsDefined() const {
-		return life > 0.0 && radius > 0;
+		return color.has_value() && life > 0.0 && radius > 0;
 	}
 };
 

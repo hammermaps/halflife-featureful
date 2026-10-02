@@ -144,7 +144,7 @@ Example of the named template:
 
 `light` defines parameters for the dynamic light.
 
-* `color` - light [color]({{< ref "JSON/#color" >}}).
+* `color` - light [color]({{< ref "JSON/#color" >}}). This is required (but can be inherited from other template).
 * `radius` - light radius in units (default provided or inherited if not explicitly set)
 * `life` - duration in seconds (default provided or inherited if not explicitly set)
 

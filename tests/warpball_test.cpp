@@ -210,7 +210,8 @@ TEST(WarpballTemplates, Parse) {
 	EXPECT_EQ(xen->beamCount, IntRange(10, 20));
 	EXPECT_EQ(xen->spawnDelay, 0.4f);
 
-	EXPECT_EQ(xen->light.color, Color3(80, 210, 130));
+	ASSERT_TRUE(xen->light.IsDefined());
+	EXPECT_EQ(*xen->light.color, Color3(80, 210, 130));
 	EXPECT_EQ(xen->light.radius, 200);
 
 	EXPECT_FALSE(xen->shake.IsDefined());
@@ -227,8 +228,9 @@ TEST(WarpballTemplates, Parse) {
 		EXPECT_EQ(t->beam.noise, 50);
 		EXPECT_EQ(t->beam.life, xen->beam.life);
 
+		ASSERT_TRUE(t->light.IsDefined());
 		EXPECT_EQ(t->light.radius, xen->light.radius);
-		EXPECT_EQ(t->light.color, Color3(39, 209, 137));
+		EXPECT_EQ(*t->light.color, Color3(39, 209, 137));
 
 		EXPECT_TRUE(strcmp(t->sprite1.sprite, xen->sprite1.sprite) == 0);
 		EXPECT_EQ(t->sprite1.color, Color3(65, 209, 61));
@@ -272,7 +274,8 @@ TEST(WarpballTemplates, Parse) {
 		EXPECT_EQ(t->sound2.volume, 0.8f);
 		EXPECT_EQ(t->sound2.pitch, 110);
 
-		EXPECT_EQ(t->light.color, xen->light.color);
+		ASSERT_TRUE(t->light.IsDefined());
+		EXPECT_EQ(*t->light.color, *xen->light.color);
 		EXPECT_EQ(t->light.radius, 160);
 
 		EXPECT_EQ(t->beamCount, IntRange(10, 15));

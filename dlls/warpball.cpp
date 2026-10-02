@@ -670,7 +670,7 @@ void PlayWarpballEffect(CBaseEntity* pInitiator, const WarpballTemplate& warpbal
 			WRITE_BYTE( TE_DLIGHT );
 			WRITE_VECTOR( vecOrigin );
 			WRITE_BYTE( (int)(light.radius * 0.1f) );		// radius * 0.1
-			WRITE_COLOR( light.color );
+			WRITE_COLOR( *light.color );
 			WRITE_BYTE( (int)(light.life * 10) );		// time * 10
 			WRITE_BYTE( (int)(light.life * 10 / 2) );		// decay * 0.1
 		MESSAGE_END();
@@ -742,7 +742,7 @@ static void ReportWarpballLight(const WarpballLight& light)
 	if (!light.IsDefined()) {
 		LOG("undefined\n");
 	} else {
-		LOG("Color: (%d, %d, %d). Radius: %d. Life: %g\n", light.color.r, light.color.g, light.color.b, light.radius, light.life);
+		LOG("Color: (%d, %d, %d). Radius: %d. Life: %g\n", light.color->r, light.color->g, light.color->b, light.radius, light.life);
 	}
 }
 
