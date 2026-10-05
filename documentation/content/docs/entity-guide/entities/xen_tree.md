@@ -8,9 +8,10 @@ entityCategory: object
 
 [TWHL](https://twhl.info/wiki/page/xen_tree)
 
-{{% hint info %}}
-This entity can play sound [animation events]({{< ref model-animation-events >}}). Use entity template with [autoprecache_sounds]({{< ref "entity-templates/#autoprecache_sounds" >}}) enabled to precache such sounds.
-{{% /hint %}}
+### Changes
+
+* This entity can play sound [animation events]({{< ref model-animation-events >}}). Use entity template with [autoprecache_sounds]({{< ref "entity-templates/#autoprecache_sounds" >}}) enabled to precache such sounds.
+* The trigger created by the Xen tree in order to "feel" the area in front of the tree is getting removed when the tree itself is removed (e.g. via the KillTarget).
 
 ### Bugfixes
 

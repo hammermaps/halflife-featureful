@@ -331,6 +331,10 @@ public:
 	void HandleAnimEvent( MonsterEvent_t *pEvent ) override;
 	void Attack();
 	int DefaultClassify() override { return CLASS_BARNACLE; }
+	void UpdateOnRemove() {
+		UTIL_RemoveAndClean(m_pTrigger);
+		CActAnimating::UpdateOnRemove();
+	}
 
 	int Save( CSave &save ) override;
 	int Restore( CRestore &restore ) override;
@@ -513,15 +517,30 @@ class CXenSporeMed : public CXenSpore
 	}
 };
 
+#define XEN_SPORE_LARGE_HULL_COUNT 5
+
 class CXenSporeLarge : public CXenSpore
 {
 	void Spawn() override;
 	const char* DefaultModel() const override {
 		return "models/fungus(large).mdl";
 	}
+	void UpdateOnRemove();
 
-	static const Vector m_hullSizes[];
+	CBaseEntity* m_hulls[XEN_SPORE_LARGE_HULL_COUNT];
+	static const Vector m_hullSizes[XEN_SPORE_LARGE_HULL_COUNT];
+
+	int Save( CSave &save ) override;
+	int Restore( CRestore &restore ) override;
+	static TYPEDESCRIPTION m_SaveData[];
 };
+
+TYPEDESCRIPTION	CXenSporeLarge::m_SaveData[] =
+{
+	DEFINE_ARRAY( CXenSporeLarge, m_hulls, FIELD_CLASSPTR, 5 ),
+};
+
+IMPLEMENT_SAVERESTORE( CXenSporeLarge, CXenSpore )
 
 // Fake collision box for big spores
 class CXenHull : public CBaseEntity
@@ -599,11 +618,22 @@ void CXenSporeLarge::Spawn()
 		return;
 
 	// Rotate the leg hulls into position
-	for( int i = 0; i < (int)ARRAYSIZE( m_hullSizes ); i++ )
+	for( int i = 0; i < XEN_SPORE_LARGE_HULL_COUNT; i++ )
 	{
 		CXenHull* hull = CXenHull::CreateHull( this, Vector( -12, -12, 0 ), Vector( 12, 12, 120 ), ( m_hullSizes[i].x * forward ) + ( m_hullSizes[i].y * right ) );
 		if (hull && FBitSet(pev->spawnflags, SF_XEN_PLANT_TRANSIT))
 			hull->pev->spawnflags |= SF_XEN_PLANT_TRANSIT;
+		m_hulls[i] = hull;
+	}
+}
+
+void CXenSporeLarge::UpdateOnRemove()
+{
+	CXenSpore::UpdateOnRemove();
+
+	for (auto& hull : m_hulls)
+	{
+		UTIL_RemoveAndClean(hull);
 	}
 }
 
