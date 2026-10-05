@@ -44,6 +44,7 @@ bookToC: false
 * `Don't Drop to Floor` - don't try instantly dropping the monster to floor after the sequence has finished. The monster still may naturally fall due to gravity after that.
 * `Allow stuck` - allow monster being stuck after the sequence has done (if the animation included some movement, e.g. some jump/leap sequence). Otherwise in case of becoming stuck the monster will just get teleported to its position before the animation.
 * `Allow unnamed idle` - make the unnamed scripted sequence with idle animation continue playing the idle animation instead of finishing the sequence (like it does in Half-Life).
+* `Allow Take Damage TriggerCondition` - allow firing a TriggerTarget for the Take Damage TriggerCondition even if the scripted sequence in Non-interruptible. In base Half-Life if the `No Interruptions` spawnflag in set, dealing damage to the monster in such script doesn't fire the TriggerTarget for the Take Damage TriggerCondition because the monster ignores damage conditions while in the non-interruptible script.
 
 ### Bugfixes
 

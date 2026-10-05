@@ -152,6 +152,7 @@ void CBaseMonster::RunAI()
 	// we throw them out cause we don't want them sitting around through the lifespan of a schedule
 	// that doesn't use them. 
 	m_afConditions &= ~( bits_COND_LIGHT_DAMAGE | bits_COND_HEAVY_DAMAGE );
+	m_bForceTakeDamageTriggerCondition = false;
 	Forget(bits_MEMORY_BLOCKER_IS_ENEMY);
 }
 

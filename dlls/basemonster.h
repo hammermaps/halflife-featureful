@@ -586,6 +586,7 @@ public:
 
 	short m_gibPolicy;
 	bool m_bForceConditionsGather;
+	bool m_bForceTakeDamageTriggerCondition;
 	float m_flNextPainTime;
 	float m_equalDislikeTime;
 	string_t m_triggerOnDeath;

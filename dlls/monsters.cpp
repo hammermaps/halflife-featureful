@@ -180,6 +180,7 @@ TYPEDESCRIPTION	CBaseMonster::m_SaveData[] =
 
 	DEFINE_FIELD( CBaseMonster, m_gibPolicy, FIELD_SHORT ),
 	DEFINE_FIELD( CBaseMonster, m_bForceConditionsGather, FIELD_BOOLEAN ),
+	DEFINE_FIELD( CBaseMonster, m_bForceTakeDamageTriggerCondition, FIELD_BOOLEAN ),
 	DEFINE_FIELD( CBaseMonster, m_flNextPainTime, FIELD_TIME ),
 	DEFINE_FIELD( CBaseMonster, m_equalDislikeTime, FIELD_TIME ),
 	DEFINE_FIELD( CBaseMonster, m_triggerOnDeath, FIELD_STRING ),
@@ -4185,7 +4186,7 @@ bool CBaseMonster::FCheckAITrigger( short condition )
 		}
 		break;
 	case AITRIGGER_TAKEDAMAGE:
-		if( m_afConditions & ( bits_COND_LIGHT_DAMAGE | bits_COND_HEAVY_DAMAGE ) )
+		if( HasConditions( bits_COND_LIGHT_DAMAGE | bits_COND_HEAVY_DAMAGE ) || m_bForceTakeDamageTriggerCondition )
 		{
 			fFireTarget = true;
 		}

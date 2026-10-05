@@ -1434,6 +1434,11 @@ TakeDamageResult CBaseMonster::TakeDamage( entvars_t *pevInflictor, entvars_t *p
 			takeDamageResult.SetGotLightDamage();
 		}
 
+		if (m_pCine && damageInfo.damage > 0 && FBitSet(m_pCine->pev->spawnflags, SF_SCRIPT_ALLOW_TAKEDAMAGE_TRIGGER))
+		{
+			m_bForceTakeDamageTriggerCondition = true;
+		}
+
 		if (pev->health <= 0.0f && m_pCine && m_pCine->m_interruptionPolicy != SCRIPT_INTERRUPTION_POLICY_ONLY_DEATH && !m_pCine->CanInterrupt())
 		{
 			TriggerOnDeath(CBaseEntity::OwnInstance(pevAttacker));
