@@ -116,7 +116,7 @@ const char warpballCatalogSchema[] = R"(
 						"$ref": "#/definitions/sprite"
 					},
 					"beam": {
-						"type": "object",
+						"type": ["object", "null"],
 						"properties": {
 							"sprite": {
 								"$ref": "#/definitions/sprite_name"
@@ -132,10 +132,11 @@ const char warpballCatalogSchema[] = R"(
 								"minimum": 1
 							},
 							"noise": {
-								"type": "integer"
+								"type": "integer",
+								"minimum": 0
 							},
 							"life": {
-								"$ref": "definitions.json#/range"
+								"$ref": "definitions.json#/range_non_negative"
 							}
 						},
 						"additionalProperties": false
@@ -145,7 +146,7 @@ const char warpballCatalogSchema[] = R"(
 						"minumum": 1
 					},
 					"beam_count": {
-						"$ref": "definitions.json#/range_int"
+						"$ref": "definitions.json#/range_int_non_negative"
 					},
 					"light": {
 						"type": ["object", "null"],
