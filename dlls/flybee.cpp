@@ -86,10 +86,8 @@ public:
 	float	m_flMinSpeed;
 	float	m_flMaxDist;
 
-	Vector	m_vecAttack2;
-
-	int		m_iFear;
 	float m_flNextAlert;
+	float m_flNextBallAttack;
 
 	static const NamedSoundScript idleSoundScript;
 	static const NamedSoundScript alertSoundScript;
@@ -113,8 +111,6 @@ public:
 
 	static const NamedVisual zapBeamVisual;
 	static const NamedVisual zapBeamAltVisual;
-	static const NamedVisual zapVisual;
-	static const NamedVisual zapWaveVisual;
 };
 
 LINK_ENTITY_TO_CLASS( monster_flybee, CFlybee );
@@ -127,8 +123,7 @@ TYPEDESCRIPTION	CFlybee::m_SaveData[] =
 	DEFINE_FIELD( CFlybee, m_flMinSpeed, FIELD_FLOAT ),
 	DEFINE_FIELD( CFlybee, m_flMaxDist, FIELD_FLOAT ),
 	DEFINE_FIELD( CFlybee, m_flNextAlert, FIELD_TIME ),
-	DEFINE_FIELD( CFlybee, m_iFear, FIELD_INTEGER ),
-	DEFINE_FIELD( CFlybee, m_vecAttack2, FIELD_VECTOR ),
+	DEFINE_FIELD( CFlybee, m_flNextBallAttack, FIELD_TIME ),
 };
 
 IMPLEMENT_SAVERESTORE( CFlybee, CFlyingMonster );
@@ -162,7 +157,7 @@ public :
 	static const NamedVisual ballVisual;
 	static const NamedVisual ballTrailVisual;
 };
-LINK_ENTITY_TO_CLASS( flyball, CFlyBall );
+LINK_ENTITY_TO_CLASS( flyball, CFlyBall )
 
 const NamedSoundScript CFlyBall::electroSoundScript = {
 	CHAN_STATIC,
@@ -183,6 +178,64 @@ const NamedVisual CFlyBall::ballTrailVisual = BuildVisual("Flybee.BallTrail")
 		.Framerate(22.0f)
 		.Scale(0.2f)
 		.RenderProps(kRenderTransAdd, Color3(230, 255, 230), 150, kRenderFxNone);
+
+class CFlybeeZapBomb : public CBaseEntity
+{
+public:
+	void Spawn() override;
+	void Precache() override;
+
+	void Animate();
+	void EXPORT AnimateThink();
+	void EXPORT FadeThink();
+
+	float m_startTime;
+	float m_lastTime;
+	float m_maxFrame;
+
+	int Save( CSave &save ) override;
+	int Restore( CRestore &restore ) override;
+	static TYPEDESCRIPTION m_SaveData[];
+
+	static const NamedSoundScript zapSoundScript;
+
+	static const NamedVisual zapVisual;
+	static const NamedVisual zapWaveVisual;
+};
+
+LINK_ENTITY_TO_CLASS( flybee_zapbomb, CFlybeeZapBomb )
+
+TYPEDESCRIPTION	CFlybeeZapBomb::m_SaveData[] =
+{
+	DEFINE_FIELD( CFlybeeZapBomb, m_startTime, FIELD_TIME ),
+	DEFINE_FIELD( CFlybeeZapBomb, m_lastTime, FIELD_TIME ),
+	DEFINE_FIELD( CFlybeeZapBomb, m_maxFrame, FIELD_FLOAT ),
+};
+
+IMPLEMENT_SAVERESTORE( CFlybeeZapBomb, CBaseEntity )
+
+const NamedVisual CFlybeeZapBomb::zapVisual = BuildVisual("Flybee.Zap")
+		.Model("sprites/nhth1.spr")
+		.Framerate(10.0f)
+		.Scale(0.8f)
+		.RenderProps(kRenderTransAdd, Color3(230, 255, 230), 150, kRenderFxNone);
+
+const NamedVisual CFlybeeZapBomb::zapWaveVisual = BuildVisual("Flybee.ZapWave")
+		.Model("sprites/shockwave.spr")
+		.Life(0.2f)
+		.BeamWidth(16)
+		.RenderColor(206, 118, 255)
+		.Alpha(80)
+		.WaveType(Visual::WAVETYPE_CYLINDER);
+
+const NamedSoundScript CFlybeeZapBomb::zapSoundScript = {
+	CHAN_BODY,
+	{"debris/beamstart14.wav"},
+	0.9f,
+	ATTN_NORM,
+	IntRange(90, 99),
+	"Flybee.Zap"
+};
 
 constexpr float flybeeAttenuation = 0.6f;
 constexpr IntRange flybeePitch(95, 105);
@@ -261,20 +314,6 @@ const NamedVisual CFlybee::zapBeamAltVisual = BuildVisual("Flybee.ZapBeamAlt")
 		.RenderColor(223, 224, 255)
 		.Mixin(&CFlybee::zapBeamVisual);
 
-const NamedVisual CFlybee::zapVisual = BuildVisual("Flybee.Zap")
-		.Model("sprites/nhth1.spr")
-		.Framerate(10.0f)
-		.Scale(0.8f)
-		.RenderProps(kRenderTransAdd, Color3(230, 255, 230), 150, kRenderFxNone);
-
-const NamedVisual CFlybee::zapWaveVisual = BuildVisual("Flybee.ZapWave")
-		.Model("sprites/shockwave.spr")
-		.Life(0.2f)
-		.BeamWidth(16)
-		.RenderColor(206, 118, 255)
-		.Alpha(80)
-		.WaveType(Visual::WAVETYPE_CYLINDER);
-
 void CFlybee::IdleSound()
 {
 	EmitSoundScript(idleSoundScript);
@@ -331,9 +370,6 @@ void CFlybee::Spawn()
 	m_flMaxSpeed	= GetSkillValue("flybee_maxspeed") * 0.75f;
 	m_flMaxDist		= 384;
 
-	m_iFear			= 0;
-	m_flNextAttack	= 0;
-
 	Vector Forward;
 	UTIL_MakeVectorsPrivate(pev->angles, Forward, 0, 0);
 	pev->velocity = m_flightSpeed * Forward.Normalize();
@@ -345,8 +381,6 @@ void CFlybee::Precache()
 	PrecacheMyModel("models/flybee.mdl");
 	PrecacheMyGibModel();
 
-	PRECACHE_SOUND("zombie/claw_miss2.wav");
-
 	RegisterAndPrecacheSoundScript(idleSoundScript);
 	RegisterAndPrecacheSoundScript(alertSoundScript);
 	RegisterAndPrecacheSoundScript(attackSoundScript);
@@ -357,9 +391,8 @@ void CFlybee::Precache()
 
 	RegisterVisual(zapBeamVisual);
 	RegisterVisual(zapBeamAltVisual);
-	RegisterVisual(zapVisual);
-	RegisterVisual(zapWaveVisual);
 
+	UTIL_PrecacheOther("flybee_zapbomb", GetProjectileOverrides());
 	UTIL_PrecacheOther( "flyball", GetProjectileOverrides() );
 }
 
@@ -379,20 +412,12 @@ bool CFlybee::CheckMeleeAttack1 ( float flDot, float flDist )
 
 bool CFlybee::CheckRangeAttack1 ( float flDot, float flDist )
 {
-	if ( !HasConditions( bits_COND_ENEMY_OCCLUDED ) && flDot > -0.7 && m_iFear <= HATE_LEVEL )
-	{
-		return true;
-	}
-	return false;
+	return !HasConditions( bits_COND_ENEMY_OCCLUDED ) && flDot > -0.7f && m_flNextBallAttack <= gpGlobals->time;
 }
 
 bool CFlybee::CheckRangeAttack2 ( float flDot, float flDist )
 {
-	if ( !HasConditions( bits_COND_ENEMY_OCCLUDED ) && m_iFear >= FEAR_LEVEL && m_flNextAttack < gpGlobals->time )
-	{
-		return true;
-	}
-	return false;
+	return !HasConditions( bits_COND_ENEMY_OCCLUDED ) && flDot > -0.7f && m_flNextAttack <= gpGlobals->time;
 }
 
 void CFlybee::SetYawSpeed()
@@ -423,8 +448,10 @@ void CFlybee::HandleAnimEvent( MonsterEvent_t *pEvent )
 			UTIL_MakeVectors( pev->angles );
 			TraceResult tr;
 
-			Vector vecStart	= pev->origin + gpGlobals->v_up * 24 + gpGlobals->v_forward * 32;
-			UTIL_TraceLine( vecStart, m_vecAttack2, dont_ignore_monsters, dont_ignore_glass, ENT(pev), &tr );
+			const Vector vecStart = pev->origin + gpGlobals->v_up * 24 + gpGlobals->v_forward * 32;
+			const Vector vecTarget = m_hEnemy != 0 ? m_hEnemy->Center() : (vecStart + gpGlobals->v_forward * 256.0f);
+
+			UTIL_TraceLine( vecStart, vecTarget, dont_ignore_monsters, dont_ignore_glass, ENT(pev), &tr );
 
 			Vector vecEnd = tr.vecEndPos;
 
@@ -442,17 +469,10 @@ void CFlybee::HandleAnimEvent( MonsterEvent_t *pEvent )
 				}
 			}
 
-			const Visual* visual = GetVisual(zapVisual);
-			CSprite *pSprite = CreateSpriteFromVisual(visual, vecEnd);
-			if (pSprite)
-			{
-				pSprite->AnimateAndDie(pSprite->pev->framerate);
-				pSprite->Expand( pSprite->pev->scale, 120 );
-			}
+			m_flNextAttack = gpGlobals->time + RANDOM_FLOAT(3.0f, 5.0f);
+			m_flNextBallAttack = Q_max(gpGlobals->time + 1.0f, m_flNextBallAttack);
 
-			SendBeamWave(vecEnd, 1000, GetVisual(zapWaveVisual), MSG_PVS, pev->origin);
-			::RadiusDamage( vecEnd, pev, pev, RadiusDamageInfo(DamageInfo{GetSkillValue("flybee_dmg_beam"), DMG_SHOCK}), Classify() );
-
+			CBaseEntity::Create("flybee_zapbomb", vecEnd, pev->angles, pev->owner, GetProjectileOverrides());
 			EmitSoundScriptAmbient(vecEnd, beamSoundScript);
 			break;
 		}
@@ -469,6 +489,9 @@ void CFlybee::HandleAnimEvent( MonsterEvent_t *pEvent )
 			CFlyBall::CreateFlyBall( vecSrc + gpGlobals->v_right * 10, ang, pev, flyBallOverrides );
 			CFlyBall::CreateFlyBall( vecSrc - gpGlobals->v_right * 30, ang, pev, flyBallOverrides );
 			CFlyBall::CreateFlyBall( vecSrc - gpGlobals->v_right * 10, ang, pev, flyBallOverrides );
+
+			m_flNextBallAttack = gpGlobals->time + RANDOM_FLOAT(2.5f, 4.5f);
+			m_flNextAttack = Q_max(gpGlobals->time + 1.0f, m_flNextAttack);
 
 			break;
 		}
@@ -604,7 +627,6 @@ Schedule_t slFlybeeRangeAttack2[] =
 
 Task_t tlFlybeeRunAttack[] =
 {
-	{ TASK_SET_FAIL_SCHEDULE,	(float)SCHED_RANGE_ATTACK1	},
 	{ TASK_FLYBEE_STOP_MOVING,	(float) 0					},
 	{ TASK_FLYBEE_RUN_ATTACK,	(float)	0					},
 };
@@ -620,7 +642,7 @@ Schedule_t slFlybeeRunAttack[] =
 		bits_COND_CAN_MELEE_ATTACK1 |
 		bits_COND_HEAVY_DAMAGE,
 		0,
-		"Range attack 2"
+		"Run attack"
 	},
 };
 
@@ -674,27 +696,42 @@ Schedule_t* CFlybee::GetSchedule()
 
 		if ( HasConditions( bits_COND_CAN_MELEE_ATTACK1 ) )
 		{
-			m_iFear = Q_max ( HATE_LEVEL, m_iFear - 5 );
 			return GetScheduleOfType( SCHED_MELEE_ATTACK1 );
 		}
 
-		if ( HasConditions( bits_COND_CAN_RANGE_ATTACK1 ) )
 		{
-			m_iFear = Q_min ( FEAR_LEVEL, m_iFear + 5 );
-			return GetScheduleOfType( SCHED_RANGE_ATTACK1 );
-		}
+			const bool canRangeAttack1 = HasConditions(bits_COND_CAN_RANGE_ATTACK1);
+			const bool canRangeAttack2 = HasConditions(bits_COND_CAN_RANGE_ATTACK2);
 
-		if ( HasConditions( bits_COND_CAN_RANGE_ATTACK2 ) )
-		{
-			m_iFear -= 10;
-			m_flNextAttack = gpGlobals->time + RANDOM_FLOAT ( 3,5 );
-			return GetScheduleOfType( SCHED_RANGE_ATTACK2 );
+			if (canRangeAttack1 && canRangeAttack2)
+			{
+				const bool doAttack2 = RANDOM_LONG(0, 2) > 0;
+				if (doAttack2)
+				{
+					return GetScheduleOfType(SCHED_RANGE_ATTACK2);
+				}
+				else
+				{
+					return GetScheduleOfType(SCHED_RANGE_ATTACK1);
+				}
+			}
+			else if (canRangeAttack1)
+			{
+				return GetScheduleOfType(SCHED_RANGE_ATTACK1);
+			}
+			else if (canRangeAttack2)
+			{
+				return GetScheduleOfType(SCHED_RANGE_ATTACK2);
+			}
+			else
+			{
+				if ((Center() - m_hEnemy->Center()).IsLengthLessThanOrEqual(300) && fabs(pev->origin.z - m_hEnemy->pev->origin.z) <= 128)
+					return slFlybeeRunAttack;
+			}
 		}
 
 		if ( HasConditions( bits_COND_HEAVY_DAMAGE ) )
 		{
-			m_iFear = Q_min ( FEAR_LEVEL, m_iFear + 3 );
-
 			m_flightSpeed = Q_min ( m_flMaxSpeed, m_flightSpeed + 40 );
 		}
 		return GetScheduleOfType( SCHED_STANDOFF );
@@ -726,23 +763,8 @@ Schedule_t* CFlybee::GetScheduleOfType ( int Type )
 		return slFlybeeRangeAttack1;
 
 	case SCHED_RANGE_ATTACK2:
+		return slFlybeeRangeAttack2;
 
-		if ( m_hEnemy->pev->velocity.IsLengthLessThanOrEqual(100) )
-		{
-			if ( (Center() - m_hEnemy->Center()).IsLengthLessThanOrEqual(300) && fabs(pev->origin.z - m_hEnemy->pev->origin.z) <= 128 )
-				return slFlybeeRunAttack;
-			else
-			{
-				if ( RANDOM_LONG ( 0,2 ) == 0 )
-					return slFlybeeRangeAttack1;
-				else
-					return slFlybeeRangeAttack2;
-			}
-		}
-		else
-		{
-			return slFlybeeRangeAttack1;
-		}
 	case SCHED_CHASE_ENEMY:
 		AttackSound();
 		// pssthrough
@@ -798,7 +820,6 @@ void CFlybee::StartTask(Task_t *pTask)
 		break;
 
 	case TASK_FLYBEE_RANGE_ATTACK2:
-		m_vecAttack2 = m_hEnemy->Center();
 		m_IdealActivity = ACT_RANGE_ATTACK2;
 		break;
 
@@ -838,12 +859,9 @@ void CFlybee::RunTask ( Task_t *pTask )
 
 			m_SaveVelocity = m_SaveVelocity * 0.8 + 0.2 * (vecPos - pev->origin).Normalize() * m_flightSpeed;
 
-			if ( m_hEnemy->MyMonsterPointer()->FInViewCone ( this ) && m_hEnemy->FVisible( this ))
+			if (m_hEnemy->FVisible(this))
 			{
-				m_flNextAlert -= 0.1;
-
-				if ( m_iFear < FEAR_LEVEL )
-					m_iFear ++;
+				m_flNextAlert -= 0.1f;
 
 				if (m_idealDist < m_flMaxDist)
 				{
@@ -860,11 +878,7 @@ void CFlybee::RunTask ( Task_t *pTask )
 			}
 			else 
 			{
-				m_flNextAlert += 0.1;
-
-				if ( m_iFear > HATE_LEVEL )
-					m_iFear --;
-
+				m_flNextAlert += 0.1f;
 
 				if (m_idealDist > 128)
 				{
@@ -910,16 +924,15 @@ void CFlybee::RunTask ( Task_t *pTask )
 			TraceResult tr;
 			UTIL_TraceHull( pev->origin, m_hEnemy->Center(), ignore_monsters, large_hull, m_hEnemy->edict(), &tr );
 
-			if (tr.flFraction < 0.9)
+			if (tr.flFraction < 0.9f)
 			{
-				TaskFail ();
+				TaskFail("path is obstructed");
 				break;
 			}
 
 			m_SaveVelocity = (tr.vecEndPos - pev->origin).Normalize() * m_flightSpeed;
 
-			m_flightSpeed = Q_min ( m_flMaxSpeed, m_flightSpeed * 1.2 );
-
+			m_flightSpeed = Q_min ( m_flMaxSpeed, m_flightSpeed * 1.2f );
 
 			break;
 		}
@@ -1216,4 +1229,73 @@ void CFlyBall::ExplodeTouch( CBaseEntity *pOther )
 	pev->solid = SOLID_NOT;
 	SetThink( &CBaseEntity::SUB_Remove );
 	pev->nextthink = gpGlobals->time + 0.01f; // let the sound play
+}
+
+void CFlybeeZapBomb::Spawn()
+{
+	ApplyVisual(GetVisual(zapVisual));
+	m_maxFrame = (float)MODEL_FRAMES(pev->modelindex) - 1;
+	m_startTime = m_lastTime = gpGlobals->time;
+
+	SetThink(&CFlybeeZapBomb::AnimateThink);
+	pev->nextthink = gpGlobals->time + 0.1f;
+}
+
+void CFlybeeZapBomb::Precache()
+{
+	RegisterAndPrecacheSoundScript(zapSoundScript);
+	RegisterVisual(zapVisual);
+	RegisterVisual(zapWaveVisual);
+}
+
+void CFlybeeZapBomb::Animate()
+{
+	pev->frame += pev->framerate * (gpGlobals->time - m_lastTime);
+	m_lastTime = gpGlobals->time;
+
+	if (pev->frame > m_maxFrame)
+	{
+		if (m_maxFrame > 0)
+			pev->frame = fmod(pev->frame, m_maxFrame);
+		else
+			pev->frame = 0.0f;
+	}
+}
+
+void CFlybeeZapBomb::AnimateThink()
+{
+	Animate();
+	if (m_startTime + 0.5f <= gpGlobals->time)
+	{
+		CBaseEntity* pOwner = CBaseEntity::OwnInstance(pev->owner);
+		const int classifyToIgnore = pOwner ? pOwner->Classify() : CLASS_NONE;
+
+		SendBeamWave(pev->origin, 1000, GetVisual(zapWaveVisual), MSG_PVS, pev->origin);
+		::RadiusDamage(pev->origin, pev, pOwner ? pOwner->pev : pev, RadiusDamageInfo(DamageInfo{GetSkillValue("flybee_dmg_beam"), DMG_SHOCK}), classifyToIgnore);
+		EmitSoundScript(zapSoundScript);
+
+		pev->speed = pev->scale;
+		pev->health = 120;
+		SetThink(&CFlybeeZapBomb::FadeThink);
+	}
+	pev->nextthink = gpGlobals->time + 0.1f;
+}
+
+void CFlybeeZapBomb::FadeThink()
+{
+	const float frametime = gpGlobals->time - m_lastTime;
+	pev->scale += pev->speed * frametime;
+	pev->renderamt -= pev->health * frametime;
+
+	if (pev->renderamt <= 0)
+	{
+		pev->renderamt = 0;
+		SetThink(&CBaseEntity::SUB_Remove);
+		pev->nextthink = gpGlobals->time;
+	}
+	else
+	{
+		Animate();
+		pev->nextthink = gpGlobals->time + 0.1f;
+	}
 }
