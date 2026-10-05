@@ -132,8 +132,8 @@ Example of the named template:
 `"sound1"` and `"sound2"` objects define sounds to be played. Each can define:
 
 * `"sound"` - path to the sound in *sound* directory. Default value is `"debris/beamstart2.wav"` for `"sound1"` and `"debris/beamstart7.wav"` for `"sound2".`
-* `"volume"` - the max is 1.0. Default value is 1.0.
-* `"pitch"` - the norm is 100. [Integer range]({{< ref "JSON/#range_int" >}}). Default value is 100.
+* `"volume"` - the maximum is 1.0. Can be a [range]({{< ref "JSON/#range" >}}) (the volume will be randomized on each play). Default value is 1.0.
+* `"pitch"` - the norm is 100 (the maximum is 255). Can be an [integer range]({{< ref "JSON/#range_int" >}}) (the pitch will be randomized on each play). Default value is 100.
 * `"attenuation"` - how the sound's volume decreases depending on the distance. 0.8 means large radius, 1.25 means medium radius. Default value is 0.8. The following string aliases are supported as well instead of numeric values: `"norm"` (large radius), `"static"` (medium radius), `"idle"` (small radius), `"none"` (play everywhere).
 
 `"sound1"` and `"sound2"` can be set to `null` to disable sprite effects.

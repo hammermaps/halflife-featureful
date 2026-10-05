@@ -70,12 +70,10 @@ const char warpballCatalogSchema[] = R"(
 					"pattern": ".+\\.wav"
 				},
 				"volume": {
-					"type": "number",
-					"exclusiveMinimum": 0,
-					"maximum": 1.0
+					"$ref": "definitions.json#/range_volume"
 				},
 				"pitch": {
-					"$ref": "definitions.json#/range_int"
+					"$ref": "definitions.json#/range_pitch"
 				},
 				"attenuation": {
 					"$ref": "definitions.json#/attenuation"
@@ -646,7 +644,7 @@ static void PlayWarpballSound(const WarpballSound& sound, const Vector& vecOrigi
 {
 	if (sound.sound != nullptr)
 	{
-		UTIL_EmitAmbientSound(playSoundEnt, vecOrigin, sound.sound, sound.volume, sound.attenuation, 0, RandomizeNumberFromRange(sound.pitch));
+		UTIL_EmitAmbientSound(playSoundEnt, vecOrigin, sound.sound, RandomizeNumberFromRange(sound.volume), sound.attenuation, 0, RandomizeNumberFromRange(sound.pitch));
 	}
 }
 
@@ -723,7 +721,7 @@ static void ReportWarpballSound(const WarpballSound& sound)
 	if (sound.sound == nullptr) {
 		LOG("undefined\n");
 	} else {
-		LOG("'%s'. Volume: %g. Attenuation: %g. Pitch: %d-%d\n", sound.sound, sound.volume, sound.attenuation, sound.pitch.min, sound.pitch.max);
+		LOG("'%s'. Volume: %g-%g. Attenuation: %g. Pitch: %d-%d\n", sound.sound, sound.volume.min, sound.volume.max, sound.attenuation, sound.pitch.min, sound.pitch.max);
 	}
 }
 

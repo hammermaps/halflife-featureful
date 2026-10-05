@@ -50,7 +50,7 @@ Each entry in the file may have the following properties:
 * `"waves"` - an array of sound samples. A sample can be a path to .wav file (e.g. `"barney/yup.wav"`), the specific sentence (starts with '!', e.g. `"!BA_OK1"`) or a sentence group (e.g. `"BA_OK"`). When the soundscript is played the wave is choosen randomly from the array. The maximum number of samples in the list is 10.
 * `"volume"` - a numeric value or [range]({{< ref "JSON/#range" >}}) between 0.0 and 1.0 to define a sound volume. If it's a range the volume value will be randomized on each play. Example of range: `[0.7, 0.9]`.
 * `"attenuation"` - a numeric value to define a sound attenuation (i.e. how fast the volume will decrease with the distance between the sound origin and the listener). The normal value is 0.8. The value 0.0 means no atenuation (play everywhere). The following string aliases are supported as well instead of numeric values: `"norm"` (large radius), `"static"` (medium radius), `"idle"` (small radius), `"none"` (play everywhere).
-* `"pitch"` - an integer value or [integer range]({{< ref "JSON/#range_int" >}}) to define a sound pitch, where 100 is a normal pitch. The values higher than 100 mean high pitch, and the values below 100 mean lowered pitch. If it's a range the pitch value will be randomized on each play. Example of range: `[95, 105]`
+* `"pitch"` - an integer value or [integer range]({{< ref "JSON/#range_int" >}}) to define a sound pitch, where 100 is a normal pitch. The values higher than 100 mean high pitch (the maximum is 255), and the values below 100 mean lowered pitch. If it's a range the pitch value will be randomized on each play. Example of range: `[95, 105]`
 
 ## Debugging
 

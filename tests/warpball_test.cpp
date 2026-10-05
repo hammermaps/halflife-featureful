@@ -92,7 +92,7 @@ const char warpballs[] = R"(
 			},
 			"sound2": {
 				"attenuation": "static",
-				"volume": 0.8,
+				"volume": [0.7, 0.8],
 				"pitch": 110
 			},
 			"light": {
@@ -271,7 +271,7 @@ TEST(WarpballTemplates, Parse) {
 
 		EXPECT_STREQ(t->sound2.sound, xen->sound2.sound);
 		EXPECT_EQ(t->sound2.attenuation, ATTN_STATIC);
-		EXPECT_EQ(t->sound2.volume, 0.8f);
+		EXPECT_EQ(t->sound2.volume, FloatRange(0.7f, 0.8f));
 		EXPECT_EQ(t->sound2.pitch, 110);
 
 		ASSERT_TRUE(t->light.IsDefined());
