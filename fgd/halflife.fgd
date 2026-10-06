@@ -157,7 +157,18 @@
 	ent_template(string): "Entity template" : : "A template name from templates/entities.json"
 ]
 
-@BaseClass size(-16 -16 0, 16 16 32) color(0 0 200) base(Targetname, TargetOnPickup, Delay, Appearflags, Angles, Global, Scalable, CustomObjectHint, EntityTemplate) = Pickup
+@BaseClass = EntityEffects
+[
+	effects(choices) : "Effects" =
+	[
+		0 : "No effects"
+		16 : "Invert light (take light from ceiling)"
+		1024 : "Don't reflect in env_mirror"
+		2048 : "Model is always bright"
+	]
+]
+
+@BaseClass size(-16 -16 0, 16 16 32) color(0 0 200) base(Targetname, TargetOnPickup, Delay, Appearflags, Angles, Global, Scalable, CustomObjectHint, EntityTemplate, EntityEffects) = Pickup
 [
 	spawnflags(Flags) =
 	[
@@ -296,17 +307,6 @@
 		43 : "Bluish"
 		1 : "Human (red) [SC compatible]"
 		2 : "Alien (yellow) [SC compatible]"
-	]
-]
-
-@BaseClass = EntityEffects
-[
-	effects(choices) : "Effects" =
-	[
-		0 : "No effects"
-		16 : "Invert light (take light from ceiling)"
-		1024 : "Don't reflect in env_mirror"
-		2048 : "Model is always bright"
 	]
 ]
 
@@ -1472,7 +1472,7 @@
 @PointClass base(Ammo) studio("models/w_crossbow_clip.mdl") = ammo_crossbow : "Spawns crossbow ammo." : "http://twhl.info/wiki.php?id=8" []
 @PointClass base(Ammo) studio("models/w_saw_clip.mdl") = ammo_556 : "M249 Ammo" []
 @PointClass base(Ammo) studio("models/w_m40a1clip.mdl") = ammo_762 : "Sniper Ammo" []
-@PointClass base(Targetname, Appearflags, Angles, Global) size(-16 -16 -16, 16 16 16) studio("models/spore_ammo.mdl") = ammo_spore : "Spore" []
+@PointClass base(Targetname, Appearflags, Angles, Global, EntityTemplate, EntityEffects) size(-16 -16 -16, 16 16 16) studio("models/spore_ammo.mdl") = ammo_spore : "Spore" []
 
 @PointClass base(Ammo) studio() = ammo_45acp : ".45 ACP Ammo" []
 @PointClass base(Ammo) studio() = ammo_57mm : "57mm Ammo" []
@@ -4226,7 +4226,7 @@
 //
 
 @PointClass size(-16 -16 0, 16 16 36) base(Item) studio("models/w_adrenaline.mdl") = item_adrenaline : "Adrenaline" []
-@PointClass size(-16 -16 0, 16 16 36) base(Targetname, Appearflags, Angles, Global, Scalable, EntityTemplate) studio("models/w_oxygen.mdl") = item_airtank : "Oxygen tank"
+@PointClass size(-16 -16 0, 16 16 36) base(Targetname, Appearflags, Angles, Global, Scalable, EntityTemplate, EntityEffects) studio("models/w_oxygen.mdl") = item_airtank : "Oxygen tank"
 [
 	model(studio) : "Custom Model"
 ]
@@ -4321,7 +4321,7 @@
 	]
 ]
 
-@BaseClass base(Targetname, Angles) = ItemRecharger
+@BaseClass base(Targetname, Angles, EntityTemplate, CustomObjectHint, Global, EntityEffects) = ItemRecharger
 [
 	TriggerOnEmpty(target_destination) : "Trigger On Empty"
 	TriggerOnFirstUse(target_destination) : "Trigger On First Use"
@@ -4334,10 +4334,10 @@
 	]
 ]
 
-@PointClass size(-12 -16 0, 12 16 36) base(ItemRecharger, EntityTemplate, CustomObjectHint, Global) studio("models/health_charger_body.mdl") = item_healthcharger : "Wall Health Kit" []
-@PointClass size(-12 -16 0, 12 16 36) base(ItemRecharger, EntityTemplate, CustomObjectHint, Global) studio("models/hev.mdl") = item_recharge : "Wall Recharger" []
+@PointClass size(-12 -16 0, 12 16 36) base(ItemRecharger) studio("models/health_charger_body.mdl") = item_healthcharger : "Wall Health Kit" []
+@PointClass size(-12 -16 0, 12 16 36) base(ItemRecharger) studio("models/hev.mdl") = item_recharge : "Wall Recharger" []
 
-@PointClass base(Targetname, Global, Angles, CustomObjectHint) size(-16 -16 0, 16 16 48 ) studio("models/eye_scanner.mdl") = item_eyescanner : "Retinal Scanner"
+@PointClass base(Targetname, Global, Angles, EntityTemplate, CustomObjectHint, EntityEffects) size(-16 -16 0, 16 16 48 ) studio("models/eye_scanner.mdl") = item_eyescanner : "Retinal Scanner"
 [
 	unlocked_target(target_destination) : "Unlocked target"
 	locked_target(target_destination) : "Locked target"
@@ -10001,7 +10001,7 @@
 // Xen
 //
 
-@BaseClass base(Targetname, RenderFields, Angles, EntityTemplate) flags(Angle) = XenPlant
+@BaseClass base(Targetname, RenderFields, Angles, EntityTemplate, EntityEffects) flags(Angle) = XenPlant
 [
 	model(studio) : "Custom Model"
 	scale(string) : "Scale (1.0 = normal size)"
@@ -10065,7 +10065,7 @@
     ]
 ]
 
-@PointClass base(Targetname, Classification, EntityTemplate) studio("models/mortar.mdl") = op4mortar : "Op4 Mortar"
+@PointClass base(Targetname, Classification, EntityTemplate, EntityEffects) studio("models/mortar.mdl") = op4mortar : "Op4 Mortar"
 [
 	spawnflags(Flags) =
 	[
