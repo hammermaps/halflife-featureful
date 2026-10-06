@@ -176,10 +176,16 @@ void CNuclearBomb::Precache()
 
 	m_pTimer = (CNuclearBombTimer*)Create("item_nuclearbombtimer", pev->origin, pev->angles);
 	if (m_pTimer)
+	{
+		m_pTimer->pev->effects = pev->effects;
 		m_pTimer->SetNuclearBombTimer(m_fOn);
+	}
 	m_pButton = (CNuclearBombButton*)Create("item_nuclearbombbutton", pev->origin, pev->angles);
 	if (m_pButton)
+	{
+		m_pButton->pev->effects = pev->effects;
 		m_pButton->SetNuclearBombButton(m_fOn);
+	}
 }
 
 void CNuclearBomb::Spawn()

@@ -2409,7 +2409,7 @@
 	]
 ]
 
-@PointClass base(Targetname) size(-16 -16 -16, 16 16 16) = env_electrified_wire : "Electrified Wire"
+@PointClass base(Targetname, EntityTemplate, EntityEffects) size(-16 -16 -16, 16 16 16) = env_electrified_wire : "Electrified Wire"
 [
 	segments(integer) : "Segments" : 16
 	sparkfrequency(integer) : "Spark Frequency" : 3
@@ -2432,7 +2432,7 @@
 	]
 ]
 
-@PointClass base(Targetname) size(-16 -16 -16, 16 16 16) = env_rope : "Rope"
+@PointClass base(Targetname, EntityTemplate, EntityEffects) size(-16 -16 -16, 16 16 16) = env_rope : "Rope"
 [
 	segments(integer) : "Segments" : 16
 	disable(choices) :"Disable Use" : 0 =

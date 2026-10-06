@@ -767,6 +767,7 @@ void CWallHealthDecay::Activate()
 	m_jar = GetClassPtr( (CWallHealthJarDecay *)NULL );
 	if (m_jar)
 	{
+		m_jar->pev->effects = pev->effects;
 		m_jar->AssignEntityOverrides(GetProjectileOverrides());
 		m_jar->Spawn();
 		UTIL_SetOrigin(m_jar->pev, pev->origin);

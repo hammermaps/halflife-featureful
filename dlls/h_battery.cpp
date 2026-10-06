@@ -337,6 +337,7 @@ void CRechargeDecay::Activate()
 	m_glass = GetClassPtr( (CRechargeGlassDecay *)NULL );
 	if (m_glass)
 	{
+		m_glass->pev->effects = pev->effects;
 		m_glass->AssignEntityOverrides(GetProjectileOverrides());
 		m_glass->Spawn();
 		UTIL_SetOrigin(m_glass->pev, pev->origin);
