@@ -427,9 +427,8 @@ void CXenTree::HandleAnimEvent( MonsterEvent_t *pEvent )
 			CBaseEntity *pList[8];
 			bool sound = false;
 			int count = UTIL_EntitiesInBox( pList, 8, m_pTrigger->pev->absmin, m_pTrigger->pev->absmax, FL_MONSTER | FL_CLIENT );
-			Vector forward;
-
-			UTIL_MakeVectorsPrivate( pev->angles, forward, NULL, NULL );
+			Vector forward, right, up;
+			UTIL_MakeVectorsPrivate( pev->angles, forward, right, up );
 
 			TraceHullAttackParams params;
 			params.punchAngle.x = 15;
@@ -444,7 +443,7 @@ void CXenTree::HandleAnimEvent( MonsterEvent_t *pEvent )
 				if( pHurt != this && pHurt->pev->owner != edict() )
 				{
 					sound = true;
-					ImitateTraceHullAttack(pHurt, params);
+					ImitateTraceHullAttack(pHurt, params, forward, right, up);
 				}
 			}
 

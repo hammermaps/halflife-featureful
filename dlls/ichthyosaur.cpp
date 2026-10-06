@@ -465,7 +465,7 @@ void CIchthyosaur::HandleAnimEvent( MonsterEvent_t *pEvent )
 						pHurt->pev->fixangle = 1;
 					}
 
-					ImitateTraceHullAttack(pHurt, params);
+					ImitateTraceHullAttack(pHurt, params, gpGlobals->v_forward, gpGlobals->v_right, gpGlobals->v_up);
 				}
 			}
 			BiteSound();

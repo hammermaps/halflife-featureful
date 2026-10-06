@@ -404,9 +404,10 @@ void CArcher::HandleAnimEvent( MonsterEvent_t *pEvent )
 		CBaseEntity *pEnemy = m_hEnemy;
 		if ( pEnemy != NULL && (pEnemy->BodyTarget(pev->origin) - pev->origin).IsLengthLessThanOrEqual(pev->size.x * 3.0f) )
 		{
-			Vector dir, face;
+			Vector dir, face, forward, right, up;
 
-			UTIL_MakeVectorsPrivate( pev->angles, face, NULL, NULL );
+			UTIL_MakeVectorsPrivate( pev->angles, forward, right, up );
+			face = forward;
 			face.z = 0;
 			dir = (pEnemy->pev->origin - pev->origin);
 			dir.z = 0;
@@ -421,7 +422,7 @@ void CArcher::HandleAnimEvent( MonsterEvent_t *pEvent )
 				params.damageInfo = DamageInfo(GetSkillValue("archer_dmg_bite"), DMG_SLASH);
 				SetTraceHullAttackParamsFromTemplate(pEvent->event, params);
 
-				ImitateTraceHullAttack(pEnemy, params);
+				ImitateTraceHullAttack(pEnemy, params, forward, right, up);
 			}
 		}
 	}

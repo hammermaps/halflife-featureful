@@ -2294,7 +2294,7 @@ bool CBaseEntity::SetTraceHullAttackParamsFromTemplate(int eventIndex, TraceHull
 	return false;
 }
 
-TakeDamageResult CBaseEntity::ImitateTraceHullAttack(CBaseEntity* pHurt, const TraceHullAttackParams& params)
+TakeDamageResult CBaseEntity::ImitateTraceHullAttack(CBaseEntity* pHurt, const TraceHullAttackParams& params, const Vector forward, const Vector right, const Vector up)
 {
 	pHurt->ApplyPunchAngle(params.punchAngle);
 
@@ -2302,9 +2302,9 @@ TakeDamageResult CBaseEntity::ImitateTraceHullAttack(CBaseEntity* pHurt, const T
 	if (applyKnock)
 	{
 		pHurt->pev->velocity = pHurt->pev->velocity +
-							   gpGlobals->v_forward * params.knockForward +
-							   gpGlobals->v_right * params.knockRight +
-							   gpGlobals->v_up * params.knockUp;
+							   forward * params.knockForward +
+							   right * params.knockRight +
+							   up * params.knockUp;
 	}
 
 	TakeDamageResult takeDamageResult = pHurt->TakeDamage( pev, pev, params.damageInfo );
