@@ -263,10 +263,10 @@ const NamedSoundScript COp4Mortar::launchSoundScript = {
 
 void COp4Mortar::Precache()
 {
-	PRECACHE_MODEL("models/mortar.mdl");
+	PrecacheMyModel("models/mortar.mdl");
 	RegisterAndPrecacheSoundScript(rotateSoundScript);
 	RegisterAndPrecacheSoundScript(launchSoundScript);
-	UTIL_PrecacheOther("mortar_shell");
+	UTIL_PrecacheOther("mortar_shell", GetProjectileOverrides());
 }
 
 void COp4Mortar::Spawn()
@@ -275,7 +275,7 @@ void COp4Mortar::Spawn()
 
 	UTIL_SetOrigin(pev, pev->origin);
 
-	SET_MODEL(edict(), "models/mortar.mdl");
+	SetMyModel("models/mortar.mdl");
 
 	pev->health = 1;
 	pev->sequence = LookupSequence("idle");
@@ -694,6 +694,7 @@ void COp4Mortar::CreateMortarProjectile(CBaseEntity* pOwner, float speed)
 	vecAngle.y = UTIL_AngleMod(pev->angles.y + m_vGunAngle.y);
 
 	ProjectileParameters projectileParams("mortar_shell", vecPos, vecAngle, speed, pOwner);
+	projectileParams.entityOverrides = GetProjectileOverrides();
 	projectileParams.variant = 1;
 	CBaseEntity* pMortarShell = CreateAndLaunchAsProjectile(projectileParams);
 	if (pMortarShell)

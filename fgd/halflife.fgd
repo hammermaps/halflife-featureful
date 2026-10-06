@@ -10067,6 +10067,7 @@
 
 @PointClass base(Targetname, Classification, EntityTemplate, EntityEffects) studio("models/mortar.mdl") = op4mortar : "Op4 Mortar"
 [
+	model(studio) : "Custom Model"
 	spawnflags(Flags) =
 	[
 		1  : "Active" : 0
