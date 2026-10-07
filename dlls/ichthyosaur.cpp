@@ -49,6 +49,8 @@ class CIchthyosaur : public CFlyingMonster
 public:
 	void Spawn() override;
 	void Precache() override;
+	const char* DefaultModel() override { return "models/icky.mdl"; }
+	float DefaultHealth() override { return GetSkillValue("ichthyosaur_health"); }
 	void SetYawSpeed() override;
 	int DefaultClassify() override;
 	const char* DefaultDisplayName() override { return "Ichthyosaur"; }
@@ -465,7 +467,7 @@ void CIchthyosaur::HandleAnimEvent( MonsterEvent_t *pEvent )
 						pHurt->pev->fixangle = 1;
 					}
 
-					ImitateTraceHullAttack(pHurt, params);
+					ImitateTraceHullAttack(pHurt, params, gpGlobals->v_forward, gpGlobals->v_right, gpGlobals->v_up);
 				}
 			}
 			BiteSound();
@@ -492,13 +494,13 @@ void CIchthyosaur::Spawn()
 {
 	Precache();
 
-	SetMyModel( "models/icky.mdl" );
+	SetMyModel();
 	SetMySize();
 
 	pev->solid		= SOLID_BBOX;
 	pev->movetype		= MOVETYPE_FLY;
 	SetMyBloodColor( BLOOD_COLOR_YELLOW );
-	SetMyHealth( GetSkillValue("ichthyosaur_health") );
+	SetMyHealth();
 	pev->view_ofs		= Vector( 0, 0, 16 );
 	SetMyFieldOfView(VIEW_FIELD_WIDE);
 	m_MonsterState		= MONSTERSTATE_NONE;
@@ -529,7 +531,7 @@ void CIchthyosaur::Spawn()
 //=========================================================
 void CIchthyosaur::Precache()
 {
-	PrecacheMyModel( "models/icky.mdl" );
+	PrecacheMyModel();
 	PrecacheMyGibModel();
 
 	RegisterAndPrecacheSoundScript(idleSoundScript);

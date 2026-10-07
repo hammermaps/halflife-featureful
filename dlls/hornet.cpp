@@ -99,7 +99,7 @@ void CHornet::Spawn()
 	pev->solid = SOLID_BBOX;
 	pev->takedamage = DAMAGE_YES;
 	pev->flags |= FL_MONSTER;
-	pev->health = 1;// weak!
+	SetMyHealth();
 
 	if( g_pGameRules->IsMultiplayer() )
 	{
@@ -129,10 +129,6 @@ void CHornet::Spawn()
 
 	SetTouch( &CHornet::DieTouch );
 	SetThink( &CHornet::StartTrack );
-
-	/*edict_t *pSoundEnt = pev->owner;
-	if( !pSoundEnt )
-		pSoundEnt = edict();*/
 
 	pev->nextthink = gpGlobals->time + 0.1f;
 	ResetSequenceInfo();

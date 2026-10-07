@@ -500,6 +500,7 @@ class CGrenadeRound : public CGrenade
 public:
 	void Spawn() override;
 	void Precache() override;
+	const char* DefaultModel() override { return "models/pipebomb.mdl"; }
 
 	void SetProjectileParamsBeforeSpawn(const ProjectileParameters& params) override;
 	void LaunchAsProjectile(const ProjectileParameters& params) override;
@@ -536,7 +537,7 @@ void CGrenadeRound::Spawn()
 	pev->movetype = MOVETYPE_BOUNCE;
 	pev->solid = SOLID_BBOX;
 
-	SetMyModel("models/pipebomb.mdl");
+	SetMyModel();
 	pev->skin = 1;
 
 	UTIL_SetSize(pev, Vector(0, 0, 0), Vector(0, 0, 0));
@@ -546,7 +547,7 @@ void CGrenadeRound::Spawn()
 
 void CGrenadeRound::Precache()
 {
-	PrecacheMyModel("models/pipebomb.mdl");
+	PrecacheMyModel();
 	RegisterVisual(trailVisual);
 	PrecacheBaseGrenadeSounds();
 	RegisterAndPrecacheSoundScript(bounceSoundScript);

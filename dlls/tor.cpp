@@ -55,6 +55,8 @@ public:
 
 	void Spawn() override;
 	void Precache() override;
+	const char* DefaultModel() override { return "models/Tor.mdl"; }
+	float DefaultHealth() override { return GetSkillValue("tor_health"); }
 	bool IsEnabledInMod() override { return g_modFeatures.IsMonsterEnabled("tor"); }
 	void SetYawSpeed() override;
 	int DefaultClassify() override {
@@ -714,13 +716,13 @@ void CTor::Spawn()
 {
 	Precache();
 
-	SetMyModel("models/Tor.mdl");
+	SetMyModel();
 	SetMySize();
 
 	pev->solid = SOLID_SLIDEBOX;
 	pev->movetype = MOVETYPE_STEP;
 	SetMyBloodColor( BLOOD_COLOR_YELLOW );
-	SetMyHealth( GetSkillValue("tor_health") );
+	SetMyHealth();
 	pev->view_ofs = Vector(0, 0, 0);// position of the eyes relative to monster's origin.
 	SetMyFieldOfView(VIEW_FIELD_WIDE);
 	m_MonsterState = MONSTERSTATE_NONE;
@@ -734,7 +736,7 @@ void CTor::Precache()
 {
 	CFollowingMonster::Precache();
 
-	PrecacheMyModel("models/Tor.mdl");
+	PrecacheMyModel();
 
 	RegisterAndPrecacheSoundScript(attackSoundScript);
 	RegisterAndPrecacheSoundScript(idleSoundScript);

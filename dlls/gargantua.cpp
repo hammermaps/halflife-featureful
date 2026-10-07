@@ -428,6 +428,8 @@ class CGargantua : public CFollowingMonster
 public:
 	void Spawn() override;
 	void Precache() override;
+	const char* DefaultModel() override { return "models/garg.mdl"; }
+	float DefaultHealth() override { return GetSkillValue("gargantua_health"); }
 	void UpdateOnRemove() override;
 	void SetYawSpeed() override;
 	int DefaultClassify() override;
@@ -497,10 +499,8 @@ public:
 	int m_GargGibModel;
 
 protected:
-	virtual float DefaultHealth();
 	virtual float FireAttackDamage();
 	virtual float StompAttackDamage();
-	virtual const char* DefaultModel();
 	virtual void FootEffect();
 	virtual void MakeStomp(const StompParams& stompParams);
 	virtual void StompEffect();
@@ -1093,13 +1093,13 @@ void CGargantua::Spawn()
 {
 	Precache();
 
-	SetMyModel( DefaultModel() );
+	SetMyModel();
 	SetMySize();
 
 	pev->solid		= SOLID_SLIDEBOX;
 	pev->movetype		= MOVETYPE_STEP;
 	SetMyBloodColor( BLOOD_COLOR_YELLOW );
-	SetMyHealth( DefaultHealth() );
+	SetMyHealth();
 	//pev->view_ofs		= Vector ( 0, 0, 96 );// taken from mdl file
 	SetMyFieldOfView(-0.2f);// width of forward view cone ( as a dotproduct result )
 	m_MonsterState		= MONSTERSTATE_NONE;
@@ -1126,7 +1126,7 @@ void CGargantua::Spawn()
 //=========================================================
 void CGargantua::Precache()
 {
-	PrecacheMyModel( DefaultModel() );
+	PrecacheMyModel();
 	m_GargGibModel = PrecacheMyGibModel(DefaultGibModel());
 
 	SoundScriptParamOverride paramOverride;
@@ -1655,11 +1655,6 @@ void CGargantua::RunTask( Task_t *pTask )
 	}
 }
 
-float CGargantua::DefaultHealth()
-{
-	return GetSkillValue("gargantua_health");
-}
-
 float CGargantua::FireAttackDamage()
 {
 	return GetSkillValue("gargantua_dmg_fire");
@@ -1668,11 +1663,6 @@ float CGargantua::FireAttackDamage()
 float CGargantua::StompAttackDamage()
 {
 	return GetSkillValue("gargantua_dmg_stomp");
-}
-
-const char* CGargantua::DefaultModel()
-{
-	return "models/garg.mdl";
 }
 
 void CGargantua::FootEffect()
@@ -2059,6 +2049,8 @@ class CBabyGargantua : public CGargantua
 {
 public:
 	void Precache() override;
+	const char* DefaultModel() override { return "models/babygarg.mdl"; }
+	float DefaultHealth() override { return GetSkillValue("babygargantua_health"); }
 	bool IsEnabledInMod() override { return g_modFeatures.IsMonsterEnabled("babygarg"); }
 	void SetYawSpeed() override;
 	const char* ReverseRelationshipModel() override { return "models/babygargf.mdl"; }
@@ -2085,10 +2077,8 @@ public:
 	Vector DefaultMaxHullSize() override { return Vector( 32.0f, 32.0f, 64.0f ); }
 
 protected:
-	float DefaultHealth() override;
 	float FireAttackDamage() override;
 	float StompAttackDamage() override;
-	const char* DefaultModel() override;
 	void FootEffect() override;
 	void MakeStomp(const StompParams& stompParams) override;
 	void StompEffect() override;
@@ -2245,7 +2235,7 @@ const NamedVisual CBabyGargantua::flameLightVisual = BuildVisual("BabyGarg.Flame
 
 void CBabyGargantua::Precache()
 {
-	PrecacheMyModel( DefaultModel() );
+	PrecacheMyModel();
 	PrecacheMyGibModel();
 
 	SoundScriptParamOverride paramOverride;
@@ -2353,11 +2343,6 @@ void CBabyGargantua::DeathSound()
 	EmitSoundScript(dieSoundScript);
 }
 
-float CBabyGargantua::DefaultHealth()
-{
-	return GetSkillValue("babygargantua_health");
-}
-
 float CBabyGargantua::FireAttackDamage()
 {
 	return GetSkillValue("babygargantua_dmg_fire");
@@ -2366,11 +2351,6 @@ float CBabyGargantua::FireAttackDamage()
 float CBabyGargantua::StompAttackDamage()
 {
 	return GetSkillValue("babygargantua_dmg_stomp");
-}
-
-const char* CBabyGargantua::DefaultModel()
-{
-	return "models/babygarg.mdl";
 }
 
 void CBabyGargantua::FootEffect()

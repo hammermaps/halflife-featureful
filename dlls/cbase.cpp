@@ -1169,12 +1169,14 @@ const Visual* CBaseEntity::RegisterVisual(const NamedVisual &defaultVisual, bool
 void CBaseEntity::RegisterVisualAsMineOwn(const NamedVisual &visual)
 {
 	// Precache custom model if it's defined in the own_visual of my entity template
-	const char* myModel = MyOwnModel(nullptr);
+	const char* myModel = MyOwnModel();
+	bool doPrecache = true;
 	if (myModel)
 	{
 		PRECACHE_MODEL(myModel);
+		doPrecache = false;
 	}
-	RegisterVisual(visual);
+	RegisterVisual(visual, doPrecache);
 }
 
 void CBaseEntity::AssignEntityOverrides(EntityOverrides entityOverrides)
@@ -1324,14 +1326,14 @@ bool CBaseEntity::ShouldAutoPrecacheSounds()
 	return false;
 }
 
-void CBaseEntity::SetMyHealth(const float defaultHealth)
+void CBaseEntity::SetMyHealth()
 {
 	const EntTemplate* entTemplate = GetMyEntTemplate();
 	if (!pev->health) {
 		if (entTemplate && entTemplate->IsHealthDefined())
 			pev->health = GetSkillValue(entTemplate->GetHealth());
 		else
-			pev->health = defaultHealth;
+			pev->health = DefaultHealth();
 	}
 
 	if (entTemplate)
@@ -1374,7 +1376,7 @@ const Visual* CBaseEntity::MyOwnVisual()
 	return nullptr;
 }
 
-const char* CBaseEntity::MyOwnModel(const char *defaultModel)
+const char* CBaseEntity::MyOwnModel()
 {
 	if (!FStringNull(pev->model))
 		return STRING(pev->model);
@@ -1383,23 +1385,24 @@ const char* CBaseEntity::MyOwnModel(const char *defaultModel)
 	if (ownVisual && ownVisual->model)
 		return ownVisual->model;
 
-	return defaultModel;
+	return DefaultModel();
 }
 
-void CBaseEntity::SetMyModel(const char *defaultModel)
+void CBaseEntity::SetMyModel()
 {
 	ApplyVisual(MyOwnVisual());
 
 	if (FStringNull(pev->model))
 	{
+		const char* defaultModel = DefaultModel();
 		if (defaultModel)
 			SET_MODEL(ENT(pev), defaultModel);
 	}
 }
 
-void CBaseEntity::PrecacheMyModel(const char *defaultModel)
+void CBaseEntity::PrecacheMyModel()
 {
-	const char* myModel = MyOwnModel(defaultModel);
+	const char* myModel = MyOwnModel();
 	if (myModel)
 		PRECACHE_MODEL(myModel);
 
@@ -2294,7 +2297,7 @@ bool CBaseEntity::SetTraceHullAttackParamsFromTemplate(int eventIndex, TraceHull
 	return false;
 }
 
-TakeDamageResult CBaseEntity::ImitateTraceHullAttack(CBaseEntity* pHurt, const TraceHullAttackParams& params)
+TakeDamageResult CBaseEntity::ImitateTraceHullAttack(CBaseEntity* pHurt, const TraceHullAttackParams& params, const Vector forward, const Vector right, const Vector up)
 {
 	pHurt->ApplyPunchAngle(params.punchAngle);
 
@@ -2302,9 +2305,9 @@ TakeDamageResult CBaseEntity::ImitateTraceHullAttack(CBaseEntity* pHurt, const T
 	if (applyKnock)
 	{
 		pHurt->pev->velocity = pHurt->pev->velocity +
-							   gpGlobals->v_forward * params.knockForward +
-							   gpGlobals->v_right * params.knockRight +
-							   gpGlobals->v_up * params.knockUp;
+							   forward * params.knockForward +
+							   right * params.knockRight +
+							   up * params.knockUp;
 	}
 
 	TakeDamageResult takeDamageResult = pHurt->TakeDamage( pev, pev, params.damageInfo );

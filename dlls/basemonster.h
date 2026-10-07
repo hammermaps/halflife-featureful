@@ -586,6 +586,7 @@ public:
 
 	short m_gibPolicy;
 	bool m_bForceConditionsGather;
+	bool m_bForceTakeDamageTriggerCondition;
 	float m_flNextPainTime;
 	float m_equalDislikeTime;
 	string_t m_triggerOnDeath;
@@ -623,20 +624,17 @@ class CDeadMonster : public CBaseMonster
 {
 public:
 	void Precache() override;
-	void SpawnHelper(int bloodColor = BLOOD_COLOR_RED, int health = 8);
+	void SpawnHelper(int bloodColor = BLOOD_COLOR_RED);
 	void MonsterInitDead() override;
 	void KeyValue( KeyValueData *pkvd ) override;
-	virtual const char* DefaultModel() {
-		return nullptr;
+	float DefaultHealth() override {
+		return 8.0f;
 	}
 	bool ShouldCollide(CBaseEntity* pOther) override;
 
 	CDeadMonster* MyDeadMonsterPointer() override {return this;}
 	virtual const char* getPos(int pose) const = 0;
 	int	m_iPose;// which sequence to display	-- temporary, don't need to save
-
-protected:
-	void SpawnHelper(const char* defaultModel, int bloodColor = BLOOD_COLOR_RED, int health = 8);
 };
 
 #endif // BASEMONSTER_H

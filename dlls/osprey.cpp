@@ -45,6 +45,8 @@ public:
 
 	void Spawn() override;
 	void Precache() override;
+	const char* DefaultModel() override { return "models/osprey.mdl"; }
+	float DefaultHealth() override { return GetSkillValue("osprey"); }
 	void KeyValue(KeyValueData* pkvd) override;
 	const char* DefaultDisplayName() override { return "Osprey"; }
 	int DefaultClassify() override { return CLASS_MACHINE; }
@@ -138,8 +140,7 @@ public:
 	static const NamedVisual blastCircleVisual;
 
 protected:
-	void SpawnImpl(const char* modelName, const float defaultHealth);
-	void PrecacheImpl(const char* modelName, const char* tailGibs, const char* bodyGibs, const char* engineGibs);
+	void PrecacheImpl(const char* tailGibs, const char* bodyGibs, const char* engineGibs);
 	virtual const char* TrooperName();
 	bool HasCustomRotorVolume() const {
 		return m_rotorVolume > 0.0f && m_rotorVolume <= 1.0f;
@@ -259,17 +260,12 @@ const NamedVisual COsprey::blastCircleVisual = BuildVisual("Osprey.BlastCircle")
 
 void COsprey::Spawn()
 {
-	SpawnImpl("models/osprey.mdl", GetSkillValue("osprey"));
-}
-
-void COsprey::SpawnImpl(const char* modelName, const float defaultHealth)
-{
 	Precache();
 	// motor
 	pev->movetype = MOVETYPE_FLY;
 	pev->solid = SOLID_BBOX;
 
-	SetMyModel( modelName );
+	SetMyModel();
 	SetMySize();
 	UTIL_SetOrigin( pev, pev->origin );
 
@@ -278,7 +274,7 @@ void COsprey::SpawnImpl(const char* modelName, const float defaultHealth)
 	m_flRightHealth = 200;
 	m_flLeftHealth = 200;
 	SetMyBloodColor(DONT_BLEED);
-	SetMyHealth( defaultHealth );
+	SetMyHealth();
 	pev->max_health = pev->health;
 
 	SetMyFieldOfView(0); // 180 degrees
@@ -306,14 +302,14 @@ void COsprey::SpawnImpl(const char* modelName, const float defaultHealth)
 
 void COsprey::Precache()
 {
-	PrecacheImpl("models/osprey.mdl", "models/osprey_tailgibs.mdl", "models/osprey_bodygibs.mdl", "models/osprey_enginegibs.mdl");
+	PrecacheImpl("models/osprey_tailgibs.mdl", "models/osprey_bodygibs.mdl", "models/osprey_enginegibs.mdl");
 }
 
-void COsprey::PrecacheImpl(const char* modelName, const char* tailGibs, const char* bodyGibs, const char* engineGibs)
+void COsprey::PrecacheImpl(const char* tailGibs, const char* bodyGibs, const char* engineGibs)
 {
 	PrecacheChildren(TrooperName(), m_reverseRelationship);
 
-	PrecacheMyModel( modelName );
+	PrecacheMyModel();
 
 	RegisterAndPrecacheSoundScript(rotorSoundScript);
 	RegisterAndPrecacheSoundScript(crashSoundScript, NPC::crashSoundScript);
@@ -1224,8 +1220,9 @@ void COsprey::ReportAIState(ALERT_TYPE level)
 class CBlkopOsprey : public COsprey
 {
 public:
-	void Spawn() override;
 	void Precache() override;
+	const char* DefaultModel() override { return "models/blkop_osprey.mdl"; }
+	float DefaultHealth() override { return GetSkillValue("blkopsosprey"); }
 	bool IsEnabledInMod() override { return g_modFeatures.IsMonsterEnabled("blkop_osprey"); }
 	void PrepareGruntBeforeSpawn(CBaseEntity* pGrunt) override;
 	int	DefaultClassify() override
@@ -1240,14 +1237,9 @@ protected:
 
 LINK_ENTITY_TO_CLASS( monster_blkop_osprey, CBlkopOsprey )
 
-void CBlkopOsprey::Spawn()
-{
-	SpawnImpl("models/blkop_osprey.mdl", GetSkillValue("blkopsosprey"));
-}
-
 void CBlkopOsprey::Precache()
 {
-	PrecacheImpl("models/blkop_osprey.mdl", "models/blkop_tailgibs.mdl", "models/blkop_bodygibs.mdl", "models/blkop_enginegibs.mdl");
+	PrecacheImpl("models/blkop_tailgibs.mdl", "models/blkop_bodygibs.mdl", "models/blkop_enginegibs.mdl");
 }
 
 void CBlkopOsprey::PrepareGruntBeforeSpawn(CBaseEntity *pGrunt)

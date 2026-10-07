@@ -13,7 +13,7 @@
 void CBasePlayerAmmo::Spawn()
 {
 	Precache();
-	SetMyModel(MyModel());
+	SetMyModel();
 
 	if (pev->movetype < 0)
 		pev->movetype = MOVETYPE_NONE;
@@ -45,7 +45,7 @@ void CBasePlayerAmmo::Spawn()
 
 void CBasePlayerAmmo::Precache()
 {
-	PrecacheMyModel(MyModel());
+	PrecacheMyModel();
 	RegisterAndPrecacheSoundScript(Items::ammoPickupSoundScript);
 }
 
@@ -197,7 +197,7 @@ void CBasePlayerAmmo::DropAsAmmoEnt(int amount)
 
 class CGlockAmmo : public CBasePlayerAmmo
 {
-	const char* MyModel() override {
+	const char* DefaultModel() override {
 		return "models/w_9mmclip.mdl";
 	}
 	int DefaultAmount() override {
@@ -213,7 +213,7 @@ LINK_ENTITY_TO_CLASS( ammo_9mmclip, CGlockAmmo )
 
 class CPythonAmmo : public CBasePlayerAmmo
 {
-	const char* MyModel() override {
+	const char* DefaultModel() override {
 		return "models/w_357ammobox.mdl";
 	}
 	int DefaultAmount() override {
@@ -228,7 +228,7 @@ LINK_ENTITY_TO_CLASS( ammo_357, CPythonAmmo )
 
 class CMP5AmmoClip : public CBasePlayerAmmo
 {
-	const char* MyModel() override {
+	const char* DefaultModel() override {
 		return "models/w_9mmARclip.mdl";
 	}
 	int DefaultAmount() override {
@@ -244,7 +244,7 @@ LINK_ENTITY_TO_CLASS( ammo_9mmAR, CMP5AmmoClip )
 
 class CMP5Chainammo : public CBasePlayerAmmo
 {
-	const char* MyModel() override {
+	const char* DefaultModel() override {
 		return "models/w_chainammo.mdl";
 	}
 	int DefaultAmount() override {
@@ -259,7 +259,7 @@ LINK_ENTITY_TO_CLASS( ammo_9mmbox, CMP5Chainammo )
 
 class CMP5AmmoGrenade : public CBasePlayerAmmo
 {
-	const char* MyModel() override {
+	const char* DefaultModel() override {
 		return "models/w_ARgrenade.mdl";
 	}
 	int DefaultAmount() override {
@@ -275,7 +275,7 @@ LINK_ENTITY_TO_CLASS( ammo_ARgrenades, CMP5AmmoGrenade )
 
 class CShotgunAmmo : public CBasePlayerAmmo
 {
-	const char* MyModel() override {
+	const char* DefaultModel() override {
 		return "models/w_shotbox.mdl";
 	}
 	int DefaultAmount() override {
@@ -290,7 +290,7 @@ LINK_ENTITY_TO_CLASS( ammo_buckshot, CShotgunAmmo )
 
 class CCrossbowAmmo : public CBasePlayerAmmo
 {
-	const char* MyModel() override {
+	const char* DefaultModel() override {
 		return "models/w_crossbow_clip.mdl";
 	}
 	int DefaultAmount() override {
@@ -305,7 +305,7 @@ LINK_ENTITY_TO_CLASS( ammo_crossbow, CCrossbowAmmo )
 
 class CRpgAmmo : public CBasePlayerAmmo
 {
-	const char* MyModel() override {
+	const char* DefaultModel() override {
 		return "models/w_rpgammo.mdl";
 	}
 	int DefaultAmount() override {
@@ -330,7 +330,7 @@ LINK_ENTITY_TO_CLASS( ammo_rpgclip, CRpgAmmo )
 
 class CGaussAmmo : public CBasePlayerAmmo
 {
-	const char* MyModel() override {
+	const char* DefaultModel() override {
 		return "models/w_gaussammo.mdl";
 	}
 	int DefaultAmount() override {
@@ -343,7 +343,7 @@ class CGaussAmmo : public CBasePlayerAmmo
 
 class CEgonAmmo : public CBasePlayerAmmo
 {
-	const char* MyModel() override {
+	const char* DefaultModel() override {
 		return "models/w_chainammo.mdl";
 	}
 	int DefaultAmount() override {
@@ -363,7 +363,7 @@ class CSniperrifleAmmo : public CBasePlayerAmmo
 	bool IsEnabledInMod() override {
 		return g_modFeatures.ammo762IsUsed;
 	}
-	const char* MyModel() override {
+	const char* DefaultModel() override {
 		return "models/w_m40a1clip.mdl";
 	}
 	int DefaultAmount() override {
@@ -380,7 +380,7 @@ class CM249AmmoClip : public CBasePlayerAmmo
 	bool IsEnabledInMod() override {
 		return g_modFeatures.ammo556IsUsed;
 	}
-	const char* MyModel() override {
+	const char* DefaultModel() override {
 		return "models/w_saw_clip.mdl";
 	}
 	int DefaultAmount() override {
@@ -395,7 +395,7 @@ LINK_ENTITY_TO_CLASS(ammo_556, CM249AmmoClip)
 
 class C45ACPAmmoClip : public CBasePlayerAmmo
 {
-	const char* MyModel() override {
+	const char* DefaultModel() override {
 		return "models/w_9mmARclip.mdl";
 	}
 	int DefaultAmount() override {
@@ -410,7 +410,7 @@ LINK_ENTITY_TO_CLASS( ammo_45acp, C45ACPAmmoClip )
 
 class C57MMAmmoClip : public CBasePlayerAmmo
 {
-	const char* MyModel() override {
+	const char* DefaultModel() override {
 		return "models/w_9mmARclip.mdl";
 	}
 	int DefaultAmount() override {
@@ -425,7 +425,7 @@ LINK_ENTITY_TO_CLASS( ammo_57mm, C57MMAmmoClip )
 
 class CNailsAmmoClip : public CBasePlayerAmmo
 {
-	const char* MyModel() override {
+	const char* DefaultModel() override {
 		return "models/w_9mmARclip.mdl";
 	}
 	int DefaultAmount() override {
@@ -440,7 +440,7 @@ LINK_ENTITY_TO_CLASS( ammo_nails, CNailsAmmoClip )
 
 class CGrenadeAmmoClip : public CBasePlayerAmmo
 {
-	const char* MyModel() override {
+	const char* DefaultModel() override {
 		return "models/w_ARgrenade.mdl";
 	}
 	int DefaultAmount() override {
@@ -455,7 +455,7 @@ LINK_ENTITY_TO_CLASS( ammo_grenadeclip, CGrenadeAmmoClip )
 
 class CFuelAmmo : public CBasePlayerAmmo
 {
-	const char* MyModel() override {
+	const char* DefaultModel() override {
 		return "models/w_gaussammo.mdl";
 	}
 	int DefaultAmount() override {
@@ -470,7 +470,7 @@ LINK_ENTITY_TO_CLASS( ammo_fuel, CFuelAmmo )
 
 class CCellsAmmo : public CBasePlayerAmmo
 {
-	const char* MyModel() override {
+	const char* DefaultModel() override {
 		return "models/w_gaussammo.mdl";
 	}
 	int DefaultAmount() override {
@@ -485,7 +485,7 @@ LINK_ENTITY_TO_CLASS( ammo_cells, CCellsAmmo )
 
 class CChargesAmmo : public CBasePlayerAmmo
 {
-	const char* MyModel() override {
+	const char* DefaultModel() override {
 		return "models/w_gaussammo.mdl";
 	}
 	int DefaultAmount() override {
@@ -500,7 +500,7 @@ LINK_ENTITY_TO_CLASS( ammo_charges, CChargesAmmo )
 
 class CRoundsAmmo : public CBasePlayerAmmo
 {
-	const char* MyModel() override {
+	const char* DefaultModel() override {
 		return "models/w_9mmARclip.mdl";
 	}
 	int DefaultAmount() override {
@@ -515,7 +515,7 @@ LINK_ENTITY_TO_CLASS( ammo_rounds, CRoundsAmmo )
 
 class CSlugsAmmo : public CBasePlayerAmmo
 {
-	const char* MyModel() override {
+	const char* DefaultModel() override {
 		return "models/w_shotbox.mdl";
 	}
 	int DefaultAmount() override {

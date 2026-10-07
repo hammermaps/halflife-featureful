@@ -1012,18 +1012,18 @@ void CHGrunt::HandleAnimEvent( MonsterEvent_t *pEvent )
 //=========================================================
 // Spawn
 //=========================================================
-void CHGrunt::SpawnHelper(const char* modelName, int health, int bloodColor)
+void CHGrunt::SpawnHelper(int bloodColor)
 {
 	Precache();
 
-	SetMyModel( modelName );
+	SetMyModel();
 	SetMySize();
 
 	pev->solid		= SOLID_SLIDEBOX;
 	pev->movetype		= MOVETYPE_STEP;
 	SetMyBloodColor( bloodColor );
 	pev->effects		= 0;
-	SetMyHealth( health );
+	SetMyHealth();
 	SetMyFieldOfView(0.2f);// indicates the width of this monster's forward view cone ( as a dotproduct result )
 	m_MonsterState		= MONSTERSTATE_NONE;
 	m_flNextGrenadeCheck	= gpGlobals->time + 1;
@@ -1053,7 +1053,7 @@ void CHGrunt::KeyValue(KeyValueData *pkvd)
 
 void CHGrunt::Spawn()
 {
-	SpawnHelper("models/hgrunt.mdl", GetSkillValue("hgrunt_health"));
+	SpawnHelper();
 	if( pev->weapons == 0 )
 	{
 		// initialize to original values
@@ -1107,9 +1107,9 @@ void CHGrunt::Spawn()
 //=========================================================
 // Precache - precaches all resources this monster needs
 //=========================================================
-void CHGrunt::PrecacheHelper(const char *modelName)
+void CHGrunt::PrecacheHelper()
 {
-	PrecacheMyModel( modelName );
+	PrecacheMyModel();
 	PrecacheMyGibModel();
 	RegisterAndPrecacheSoundScript(NPC::swishSoundScript);// because we use the basemonster SWIPE animation event
 
@@ -1118,7 +1118,7 @@ void CHGrunt::PrecacheHelper(const char *modelName)
 
 void CHGrunt::Precache()
 {
-	PrecacheHelper("models/hgrunt.mdl");
+	PrecacheHelper();
 
 	RegisterAndPrecacheSoundScript(painSoundScript);
 	RegisterAndPrecacheSoundScript(dieSoundScript);

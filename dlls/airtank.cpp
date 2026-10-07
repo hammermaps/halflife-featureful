@@ -23,6 +23,9 @@ class CAirtank : public CGrenade
 {
 	void Spawn() override;
 	void Precache() override;
+	const char* DefaultModel() override { return "models/w_oxygen.mdl"; }
+	float DefaultHealth() override { return 20; }
+	const char* DefaultDisplayName() override { return "Airtank"; }
 	void EXPORT TankThink();
 	void EXPORT TankTouch( CBaseEntity *pOther );
 	int  BloodColor() override { return DONT_BLEED; }
@@ -71,7 +74,7 @@ void CAirtank::Spawn()
 	pev->movetype = MOVETYPE_FLY;
 	pev->solid = SOLID_BBOX;
 
-	SetMyModel("models/w_oxygen.mdl");
+	SetMyModel();
 	UTIL_SetSize( pev, Vector( -16, -16, 0), Vector( 16, 16, 36 ) );
 	UTIL_SetOrigin( pev, pev->origin );
 
@@ -80,14 +83,15 @@ void CAirtank::Spawn()
 
 	pev->flags |= FL_MONSTER;
 	pev->takedamage = DAMAGE_YES;
-	pev->health = 20;
+	SetMyHealth();
+	pev->max_health = pev->health;
 	m_state = 1;
 }
 
 void CAirtank::Precache()
 {
 	PrecacheBaseGrenadeSounds();
-	PrecacheMyModel("models/w_oxygen.mdl");
+	PrecacheMyModel();
 	RegisterAndPrecacheSoundScript(supplySoundScript);
 	RegisterAndPrecacheSoundScript(denySoundScript);
 }

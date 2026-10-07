@@ -71,14 +71,14 @@ Example of the named template:
       "sprite1": {
         "sprite": "sprites/fexplo1.spr",
         "alpha": 255,
-        "color": "77 210 130",
+        "color": [77, 210, 130],
         "framerate": 12,
         "scale": 1.0
       },
       "sprite2": {
         "sprite": "sprites/xflare1.spr",
         "alpha": 255,
-        "color": "77 210 130",
+        "color": [77, 210, 130],
         "framerate": 12,
         "scale": 1.0
       },
@@ -96,16 +96,16 @@ Example of the named template:
       },
       "beam": {
         "sprite": "sprites/lgtning.spr",
-        "color": "20 243 20",
+        "color": [20, 243, 20],
         "alpha": 220,
         "width": 30,
         "noise": 65,
-        "life": "0.5,1.6"
+        "life": [0.5, 1.6]
       },
       "beam_radius": 192,
-      "beam_count": "10,20",
+      "beam_count": [10, 20],
       "light": {
-        "color": "77 210 130",
+        "color": [77, 210, 130],
         "radius": 200
       },
       "shake": null,
@@ -115,72 +115,103 @@ Example of the named template:
 }
 ```
 
-`sprite1` and `sprite2` define sprites to be played. Each can define:
+#### sprites
 
-* `sprite` - path to the sprite.
-* `color` - sprite [color]({{< ref "JSON/#color" >}}).
-* `alpha` - sprite [opacity]({{< ref "JSON/#alpha" >}}).
-* `scale` - the sprite scale.
-* `framerate` - the animation speed (frames per second).
+`"sprite1"` and `"sprite2"` objects define sprites to be played. Each can define:
 
-`sound1` and `sound2` define sounds to be played. Each can define:
+* `"sprite"` - path to the sprite. Default value is `"sprites/fexplo1.spr"` for `"sprite1"` and `"sprites/xflare1.spr"` for `"sprite2"`.
+* `"color"` - sprite [color]({{< ref "JSON/#color" >}}). Default color is `[77, 210, 130]`.
+* `"alpha"` - sprite [opacity]({{< ref "JSON/#alpha" >}}). Default value is 255.
+* `"scale"` - the sprite scale. Default value is 1.0.
+* `"framerate"` - the animation speed (frames per second). Default value is 12.0.
 
-* `sound` - path to the sound in *sound* directory.
-* `volume` - the max is 1.0.
-* `pitch` - the norm is 100. [Integer range]({{< ref "JSON/#range_int" >}}).
-* `attenuation` (i.e. how the sound's volume decreases depending on the distance. 0.8 means large radius, 1.25 means medium radius)
+`"sprite1"` and `"sprite2"` can be set to `null` to disable sprite effects.
 
-`beam` defines the parameters of beams to be played.
+#### sounds
 
-* `sprite` - path to the sprite used as a beam texture.
-* `color` - beam [color]({{< ref "JSON/#color" >}}).
-* `alpha` - beam [opacity]({{< ref "JSON/#alpha" >}}).
-* `width` - how wide the beam is. The max is 255.
-* `noise` - the amplitude of the beam. The max is 255.
-* `life` - for how long (in seconds) the beams will render. [Range]({{< ref "JSON/#range" >}}).
+`"sound1"` and `"sound2"` objects define sounds to be played. Each can define:
 
-`beam_radius` - the maximum length of the beams. When the effect is played beams will try to reach the surrounding walls.
-`beam_count` - the number of the beams to spawn. [Integer range]({{< ref "JSON/#range_int" >}}).
+* `"sound"` - path to the sound in *sound* directory. Default value is `"debris/beamstart2.wav"` for `"sound1"` and `"debris/beamstart7.wav"` for `"sound2".`
+* `"volume"` - the maximum is 1.0. Can be a [range]({{< ref "JSON/#range" >}}) (the volume will be randomized on each play). Default value is 1.0.
+* `"pitch"` - the norm is 100 (the maximum is 255). Can be an [integer range]({{< ref "JSON/#range_int" >}}) (the pitch will be randomized on each play). Default value is 100.
+* `"attenuation"` - how the sound's volume decreases depending on the distance. 0.8 means large radius, 1.25 means medium radius. Default value is 0.8. The following string aliases are supported as well instead of numeric values: `"norm"` (large radius), `"static"` (medium radius), `"idle"` (small radius), `"none"` (play everywhere).
 
-`light` defines parameters for the dynamic light.
+`"sound1"` and `"sound2"` can be set to `null` to disable sprite effects.
 
-* `color` - light [color]({{< ref "JSON/#color" >}}).
-* `radius` - light radius in units (default provided or inherited if not explicitly set)
-* `life` - duration in seconds (default provided or inherited if not explicitly set)
+#### beam
 
-Set "light" to `null` if you don't want a dynamic light effect.
+`"beam"` defines the parameters of beams to be played.
 
-`shake` defines the shake effect.
+* `"sprite"` - path to the sprite used as a beam texture. Default value is `"sprites/lgtning.spr"`.
+* `"color"` - beam [color]({{< ref "JSON/#color" >}}). Default color is `[20, 243, 20]`.
+* `"alpha"` - beam [opacity]({{< ref "JSON/#alpha" >}}). Default value is 220.
+* `"width"` - how wide the beam is. The max is 255. Default value is 30.
+* `"noise"` - the amplitude of the beam. The max is 255. Default value is 65.
+* `"life"` - for how long (in seconds) the beams will render. [Range]({{< ref "JSON/#range" >}}). Default range is `[0.5, 1.6]`.
 
-* `radius`
-* `duration` (must be higher than 0 to enable the shake).
-* `frequency`
-* `amplitude`
+Set `"beam"` to `null` to disable beam effect.
+
+#### beam_radius
+
+`"beam_radius"` - the maximum length of the beams. When the effect is played beams will try to reach the surrounding walls. Default value is 192.
+
+#### beam_count
+
+`"beam_count"` - the number of the beams to spawn. [Integer range]({{< ref "JSON/#range_int" >}}). Default range is `[10, 20]`.
+
+#### light
+
+`"light"` defines parameters for the dynamic light. By default a warpball template doesn't use dynamic light.
+
+* `"color"` - light [color]({{< ref "JSON/#color" >}}). This is required (but can be inherited from other template).
+* `"radius"` - light radius in units (default provided or inherited if not explicitly set)
+* `"life"` - duration in seconds (default provided or inherited if not explicitly set)
+
+Set `"light"` to `null` to disable dynamic light effect inherited from the parent warpball template.
+
+#### shake
+
+`"shake"` defines the shake effect.
+
+* `"radius"` - an integer number. Radius in units.
+* `"duration"` (must be higher than 0 to enable the shake).
+* `"frequency"` - a number in range from 0 to 255.
+* `"amplitude"` - an integer number in range from 0 to 16.
 
 Refer to [env_shake](https://twhl.info/wiki/page/env_shake) documentation to understand the meaning of these parameters.
 
-By default the warpball effect doesn't have shake.
+By default a warpball template doesn't have shake.
 
-`ai_sound` defines the optional AI sound produced when the effect starts (e.g. to attract other monsters' attention).
+Set `"shake"` to `null` to disable shake effect inherited from the parent warpball template.
 
-* `type` - the type of AI sound. Possible values are `combat` and `danger`.
-* `duration` - duration of sound.
-* `radius` - the effective radius.
+#### ai_sound
 
-By default the warpball effect doesn't make AI sounds.
+`"ai_sound"` defines the optional AI sound produced when the effect starts (e.g. to attract other monsters' attention).
 
-`sound1`, `sound2`, `sprite1`, `sprite2`, `light`, `shake` and `ai_sound` can be set to `null` to disable the particular aspect of the warpball effect inherited from the base template.
+* `"type"` - the type of AI sound. Possible values are `"combat"` and `"danger"`.
+* `"duration"` - duration of sound. Default value is 0.3.
+* `"radius"` - the effective radius. Default value is 192.
 
-`spawn_delay` - the delay (in seconds) between the start of the warpball effect and the spawn of the monster. This is not a part of the visual or sound effects, but it's convenient to define it in the template, so all monstermakers that use the warpball template will have this delay before monster spawn.
-The `monstermaker` instance can redefine the delay by providing the `Delay before spawn` parameter.
+By default a warpball template doesn't make AI sounds.
+
+Set `"ai_sound"` to `null` to disable AI sound inherited from the parent warpball template.
+
+#### spawn_delay
+
+`"spawn_delay"` - the delay (in seconds) between the start of the warpball effect and the spawn of the monster. This is not a part of the visual or sound effects, but it's convenient to define it in the template, so all monstermakers that use the warpball template will have this delay before monster spawn.
+The [monstermaker]({{< ref monstermaker >}}) instance can redefine the delay by providing the `Delay before spawn` parameter.
 
 The spawn delay is an important for the gameplay: the player will have some time to react to the incoming portal before the actual monster appears. The numbers between 0.3 and 0.5 are good. While the delay is in effect the invisible hull is created to prevent other monsters and players from blocking the monster's spawn (note that other entities like doors and trains still can get in the way).
 
-`position` - the object that defines the custom position of the warpball effect relative to the monster's origin. Currently has only one parameter:
+Default value is 0.0 (no delay).
 
-* `vertical_shift` - the distance (in units) between the monster's origin (usually at the monster's feet) and the center of the warpball effect.
+#### position
 
-If `position` is not defined the center of the monster's body is used.
+`"position"` - the object that defines the custom position of the warpball effect relative to the monster's origin. Currently has only one parameter:
+
+* `"vertical_shift"` - the distance (in units) between the monster's origin (usually at the monster's feet) and the center of the warpball effect.
+
+If `"position"` is not defined the center of the monster's body is used.
 
 ### Template inheritance
 

@@ -92,6 +92,7 @@ public:
 	Vector m_lastBounceOrigin;	// Used to fix a bug in engine: when object isn't moving, but its speed isn't 0 and on ground isn't set
 	void Spawn() override;
 	void Precache() override;
+	const char* DefaultModel() override { return "models/w_satchel.mdl"; }
 	void BounceSound() override;
 	void Explode(const TraceResult *pTrace) override;
 	RadiusDamageInfo GetDefaultProjectileRadiusDamageInfo() override;
@@ -133,7 +134,7 @@ void CSatchelCharge::Spawn()
 	pev->movetype = MOVETYPE_BOUNCE;
 	pev->solid = SOLID_BBOX;
 
-	SET_MODEL( ENT( pev ), "models/w_satchel.mdl" );
+	SetMyModel();
 	//UTIL_SetSize( pev, Vector( -16, -16, -4 ), Vector( 16, 16, 32 ) );	// Old box -- size of headcrab monsters/players get blocked by this
 	UTIL_SetSize( pev, Vector( -4, -4, -4 ), Vector( 4, 4, 4 ) );	// Uses point-sized, and can be stepped over
 	UTIL_SetOrigin( pev, pev->origin );
@@ -214,7 +215,7 @@ void CSatchelCharge::SatchelThink()
 
 void CSatchelCharge::Precache()
 {
-	PRECACHE_MODEL( "models/w_satchel.mdl" );
+	PrecacheMyModel();
 
 	PrecacheBaseGrenadeSounds();
 	RegisterAndPrecacheSoundScript(bounceSoundScript);
@@ -386,10 +387,8 @@ bool CSatchel::AddToPlayer( CBasePlayer *pPlayer )
 
 void CSatchel::Spawn()
 {
-	const WeaponParameters& params = MyParameters();
-
 	Precache();
-	SetMyModel(params.worldModel.c_str());
+	SetMyModel();
 
 	SetInitialAmmoAmount();
 	InitMaxClip();

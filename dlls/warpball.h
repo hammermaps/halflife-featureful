@@ -10,6 +10,7 @@
 #include "const_sound.h"
 #include "template_property_types.h"
 #include "json_config.h"
+#include "optional.h"
 
 #define WARPBALL_RED_DEFAULT 77
 #define WARPBALL_GREEN_DEFAULT 210
@@ -29,63 +30,41 @@
 
 struct WarpballSound
 {
-	WarpballSound(): sound(), volume(1.0f), attenuation(ATTN_NORM), pitch(100) {}
-	const char* sound;
-	float volume;
-	float attenuation;
-	IntRange pitch;
+	const char* sound{nullptr};
+	FloatRange volume{1.0f};
+	float attenuation{ATTN_NORM};
+	IntRange pitch{100};
 };
 
 struct WarpballSprite
 {
-	WarpballSprite():
-		sprite(),
-		color(),
-		alpha(255),
-		scale(1.0f),
-		framerate(12.0f),
-		rendermode(kRenderGlow),
-		renderfx(kRenderFxNoDissipation)
-	{}
-	const char* sprite;
-	Color3 color;
-	int alpha;
-	float scale;
-	float framerate;
-	int rendermode;
-	int renderfx;
+	const char* sprite{nullptr};
+	Color3 color{};
+	int alpha{255};
+	float scale{1.0f};
+	float framerate{12.0f};
+	int rendermode{kRenderGlow};
+	int renderfx{kRenderFxNoDissipation};
 };
 
 struct WarpballBeam
 {
-	WarpballBeam():
-		sprite(),
-		texture(0),
-		color(),
-		alpha(220),
-		width(30),
-		noise(65),
-		life(0.5f, 1.6f) {}
-	const char* sprite;
-	int texture;
-	Color3 color;
-	int alpha;
-	int width;
-	int noise;
-	FloatRange life;
+	const char* sprite{nullptr};
+	int texture{0};
+	Color3 color{};
+	int alpha{220};
+	int width{30};
+	int noise{65};
+	FloatRange life{0.5f, 1.6f};
 };
 
 struct WarpballLight
 {
-	WarpballLight():
-		color(),
-		radius(192),
-		life(1.5f) {}
-	Color3 color;
-	int radius;
-	float life;
+	optional<Color3> color;
+	int radius{192};
+	float life{1.5f};
 	inline bool IsDefined() const {
-		return life > 0.0 && radius > 0;
+		return color.has_value() && life > 0.0 && radius > 0;
 	}
 };
 
@@ -93,10 +72,9 @@ typedef PlayerShake WarpballShake;
 
 struct WarpballAiSound
 {
-	WarpballAiSound(): type(0), radius(192), duration(0.3f) {}
-	int type;
-	int radius;
-	float duration;
+	int type{0};
+	int radius{192};
+	float duration{0.3f};
 	inline bool IsDefined() const {
 		return type != 0 && duration > 0.0f && radius > 0;
 	}
@@ -104,9 +82,8 @@ struct WarpballAiSound
 
 struct WarpballPosition
 {
-	WarpballPosition(): verticalShift(0.0f), defined(false) {}
-	float verticalShift;
-	bool defined;
+	float verticalShift{0.0f};
+	bool defined{false};
 	inline bool IsDefined() const {
 		return defined;
 	}
@@ -114,10 +91,6 @@ struct WarpballPosition
 
 struct WarpballTemplate
 {
-	WarpballTemplate():
-		beamRadius(192),
-		beamCount(10, 20),
-		spawnDelay(0.0f) {}
 	WarpballSound sound1;
 	WarpballSound sound2;
 
@@ -125,14 +98,14 @@ struct WarpballTemplate
 	WarpballSprite sprite2;
 
 	WarpballBeam beam;
-	int beamRadius;
-	IntRange beamCount;
+	int beamRadius{192};
+	IntRange beamCount{10, 20};
 
 	WarpballLight light;
 	WarpballShake shake;
 
 	WarpballAiSound aiSound;
-	float spawnDelay;
+	float spawnDelay{0.0f};
 	WarpballPosition position;
 };
 

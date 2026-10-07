@@ -363,7 +363,7 @@ void W_Precache( CBaseEntity* pWorld )
 	UTIL_PrecacheOther( "ammo_rpgclip" );
 	UTIL_PrecacheOther( "ammo_crossbow" );
 
-	if( g_pGameRules->IsDeathmatch() )
+	if (g_pGameRules->DeadPlayerWeapons(nullptr) != GR_PLR_DROP_GUN_NO)
 	{
 		UTIL_PrecacheOther( "weaponbox" );// container for dropped deathmatch weapons
 	}
@@ -1126,7 +1126,7 @@ void CBasePlayerWeapon::PrecacheWeaponModels()
 {
 	const WeaponParameters& params = MyParameters();
 
-	PrecacheMyModel(params.worldModel.c_str());
+	PrecacheMyModel();
 	PRECACHE_MODEL(params.ViewModel());
 	PrecachePModel(params.PlayerModel());
 
@@ -1454,7 +1454,7 @@ IMPLEMENT_SAVERESTORE( CWeaponBox, CBaseDelay )
 //=========================================================
 void CWeaponBox::Precache()
 {
-	PRECACHE_MODEL( "models/w_weaponbox.mdl" );
+	PrecacheMyModel();
 }
 
 //=========================================================
@@ -1496,7 +1496,7 @@ void CWeaponBox::Spawn()
 	const int itemSize = 24;
 	UTIL_SetSize( pev, Vector( -itemSize, -itemSize, 0 ), Vector( itemSize, itemSize, itemSize ) );
 
-	SET_MODEL( ENT( pev ), "models/w_weaponbox.mdl" );
+	SetMyModel();
 }
 
 //=========================================================

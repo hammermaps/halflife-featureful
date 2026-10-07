@@ -39,6 +39,8 @@ public:
 
 	void Spawn() override;
 	void Precache() override;
+	const char* DefaultModel() override { return "models/apache.mdl"; }
+	float DefaultHealth() override { return GetSkillValue("apache_health"); }
 	void KeyValue(KeyValueData* pkvd) override;
 	int DefaultClassify() override { return CLASS_HUMAN_MILITARY; }
 	bool HasFlesh() override { return false; }
@@ -125,8 +127,8 @@ public:
 	static const NamedVisual blastCircleVisual;
 
 protected:
-	void SpawnImpl(const char* modelName);
-	void PrecacheImpl(const char* modelName, const char* gibModel);
+	void SpawnImpl();
+	void PrecacheImpl(const char* gibModel);
 	void SetRotorVolumeOverride(SoundScriptParamOverride& param)
 	{
 		if (m_rotorVolume > 0.0f && m_rotorVolume <= 1.0f)
@@ -222,24 +224,24 @@ const NamedVisual CApache::blastCircleVisual = BuildVisual("Apache.BlastCircle")
 
 void CApache::Spawn()
 {
-	SpawnImpl("models/apache.mdl");
+	SpawnImpl();
 }
 
-void CApache::SpawnImpl(const char *modelName)
+void CApache::SpawnImpl()
 {
 	Precache();
 	// motor
 	pev->movetype = MOVETYPE_FLY;
 	pev->solid = SOLID_BBOX;
 
-	SetMyModel( modelName );
+	SetMyModel();
 	SetMySize();
 	UTIL_SetOrigin( pev, pev->origin );
 
 	pev->flags |= FL_MONSTER;
 	pev->takedamage = DAMAGE_AIM;
 	SetMyBloodColor(DONT_BLEED);
-	SetMyHealth( GetSkillValue("apache_health") );
+	SetMyHealth();
 	pev->max_health = pev->health;
 
 	SetMyFieldOfView(-0.707f); // 270 degrees
@@ -271,12 +273,12 @@ void CApache::SpawnImpl(const char *modelName)
 
 void CApache::Precache()
 {
-	PrecacheImpl("models/apache.mdl", "models/metalplategibs_green.mdl");
+	PrecacheImpl("models/metalplategibs_green.mdl");
 }
 
-void CApache::PrecacheImpl(const char* modelName, const char* gibModel)
+void CApache::PrecacheImpl(const char* gibModel)
 {
-	PrecacheMyModel( modelName );
+	PrecacheMyModel();
 	m_iBodyGibs = PrecacheMyGibModel(gibModel);
 
 	RegisterAndPrecacheSoundScript(rotorSoundScript);
@@ -1305,6 +1307,7 @@ class CBlkopApache : public CApache
 public:
 	void Spawn() override;
 	void Precache() override;
+	const char* DefaultModel() override { return "models/blkop_apache.mdl"; }
 	bool IsEnabledInMod() override { return g_modFeatures.IsMonsterEnabled("blkop_apache"); }
 	int	DefaultClassify() override
 	{
@@ -1318,10 +1321,10 @@ LINK_ENTITY_TO_CLASS( monster_blkop_apache, CBlkopApache )
 
 void CBlkopApache::Spawn()
 {
-	SpawnImpl("models/blkop_apache.mdl");
+	SpawnImpl();
 }
 
 void CBlkopApache::Precache()
 {
-	PrecacheImpl("models/blkop_apache.mdl", "models/metalplategibs_dark.mdl");
+	PrecacheImpl("models/metalplategibs_dark.mdl");
 }

@@ -2955,8 +2955,6 @@ void CEnvQuakeFx::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE u
 // overloaded pev->frags, is now a flag for whether or not a can is stuck in the dispenser. 
 // overloaded pev->health, is now how many cans remain in the machine.
 //=========================================================
-#define DEFAULT_CAN_MODEL "models/can.mdl"
-
 class CEnvBeverage : public CBaseDelay
 {
 public:
@@ -3044,6 +3042,7 @@ class CItemSoda : public CBaseEntity
 public:
 	void Spawn() override;
 	void Precache() override;
+	const char* DefaultModel() override { return "models/can.mdl"; }
 	void EXPORT CanThink();
 	void EXPORT CanTouch( CBaseEntity *pOther );
 
@@ -3065,7 +3064,7 @@ const NamedSoundScript CItemSoda::drinkSoundScript = {
 
 void CItemSoda::Precache()
 {
-	PrecacheMyModel(DEFAULT_CAN_MODEL);
+	PrecacheMyModel();
 	RegisterAndPrecacheSoundScript(bounceSoundScript);
 	RegisterAndPrecacheSoundScript(drinkSoundScript);
 }
@@ -3078,7 +3077,7 @@ void CItemSoda::Spawn()
 	pev->solid = SOLID_NOT;
 	pev->movetype = MOVETYPE_TOSS;
 
-	SetMyModel(DEFAULT_CAN_MODEL);
+	SetMyModel();
 	UTIL_SetSize( pev, Vector( 0, 0, 0 ), Vector( 0, 0, 0 ) );
 	
 	SetThink( &CItemSoda::CanThink );

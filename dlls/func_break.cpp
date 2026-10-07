@@ -261,7 +261,7 @@ void CBreakable::Spawn()
 	if( FBitSet( pev->spawnflags, SF_BREAK_TRIGGER_ONLY ) )		// Only break on trigger
 		SetTouch( NULL );
 
-	SetMyHealth(0.0f);
+	SetMyHealth();
 	pev->max_health = pev->health;
 
 	// Flag unbreakable glass as "worldbrush" so it will block ALL tracelines

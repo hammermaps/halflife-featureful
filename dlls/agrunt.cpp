@@ -71,6 +71,8 @@ class CAGrunt : public CFollowingMonster
 public:
 	void Spawn() override;
 	void Precache() override;
+	const char* DefaultModel() override { return "models/agrunt.mdl"; }
+	float DefaultHealth() override { return GetSkillValue("agrunt_health"); }
 	void SetYawSpeed() override;
 	int DefaultClassify() override;
 	const char* DefaultDisplayName() override { return "Alien Grunt"; }
@@ -587,14 +589,14 @@ void CAGrunt::Spawn()
 {
 	Precache();
 
-	SetMyModel( "models/agrunt.mdl" );
+	SetMyModel();
 	SetMySize();
 
 	pev->solid = SOLID_SLIDEBOX;
 	pev->movetype = MOVETYPE_STEP;
 	SetMyBloodColor( BLOOD_COLOR_YELLOW );
 	pev->effects = 0;
-	SetMyHealth( GetSkillValue("agrunt_health") );
+	SetMyHealth();
 	SetMyFieldOfView(0.2f);// indicates the width of this monster's forward view cone ( as a dotproduct result )
 	m_MonsterState = MONSTERSTATE_NONE;
 	SetMySquadCapabilities(bits_CAP_SQUAD);
@@ -612,7 +614,7 @@ void CAGrunt::Spawn()
 //=========================================================
 void CAGrunt::Precache()
 {
-	PrecacheMyModel( "models/agrunt.mdl" );
+	PrecacheMyModel();
 	PrecacheMyGibModel();
 
 	RegisterAndPrecacheSoundScript(attackHitSoundScript, NPC::attackHitSoundScript);
@@ -1193,6 +1195,7 @@ class CDeadAgrunt : public CDeadMonster
 public:
 	void Spawn() override;
 	const char* DefaultModel() override { return "models/agrunt.mdl"; }
+	float DefaultHealth() override { return GetSkillValue("agrunt_health")/2; }
 	int	DefaultClassify() override { return	CLASS_ALIEN_MILITARY; }
 	DamageInfo DefaultHandleTraceAttack(entvars_t *pevInflictor, entvars_t *pevAttacker, const DamageInfo &inputDamageInfo, Vector vecDir, TraceResult *ptr) override;
 
@@ -1211,7 +1214,7 @@ LINK_ENTITY_TO_CLASS( monster_alien_grunt_dead, CDeadAgrunt )
 
 void CDeadAgrunt::Spawn()
 {
-	SpawnHelper(BLOOD_COLOR_YELLOW, GetSkillValue("agrunt_health")/2);
+	SpawnHelper(BLOOD_COLOR_YELLOW);
 	MonsterInitDead();
 	pev->frame = 255;
 }

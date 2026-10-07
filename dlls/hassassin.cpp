@@ -60,6 +60,8 @@ class CHAssassin : public CFollowingMonster
 public:
 	void Spawn() override;
 	void Precache() override;
+	const char* DefaultModel() override { return "models/hassassin.mdl"; }
+	float DefaultHealth() override { return GetSkillValue("hassassin_health"); }
 	void SetYawSpeed() override;
 	int DefaultClassify() override;
 	const char* DefaultDisplayName() override { return "Female Assassin"; }
@@ -458,14 +460,14 @@ void CHAssassin::Spawn()
 {
 	Precache();
 
-	SetMyModel( "models/hassassin.mdl" );
+	SetMyModel();
 	SetMySize();
 
 	pev->solid		= SOLID_SLIDEBOX;
 	pev->movetype		= MOVETYPE_STEP;
 	SetMyBloodColor( BLOOD_COLOR_RED );
 	pev->effects		= 0;
-	SetMyHealth( GetSkillValue("hassassin_health") );
+	SetMyHealth();
 	SetMyFieldOfView(VIEW_FIELD_WIDE); // indicates the width of this monster's forward view cone ( as a dotproduct result )
 	m_MonsterState		= MONSTERSTATE_NONE;
 	m_afCapability		= bits_CAP_MELEE_ATTACK1;
@@ -487,7 +489,7 @@ void CHAssassin::Spawn()
 //=========================================================
 void CHAssassin::Precache()
 {
-	PrecacheMyModel( "models/hassassin.mdl" );
+	PrecacheMyModel();
 	PrecacheMyGibModel();
 
 	RegisterAndPrecacheSoundScript(shotSoundScript);

@@ -38,6 +38,9 @@ public:
 
 	void Spawn() override;
 	void Precache() override;
+	const char* DefaultModel() override { return "models/tentacle2.mdl"; }
+	float DefaultHealth() override { return GetSkillValue("tentacle_health"); }
+	const char* DefaultDisplayName() override { return "Tentacle"; }
 	void KeyValue( KeyValueData *pkvd ) override;
 
 	int Save( CSave &save ) override;
@@ -302,13 +305,13 @@ void CTentacle::Spawn()
 	pev->solid = SOLID_BBOX;
 	pev->movetype = MOVETYPE_FLY;
 	pev->effects = 0;
-	SetMyHealth(GetSkillValue("tentacle_health"));
+	SetMyHealth();
 	pev->max_health = pev->health;
 	pev->sequence = 0;
 	//Always interpolate tentacles since they don't actually move.
 	m_EFlags |= EFLAG_SLERP;
 
-	SetMyModel( "models/tentacle2.mdl" );
+	SetMyModel();
 	UTIL_SetSize( pev, Vector( -32, -32, 0 ), Vector( 32, 32, 64 ) );
 
 	pev->takedamage = DAMAGE_AIM;
@@ -347,7 +350,7 @@ void CTentacle::Spawn()
 
 void CTentacle::Precache()
 {
-	PrecacheMyModel( "models/tentacle2.mdl" );
+	PrecacheMyModel();
 
 	RegisterAndPrecacheSoundScript(fliesSoundScript);
 	RegisterAndPrecacheSoundScript(squirmSoundScript);
@@ -1049,6 +1052,8 @@ class CTentacleMaw : public CBaseMonster
 public:
 	void Spawn() override;
 	void Precache() override;
+	const char* DefaultModel() override { return "models/maw.mdl"; }
+	float DefaultHealth() override { return 75; }
 };
 
 LINK_ENTITY_TO_CLASS( monster_tentaclemaw, CTentacleMaw )
@@ -1059,13 +1064,13 @@ LINK_ENTITY_TO_CLASS( monster_tentaclemaw, CTentacleMaw )
 void CTentacleMaw::Spawn()
 {
 	Precache();
-	SET_MODEL( ENT( pev ), "models/maw.mdl" );
+	SetMyModel();
 	UTIL_SetSize( pev, Vector( -32, -32, 0 ), Vector( 32, 32, 64 ) );
 
 	pev->solid = SOLID_NOT;
 	pev->movetype = MOVETYPE_STEP;
 	pev->effects = 0;
-	pev->health = 75;
+	SetMyHealth();
 	pev->yaw_speed = 8;
 	pev->sequence = 0;
 
@@ -1075,5 +1080,5 @@ void CTentacleMaw::Spawn()
 
 void CTentacleMaw::Precache()
 {
-	PRECACHE_MODEL( "models/maw.mdl" );
+	PrecacheMyModel();
 }

@@ -77,8 +77,10 @@ class CHeadCrab : public CBaseMonster
 {
 public:
 	void Spawn() override;
-	void SpawnHelper(const char* modelName, float health);
+	void SpawnHelper();
 	void Precache() override;
+	const char* DefaultModel() override { return "models/headcrab.mdl"; }
+	float DefaultHealth() override { return GetSkillValue("headcrab_health"); }
 	void RunTask ( Task_t *pTask ) override;
 	void StartTask ( Task_t *pTask ) override;
 	void SetYawSpeed () override;
@@ -276,20 +278,20 @@ void CHeadCrab::SetYawSpeed()
 void CHeadCrab::Spawn()
 {
 	Precache();
-	SpawnHelper("models/headcrab.mdl", GetSkillValue("headcrab_health"));
+	SpawnHelper();
 	MonsterInit();
 }
 
-void CHeadCrab::SpawnHelper(const char *modelName, float health)
+void CHeadCrab::SpawnHelper()
 {
-	SetMyModel( modelName );
+	SetMyModel();
 	SetMySize();
 
 	pev->solid		= SOLID_SLIDEBOX;
 	pev->movetype		= MOVETYPE_STEP;
 	SetMyBloodColor( BLOOD_COLOR_YELLOW );
 	pev->effects		= 0;
-	SetMyHealth( health );
+	SetMyHealth();
 	pev->view_ofs		= Vector( 0, 0, 20 );// position of the eyes relative to monster's origin.
 	pev->yaw_speed		= 5;//!!! should we put this in the monster's changeanim function since turn rates may vary with state/anim?
 	SetMyFieldOfView(0.5f);// indicates the width of this monster's forward view cone ( as a dotproduct result )
@@ -302,7 +304,7 @@ void CHeadCrab::SpawnHelper(const char *modelName, float health)
 //=========================================================
 void CHeadCrab::Precache()
 {
-	PrecacheMyModel( "models/headcrab.mdl" );
+	PrecacheMyModel();
 	PrecacheMyGibModel();
 
 	RegisterAndPrecacheSoundScript(idleSoundScript);
@@ -506,6 +508,8 @@ public:
 	void ApplyDefaultRenderProps(int overridenRenderProps) override;
 	void Spawn() override;
 	void Precache() override;
+	const char* DefaultModel() override { return "models/baby_headcrab.mdl"; }
+	float DefaultHealth() override { return GetSkillValue("babycrab_health"); }
 	const char* DefaultDisplayName() override { return "Baby Headcrab"; }
 	void SetYawSpeed() override;
 	float GetDamageAmount() override { return GetSkillValue("babycrab_dmg_bite"); }
@@ -560,13 +564,13 @@ void CBabyCrab::ApplyDefaultRenderProps(int overridenRenderProps)
 void CBabyCrab::Spawn()
 {
 	Precache();
-	SpawnHelper("models/baby_headcrab.mdl", GetSkillValue("babycrab_health"));
+	SpawnHelper();
 	MonsterInit();
 }
 
 void CBabyCrab::Precache()
 {
-	PrecacheMyModel( "models/baby_headcrab.mdl" );
+	PrecacheMyModel();
 	PrecacheMyGibModel();
 
 	SoundScriptParamOverride paramOverride;
@@ -627,6 +631,8 @@ class CShockRoach : public CHeadCrab
 public:
 	void Spawn() override;
 	void Precache() override;
+	const char* DefaultModel() override { return "models/w_shock_rifle.mdl"; }
+	float DefaultHealth() override { return GetSkillValue("shockroach_health"); }
 	bool IsEnabledInMod() override { return g_modFeatures.IsMonsterEnabled("shockroach"); }
 	const char* DefaultDisplayName() override { return "Shock Roach"; }
 	float GetDamageAmount() override { return GetSkillValue("shockroach_dmg_bite"); }
@@ -758,14 +764,14 @@ void CShockRoach::Spawn()
 {
 	Precache();
 
-	SetMyModel("models/w_shock_rifle.mdl");
+	SetMyModel();
 	SetMySize();
 
 	pev->solid = SOLID_SLIDEBOX;
 	pev->movetype = MOVETYPE_FLY;
 	SetMyBloodColor( BLOOD_COLOR_YELLOW );
 	pev->effects = 0;
-	SetMyHealth( GetSkillValue("shockroach_health") );
+	SetMyHealth();
 	pev->view_ofs = Vector(0, 0, 20);// position of the eyes relative to monster's origin.
 	pev->yaw_speed = 5;//!!! should we put this in the monster's changeanim function since turn rates may vary with state/anim?
 	SetMyFieldOfView(0.5f);// indicates the width of this monster's forward view cone ( as a dotproduct result )
@@ -805,7 +811,7 @@ void CShockRoach::Precache()
 
 	PRECACHE_SOUND("shockroach/shock_walk.wav");
 
-	PrecacheMyModel("models/w_shock_rifle.mdl");
+	PrecacheMyModel();
 	PrecacheMyGibModel();
 }
 

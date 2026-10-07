@@ -218,6 +218,8 @@ class CPitdrone : public CFollowingMonster
 public:
 	void Spawn() override;
 	void Precache() override;
+	const char* DefaultModel() override { return "models/pit_drone.mdl"; }
+	float DefaultHealth() override { return GetSkillValue("pitdrone_health"); }
 	bool IsEnabledInMod() override { return g_modFeatures.IsMonsterEnabled("pitdrone"); }
 	void HandleAnimEvent(MonsterEvent_t *pEvent) override;
 	void SetYawSpeed() override;
@@ -607,14 +609,14 @@ void CPitdrone::Spawn()
 {
 	Precache();
 
-	SetMyModel("models/pit_drone.mdl");
+	SetMyModel();
 	SetMySize();
 
 	pev->solid = SOLID_SLIDEBOX;
 	pev->movetype = MOVETYPE_STEP;
 	SetMyBloodColor( BLOOD_COLOR_YELLOW );
 	pev->effects = 0;
-	SetMyHealth( GetSkillValue("pitdrone_health") );
+	SetMyHealth();
 	SetMyFieldOfView(0.2f);// indicates the width of this monster's forward view cone ( as a dotproduct result )
 	m_MonsterState = MONSTERSTATE_NONE;
 	SetMySquadCapabilities(bits_CAP_SQUAD);
@@ -640,7 +642,7 @@ void CPitdrone::Spawn()
 //=========================================================
 void CPitdrone::Precache()
 {
-	PrecacheMyModel("models/pit_drone.mdl");
+	PrecacheMyModel();
 	PrecacheMyGibModel(DefaultGibModel());
 	RegisterVisual(tinySpitVisual);// client side spittle.
 
@@ -1174,6 +1176,7 @@ public:
 	void Spawn() override;
 	void Precache() override;
 	const char* DefaultModel() override { return "models/pit_drone.mdl"; }
+	float DefaultHealth() override { return GetSkillValue("pitdrone_health")/2; }
 	bool IsEnabledInMod() override { return g_modFeatures.IsMonsterEnabled("pitdrone"); }
 	int	DefaultClassify() override { return	CLASS_RACEX_PREDATOR; }
 	const char* DefaultGibModel() override {
@@ -1195,13 +1198,13 @@ LINK_ENTITY_TO_CLASS( monster_pitdrone_dead, CDeadPitdrone )
 
 void CDeadPitdrone::Precache()
 {
-	PrecacheMyModel(DefaultModel());
+	PrecacheMyModel();
 	PrecacheMyGibModel(DefaultGibModel());
 }
 
 void CDeadPitdrone::Spawn()
 {
-	SpawnHelper(BLOOD_COLOR_YELLOW, GetSkillValue("pitdrone_health")/2);
+	SpawnHelper(BLOOD_COLOR_YELLOW);
 	MonsterInitDead();
 	pev->frame = 255;
 }

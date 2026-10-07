@@ -66,6 +66,8 @@ class CLeech : public CBaseMonster
 public:
 	void Spawn() override;
 	void Precache() override;
+	const char* DefaultModel() override { return "models/leech.mdl"; }
+	float DefaultHealth() override { return GetSkillValue("leech_health"); }
 
 	void EXPORT SwimThink();
 	void EXPORT DeadThink();
@@ -195,14 +197,14 @@ const NamedSoundScript CLeech::dieSoundScript = {
 void CLeech::Spawn()
 {
 	Precache();
-	SetMyModel( "models/leech.mdl" );
+	SetMyModel();
 	SetMySize();
 	// Don't push the minz down too much or the water check will fail because this entity is really point-sized
 	pev->solid = SOLID_SLIDEBOX;
 	pev->movetype = MOVETYPE_FLY;
 	SetBits( pev->flags, FL_SWIM );
 	SetMyBloodColor(DONT_BLEED);
-	SetMyHealth( GetSkillValue("leech_health") );
+	SetMyHealth();
 
 	SetMyFieldOfView(-0.5);
 	m_flDistLook = 750;
@@ -305,7 +307,7 @@ void CLeech::DeathSound()
 
 void CLeech::Precache()
 {
-	PrecacheMyModel( "models/leech.mdl" );
+	PrecacheMyModel();
 	PrecacheMyGibModel();
 
 	RegisterAndPrecacheSoundScript(attackSoundScript);

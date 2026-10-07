@@ -180,6 +180,7 @@ TYPEDESCRIPTION	CBaseMonster::m_SaveData[] =
 
 	DEFINE_FIELD( CBaseMonster, m_gibPolicy, FIELD_SHORT ),
 	DEFINE_FIELD( CBaseMonster, m_bForceConditionsGather, FIELD_BOOLEAN ),
+	DEFINE_FIELD( CBaseMonster, m_bForceTakeDamageTriggerCondition, FIELD_BOOLEAN ),
 	DEFINE_FIELD( CBaseMonster, m_flNextPainTime, FIELD_TIME ),
 	DEFINE_FIELD( CBaseMonster, m_equalDislikeTime, FIELD_TIME ),
 	DEFINE_FIELD( CBaseMonster, m_triggerOnDeath, FIELD_STRING ),
@@ -4185,7 +4186,7 @@ bool CBaseMonster::FCheckAITrigger( short condition )
 		}
 		break;
 	case AITRIGGER_TAKEDAMAGE:
-		if( m_afConditions & ( bits_COND_LIGHT_DAMAGE | bits_COND_HEAVY_DAMAGE ) )
+		if( HasConditions( bits_COND_LIGHT_DAMAGE | bits_COND_HEAVY_DAMAGE ) || m_bForceTakeDamageTriggerCondition )
 		{
 			fFireTarget = true;
 		}
@@ -5918,14 +5919,14 @@ void CDeadMonster::KeyValue( KeyValueData *pkvd )
 
 void CDeadMonster::Precache()
 {
-	PrecacheMyModel(DefaultModel());
+	PrecacheMyModel();
 	PrecacheMyGibModel();
 }
 
-void CDeadMonster::SpawnHelper(const char* defaultModel, int bloodColor, int health)
+void CDeadMonster::SpawnHelper(int bloodColor)
 {
 	Precache();
-	SetMyModel(defaultModel);
+	SetMyModel();
 
 	pev->effects &= EF_INVLIGHT;
 	pev->yaw_speed		= 8;
@@ -5938,12 +5939,7 @@ void CDeadMonster::SpawnHelper(const char* defaultModel, int bloodColor, int hea
 	{
 		ALERT ( at_console, "%s with bad pose (no '%s' animation in %s)\n", STRING(pev->classname), seqName, STRING(pev->model) );
 	}
-	SetMyHealth( health );
-}
-
-void CDeadMonster::SpawnHelper(int bloodColor, int health)
-{
-	SpawnHelper(DefaultModel(), bloodColor, health);
+	SetMyHealth();
 }
 
 void CDeadMonster::MonsterInitDead()

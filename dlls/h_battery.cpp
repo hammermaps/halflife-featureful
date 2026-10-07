@@ -143,6 +143,7 @@ public:
 	void KeyValue( KeyValueData *pkvd ) override;
 	void Spawn() override;
 	void Precache() override;
+	const char* DefaultModel() override { return "models/hev.mdl"; }
 	void Activate() override;
 	void EXPORT AnimateAndWork();
 	void SearchForPlayer();
@@ -276,7 +277,7 @@ void CRechargeDecay::Spawn()
 		pev->movetype = MOVETYPE_NONE;
 	}
 
-	SetMyModel("models/hev.mdl");
+	SetMyModel();
 
 	bool setSafeBox = false;
 	if (m_collisionType == PS2CHARGER_COLLISION_ACCURATE)
@@ -314,7 +315,7 @@ LINK_ENTITY_TO_CLASS(item_recharge, CRechargeDecay)
 
 void CRechargeDecay::Precache()
 {
-	PrecacheMyModel("models/hev.mdl");
+	PrecacheMyModel();
 
 	RegisterAndPrecacheSoundScript(CRecharge::startSoundScript);
 	RegisterAndPrecacheSoundScript(CRecharge::denySoundScript);
@@ -337,6 +338,7 @@ void CRechargeDecay::Activate()
 	m_glass = GetClassPtr( (CRechargeGlassDecay *)NULL );
 	if (m_glass)
 	{
+		m_glass->pev->effects = pev->effects;
 		m_glass->AssignEntityOverrides(GetProjectileOverrides());
 		m_glass->Spawn();
 		UTIL_SetOrigin(m_glass->pev, pev->origin);

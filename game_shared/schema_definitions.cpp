@@ -140,6 +140,7 @@ const char* const json_schemas::definitions = R"(
 	"range_alpha": {
 		"type": ["string", "object", "integer", "array"],
 		"minimum": 0,
+		"maximum": 255,
 		"pattern": "^[0-9]{1,3}(,[0-9]{1,3})?$",
 		"properties": {
 			"min": {
@@ -159,6 +160,60 @@ const char* const json_schemas::definitions = R"(
 			"type": "integer",
 			"minimum": 0,
 			"maximum": 255
+		},
+		"minItems": 2,
+		"maxItems": 2
+	},
+	"range_pitch": {
+		"type": ["string", "object", "integer", "array"],
+		"minimum": 0,
+		"maximum": 255,
+		"pattern": "^[0-9]{1,3}(,[0-9]{1,3})?$",
+		"properties": {
+			"min": {
+				"type": "integer",
+				"minimum": 0,
+				"maximum": 255
+			},
+			"max": {
+				"type": "integer",
+				"minimum": 0,
+				"maximum": 255
+			}
+		},
+		"required": ["min", "max"],
+		"additionalProperties": false,
+		"items": {
+			"type": "integer",
+			"minimum": 0,
+			"maximum": 255
+		},
+		"minItems": 2,
+		"maxItems": 2
+	},
+	"range_volume": {
+		"type": ["string", "object", "number", "array"],
+		"minimum": 0,
+		"maximum": 1.0,
+		"pattern": "^[0-1]+(\\.[0-9]+)?(,[0-1]+(\\.[0-9]+)?)?$",
+		"properties": {
+			"min": {
+				"type": "number",
+				"minimum": 0,
+				"maximum": 1.0
+			},
+			"max": {
+				"type": "number",
+				"minimum": 0,
+				"maximum": 1.0
+			}
+		},
+		"required": ["min", "max"],
+		"additionalProperties": false,
+		"items": {
+			"type": "number",
+			"minimum": 0,
+			"maximum": 1.0
 		},
 		"minItems": 2,
 		"maxItems": 2
@@ -336,13 +391,13 @@ const char* const json_schemas::definitions = R"(
 				"$ref": "#/sound_channel"
 			},
 			"volume": {
-				"$ref": "#/range"
+				"$ref": "#/range_volume"
 			},
 			"attenuation": {
 				"$ref": "#/attenuation"
 			},
 			"pitch": {
-				"$ref": "#/range_int_non_negative"
+				"$ref": "#/range_pitch"
 			}
 		},
 		"additionalProperties": false

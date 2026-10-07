@@ -645,7 +645,7 @@ void CConfigurableWeapon::Spawn()
 {
 	const WeaponParameters& params = MyParameters();
 	Precache();
-	SetMyModel(params.worldModel.c_str());
+	SetMyModel();
 
 	SetInitialAmmoAmount();
 	InitMaxClip();
@@ -3068,12 +3068,6 @@ bool CConfigurableWeapon::Swing(bool fFirst)
 				FindHullIntersection( vecSrc, tr, VEC_DUCK_HULL_MIN, VEC_DUCK_HULL_MAX, m_pPlayer );
 			vecEnd = tr.vecEndPos;	// This is the point on the actual surface (the hull could have hit space)
 		}
-		if (!fire.kickBackOnHitOnly.Get(altMode))
-			ApplyMyKickBack(altMode);
-	}
-	else
-	{
-		ApplyMyKickBack(altMode);
 	}
 #endif
 	if( fFirst )
@@ -3084,6 +3078,9 @@ bool CConfigurableWeapon::Swing(bool fFirst)
 
 	if( tr.flFraction >= 1.0f )
 	{
+		if (!fire.kickBackOnHitOnly.Get(altMode))
+			ApplyMyKickBack(altMode);
+
 		if( fFirst )
 		{
 			// miss
@@ -3095,6 +3092,8 @@ bool CConfigurableWeapon::Swing(bool fFirst)
 	}
 	else
 	{
+		ApplyMyKickBack(altMode);
+
 		const WeaponParameters::FireAnimArray& arr = fire.hitAnims.Get(altMode);
 		if (arr.size())
 		{
@@ -3213,25 +3212,24 @@ void CConfigurableWeapon::BigSwing()
 				FindHullIntersection( vecSrc, tr, VEC_DUCK_HULL_MIN, VEC_DUCK_HULL_MAX, m_pPlayer );
 			vecEnd = tr.vecEndPos;	// This is the point on the actual surface (the hull could have hit space)
 		}
-		if (!fire.kickBackOnHitOnly.Get(altMode))
-			ApplyMyKickBack(altMode);
-	}
-	else
-	{
-		ApplyMyKickBack(altMode);
 	}
 #endif
 
 	PLAYBACK_EVENT_FULL( FEV_NOTHOST, m_pPlayer->edict(), GetPlaybackEvent(altMode),
 						0.0f, g_vecZero, g_vecZero, 0, 0, PackIParam1(altMode, Emptied()), PackIParam2(), 0, 0 );
 
-	if ( tr.flFraction >= 1.0 )
+	if ( tr.flFraction >= 1.0f )
 	{
+		if (!fire.kickBackOnHitOnly.Get(altMode))
+			ApplyMyKickBack(altMode);
+
 		// player "shoot" animation
 		m_pPlayer->SetAnimation( PLAYER_ATTACK1 );
 	}
 	else
 	{
+		ApplyMyKickBack(altMode);
+
 		const WeaponParameters::FireAnimArray& arr = fire.hitAnims.Get(altMode);
 		if (arr.size())
 		{

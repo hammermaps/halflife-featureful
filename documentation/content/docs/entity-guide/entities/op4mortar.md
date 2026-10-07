@@ -8,6 +8,10 @@ entityCategory: object
 
 The stationary mortar weapon from Opposing Force. Can act aggressive to the player or can be controlled by a player via [func_op4mortarcontroller]({{< ref func_op4mortarcontroller >}}).
 
+{{% hint info %}}
+The entity direction and the model direction don't match (the difference is 180-degree) - that's how it was designed in Opposin Force. The default model "looks" at the direction the mortar will be using for firing. If your level editor doesn't support showing the models make sure to rotate entity by 180-degree from the desired direction.
+{{% /hint %}}
+
 ### Parameters
 
 * `Mortar Shell Velocity` - the speed of the mortar projectile. For AI mortars you should set a high value otherwise the mortar won't be able to find the right angle to fire. The Opposing Force map that uses `op4mortar` sets the velocity to 1400. Alternatively you can make the map with the skybox high enough for the mortar shell arch.

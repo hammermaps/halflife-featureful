@@ -1471,6 +1471,7 @@ class CTestHull : public CBaseMonster
 {
 public:
 	void Spawn( entvars_t *pevMasterNode );
+	float DefaultHealth() override { return 50; }
 	int ObjectCaps() override { return CBaseMonster :: ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
 	void EXPORT CallBuildNodeGraph ();
 	void BuildNodeGraph();
@@ -1494,7 +1495,7 @@ void CTestHull::Spawn( entvars_t *pevMasterNode )
 	pev->solid = SOLID_SLIDEBOX;
 	pev->movetype = MOVETYPE_STEP;
 	pev->effects = 0;
-	pev->health = 50;
+	SetMyHealth();
 	pev->yaw_speed = 8;
 
 	if( WorldGraph.m_fGraphPresent )

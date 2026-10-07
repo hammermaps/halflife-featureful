@@ -35,6 +35,8 @@ class CPitWorm : public CBaseMonster
 public:
 	void Spawn() override;
 	void Precache() override;
+	const char* DefaultModel() override { return "models/pit_worm_up.mdl"; }
+	float DefaultHealth() override { return GetSkillValue("pitworm_health"); }
 	bool IsEnabledInMod() override { return g_modFeatures.IsMonsterEnabled("pitworm"); }
 	int  DefaultClassify() override;
 	const char* DefaultDisplayName() override { return "Pit Worm"; }
@@ -314,7 +316,7 @@ const NamedVisual CPitWorm::eyeLightVisual = BuildVisual("PitWorm.EyeLight")
 void CPitWorm::Spawn()
 {
 	Precache();
-	SetMyModel("models/pit_worm_up.mdl");
+	SetMyModel();
 
 	pev->movetype = MOVETYPE_FLY;
 	pev->solid = SOLID_BBOX;
@@ -325,7 +327,7 @@ void CPitWorm::Spawn()
 	pev->flags |= FL_MONSTER|FL_FLY;
 	pev->takedamage = DAMAGE_AIM;
 
-	SetMyHealth( GetSkillValue("pitworm_health") );
+	SetMyHealth();
 	pev->max_health = pev->health;
 
 	pev->view_ofs = PITWORM_EYE_OFFSET;
@@ -383,7 +385,7 @@ void CPitWorm::Spawn()
 //=========================================================
 void CPitWorm::Precache()
 {
-	PrecacheMyModel("models/pit_worm_up.mdl");
+	PrecacheMyModel();
 
 	PRECACHE_SOUND("pitworm/pit_worm_attack_eyeblast_impact.wav");
 

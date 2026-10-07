@@ -73,6 +73,8 @@ class CFlockingFlyer : public CBaseMonster
 public:
 	void Spawn() override;
 	void Precache() override;
+	const char* DefaultModel() override { return "models/boid.mdl"; }
+	float DefaultHealth() override { return 1; }
 	void SpawnCommonCode();
 	void EXPORT IdleThink();
 	void BoidAdvanceFrame();
@@ -319,7 +321,7 @@ void CFlockingFlyer::Spawn()
 void CFlockingFlyer::Precache()
 {
 	//PRECACHE_MODEL( "models/aflock.mdl" );
-	PrecacheMyModel( "models/boid.mdl" );
+	PrecacheMyModel();
 	PrecacheMyGibModel();
 	RegisterAndPrecacheSoundScript(idleSoundScript);
 	RegisterAndPrecacheSoundScript(alertSoundScript);
@@ -398,13 +400,13 @@ void CFlockingFlyer::SpawnCommonCode()
 	pev->solid = SOLID_SLIDEBOX;
 	pev->movetype = MOVETYPE_FLY;
 	pev->takedamage	= DAMAGE_NO;
-	pev->health = 1;
+	SetMyHealth();
 
 	m_fPathBlocked	= false;// obstacles will be detected
 	SetMyFieldOfView(0.2f);
 
 	//SET_MODEL( ENT( pev ), "models/aflock.mdl" );
-	SetMyModel( "models/boid.mdl" );
+	SetMyModel();
 
 	//UTIL_SetSize( pev, Vector( 0.0f, 0.0f, 0.0f ), Vector( 0.0f, 0.0f, 0.0f ) );
 	UTIL_SetSize( pev, Vector( -5.0f, -5.0f, 0.0f ), Vector( 5.0f, 5.0f, 2.0f ) );

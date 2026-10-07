@@ -157,7 +157,18 @@
 	ent_template(string): "Entity template" : : "A template name from templates/entities.json"
 ]
 
-@BaseClass size(-16 -16 0, 16 16 32) color(0 0 200) base(Targetname, TargetOnPickup, Delay, Appearflags, Angles, Global, Scalable, CustomObjectHint, EntityTemplate) = Pickup
+@BaseClass = EntityEffects
+[
+	effects(choices) : "Effects" =
+	[
+		0 : "No effects"
+		16 : "Invert light (take light from ceiling)"
+		1024 : "Don't reflect in env_mirror"
+		2048 : "Model is always bright"
+	]
+]
+
+@BaseClass size(-16 -16 0, 16 16 32) color(0 0 200) base(Targetname, TargetOnPickup, Delay, Appearflags, Angles, Global, Scalable, CustomObjectHint, EntityTemplate, EntityEffects) = Pickup
 [
 	spawnflags(Flags) =
 	[
@@ -296,17 +307,6 @@
 		43 : "Bluish"
 		1 : "Human (red) [SC compatible]"
 		2 : "Alien (yellow) [SC compatible]"
-	]
-]
-
-@BaseClass = EntityEffects
-[
-	effects(choices) : "Effects" =
-	[
-		0 : "No effects"
-		16 : "Invert light (take light from ceiling)"
-		1024 : "Don't reflect in env_mirror"
-		2048 : "Model is always bright"
 	]
 ]
 
@@ -1284,6 +1284,7 @@
 		65536: "Don't Drop to Floor" : 0 : "Don't try instantly dropping the monster to floor after the sequence has finished (the monster still may naturally fall due to gravity after that)"
 		131072: "Allow stuck" : 0 : "Allow monster being stuck after the sequence has done (if the animation included some movement). Otherwise the monster will just get teleported to its position before the animation."
 		262144: "Allow unnamed idle" : 0 : "Make the unnamed scripted sequence with idle animation work as expected: continue playing the idle animation instead of finishing the sequence"
+		524288: "Allow Take Damage TriggerCondition" : 0 : "Allow firing a TriggerTarget for the Take Damage TriggerCondition even if the scripted sequence in Non-interruptible"
 	]
 	m_targetActivator(choices) : "Activator for targets" : : "Activator for Target, Fire after moving, Fire on Animation start" =
 	[
@@ -1471,7 +1472,7 @@
 @PointClass base(Ammo) studio("models/w_crossbow_clip.mdl") = ammo_crossbow : "Spawns crossbow ammo." : "http://twhl.info/wiki.php?id=8" []
 @PointClass base(Ammo) studio("models/w_saw_clip.mdl") = ammo_556 : "M249 Ammo" []
 @PointClass base(Ammo) studio("models/w_m40a1clip.mdl") = ammo_762 : "Sniper Ammo" []
-@PointClass base(Targetname, Appearflags, Angles, Global) size(-16 -16 -16, 16 16 16) studio("models/spore_ammo.mdl") = ammo_spore : "Spore" []
+@PointClass base(Targetname, Appearflags, Angles, Global, EntityTemplate, EntityEffects) size(-16 -16 -16, 16 16 16) studio("models/spore_ammo.mdl") = ammo_spore : "Spore" []
 
 @PointClass base(Ammo) studio() = ammo_45acp : ".45 ACP Ammo" []
 @PointClass base(Ammo) studio() = ammo_57mm : "57mm Ammo" []
@@ -2408,7 +2409,7 @@
 	]
 ]
 
-@PointClass base(Targetname) size(-16 -16 -16, 16 16 16) = env_electrified_wire : "Electrified Wire"
+@PointClass base(Targetname, EntityTemplate, EntityEffects) size(-16 -16 -16, 16 16 16) = env_electrified_wire : "Electrified Wire"
 [
 	segments(integer) : "Segments" : 16
 	sparkfrequency(integer) : "Spark Frequency" : 3
@@ -2431,7 +2432,7 @@
 	]
 ]
 
-@PointClass base(Targetname) size(-16 -16 -16, 16 16 16) = env_rope : "Rope"
+@PointClass base(Targetname, EntityTemplate, EntityEffects) size(-16 -16 -16, 16 16 16) = env_rope : "Rope"
 [
 	segments(integer) : "Segments" : 16
 	disable(choices) :"Disable Use" : 0 =
@@ -4225,9 +4226,10 @@
 //
 
 @PointClass size(-16 -16 0, 16 16 36) base(Item) studio("models/w_adrenaline.mdl") = item_adrenaline : "Adrenaline" []
-@PointClass size(-16 -16 0, 16 16 36) base(Targetname, Appearflags, Angles, Global, Scalable, EntityTemplate) studio("models/w_oxygen.mdl") = item_airtank : "Oxygen tank"
+@PointClass size(-16 -16 0, 16 16 36) base(Targetname, Appearflags, Angles, Global, Scalable, EntityTemplate, EntityEffects) studio("models/w_oxygen.mdl") = item_airtank : "Oxygen tank"
 [
 	model(studio) : "Custom Model"
+	health(string) : "Custom Health"
 ]
 @PointClass size(-16 -16 0, 16 16 36) base(Item) studio("models/w_antidote.mdl") = item_antidote : "Poison antidote"
 [
@@ -4320,7 +4322,7 @@
 	]
 ]
 
-@BaseClass base(Targetname, Angles) = ItemRecharger
+@BaseClass base(Targetname, Angles, EntityTemplate, CustomObjectHint, Global, EntityEffects) = ItemRecharger
 [
 	TriggerOnEmpty(target_destination) : "Trigger On Empty"
 	TriggerOnFirstUse(target_destination) : "Trigger On First Use"
@@ -4333,10 +4335,10 @@
 	]
 ]
 
-@PointClass size(-12 -16 0, 12 16 36) base(ItemRecharger, EntityTemplate, CustomObjectHint, Global) studio("models/health_charger_body.mdl") = item_healthcharger : "Wall Health Kit" []
-@PointClass size(-12 -16 0, 12 16 36) base(ItemRecharger, EntityTemplate, CustomObjectHint, Global) studio("models/hev.mdl") = item_recharge : "Wall Recharger" []
+@PointClass size(-12 -16 0, 12 16 36) base(ItemRecharger) studio("models/health_charger_body.mdl") = item_healthcharger : "Wall Health Kit" []
+@PointClass size(-12 -16 0, 12 16 36) base(ItemRecharger) studio("models/hev.mdl") = item_recharge : "Wall Recharger" []
 
-@PointClass base(Targetname, Global, Angles, CustomObjectHint) size(-16 -16 0, 16 16 48 ) studio("models/eye_scanner.mdl") = item_eyescanner : "Retinal Scanner"
+@PointClass base(Targetname, Global, Angles, EntityTemplate, CustomObjectHint, EntityEffects) size(-16 -16 0, 16 16 48 ) studio("models/eye_scanner.mdl") = item_eyescanner : "Retinal Scanner"
 [
 	unlocked_target(target_destination) : "Unlocked target"
 	locked_target(target_destination) : "Locked target"
@@ -9949,7 +9951,10 @@
 	]
 ]
 @PointClass base(Weapon, WeaponInitAmmo) studio("models/w_hgun.mdl") = weapon_hornetgun : "Hornet Gun" []
-@PointClass base(Pickup) size(-16 -16 0, 16 16 64) color(0 128 0) studio("models/w_weaponbox.mdl") =  weaponbox : "Weapon/Ammo Container" []
+@PointClass base(Pickup) size(-16 -16 0, 16 16 64) color(0 128 0) studio("models/w_weaponbox.mdl") =  weaponbox : "Weapon/Ammo Container"
+[
+	model(studio) : "Custom Model"
+]
 @PointClass base(Weapon, WeaponInitAmmo) studio("models/w_desert_eagle.mdl") = weapon_eagle : "Desert Eagle" []
 @PointClass base(Weapon, WeaponInitAmmo) studio("models/w_penguinnest.mdl") = weapon_penguin : "Killer Penguin" []
 @PointClass base(Weapon) studio("models/w_pipe_wrench.mdl") = weapon_pipewrench : "Pipe Wrench" []
@@ -9997,7 +10002,7 @@
 // Xen
 //
 
-@BaseClass base(Targetname, RenderFields, Angles, EntityTemplate) flags(Angle) = XenPlant
+@BaseClass base(Targetname, RenderFields, Angles, EntityTemplate, EntityEffects) flags(Angle) = XenPlant
 [
 	model(studio) : "Custom Model"
 	scale(string) : "Scale (1.0 = normal size)"
@@ -10061,8 +10066,9 @@
     ]
 ]
 
-@PointClass base(Targetname, Classification, EntityTemplate) studio("models/mortar.mdl") = op4mortar : "Op4 Mortar"
+@PointClass base(Targetname, Classification, EntityTemplate, EntityEffects) studio("models/mortar.mdl") = op4mortar : "Op4 Mortar"
 [
+	model(studio) : "Custom Model"
 	spawnflags(Flags) =
 	[
 		1  : "Active" : 0

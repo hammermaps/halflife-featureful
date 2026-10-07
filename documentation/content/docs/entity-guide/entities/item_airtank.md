@@ -8,6 +8,10 @@ entityCategory: object
 
 [TWHL](https://twhl.info/wiki/page/item_airtank)
 
+### Changes
+
+* Now `item_airtank` has settable model and health.
+
 ### Soundscripts
 
 * **AirTank.Supply** - air is supplied to the player.

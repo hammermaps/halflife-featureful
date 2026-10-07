@@ -318,9 +318,8 @@ void CBarnacleGrapple::PrecacheDefaultModelSounds()
 
 void CBarnacleGrapple::Spawn()
 {
-	const WeaponParameters& params = MyParameters();
 	Precache();
-	SetMyModel(params.worldModel.c_str());
+	SetMyModel();
 	m_pTip = NULL;
 	m_bGrappling = false;
 	SetInitialAmmoAmount();

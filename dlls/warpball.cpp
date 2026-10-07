@@ -70,12 +70,10 @@ const char warpballCatalogSchema[] = R"(
 					"pattern": ".+\\.wav"
 				},
 				"volume": {
-					"type": "number",
-					"exclusiveMinimum": 0,
-					"maximum": 1.0
+					"$ref": "definitions.json#/range_volume"
 				},
 				"pitch": {
-					"$ref": "definitions.json#/range_int"
+					"$ref": "definitions.json#/range_pitch"
 				},
 				"attenuation": {
 					"$ref": "definitions.json#/attenuation"
@@ -116,7 +114,7 @@ const char warpballCatalogSchema[] = R"(
 						"$ref": "#/definitions/sprite"
 					},
 					"beam": {
-						"type": "object",
+						"type": ["object", "null"],
 						"properties": {
 							"sprite": {
 								"$ref": "#/definitions/sprite_name"
@@ -132,10 +130,11 @@ const char warpballCatalogSchema[] = R"(
 								"minimum": 1
 							},
 							"noise": {
-								"type": "integer"
+								"type": "integer",
+								"minimum": 0
 							},
 							"life": {
-								"$ref": "definitions.json#/range"
+								"$ref": "definitions.json#/range_non_negative"
 							}
 						},
 						"additionalProperties": false
@@ -145,7 +144,7 @@ const char warpballCatalogSchema[] = R"(
 						"minumum": 1
 					},
 					"beam_count": {
-						"$ref": "definitions.json#/range_int"
+						"$ref": "definitions.json#/range_int_non_negative"
 					},
 					"light": {
 						"type": ["object", "null"],
@@ -645,7 +644,7 @@ static void PlayWarpballSound(const WarpballSound& sound, const Vector& vecOrigi
 {
 	if (sound.sound != nullptr)
 	{
-		UTIL_EmitAmbientSound(playSoundEnt, vecOrigin, sound.sound, sound.volume, sound.attenuation, 0, RandomizeNumberFromRange(sound.pitch));
+		UTIL_EmitAmbientSound(playSoundEnt, vecOrigin, sound.sound, RandomizeNumberFromRange(sound.volume), sound.attenuation, 0, RandomizeNumberFromRange(sound.pitch));
 	}
 }
 
@@ -670,7 +669,7 @@ void PlayWarpballEffect(CBaseEntity* pInitiator, const WarpballTemplate& warpbal
 			WRITE_BYTE( TE_DLIGHT );
 			WRITE_VECTOR( vecOrigin );
 			WRITE_BYTE( (int)(light.radius * 0.1f) );		// radius * 0.1
-			WRITE_COLOR( light.color );
+			WRITE_COLOR( *light.color );
 			WRITE_BYTE( (int)(light.life * 10) );		// time * 10
 			WRITE_BYTE( (int)(light.life * 10 / 2) );		// decay * 0.1
 		MESSAGE_END();
@@ -722,7 +721,7 @@ static void ReportWarpballSound(const WarpballSound& sound)
 	if (sound.sound == nullptr) {
 		LOG("undefined\n");
 	} else {
-		LOG("'%s'. Volume: %g. Attenuation: %g. Pitch: %d-%d\n", sound.sound, sound.volume, sound.attenuation, sound.pitch.min, sound.pitch.max);
+		LOG("'%s'. Volume: %g-%g. Attenuation: %g. Pitch: %d-%d\n", sound.sound, sound.volume.min, sound.volume.max, sound.attenuation, sound.pitch.min, sound.pitch.max);
 	}
 }
 
@@ -742,7 +741,7 @@ static void ReportWarpballLight(const WarpballLight& light)
 	if (!light.IsDefined()) {
 		LOG("undefined\n");
 	} else {
-		LOG("Color: (%d, %d, %d). Radius: %d. Life: %g\n", light.color.r, light.color.g, light.color.b, light.radius, light.life);
+		LOG("Color: (%d, %d, %d). Radius: %d. Life: %g\n", light.color->r, light.color->g, light.color->b, light.radius, light.life);
 	}
 }
 

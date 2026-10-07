@@ -1807,6 +1807,7 @@ class CFurniture : public CBaseMonster
 {
 public:
 	void Spawn() override;
+	float DefaultHealth() override { return 80000; }
 	int DefaultClassify() override;
 	int ObjectCaps() override { return (CBaseMonster::ObjectCaps() & ~FCAP_ACROSS_TRANSITION); }
 };
@@ -1824,7 +1825,7 @@ void CFurniture::Spawn()
 
 	pev->movetype = MOVETYPE_NONE;
 	pev->solid = SOLID_BBOX;
-	pev->health = 80000;
+	SetMyHealth();
 	pev->takedamage = DAMAGE_AIM;
 	pev->effects = 0;
 	pev->yaw_speed = 0;

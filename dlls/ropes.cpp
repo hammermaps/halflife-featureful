@@ -879,10 +879,10 @@ void CRope::SetRopeSegments( const int uiNumSegments,
 		TraceModels( ppPrimarySegs, ppHiddenSegs );
 
 		ppPrimarySegs[ 0 ]->pev->solid = SOLID_TRIGGER;
-		ppPrimarySegs[ 0 ]->pev->effects = 0;
+		ClearBits(ppPrimarySegs[ 0 ]->pev->effects, EF_NODRAW);
 
 		ppHiddenSegs[ 0 ]->pev->solid = SOLID_NOT;
-		ppHiddenSegs[ 0 ]->pev->effects = EF_NODRAW;
+		SetBits(ppHiddenSegs[ 0 ]->pev->effects, EF_NODRAW);
 
 		for( int uiIndex = 1; uiIndex < uiNumSegments; ++uiIndex )
 		{
@@ -890,10 +890,10 @@ void CRope::SetRopeSegments( const int uiNumSegments,
 			CRopeSegment* pHidden = ppHiddenSegs[ uiIndex ];
 
 			pPrim->pev->solid = SOLID_TRIGGER;
-			pPrim->pev->effects = 0;
+			ClearBits(pPrim->pev->effects, EF_NODRAW);
 
 			pHidden->pev->solid = SOLID_NOT;
-			pHidden->pev->effects = EF_NODRAW;
+			SetBits(pHidden->pev->effects, EF_NODRAW);
 
 			Vector vecOrigin = pPrim->pev->origin;
 
@@ -1286,7 +1286,7 @@ void CRopeSegment::Spawn()
 
 	pev->movetype = MOVETYPE_NOCLIP;
 	pev->solid = SOLID_TRIGGER;
-	pev->effects = EF_NODRAW;
+	SetBits(pev->effects, EF_NODRAW);
 	SetAbsOrigin( pev->origin );
 
 	UTIL_SetSize( pev, Vector( -30, -30, -30 ), Vector( 30, 30, 30 ) );
@@ -1370,6 +1370,7 @@ CRopeSegment* CRopeSegment::CreateSegment( CRopeSample* pSample, string_t iszMod
 	CRopeSegment* pSegment = GetClassPtr<CRopeSegment>( NULL );
 
 	pSegment->mModelName = iszModelName;
+	pSegment->pev->effects = rope->pev->effects;
 
 	pSegment->Spawn();
 

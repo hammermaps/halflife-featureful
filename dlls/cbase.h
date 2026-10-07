@@ -519,11 +519,11 @@ public:
 	const EntTemplate* GetOwnerEntTemplate();
 	bool ShouldAutoPrecacheSounds();
 
-	void SetMyHealth(const float defaultHealth);
+	void SetMyHealth();
 	const Visual* MyOwnVisual();
-	const char* MyOwnModel(const char* defaultModel);
-	void SetMyModel(const char* defaultModel);
-	void PrecacheMyModel(const char* defaultModel);
+	const char* MyOwnModel();
+	void SetMyModel();
+	void PrecacheMyModel();
 	void PrecacheRegenAndPowerShield();
 
 	// allow engine to allocate instance data
@@ -666,6 +666,8 @@ public:
 
 	virtual void AddFloatPoints( float score, bool bAllowNegativeScore ) {}
 
+	virtual const char* DefaultModel() { return nullptr; }
+	virtual float DefaultHealth() { return 0.0f; }
 	virtual const char* DefaultDisplayName() { return nullptr; }
 	const char* DisplayName();
 	virtual bool MustDisplayHUDInfo() const { return false; }
@@ -726,7 +728,7 @@ public:
 	void ApplyRadiusDamageInfoPatch(RadiusDamageInfo& curRadiusDamageInfo, const RadiusDamageInfoPatch& radiusDamageInfo);
 	void ApplyPunchAngle(const Vector& punchAngle);
 	bool SetTraceHullAttackParamsFromTemplate(int eventIndex, TraceHullAttackParams& params);
-	TakeDamageResult ImitateTraceHullAttack(CBaseEntity* pHurt, const TraceHullAttackParams& params);
+	TakeDamageResult ImitateTraceHullAttack(CBaseEntity* pHurt, const TraceHullAttackParams& params, const Vector forward, const Vector right, const Vector up);
 
 	void InsertAISound(int iType, const Vector &vecOrigin, int iVolume, float flDuration);
 	void InsertAISound(int iType, int iVolume, float flDuration);

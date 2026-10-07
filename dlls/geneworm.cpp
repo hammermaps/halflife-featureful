@@ -610,6 +610,8 @@ public:
 
 	void Spawn() override;
 	void Precache() override;
+	const char* DefaultModel() override { return "models/geneworm.mdl"; }
+	float DefaultHealth() override { return GetSkillValue("geneworm_health"); }
 	bool IsEnabledInMod() override { return g_modFeatures.IsMonsterEnabled("geneworm"); }
 	int  DefaultClassify() override { return CLASS_RACEX_SHOCK; }
 	const char* DefaultDisplayName() override { return "Gene Worm"; }
@@ -842,7 +844,7 @@ void CGeneWorm::Spawn()
 	pev->movetype = MOVETYPE_FLY;
 	pev->solid = SOLID_NOT;
 
-	SetMyModel("models/geneworm.mdl");
+	SetMyModel();
 
 	UTIL_SetSize(pev, Vector( -437, -720, -332 ), Vector( 425, 164, 355 ));
 	UTIL_SetOrigin(pev, pev->origin);
@@ -852,7 +854,7 @@ void CGeneWorm::Spawn()
 
 	pev->effects = 0;
 
-	SetMyHealth(GetSkillValue("geneworm_health"));
+	SetMyHealth();
 	pev->max_health = pev->health;
 
 	pev->view_ofs = Vector{0, 0, 300};
@@ -898,7 +900,7 @@ void CGeneWorm::Spawn()
 
 void CGeneWorm::Precache()
 {
-	PrecacheMyModel("models/geneworm.mdl");
+	PrecacheMyModel();
 
 	RegisterAndPrecacheSoundScript(idleSoundScript);
 	RegisterAndPrecacheSoundScript(dieSoundScript);

@@ -147,6 +147,8 @@ public:
 	void Spawn() override;
 	int GetDefaultVoicePitch() override;
 	void Precache() override;
+	const char* DefaultModel() override { return "models/hgrunt_opfor.mdl"; }
+	float DefaultHealth() override { return GetSkillValue("hgrunt_ally_health"); }
 	bool IsEnabledInMod() override { return g_modFeatures.IsMonsterEnabled("human_grunt_ally"); }
 	void SetYawSpeed() override;
 	int  DefaultISoundMask() override;
@@ -244,7 +246,7 @@ public:
 protected:
 	void PerformKick(int eventIndex, float kickDamage);
 	void PrecacheCommon();
-	void SpawnHelper(const char* defaultModel, float defaultHealth);
+	void SpawnHelper();
 	void SpeakCaughtEnemy();
 
 	virtual bool HasWeaponEquiped();
@@ -293,6 +295,8 @@ public:
 	void Spawn() override;
 	int GetDefaultVoicePitch() override;
 	void Precache() override;
+	const char* DefaultModel() override { return "models/hgrunt_medic.mdl"; }
+	float DefaultHealth() override { return GetSkillValue("medic_ally_health"); }
 	bool IsEnabledInMod() override { return g_modFeatures.IsMonsterEnabled("human_grunt_medic"); }
 	const char* DefaultDisplayName() override { return "Medic Grunt"; }
 	void HandleAnimEvent( MonsterEvent_t *pEvent ) override;
@@ -1831,7 +1835,7 @@ void CHFGrunt::Spawn()
 {
 	Precache();
 
-	SpawnHelper("models/hgrunt_opfor.mdl", GetSkillValue("hgrunt_ally_health"));
+	SpawnHelper();
 
 	if ( m_iHead <= -2 )
 	{
@@ -1898,15 +1902,15 @@ void CHFGrunt::Spawn()
 	TalkMonsterInit();
 }
 
-void CHFGrunt::SpawnHelper(const char *defaultModel, float defaultHealth)
+void CHFGrunt::SpawnHelper()
 {
-	SetMyModel(defaultModel);
+	SetMyModel();
 	SetMySize();
 
 	pev->solid			= SOLID_SLIDEBOX;
 	pev->movetype		= MOVETYPE_STEP;
 	SetMyBloodColor( BLOOD_COLOR_RED );
-	SetMyHealth( defaultHealth );
+	SetMyHealth();
 	pev->view_ofs		= Vector ( 0, 0, 50 );// position of the eyes relative to monster's origin.
 	SetMyFieldOfView(VIEW_FIELD_WIDE); // NOTE: we need a wide field of view so npc will notice player and say hello
 	m_MonsterState		= MONSTERSTATE_NONE;
@@ -1928,7 +1932,7 @@ void CHFGrunt::SpawnHelper(const char *defaultModel, float defaultHealth)
 //=========================================================
 void CHFGrunt::Precache()
 {
-	PrecacheMyModel("models/hgrunt_opfor.mdl");
+	PrecacheMyModel();
 	PrecacheMyGibModel();
 
 	RegisterAndPrecacheSoundScript(painSoundScript);
@@ -2878,6 +2882,8 @@ public:
 	void Spawn() override;
 	int GetDefaultVoicePitch() override { return 95; }
 	void Precache() override;
+	const char* DefaultModel() override { return "models/hgrunt_torch.mdl"; }
+	float DefaultHealth() override { return GetSkillValue("torch_ally_health"); }
 	void Activate() override;
 	bool IsEnabledInMod() override { return g_modFeatures.IsMonsterEnabled("human_grunt_torch"); }
 	const char* DefaultDisplayName() override { return "Torch Grunt"; }
@@ -2956,7 +2962,7 @@ void CTorch::Spawn()
 {
 	Precache();
 
-	SpawnHelper("models/hgrunt_torch.mdl", GetSkillValue("torch_ally_health"));
+	SpawnHelper();
 
 	if (!pev->weapons)
 		pev->weapons = TORCH_EAGLE;
@@ -2978,7 +2984,7 @@ void CTorch::Spawn()
 
 void CTorch::Precache()
 {
-	PrecacheMyModel("models/hgrunt_torch.mdl");
+	PrecacheMyModel();
 	PrecacheMyGibModel();
 
 	RegisterAndPrecacheSoundScript(painSoundScript, CHFGrunt::painSoundScript);
@@ -3711,7 +3717,7 @@ void CMedic::Spawn()
 {
 	Precache();
 
-	SpawnHelper("models/hgrunt_medic.mdl", GetSkillValue("medic_ally_health"));
+	SpawnHelper();
 	SetBodyGroupNumbers();
 
 	if (!pev->weapons)
@@ -3747,7 +3753,7 @@ void CMedic::Spawn()
 
 void CMedic::Precache()
 {
-	PrecacheMyModel("models/hgrunt_medic.mdl");
+	PrecacheMyModel();
 	PrecacheMyGibModel();
 
 	RegisterAndPrecacheSoundScript(painSoundScript, CHFGrunt::painSoundScript);

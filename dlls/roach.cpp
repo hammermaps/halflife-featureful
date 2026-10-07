@@ -39,6 +39,8 @@ class CRoach : public CBaseMonster
 public:
 	void Spawn() override;
 	void Precache() override;
+	const char* DefaultModel() override { return "models/roach.mdl"; }
+	float DefaultHealth() override { return 1.0f; }
 	void SetYawSpeed() override;
 	void MonsterThink() override;
 	void Move( float flInterval ) override;
@@ -158,14 +160,14 @@ void CRoach::Spawn()
 {
 	Precache();
 
-	SetMyModel( "models/roach.mdl" );
+	SetMyModel();
 	SetMySize();
 
 	pev->solid = SOLID_SLIDEBOX;
 	pev->movetype = MOVETYPE_STEP;
 	SetMyBloodColor( BLOOD_COLOR_YELLOW );
 	pev->effects = 0;
-	SetMyHealth( 1 );
+	SetMyHealth();
 	SetMyFieldOfView(0.5f);// indicates the width of this monster's forward view cone ( as a dotproduct result )
 	m_MonsterState = MONSTERSTATE_NONE;
 
@@ -185,7 +187,7 @@ void CRoach::Spawn()
 //=========================================================
 void CRoach::Precache()
 {
-	PrecacheMyModel( "models/roach.mdl" );
+	PrecacheMyModel();
 	PrecacheMyGibModel();
 
 	RegisterAndPrecacheSoundScript(walkSoundScript);

@@ -40,6 +40,7 @@ class CCrossbowBolt : public CBaseEntity
 public:
 	void Spawn() override;
 	void Precache() override;
+	const char* DefaultModel() override { return "models/crossbow_bolt.mdl"; }
 	int Classify() override;
 	void EXPORT BubbleThink();
 	void EXPORT BoltTouch( CBaseEntity *pOther );
@@ -110,7 +111,7 @@ void CCrossbowBolt::Spawn()
 
 	pev->gravity = 0.5f;
 
-	SetMyModel("models/crossbow_bolt.mdl");
+	SetMyModel();
 
 	UTIL_SetOrigin( pev, pev->origin );
 	UTIL_SetSize( pev, Vector( 0, 0, 0 ), Vector( 0, 0, 0 ) );
@@ -122,7 +123,7 @@ void CCrossbowBolt::Spawn()
 
 void CCrossbowBolt::Precache()
 {
-	PrecacheMyModel("models/crossbow_bolt.mdl");
+	PrecacheMyModel();
 	RegisterAndPrecacheSoundScript(boltHitBody);
 	RegisterAndPrecacheSoundScript(boltHitWorld);
 }

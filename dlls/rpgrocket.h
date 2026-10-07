@@ -21,6 +21,7 @@ public:
 	static	TYPEDESCRIPTION m_SaveData[];
 	void Spawn() override;
 	void Precache() override;
+	const char* DefaultModel() override { return "models/rpgrocket.mdl"; }
 	RadiusDamageInfo GetDefaultProjectileRadiusDamageInfo() override;
 	void SetProjectileParamsBeforeSpawn(const ProjectileParameters& params) override;
 	void LaunchAsProjectile(const ProjectileParameters& params) override;

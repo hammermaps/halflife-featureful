@@ -40,7 +40,9 @@ class CSqueakGrenade : public CGrenade
 public:
 	void Spawn() override;
 	void Precache() override;
-	int DefaultClassify() override;
+	const char* DefaultModel() override { return "models/w_squeak.mdl"; }
+	float DefaultHealth() override { return GetSkillValue("snark_health"); }
+	int DefaultClassify() override { return CLASS_SNARK; }
 	void EXPORT SuperBounceTouch( CBaseEntity *pOther );
 	void EXPORT HuntThink();
 	int	BloodColor() override { return CBaseMonster::BloodColor(); }
@@ -54,7 +56,6 @@ public:
 
 	static TYPEDESCRIPTION m_SaveData[];
 
-	virtual float DefaultHealth();
 	virtual float BiteDamage();
 	virtual float AdditionalExplosionDamage();
 	virtual float MaximumExplosionDamage();
@@ -77,8 +78,8 @@ public:
 	float m_flBirthTime;
 
 protected:
-	void SpawnImpl(const char* modelName, float damage, float lifespan);
-	void PrecacheImpl(const char* modelName);
+	void SpawnImpl(float damage, float lifespan);
+	void PrecacheImpl();
 
 	static const NamedSoundScript dieSoundScript;
 	static const NamedSoundScript gibbedSoundScript;
@@ -140,25 +141,20 @@ const NamedSoundScript CSqueakGrenade::bounceSoundScript = {
 	"Snark.Bounce"
 };
 
-int CSqueakGrenade::DefaultClassify()
-{
-	return CLASS_SNARK;
-}
-
 void CSqueakGrenade::Spawn()
 {
 	Precache();
-	SpawnImpl("models/w_squeak.mdl", GetSkillValue("snark_dmg_pop"), GetSkillValue("snark_lifespan"));
+	SpawnImpl(GetSkillValue("snark_dmg_pop"), GetSkillValue("snark_lifespan"));
 }
 
-void CSqueakGrenade::SpawnImpl(const char* modelName, float damage, float lifespan)
+void CSqueakGrenade::SpawnImpl(float damage, float lifespan)
 {
 	// motor
 	pev->movetype = MOVETYPE_BOUNCE;
 	pev->solid = SOLID_BBOX;
 	SetMyBloodColor( BLOOD_COLOR_YELLOW );
 
-	SET_MODEL( ENT( pev ), modelName );
+	SetMyModel();
 	SetMySize();
 	UTIL_SetOrigin( pev, pev->origin );
 
@@ -169,7 +165,7 @@ void CSqueakGrenade::SpawnImpl(const char* modelName, float damage, float lifesp
 
 	pev->flags |= FL_MONSTER;
 	pev->takedamage = DAMAGE_AIM;
-	SetMyHealth(DefaultHealth());
+	SetMyHealth();
 	pev->max_health = pev->health;
 	pev->gravity = 0.5f;
 	pev->friction = 0.5f;
@@ -199,12 +195,12 @@ void CSqueakGrenade::SpawnImpl(const char* modelName, float damage, float lifesp
 
 void CSqueakGrenade::Precache()
 {
-	PrecacheImpl("models/w_squeak.mdl");
+	PrecacheImpl();
 }
 
-void CSqueakGrenade::PrecacheImpl( const char* modelName )
+void CSqueakGrenade::PrecacheImpl()
 {
-	PRECACHE_MODEL( modelName );
+	PrecacheMyModel();
 	RegisterAndPrecacheSoundScript(dieSoundScript);
 	RegisterAndPrecacheSoundScript(gibbedSoundScript);
 	RegisterAndPrecacheSoundScript(squeakSoundScript);
@@ -262,11 +258,6 @@ void CSqueakGrenade::ReportAIState(ALERT_TYPE level)
 	{
 		ALERT(level, "Has infinite lifespan. ");
 	}
-}
-
-float CSqueakGrenade::DefaultHealth()
-{
-	return GetSkillValue("snark_health");
 }
 
 float CSqueakGrenade::BiteDamage()
@@ -501,8 +492,10 @@ void CSqueakGrenade::SuperBounceTouch( CBaseEntity *pOther )
 
 class CPenguinGrenade : public CSqueakGrenade
 {
+public:
 	void Spawn() override;
 	void Precache() override;
+	const char* DefaultModel() override { return "models/w_penguin.mdl"; }
 	KilledResult Killed(entvars_t *pevInflictor,entvars_t *pevAttacker, int iGib) override;
 	float AdditionalExplosionDamage() override;
 	float DefaultHealth() override;
@@ -515,13 +508,13 @@ class CPenguinGrenade : public CSqueakGrenade
 void CPenguinGrenade::Spawn()
 {
 	Precache();
-	SpawnImpl("models/w_penguin.mdl", GetSkillValue("penguin_dmg_pop"), GetSkillValue("penguin_lifespan"));
+	SpawnImpl(GetSkillValue("penguin_dmg_pop"), GetSkillValue("penguin_lifespan"));
 }
 
 void CPenguinGrenade::Precache()
 {
 	PrecacheBaseGrenadeSounds();
-	PrecacheImpl("models/w_penguin.mdl");
+	PrecacheImpl();
 }
 
 KilledResult CPenguinGrenade::Killed(entvars_t *pevInflictor, entvars_t *pevAttacker, int iGib)
@@ -596,9 +589,8 @@ LINK_WEAPON_TO_CLASS( weapon_snark, CSqueak )
 
 void CSqueak::Spawn()
 {
-	const WeaponParameters& params = MyParameters();
 	Precache();
-	SetMyModel(params.worldModel.c_str());
+	SetMyModel();
 
 	SetInitialAmmoAmount();
 	InitMaxClip();
