@@ -39,6 +39,8 @@ class CHWGrunt : public CFollowingMonster
 public:
 	void Spawn() override;
 	void Precache() override;
+	const char* DefaultModel() override { return "models/hwgrunt.mdl"; }
+	float DefaultHealth() override { return GetSkillValue("hwgrunt_health"); }
 	bool IsEnabledInMod() override { return g_modFeatures.IsMonsterEnabled("hwgrunt"); }
 	void SetYawSpeed() override;
 	int DefaultClassify() override { return CLASS_HUMAN_MILITARY; }
@@ -145,7 +147,7 @@ void CHWGrunt::Spawn()
 {
 	Precache();
 
-	SetMyModel( "models/hwgrunt.mdl" );
+	SetMyModel();
 	DetectModelType();
 	SetMySize();
 
@@ -153,7 +155,7 @@ void CHWGrunt::Spawn()
 	pev->movetype		= MOVETYPE_STEP;
 	SetMyBloodColor( BLOOD_COLOR_RED );
 	pev->effects		= 0;
-	SetMyHealth( GetSkillValue("hwgrunt_health") );
+	SetMyHealth();
 	SetMyFieldOfView(0.2);// indicates the width of this monster's forward view cone ( as a dotproduct result )
 	m_MonsterState		= MONSTERSTATE_NONE;
 	m_flNextPainTime	= gpGlobals->time;
@@ -175,7 +177,7 @@ void CHWGrunt::Spawn()
 
 void CHWGrunt::Precache()
 {
-	PrecacheMyModel("models/hwgrunt.mdl");
+	PrecacheMyModel();
 	PrecacheMyGibModel();
 
 	RegisterAndPrecacheSoundScript(painSoundScript, CHGrunt::painSoundScript);

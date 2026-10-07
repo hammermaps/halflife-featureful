@@ -357,6 +357,8 @@ class CISlave : public CFollowingMonster
 public:
 	void Spawn() override;
 	void Precache() override;
+	const char* DefaultModel() override { return "models/islave.mdl"; }
+	float DefaultHealth() override { return GetSkillValue("islave_health"); }
 	void Activate() override;
 	void KeyValue(KeyValueData* pkvd) override;
 	void UpdateOnRemove() override;
@@ -1485,14 +1487,14 @@ void CISlave::Spawn()
 {
 	Precache();
 
-	SetMyModel( "models/islave.mdl" );
+	SetMyModel();
 	SetMySize();
 
 	pev->solid		= SOLID_SLIDEBOX;
 	pev->movetype		= MOVETYPE_STEP;
 	SetMyBloodColor( BLOOD_COLOR_YELLOW );
 	pev->effects		= 0;
-	SetMyHealth( GetSkillValue("islave_health") );
+	SetMyHealth();
 	pev->view_ofs		= Vector( 0, 0, 64 );// position of the eyes relative to monster's origin.
 	SetMyFieldOfView(VIEW_FIELD_WIDE); // NOTE: we need a wide field of view so npc will notice player and say hello
 	m_MonsterState		= MONSTERSTATE_NONE;
@@ -1537,7 +1539,7 @@ void CISlave::Precache()
 	RegisterVisual(idleLightVisual);
 	RegisterVisual(summonLightVisual);
 
-	PrecacheMyModel( "models/islave.mdl" );
+	PrecacheMyModel();
 	PrecacheMyGibModel();
 
 	RegisterAndPrecacheSoundScript(idleSoundScript);

@@ -36,6 +36,9 @@ class CBarnacle : public CBaseMonster
 public:
 	void Spawn() override;
 	void Precache() override;
+	const char* DefaultModel() override { return "models/barnacle.mdl"; }
+	float DefaultHealth() override { return GetSkillValue("barnacle_health"); }
+	const char* DefaultDisplayName() override { return "Barnacle"; }
 	void Activate() override;
 	void UpdateOnRemove() override;
 	bool MustAddToFullPack(unsigned char *pSet) override;
@@ -169,7 +172,7 @@ void CBarnacle::Spawn()
 {
 	Precache();
 
-	SetMyModel( "models/barnacle.mdl" );
+	SetMyModel();
 	SetMySize();
 
 	pev->solid = SOLID_SLIDEBOX;
@@ -177,7 +180,7 @@ void CBarnacle::Spawn()
 	pev->takedamage = DAMAGE_AIM;
 	SetMyBloodColor( BLOOD_COLOR_RED );
 	pev->effects = EF_INVLIGHT; // take light from the ceiling
-	SetMyHealth( GetSkillValue("barnacle_health") );
+	SetMyHealth();
 	SetMyFieldOfView(0.5f);// indicates the width of this monster's forward view cone ( as a dotproduct result )
 	m_MonsterState = MONSTERSTATE_NONE;
 	m_flKillVictimTime = 0.0f;
@@ -452,7 +455,7 @@ void CBarnacle::WaitTillDead()
 //=========================================================
 void CBarnacle::Precache()
 {
-	PrecacheMyModel( "models/barnacle.mdl" );
+	PrecacheMyModel();
 	PrecacheMyGibModel();
 
 	RegisterAndPrecacheSoundScript(alertSoundScript);//happy, lifting food up

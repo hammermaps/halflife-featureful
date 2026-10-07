@@ -35,6 +35,8 @@ public:
 
 	void Spawn() override;
 	void Precache() override;
+	const char* DefaultModel() override { return "models/nihilanth.mdl"; }
+	float DefaultHealth() override { return GetSkillValue("nihilanth_health"); }
 
 	int DefaultClassify() override { return CLASS_ALIEN_MILITARY; }
 	const char* DefaultDisplayName() override { return "Nihilanth"; }
@@ -188,6 +190,8 @@ public:
 
 	void Spawn() override;
 	void Precache() override;
+	const char* DefaultModel() override { return zapVisual.model; }
+	float DefaultHealth() override { return 0.0f; }
 
 	void CircleInit( CBaseEntity *pTarget );
 	void AbsorbInit();
@@ -432,14 +436,14 @@ void CNihilanth::Spawn()
 	pev->movetype = MOVETYPE_FLY;
 	pev->solid = SOLID_BBOX;
 
-	SetMyModel( "models/nihilanth.mdl" );
+	SetMyModel();
 	// UTIL_SetSize(pev, Vector( -300, -300, 0), Vector(300, 300, 512));
 	UTIL_SetSize( pev, Vector( -32, -32, 0 ), Vector( 32, 32, 64 ) );
 	UTIL_SetOrigin( pev, pev->origin );
 
 	pev->flags		|= FL_MONSTER | FL_FLY;
 	pev->takedamage		= DAMAGE_AIM;
-	pev->health		= GetSkillValue("nihilanth_health");
+	SetMyHealth();
 	pev->max_health = pev->health;
 	pev->view_ofs		= Vector( 0, 0, 300 );
 
@@ -483,7 +487,7 @@ void CNihilanth::Spawn()
 
 void CNihilanth::Precache()
 {
-	PrecacheMyModel( "models/nihilanth.mdl" );
+	PrecacheMyModel();
 
 	UTIL_PrecacheOther( "nihilanth_energy_ball", GetProjectileOverrides() );
 	UTIL_PrecacheOther( "monster_alien_controller" );

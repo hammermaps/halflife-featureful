@@ -27,6 +27,8 @@ class CPlayerMonster : public CBaseMonster
 public:
 	void Spawn() override;
 	void Precache() override;
+	const char* DefaultModel() override { return "models/player.mdl"; }
+	float DefaultHealth() override { return 8.0f; }
 	void SetYawSpeed() override;
 	int Classify() override;
 	void HandleAnimEvent( MonsterEvent_t *pEvent ) override;
@@ -98,7 +100,7 @@ void CPlayerMonster::Spawn()
 	pev->solid = SOLID_SLIDEBOX;
 	pev->movetype = MOVETYPE_STEP;
 	SetMyBloodColor(BLOOD_COLOR_RED);
-	pev->health = 8;
+	SetMyHealth();
 	SetMyFieldOfView(0.5f);// indicates the width of this monster's forward view cone ( as a dotproduct result )
 	m_MonsterState = MONSTERSTATE_NONE;
 

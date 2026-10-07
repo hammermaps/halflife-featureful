@@ -42,8 +42,10 @@ class CFlybee : public CFlyingMonster
 public:
 	void Spawn() override;
 	void Precache() override;
+	const char* DefaultModel() override { return "models/flybee.mdl"; }
+	float DefaultHealth() override { return GetSkillValue("flybee_health"); }
 	bool IsEnabledInMod() override { return g_modFeatures.IsMonsterEnabled("flybee"); }
-	int DefaultClassify() override;
+	int DefaultClassify() override { return CLASS_ALIEN_MONSTER; }
 	const char* DefaultDisplayName() override { return "Flybee"; }
 
 	int		Save( CSave &save ) override;
@@ -348,13 +350,13 @@ void CFlybee::Spawn()
 {
 	Precache();
 
-	SetMyModel("models/flybee.mdl");
+	SetMyModel();
 	SetMySize();
 
 	pev->solid			= SOLID_BBOX;
 	pev->movetype		= MOVETYPE_FLY;
 	SetMyBloodColor(BLOOD_COLOR_YELLOW);
-	SetMyHealth(GetSkillValue("flybee_health"));
+	SetMyHealth();
 	pev->view_ofs		= Vector ( 0, 0, 16 );
 	SetMyFieldOfView(VIEW_FIELD_WIDE);
 	m_MonsterState		= MONSTERSTATE_NONE;
@@ -378,7 +380,7 @@ void CFlybee::Spawn()
 
 void CFlybee::Precache()
 {
-	PrecacheMyModel("models/flybee.mdl");
+	PrecacheMyModel();
 	PrecacheMyGibModel();
 
 	RegisterAndPrecacheSoundScript(idleSoundScript);
@@ -394,11 +396,6 @@ void CFlybee::Precache()
 
 	UTIL_PrecacheOther("flybee_zapbomb", GetProjectileOverrides());
 	UTIL_PrecacheOther( "flyball", GetProjectileOverrides() );
-}
-
-int	CFlybee::DefaultClassify()
-{
-	return	CLASS_ALIEN_MONSTER;
 }
 
 bool CFlybee::CheckMeleeAttack1 ( float flDot, float flDist )

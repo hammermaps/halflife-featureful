@@ -31,6 +31,7 @@
 class CLegacyCineMonster : public CBaseMonster
 {
 public:
+	float DefaultHealth() override { return 1.0f; }
 	void CineSpawn( const char *szModel );
 	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value ) override;
 	void EXPORT CineThink();
@@ -112,7 +113,7 @@ void CLegacyCineMonster :: CineSpawn( const char *szModel )
 	pev->solid			= SOLID_SLIDEBOX;
 	pev->movetype		= MOVETYPE_STEP;
 	pev->effects		= 0;
-	pev->health			= 1;
+	SetMyHealth();
 	pev->yaw_speed		= 10;
 	
 	// ugly alpha hack, can't set ints from the bsp.	

@@ -346,6 +346,8 @@ class CBullsquid : public CBaseMonster
 public:
 	void Spawn() override;
 	void Precache() override;
+	const char* DefaultModel() override { return "models/bullsquid.mdl"; }
+	float DefaultHealth() override { return GetSkillValue("bullsquid_health"); }
 	void SetYawSpeed() override;
 	int  DefaultISoundMask() override;
 	int  DefaultClassify() override;
@@ -823,14 +825,14 @@ void CBullsquid::Spawn()
 {
 	Precache();
 
-	SetMyModel( "models/bullsquid.mdl" );
+	SetMyModel();
 	SetMySize();
 
 	pev->solid = SOLID_SLIDEBOX;
 	pev->movetype = MOVETYPE_STEP;
 	SetMyBloodColor( BLOOD_COLOR_YELLOW );
 	pev->effects = 0;
-	SetMyHealth( GetSkillValue("bullsquid_health") );
+	SetMyHealth();
 	SetMyFieldOfView(0.2f);// indicates the width of this monster's forward view cone ( as a dotproduct result )
 	m_MonsterState = MONSTERSTATE_NONE;
 	SetMyCanOpenDoors(false);
@@ -846,7 +848,7 @@ void CBullsquid::Spawn()
 //=========================================================
 void CBullsquid::Precache()
 {
-	PrecacheMyModel( "models/bullsquid.mdl" );
+	PrecacheMyModel();
 	PrecacheMyGibModel();
 
 	UTIL_PrecacheOther("squidspit", GetProjectileOverrides());
@@ -1455,6 +1457,7 @@ class CDeadBullsquid : public CDeadMonster
 public:
 	void Spawn() override;
 	const char* DefaultModel() override { return "models/bullsquid.mdl"; }
+	float DefaultHealth() override { return GetSkillValue("bullsquid_health")/2; }
 	int	DefaultClassify() override { return	CLASS_ALIEN_MONSTER; }
 
 	const char* getPos(int pos) const override;
@@ -1469,7 +1472,7 @@ LINK_ENTITY_TO_CLASS( monster_bullchicken_dead, CDeadBullsquid )
 
 void CDeadBullsquid::Spawn()
 {
-	SpawnHelper(BLOOD_COLOR_YELLOW, GetSkillValue("bullsquid_health")/2);
+	SpawnHelper(BLOOD_COLOR_YELLOW);
 	MonsterInitDead();
 	pev->frame = 255;
 }

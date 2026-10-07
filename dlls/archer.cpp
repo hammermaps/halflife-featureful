@@ -38,6 +38,8 @@ class CArcher : public CBaseMonster
 public:
 	void Spawn() override;
 	void Precache() override;
+	const char* DefaultModel() override { return "models/archer.mdl"; }
+	float DefaultHealth() override { return GetSkillValue("archer_health"); }
 	void CheckForAttachments()
 	{
 		if (pev->modelindex)
@@ -229,12 +231,12 @@ const NamedVisual CArcher::zapLightVisual = BuildVisual("Archer.ZapLight")
 void CArcher::Spawn( void )
 {
 	Precache();
-	SetMyModel("models/archer.mdl");
+	SetMyModel();
 	SetMySize();
 	pev->solid			= SOLID_SLIDEBOX;
 	pev->movetype		= MOVETYPE_FLY;
 	SetBits(pev->flags, FL_SWIM);
-	SetMyHealth(GetSkillValue("archer_health"));
+	SetMyHealth();
 	SetMyBloodColor(BLOOD_COLOR_YELLOW);
 
 	SetMyFieldOfView(VIEW_FIELD_FULL);
@@ -314,7 +316,7 @@ void CArcher::SwitchArcherState()
 
 void CArcher::Precache()
 {
-	PrecacheMyModel("models/archer.mdl");
+	PrecacheMyModel();
 	PrecacheMyGibModel();
 
 	RegisterAndPrecacheSoundScript(biteSoundScript);

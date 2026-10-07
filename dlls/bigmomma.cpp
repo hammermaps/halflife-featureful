@@ -207,6 +207,8 @@ class CBigMomma : public CBaseMonster
 public:
 	void Spawn() override;
 	void Precache() override;
+	const char* DefaultModel() override { return "models/big_mom.mdl"; }
+	float DefaultHealth() override { return 150.0f * GetSkillValue("bigmomma_health_factor"); }
 	void KeyValue( KeyValueData *pkvd ) override;
 	void Activate() override;
 	DamageInfo DefaultTransformDamageInfo(entvars_t *pevInflictor, entvars_t *pevAttacker, const DamageInfo& inputDamageInfo) override;
@@ -795,13 +797,13 @@ void CBigMomma::Spawn()
 {
 	Precache();
 
-	SetMyModel( "models/big_mom.mdl" );
+	SetMyModel();
 	SetMySize();
 
 	pev->solid = SOLID_SLIDEBOX;
 	pev->movetype = MOVETYPE_STEP;
 	SetMyBloodColor( BLOOD_COLOR_YELLOW );
-	SetMyHealth( 150.0f * GetSkillValue("bigmomma_health_factor") );
+	SetMyHealth();
 	pev->view_ofs = Vector( 0.0f, 0.0f, 128.0f );// position of the eyes relative to monster's origin.
 	SetMyFieldOfView(0.3f);// indicates the width of this monster's forward view cone ( as a dotproduct result )
 	m_MonsterState = MONSTERSTATE_NONE;
@@ -815,7 +817,7 @@ void CBigMomma::Spawn()
 //=========================================================
 void CBigMomma::Precache()
 {
-	PrecacheMyModel( "models/big_mom.mdl" );
+	PrecacheMyModel();
 	PrecacheMyGibModel();
 
 	RegisterAndPrecacheSoundScript(alertSoundScript);

@@ -78,6 +78,8 @@ class CBarney : public CTalkMonster
 public:
 	void Spawn() override;
 	void Precache() override;
+	const char* DefaultModel() override { return "models/barney.mdl"; }
+	float DefaultHealth() override { return GetSkillValue("barney_health"); }
 	void KeyValue(KeyValueData* pkvd) override;
 	void SetYawSpeed() override;
 	int DefaultISoundMask() override;
@@ -129,7 +131,7 @@ public:
 	CUSTOM_SCHEDULES
 
 protected:
-	void SpawnImpl(const char* modelName, float health);
+	void SpawnImpl();
 	DamageInfo DefaultHandleTraceAttackImpl(entvars_t *pevInflictor, entvars_t *pevAttacker, const DamageInfo &inputDamageInfo, Vector vecDir, TraceResult *ptr, bool hasHelmet);
 
 	int m_iHead;
@@ -407,15 +409,15 @@ void CBarney::HandleAnimEvent( MonsterEvent_t *pEvent )
 //=========================================================
 // Spawn
 //=========================================================
-void CBarney::SpawnImpl(const char* modelName, float health)
+void CBarney::SpawnImpl()
 {
-	SetMyModel( modelName );
+	SetMyModel();
 	SetMySize();
 
 	pev->solid = SOLID_SLIDEBOX;
 	pev->movetype = MOVETYPE_STEP;
 	SetMyBloodColor( BLOOD_COLOR_RED );
-	SetMyHealth( health );
+	SetMyHealth();
 	pev->view_ofs = Vector ( 0.0f, 0.0f, 50.0f );// position of the eyes relative to monster's origin.
 	SetMyFieldOfView(VIEW_FIELD_WIDE); // NOTE: we need a wide field of view so npc will notice player and say hello
 	m_MonsterState = MONSTERSTATE_NONE;
@@ -434,7 +436,7 @@ void CBarney::SpawnImpl(const char* modelName, float health)
 void CBarney::Spawn()
 {
 	Precache();
-	SpawnImpl("models/barney.mdl", GetSkillValue("barney_health"));
+	SpawnImpl();
 	if (bodystate == -1) {
 		bodystate = RANDOM_LONG(BARNEY_BODY_GUNHOLSTERED, BARNEY_BODY_GUNDRAWN);
 	}
@@ -494,7 +496,7 @@ bool CBarney::HasGun()
 
 void CBarney::Precache()
 {
-	PrecacheMyModel("models/barney.mdl");
+	PrecacheMyModel();
 	PrecacheMyGibModel();
 
 	RegisterAndPrecacheSoundScript(painSoundScript);
@@ -803,6 +805,8 @@ class COtis : public CBarney
 public:
 	void Spawn() override;
 	void Precache() override;
+	const char* DefaultModel() override { return "models/otis.mdl"; }
+	float DefaultHealth() override { return GetSkillValue("otis_health"); }
 	bool IsEnabledInMod() override { return g_modFeatures.IsMonsterEnabled("otis"); }
 	const char* DefaultSentenceGroup(int group) override;
 	const char* ReverseRelationshipModel() override { return "models/otisf.mdl"; }
@@ -835,7 +839,7 @@ LINK_ENTITY_TO_CLASS( monster_otis, COtis )
 void COtis::Spawn()
 {
 	Precache();
-	SpawnImpl("models/otis.mdl", GetSkillValue("otis_health"));
+	SpawnImpl();
 	CacheGunGroupModels();
 	if ( m_iHead == -1 )
 		SetBodygroup(OTIS_HEAD_GROUP, RANDOM_LONG(0, 1));
@@ -855,7 +859,7 @@ void COtis::SetGunState(int gunState)
 
 void COtis::Precache()
 {
-	PrecacheMyModel("models/otis.mdl");
+	PrecacheMyModel();
 	PrecacheMyGibModel();
 
 	RegisterAndPrecacheSoundScript(fireDesertEagleSoundScript, NPC::desertEagleSoundScript);
@@ -997,6 +1001,7 @@ class CBarniel : public CBarney
 public:
 	void Spawn() override;
 	void Precache() override;
+	const char* DefaultModel() override { return "models/barniel.mdl"; }
 	bool IsEnabledInMod() override { return g_modFeatures.IsMonsterEnabled("barniel"); }
 	const char* DefaultSentenceGroup(int group) override;
 	const char* ReverseRelationshipModel() override { return NULL; }
@@ -1034,7 +1039,7 @@ const NamedSoundScript CBarniel::firePistolSoundScript = {
 void CBarniel::Spawn()
 {
 	Precache();
-	SpawnImpl("models/barniel.mdl", GetSkillValue("barney_health"));
+	SpawnImpl();
 
 	if (bodystate == -1) {
 		bodystate = RANDOM_LONG(BARNEY_BODY_GUNHOLSTERED, BARNEY_BODY_GUNDRAWN);
@@ -1045,7 +1050,7 @@ void CBarniel::Spawn()
 
 void CBarniel::Precache()
 {
-	PrecacheMyModel("models/barniel.mdl");
+	PrecacheMyModel();
 	PrecacheMyGibModel();
 
 	RegisterAndPrecacheSoundScript(painSoundScript);
@@ -1166,6 +1171,8 @@ class CKate : public CBarney
 public:
 	void Spawn() override;
 	void Precache() override;
+	const char* DefaultModel() override { return "models/kate.mdl"; }
+	float DefaultHealth() override { return GetSkillValue("kate_health"); }
 	bool IsEnabledInMod() override { return g_modFeatures.IsMonsterEnabled("kate"); }
 	const char* DefaultSentenceGroup(int group) override;
 	const char* DefaultDisplayName() override { return "Kate"; }
@@ -1226,7 +1233,7 @@ const NamedSoundScript CKate::punchSoundScript = {
 void CKate::Spawn()
 {
 	Precache();
-	SpawnImpl("models/kate.mdl", GetSkillValue("kate_health"));
+	SpawnImpl();
 	m_iCombatState = -1;
 
 	if (bodystate == -1) {
@@ -1238,7 +1245,7 @@ void CKate::Spawn()
 
 void CKate::Precache()
 {
-	PrecacheMyModel("models/kate.mdl");
+	PrecacheMyModel();
 	PrecacheMyGibModel();
 
 	RegisterAndPrecacheSoundScript(painSoundScript);

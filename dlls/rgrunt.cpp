@@ -26,6 +26,8 @@ class CRGrunt : public CHGrunt
 public:
 	void Spawn() override;
 	void Precache() override;
+	const char* DefaultModel() override { return "models/rgrunt.mdl"; }
+	float DefaultHealth() override { return GetSkillValue("hgrunt_health"); }
 	bool IsEnabledInMod() override { return g_modFeatures.IsMonsterEnabled("robogrunt"); }
 	int DefaultClassify() override { return CLASS_MACHINE; }
 	const char* DefaultDisplayName() override { return "Robo Grunt"; }
@@ -157,7 +159,7 @@ const char* CRGrunt::SentenceByNumber(int sentence)
 
 void CRGrunt::Spawn()
 {
-	SpawnHelper("models/rgrunt.mdl", GetSkillValue("hgrunt_health"), DONT_BLEED);
+	SpawnHelper(DONT_BLEED);
 	if( pev->weapons == 0 )
 	{
 		pev->weapons = HGRUNT_9MMAR | HGRUNT_HANDGRENADE;
@@ -181,7 +183,7 @@ void CRGrunt::Spawn()
 
 void CRGrunt::Precache()
 {
-	PrecacheMyModel("models/rgrunt.mdl");
+	PrecacheMyModel();
 	PrecacheMyGibModel(DefaultGibModel());
 	RegisterAndPrecacheSoundScript(NPC::swishSoundScript);
 

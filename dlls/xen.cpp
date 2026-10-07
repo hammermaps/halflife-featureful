@@ -90,6 +90,7 @@ class CXenPLight : public CActAnimating
 public:
 	void Spawn() override;
 	void Precache() override;
+	const char* DefaultModel() override { return "models/light.mdl"; }
 	void Touch( CBaseEntity *pOther ) override;
 	void Think() override;
 	void UpdateOnRemove() override;
@@ -123,7 +124,7 @@ void CXenPLight::Spawn()
 {
 	Precache();
 
-	SetMyModel("models/light.mdl");
+	SetMyModel();
 	pev->movetype = MOVETYPE_NONE;
 
 	if (FBitSet(pev->spawnflags, SF_XEN_PLANT_DROP_TO_FLOOR))
@@ -169,7 +170,7 @@ void CXenPLight::Spawn()
 
 void CXenPLight::Precache()
 {
-	PrecacheMyModel("models/light.mdl");
+	PrecacheMyModel();
 	RegisterVisual(glowVisual);
 }
 
@@ -242,6 +243,7 @@ class CXenHair : public CActAnimating
 public:
 	void Spawn() override;
 	void Precache() override;
+	const char* DefaultModel() override { return "models/hair.mdl"; }
 	void Think() override;
 };
 
@@ -252,7 +254,7 @@ LINK_ENTITY_TO_CLASS( xen_hair, CXenHair )
 void CXenHair::Spawn()
 {
 	Precache();
-	SetMyModel("models/hair.mdl");
+	SetMyModel();
 	UTIL_SetSize( pev, Vector( -4, -4, 0 ), Vector( 4, 4, 32 ) );
 	pev->sequence = 0;
 
@@ -282,7 +284,7 @@ void CXenHair::Think()
 
 void CXenHair::Precache()
 {
-	PrecacheMyModel( "models/hair.mdl" );
+	PrecacheMyModel();
 }
 
 class CXenTreeTrigger : public CBaseEntity
@@ -324,6 +326,7 @@ class CXenTree : public CActAnimating
 public:
 	void Spawn() override;
 	void Precache() override;
+	const char* DefaultModel() override { return "models/tree.mdl"; }
 	void Activate() override;
 	void Touch( CBaseEntity *pOther ) override;
 	void Think() override;
@@ -360,7 +363,7 @@ void CXenTree::Spawn()
 {
 	Precache();
 
-	SetMyModel("models/tree.mdl");
+	SetMyModel();
 	pev->movetype = MOVETYPE_NONE;
 	pev->solid = FBitSet(pev->spawnflags, SF_XEN_PLANT_NONSOLID) ? SOLID_NOT : SOLID_BBOX;
 
@@ -383,7 +386,7 @@ void CXenTree::Spawn()
 
 void CXenTree::Precache()
 {
-	PrecacheMyModel( "models/tree.mdl" );
+	PrecacheMyModel();
 	RegisterAndPrecacheSoundScript(attackHitSoundScript, NPC::attackHitSoundScript);
 	RegisterAndPrecacheSoundScript(attackMissSoundScript, NPC::attackMissSoundScript);
 }
@@ -496,22 +499,23 @@ public:
 	TakeDamageResult TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, const DamageInfo& damageInfo ) override { Attack(); return TakeDamageResult(); }
 	void Attack() {}
 
-	virtual const char* DefaultModel() const = 0;
 	void SetMySize(const Vector& vecMin, const Vector& vecMax);
 };
 
 class CXenSporeSmall : public CXenSpore
 {
+public:
 	void Spawn() override;
-	const char* DefaultModel() const override {
+	const char* DefaultModel() override {
 		return "models/fungus(small).mdl";
 	}
 };
 
 class CXenSporeMed : public CXenSpore
 {
+public:
 	void Spawn() override;
-	const char* DefaultModel() const override {
+	const char* DefaultModel() override {
 		return "models/fungus.mdl";
 	}
 };
@@ -520,8 +524,9 @@ class CXenSporeMed : public CXenSpore
 
 class CXenSporeLarge : public CXenSpore
 {
+public:
 	void Spawn() override;
-	const char* DefaultModel() const override {
+	const char* DefaultModel() override {
 		return "models/fungus(large).mdl";
 	}
 	void UpdateOnRemove();
@@ -636,11 +641,11 @@ void CXenSporeLarge::UpdateOnRemove()
 	}
 }
 
-void CXenSpore :: Spawn()
+void CXenSpore::Spawn()
 {
 	Precache();
 
-	SetMyModel(DefaultModel());
+	SetMyModel();
 	pev->movetype = MOVETYPE_NONE;
 	pev->solid = FBitSet(pev->spawnflags, SF_XEN_PLANT_NONSOLID) ? SOLID_NOT : SOLID_BBOX;
 	pev->takedamage = DAMAGE_YES;
@@ -660,7 +665,7 @@ void CXenSpore :: Spawn()
 
 void CXenSpore::Precache()
 {
-	PrecacheMyModel(DefaultModel());
+	PrecacheMyModel();
 }
 
 void CXenSpore::Touch( CBaseEntity *pOther )

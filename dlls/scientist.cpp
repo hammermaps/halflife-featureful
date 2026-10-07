@@ -90,6 +90,8 @@ public:
 	int GetDefaultVoicePitch() override;
 	void Spawn() override;
 	void Precache() override;
+	const char* DefaultModel() override { return "models/scientist.mdl"; }
+	float DefaultHealth() override { return GetSkillValue("scientist_health"); }
 	void CalcTotalHeadCount();
 
 	void SetYawSpeed() override;
@@ -155,7 +157,7 @@ public:
 	static const NamedSoundScript healSoundScript;
 
 protected:
-	void SciSpawnHelper(const char* modelName, float health);
+	void SciSpawnHelper();
 
 	float m_healTime;
 	float m_fearTime;
@@ -741,7 +743,7 @@ void CScientist::HandleAnimEvent( MonsterEvent_t *pEvent )
 //=========================================================
 // Spawn
 //=========================================================
-void CScientist::SciSpawnHelper(const char* modelName, float health)
+void CScientist::SciSpawnHelper()
 {
 	// We need to set it before precache so the right voice will be chosen
 	if( pev->body == -1 )
@@ -752,13 +754,13 @@ void CScientist::SciSpawnHelper(const char* modelName, float health)
 
 	Precache();
 
-	SetMyModel( modelName );
+	SetMyModel();
 	SetMySize();
 
 	pev->solid = SOLID_SLIDEBOX;
 	pev->movetype = MOVETYPE_STEP;
 	SetMyBloodColor( BLOOD_COLOR_RED );
-	SetMyHealth( health );
+	SetMyHealth();
 	pev->view_ofs = Vector( 0, 0, 50 );// position of the eyes relative to monster's origin.
 	SetMyFieldOfView(VIEW_FIELD_WIDE); // NOTE: we need a wide field of view so scientists will notice player and say hello
 	m_MonsterState = MONSTERSTATE_NONE;
@@ -791,7 +793,7 @@ int CScientist::GetDefaultVoicePitch()
 
 void CScientist::Spawn()
 {
-	SciSpawnHelper("models/scientist.mdl", GetSkillValue("scientist_health"));
+	SciSpawnHelper();
 	CalcTotalHeadCount();
 
 	// White hands
@@ -809,7 +811,7 @@ void CScientist::Spawn()
 //=========================================================
 void CScientist::Precache()
 {
-	PrecacheMyModel( "models/scientist.mdl" );
+	PrecacheMyModel();
 	PrecacheMyGibModel();
 
 	RegisterAndPrecacheSoundScript(painSoundScript);
@@ -1286,6 +1288,7 @@ class CSittingScientist : public CScientist // kdb: changed from public CBaseMon
 public:
 	void Spawn() override;
 	void Precache() override;
+	float DefaultHealth() override { return 50.0f; }
 
 	void EXPORT SittingThink();
 	int DefaultClassify() override;
@@ -1305,7 +1308,7 @@ public:
 	float m_flResponseDelay;
 
 protected:
-	void SciSpawnHelper(const char* modelName);
+	void SciSpawnHelper();
 };
 
 LINK_ENTITY_TO_CLASS( monster_sitting_scientist, CSittingScientist )
@@ -1332,10 +1335,10 @@ SITTING_ANIM_sitting3
 //
 // ********** Scientist SPAWN **********
 //
-void CSittingScientist::SciSpawnHelper(const char* modelName)
+void CSittingScientist::SciSpawnHelper()
 {
-	PrecacheMyModel( modelName );
-	SetMyModel( modelName );
+	PrecacheMyModel();
+	SetMyModel();
 	Precache();
 	InitBoneControllers();
 
@@ -1347,7 +1350,7 @@ void CSittingScientist::SciSpawnHelper(const char* modelName)
 	else
 		pev->movetype = MOVETYPE_STEP;
 	pev->effects = 0;
-	SetMyHealth( 50 );
+	SetMyHealth();
 	
 	SetMyBloodColor( BLOOD_COLOR_RED );
 	SetMyFieldOfView(VIEW_FIELD_WIDE); // indicates the width of this monster's forward view cone ( as a dotproduct result )
@@ -1379,7 +1382,7 @@ void CSittingScientist::SciSpawnHelper(const char* modelName)
 
 void CSittingScientist::Spawn()
 {
-	SciSpawnHelper("models/scientist.mdl");
+	SciSpawnHelper();
 	CalcTotalHeadCount();
 	// Luther is black, make his hands black
 	if ( pev->body == HEAD_LUTHER )
@@ -1576,6 +1579,8 @@ public:
 	}
 	void Spawn() override;
 	void Precache() override;
+	const char* DefaultModel() override { return "models/cleansuit_scientist.mdl"; }
+	float DefaultHealth() override { return GetSkillValue("cleansuit_scientist_health"); }
 	bool IsEnabledInMod() override { return g_modFeatures.IsMonsterEnabled("cleansuit_scientist"); }
 	const char* DefaultDisplayName() override { return "Cleansuit Scientist"; }
 	bool AbleToHeal() override { return false; }
@@ -1596,13 +1601,13 @@ LINK_ENTITY_TO_CLASS( monster_cleansuit_scientist, CCleansuitScientist )
 
 void CCleansuitScientist::Spawn()
 {
-	SciSpawnHelper("models/cleansuit_scientist.mdl", GetSkillValue("cleansuit_scientist_health"));
+	SciSpawnHelper();
 	TalkMonsterInit();
 }
 
 void CCleansuitScientist::Precache()
 {
-	PrecacheMyModel("models/cleansuit_scientist.mdl");
+	PrecacheMyModel();
 	PrecacheMyGibModel();
 
 	RegisterAndPrecacheSoundScript(painSoundScript, CScientist::painSoundScript);
@@ -1651,12 +1656,13 @@ class CSittingCleansuitScientist : public CSittingScientist
 {
 public:
 	void Spawn() override;
+	const char* DefaultModel() override { return "models/cleansuit_scientist.mdl"; }
 	bool IsEnabledInMod() override { return g_modFeatures.IsMonsterEnabled("cleansuit_scientist"); }
 };
 
 void CSittingCleansuitScientist::Spawn()
 {
-	SciSpawnHelper("models/cleansuit_scientist.mdl");
+	SciSpawnHelper();
 }
 
 LINK_ENTITY_TO_CLASS( monster_sitting_cleansuit_scientist, CSittingCleansuitScientist )
@@ -1669,6 +1675,14 @@ public:
 	int GetDefaultVoicePitch() override { return 100; }
 	void Spawn() override;
 	void Precache() override;
+	const char* DefaultModel() override {
+#if FEATURE_ROSENBERG_DECAY
+		return "models/scientist_rosenberg.mdl";
+#else
+		return "models/scientist.mdl";
+#endif
+	}
+	float DefaultHealth() override { return GetSkillValue("scientist_health") * 2; }
 	bool IsEnabledInMod() override { return g_modFeatures.IsMonsterEnabled("rosenberg"); }
 	const char* DefaultDisplayName() override { return "Dr. Rosenberg"; }
 	const char* DefaultSentenceGroup(int group) override;
@@ -1699,9 +1713,9 @@ const NamedSoundScript CRosenberg::painSoundScript = {
 void CRosenberg::Spawn()
 {
 #if FEATURE_ROSENBERG_DECAY
-	SciSpawnHelper("models/scientist_rosenberg.mdl", gSkillData.scientistHealth * 2);
+	SciSpawnHelper();
 #else
-	SciSpawnHelper("models/scientist.mdl", GetSkillValue("scientist_health") * 2);
+	SciSpawnHelper();
 	CalcTotalHeadCount();
 	pev->body = 3;
 #endif
@@ -1711,9 +1725,9 @@ void CRosenberg::Spawn()
 void CRosenberg::Precache()
 {
 #if FEATURE_ROSENBERG_DECAY
-	PrecacheMyModel("models/scientist_rosenberg.mdl");
+	PrecacheMyMonsterModel();
 #else
-	PrecacheMyModel("models/scientist.mdl");
+	PrecacheMyModel();
 	CalcTotalHeadCount();
 #endif
 	PrecacheMyGibModel();
@@ -1779,10 +1793,11 @@ public:
 	int GetDefaultVoicePitch() override { return 100; }
 	void Spawn() override
 	{
-		SciSpawnHelper("models/scientist.mdl", GetSkillValue("civilian_health"));
+		SciSpawnHelper();
 		TalkMonsterInit();
 	}
 	void Precache() override;
+	float DefaultHealth() override { return GetSkillValue("civilian_health"); }
 	void HandleAnimEvent( MonsterEvent_t *pEvent ) override {
 		CTalkMonster::HandleAnimEvent(pEvent);
 	}
@@ -1804,7 +1819,7 @@ LINK_ENTITY_TO_CLASS( monster_civilian, CCivilian )
 
 void CCivilian::Precache()
 {
-	PrecacheMyModel("models/scientist.mdl");
+	PrecacheMyModel();
 	PrecacheMyGibModel();
 
 	RegisterAndPrecacheSoundScript(painSoundScript, CScientist::painSoundScript);
@@ -1821,6 +1836,8 @@ public:
 	int GetDefaultVoicePitch() override { return 100; }
 	void Spawn() override;
 	void Precache() override;
+	const char* DefaultModel() override { return "models/wheelchair_sci.mdl"; }
+	float DefaultHealth() override { return GetSkillValue("scientist_health") * 2; }
 	bool IsEnabledInMod() override { return g_modFeatures.IsMonsterEnabled("keller"); }
 	const char* DefaultDisplayName() override { return "Richard Keller"; }
 	const char* DefaultSentenceGroup(int group) override;
@@ -1856,13 +1873,13 @@ const NamedSoundScript CKeller::dieSoundScript = {
 
 void CKeller::Spawn()
 {
-	SciSpawnHelper("models/wheelchair_sci.mdl", GetSkillValue("scientist_health") * 2);
+	SciSpawnHelper();
 	TalkMonsterInit();
 }
 
 void CKeller::Precache()
 {
-	PrecacheMyModel("models/wheelchair_sci.mdl");
+	PrecacheMyModel();
 	PrecacheMyGibModel();
 
 	RegisterAndPrecacheSoundScript(painSoundScript);

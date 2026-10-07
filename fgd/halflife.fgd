@@ -4229,6 +4229,7 @@
 @PointClass size(-16 -16 0, 16 16 36) base(Targetname, Appearflags, Angles, Global, Scalable, EntityTemplate, EntityEffects) studio("models/w_oxygen.mdl") = item_airtank : "Oxygen tank"
 [
 	model(studio) : "Custom Model"
+	health(string) : "Custom Health"
 ]
 @PointClass size(-16 -16 0, 16 16 36) base(Item) studio("models/w_antidote.mdl") = item_antidote : "Poison antidote"
 [

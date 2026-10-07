@@ -345,6 +345,8 @@ class CVoltigore : public CFollowingMonster
 public:
 	void Spawn() override;
 	void Precache() override;
+	const char* DefaultModel() override { return "models/voltigore.mdl"; }
+	float DefaultHealth() override { return GetSkillValue("voltigore_health"); }
 	bool IsEnabledInMod() override { return g_modFeatures.IsMonsterEnabled("voltigore"); }
 	void SetYawSpeed() override;
 	int  DefaultClassify() override;
@@ -788,14 +790,14 @@ void CVoltigore::Spawn()
 {
 	Precache();
 
-	SetMyModel("models/voltigore.mdl");
+	SetMyModel();
 	SetMySize();
 
 	pev->solid			= SOLID_SLIDEBOX;
 	pev->movetype		= MOVETYPE_STEP;
 	SetMyBloodColor(BLOOD_COLOR_YELLOW);
 	pev->effects		= 0;
-	SetMyHealth(GetSkillValue("voltigore_health"));
+	SetMyHealth();
 	SetMyFieldOfView(0.2f);// indicates the width of this monster's forward view cone ( as a dotproduct result )
 	m_MonsterState		= MONSTERSTATE_NONE;
 	m_afCapability = bits_CAP_TURN_HEAD;
@@ -815,7 +817,7 @@ void CVoltigore::Spawn()
 //=========================================================
 void CVoltigore::Precache()
 {
-	PrecacheMyModel("models/voltigore.mdl");
+	PrecacheMyModel();
 	PrecacheMyGibModel("models/vgibs.mdl");
 
 	RegisterAndPrecacheSoundScript(idleSoundScript);
@@ -1109,6 +1111,8 @@ class CBabyVoltigore : public CVoltigore
 public:
 	void	Spawn() override;
 	void	Precache() override;
+	const char* DefaultModel() override { return "models/baby_voltigore.mdl"; }
+	float DefaultHealth() override { return GetSkillValue("babyvoltigore_health"); }
 	bool IsEnabledInMod() override { return g_modFeatures.IsMonsterEnabled("babyvoltigore"); }
 	const char* DefaultDisplayName() override { return "Baby Voltigore"; }
 	void	HandleAnimEvent(MonsterEvent_t* pEvent) override;
@@ -1171,14 +1175,14 @@ void CBabyVoltigore::Spawn()
 {
 	Precache();
 
-	SetMyModel("models/baby_voltigore.mdl");
+	SetMyModel();
 	SetMySize();
 
 	pev->solid			= SOLID_SLIDEBOX;
 	pev->movetype		= MOVETYPE_STEP;
 	SetMyBloodColor(BLOOD_COLOR_YELLOW);
 	pev->effects		= 0;
-	SetMyHealth(GetSkillValue("babyvoltigore_health"));
+	SetMyHealth();
 	SetMyFieldOfView(0.2f);// indicates the width of this monster's forward view cone ( as a dotproduct result )
 	m_MonsterState		= MONSTERSTATE_NONE;
 	m_afCapability = bits_CAP_TURN_HEAD;
@@ -1195,7 +1199,7 @@ void CBabyVoltigore::Spawn()
 //=========================================================
 void CBabyVoltigore::Precache()
 {
-	PrecacheMyModel("models/baby_voltigore.mdl");
+	PrecacheMyModel();
 
 	SoundScriptParamOverride voiceParamOverride;
 	voiceParamOverride.OverridePitchRelative(180);

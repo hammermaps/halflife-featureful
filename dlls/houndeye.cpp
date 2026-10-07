@@ -105,6 +105,8 @@ class CHoundeye : public CFollowingMonster
 public:
 	void Spawn() override;
 	void Precache() override;
+	const char* DefaultModel() override { return "models/houndeye.mdl"; }
+	float DefaultHealth() override { return GetSkillValue("houndeye_health"); }
 	int DefaultClassify() override;
 	const char* DefaultDisplayName() override { return "Houndeye"; }
 	void HandleAnimEvent( MonsterEvent_t *pEvent ) override;
@@ -453,14 +455,14 @@ void CHoundeye::Spawn()
 {
 	Precache();
 
-	SetMyModel( "models/houndeye.mdl" );
+	SetMyModel();
 	SetMySize();
 
 	pev->solid		= SOLID_SLIDEBOX;
 	pev->movetype		= MOVETYPE_STEP;
 	SetMyBloodColor( BLOOD_COLOR_YELLOW );
 	pev->effects		= 0;
-	SetMyHealth( GetSkillValue("houndeye_health") );
+	SetMyHealth();
 	pev->yaw_speed		= 5;//!!! should we put this in the monster's changeanim function since turn rates may vary with state/anim?
 	SetMyFieldOfView(0.5f);// indicates the width of this monster's forward view cone ( as a dotproduct result )
 	m_MonsterState		= MONSTERSTATE_NONE;
@@ -477,7 +479,7 @@ void CHoundeye::Spawn()
 //=========================================================
 void CHoundeye::Precache()
 {
-	PrecacheMyModel( "models/houndeye.mdl" );
+	PrecacheMyModel();
 	PrecacheMyGibModel();
 
 	RegisterAndPrecacheSoundScript(idleSoundScript);

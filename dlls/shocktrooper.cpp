@@ -78,6 +78,8 @@ public:
 	void Spawn() override;
 	void MonsterThink() override;
 	void Precache() override;
+	const char* DefaultModel() override { return "models/strooper.mdl"; }
+	float DefaultHealth() override { return GetSkillValue("shocktrooper_health") * GetSkillValue("shocktrooper_health_factor"); }
 	bool IsEnabledInMod() override { return g_modFeatures.IsMonsterEnabled("shocktrooper"); }
 	int  DefaultClassify() override;
 	const char* ReverseRelationshipModel() override { return nullptr; }
@@ -465,7 +467,7 @@ void CShockTrooper::Spawn()
 {
 	Precache();
 
-	SpawnHelper("models/strooper.mdl", GetSkillValue("shocktrooper_health") * GetSkillValue("shocktrooper_health_factor"), BLOOD_COLOR_YELLOW);
+	SpawnHelper(BLOOD_COLOR_YELLOW);
 	SetMySize();
 
 	if (pev->weapons == 0)
@@ -521,7 +523,7 @@ void CShockTrooper::MonsterThink()
 //=========================================================
 void CShockTrooper::Precache()
 {
-	PrecacheMyModel("models/strooper.mdl");
+	PrecacheMyModel();
 	PrecacheMyGibModel(DefaultGibModel());
 	RegisterVisual(muzzleFlashVisual);
 	if (!ShouldAutoPrecacheSounds())
@@ -639,6 +641,7 @@ public:
 	void Spawn() override;
 	void Precache() override;
 	const char* DefaultModel() override { return "models/strooper.mdl"; }
+	float DefaultHealth() override { return GetSkillValue("shocktrooper_health")/2; }
 	bool IsEnabledInMod() override { return g_modFeatures.IsMonsterEnabled("shocktrooper"); }
 	int	DefaultClassify() override { return	CLASS_RACEX_SHOCK; }
 	const char* DefaultGibModel() override {
@@ -663,13 +666,13 @@ LINK_ENTITY_TO_CLASS( monster_shocktrooper_dead, CDeadStrooper )
 
 void CDeadStrooper::Precache()
 {
-	PrecacheMyModel(DefaultModel());
+	PrecacheMyModel();
 	PrecacheMyGibModel(DefaultGibModel());
 }
 
 void CDeadStrooper::Spawn()
 {
-	SpawnHelper(BLOOD_COLOR_YELLOW, GetSkillValue("shocktrooper_health")/2);
+	SpawnHelper(BLOOD_COLOR_YELLOW);
 	MonsterInitDead();
 	pev->frame = 255;
 }

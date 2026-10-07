@@ -39,6 +39,8 @@ class CPantherEye : public CFollowingMonster
 public:
 	void Spawn() override;
 	void Precache() override;
+	const char* DefaultModel() override { return "models/panthereye.mdl"; }
+	float DefaultHealth() override { return GetSkillValue("panthereye_health"); }
 	bool IsEnabledInMod() override { return g_modFeatures.IsMonsterEnabled("panthereye"); }
 	void SetYawSpeed() override;
 	int  DefaultClassify() override;
@@ -175,13 +177,13 @@ void CPantherEye::Spawn()
 {
 	Precache();
 
-	SetMyModel("models/panthereye.mdl");
+	SetMyModel();
 	SetMySize();
 
 	pev->solid = SOLID_SLIDEBOX;
 	pev->movetype = MOVETYPE_STEP;
 	SetMyBloodColor(BLOOD_COLOR_YELLOW);
-	SetMyHealth(GetSkillValue("panthereye_health"));
+	SetMyHealth();
 	SetMyFieldOfView(0.5f);
 	m_MonsterState = MONSTERSTATE_NONE;
 	SetMySquadCapabilities(bits_CAP_SQUAD|bits_CAP_SQUAD_SAME_CLASSNAME);
@@ -191,7 +193,7 @@ void CPantherEye::Spawn()
 
 void CPantherEye::Precache()
 {
-	PrecacheMyModel("models/panthereye.mdl");
+	PrecacheMyModel();
 	PrecacheMyGibModel();
 
 	RegisterAndPrecacheSoundScript(attackHitSoundScript, NPC::attackHitSoundScript);

@@ -40,6 +40,8 @@ class CBloater : public CBaseMonster
 public:
 	void Spawn() override;
 	void Precache() override;
+	const char* DefaultModel() override { return "models/floater.mdl"; }
+	float DefaultHealth() override { return 40; }
 	void SetYawSpeed() override;
 	int DefaultClassify() override;
 	void HandleAnimEvent( MonsterEvent_t *pEvent ) override;
@@ -103,14 +105,14 @@ void CBloater::Spawn()
 {
 	Precache();
 
-	SetMyModel( "models/floater.mdl" );
+	SetMyModel();
 	UTIL_SetSize( pev, VEC_HUMAN_HULL_MIN, VEC_HUMAN_HULL_MAX );
 
 	pev->solid = SOLID_SLIDEBOX;
 	pev->movetype = MOVETYPE_FLY;
 	pev->spawnflags |= FL_FLY;
 	SetMyBloodColor( BLOOD_COLOR_YELLOW );
-	SetMyHealth( 40 );
+	SetMyHealth();
 	pev->view_ofs = VEC_VIEW;// position of the eyes relative to monster's origin.
 	SetMyFieldOfView(0.5f);// indicates the width of this monster's forward view cone ( as a dotproduct result )
 	m_MonsterState = MONSTERSTATE_NONE;
@@ -123,7 +125,7 @@ void CBloater::Spawn()
 //=========================================================
 void CBloater::Precache()
 {
-	PrecacheMyModel( "models/floater.mdl" );
+	PrecacheMyModel();
 	PrecacheMyGibModel();
 }	
 
@@ -144,6 +146,8 @@ public:
 
 	void Spawn() override;
 	void Precache() override;
+	const char* DefaultModel() override { return "models/floater.mdl"; }
+	float DefaultHealth() override { return GetSkillValue("floater_health"); }
 	bool IsEnabledInMod() override { return g_modFeatures.IsMonsterEnabled("floater"); }
 	void SetYawSpeed() override;
 	int DefaultISoundMask() override;
@@ -395,14 +399,14 @@ void CFloater::Spawn()
 {
 	Precache();
 
-	SetMyModel( "models/floater.mdl" );
+	SetMyModel();
 	SetMySize();
 
 	pev->solid		= SOLID_SLIDEBOX;
 	pev->movetype		= MOVETYPE_FLY;
 	pev->flags		|= FL_FLY;
 	SetMyBloodColor( BLOOD_COLOR_YELLOW );
-	SetMyHealth( GetSkillValue("floater_health") );
+	SetMyHealth();
 	pev->view_ofs		= Vector( 0, 0, -2 );// position of the eyes relative to monster's origin.
 	SetMyFieldOfView(VIEW_FIELD_FULL);// indicates the width of this monster's forward view cone ( as a dotproduct result )
 	m_MonsterState		= MONSTERSTATE_NONE;
@@ -442,7 +446,7 @@ void CFloater::Spawn()
 
 void CFloater::Precache()
 {
-	PrecacheMyModel( "models/floater.mdl" );
+	PrecacheMyModel();
 	PrecacheMyGibModel();
 
 	RegisterVisual(blowSprayVisual);

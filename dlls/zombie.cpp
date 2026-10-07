@@ -40,6 +40,8 @@ class CZombie : public CBaseMonster
 public:
 	void Spawn() override;
 	void Precache() override;
+	const char* DefaultModel() override { return "models/zombie.mdl"; }
+	float DefaultHealth() override { return GetSkillValue("zombie_health"); }
 	void SetYawSpeed() override;
 	int DefaultClassify() override;
 	const char* DefaultDisplayName() override { return "Zombie"; }
@@ -77,7 +79,6 @@ public:
 	virtual float BothSlashDamage() { return GetSkillValue("zombie_dmg_both_slash"); }
 protected:
 	void SlashAttack(const TraceHullAttackParams& params);
-	void ZombieSpawnHelper(const char* modelName, float health);
 	void PrecacheSounds();
 };
 
@@ -249,15 +250,17 @@ void CZombie::HandleAnimEvent( MonsterEvent_t *pEvent )
 //=========================================================
 // Spawn
 //=========================================================
-void CZombie::ZombieSpawnHelper(const char* modelName, float health)
+void CZombie::Spawn()
 {
-	SetMyModel( modelName );
+	Precache();
+
+	SetMyModel();
 	SetMySize();
 
 	pev->solid			= SOLID_SLIDEBOX;
 	pev->movetype		= MOVETYPE_STEP;
 	SetMyBloodColor( BLOOD_COLOR_YELLOW );
-	SetMyHealth( health );
+	SetMyHealth();
 	pev->view_ofs		= VEC_VIEW;// position of the eyes relative to monster's origin.
 	SetMyFieldOfView(0.5f);// indicates the width of this monster's forward view cone ( as a dotproduct result )
 	m_MonsterState		= MONSTERSTATE_NONE;
@@ -266,18 +269,12 @@ void CZombie::ZombieSpawnHelper(const char* modelName, float health)
 	MonsterInit();
 }
 
-void CZombie::Spawn()
-{
-	Precache();
-	ZombieSpawnHelper("models/zombie.mdl", GetSkillValue("zombie_health"));
-}
-
 //=========================================================
 // Precache - precaches all resources this monster needs
 //=========================================================
 void CZombie::Precache()
 {
-	PrecacheMyModel("models/zombie.mdl");
+	PrecacheMyModel();
 	PrecacheMyGibModel();
 	PrecacheSounds();
 }
@@ -359,27 +356,14 @@ void CDeadZombie::Spawn()
 
 class CZombieBarney : public CZombie
 {
-	void Spawn() override;
-	void Precache() override;
+	const char* DefaultModel() override { return "models/zombie_barney.mdl"; }
+	float DefaultHealth() override { return GetSkillValue("zombie_barney_health"); }
 	bool IsEnabledInMod() override { return g_modFeatures.IsMonsterEnabled("zombie_barney"); }
 	float OneSlashDamage() override { return GetSkillValue("zombie_barney_dmg_one_slash"); }
 	float BothSlashDamage() override { return GetSkillValue("zombie_barney_dmg_both_slash"); }
 };
 
 LINK_ENTITY_TO_CLASS( monster_zombie_barney, CZombieBarney )
-
-void CZombieBarney::Spawn()
-{
-	Precache();
-	ZombieSpawnHelper("models/zombie_barney.mdl", GetSkillValue("zombie_barney_health"));
-}
-
-void CZombieBarney::Precache()
-{
-	PrecacheMyModel("models/zombie_barney.mdl");
-	PrecacheMyGibModel();
-	PrecacheSounds();
-}
 
 class CDeadZombieBarney : public CDeadZombie
 {
@@ -400,27 +384,14 @@ void CDeadZombieBarney::Spawn()
 
 class CZombieSoldier : public CZombie
 {
-	void Spawn() override;
-	void Precache() override;
+	const char* DefaultModel() override { return "models/zombie_soldier.mdl"; }
+	float DefaultHealth() override { return GetSkillValue("zombie_soldier_health"); }
 	bool IsEnabledInMod() override { return g_modFeatures.IsMonsterEnabled("zombie_soldier"); }
 	float OneSlashDamage() override { return GetSkillValue("zombie_soldier_dmg_one_slash"); }
 	float BothSlashDamage() override { return GetSkillValue("zombie_soldier_dmg_both_slash"); }
 };
 
 LINK_ENTITY_TO_CLASS( monster_zombie_soldier, CZombieSoldier )
-
-void CZombieSoldier::Spawn()
-{
-	Precache();
-	ZombieSpawnHelper("models/zombie_soldier.mdl", GetSkillValue("zombie_soldier_health"));
-}
-
-void CZombieSoldier::Precache()
-{
-	PrecacheMyModel("models/zombie_soldier.mdl");
-	PrecacheMyGibModel();
-	PrecacheSounds();
-}
 
 class CDeadZombieSoldier : public CDeadMonster
 {

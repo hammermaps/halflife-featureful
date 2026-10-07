@@ -645,7 +645,7 @@ void CConfigurableWeapon::Spawn()
 {
 	const WeaponParameters& params = MyParameters();
 	Precache();
-	SetMyModel(params.worldModel.c_str());
+	SetMyModel();
 
 	SetInitialAmmoAmount();
 	InitMaxClip();

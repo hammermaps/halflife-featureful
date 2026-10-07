@@ -121,6 +121,8 @@ class CRoboCop : public CBaseMonster
 public:
 	void Spawn() override;
 	void Precache() override;
+	const char* DefaultModel() override { return "models/robocop.mdl"; }
+	float DefaultHealth() override { return GetSkillValue("robocop_health"); }
 	bool IsEnabledInMod() override { return g_modFeatures.IsMonsterEnabled("robocop"); }
 	void UpdateOnRemove() override;
 	void RemoveSpriteEffects();
@@ -620,13 +622,13 @@ void CRoboCop::Spawn()
 {
 	Precache();
 
-	SetMyModel( "models/robocop.mdl" );
+	SetMyModel();
 	SetMySize();
 
 	pev->solid		= SOLID_SLIDEBOX;
 	pev->movetype		= MOVETYPE_STEP;
 	SetMyBloodColor(DONT_BLEED);
-	SetMyHealth(GetSkillValue("robocop_health"));
+	SetMyHealth();
 	SetMyFieldOfView(VIEW_FIELD_WIDE);
 	m_MonsterState		= MONSTERSTATE_NONE;
 	SetMyCanOpenDoors(false);
@@ -640,7 +642,7 @@ void CRoboCop::Spawn()
 
 void CRoboCop::Precache()
 {
-	PrecacheMyModel( "models/robocop.mdl" );
+	PrecacheMyModel();
 	PrecacheMyGibModel();
 
 	m_RobocopGibModel = PRECACHE_MODEL( "models/metalplategibs.mdl" );

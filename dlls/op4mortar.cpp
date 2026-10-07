@@ -19,6 +19,7 @@ public:
 	void EXPORT BurnThink();
 	void EXPORT MortarExplodeTouch(CBaseEntity *pOther);
 	void Spawn() override;
+	const char* DefaultModel() override { return "models/mortarshell.mdl"; }
 	void EXPORT FlyThink();
 
 	RadiusDamageInfo GetDefaultProjectileRadiusDamageInfo() override {
@@ -73,7 +74,7 @@ const NamedVisual CMortarShell::trailVisual = BuildVisual::Spray("Op4Mortar.Trai
 void CMortarShell::Precache()
 {
 	PrecacheBaseGrenadeSounds();
-	PrecacheMyModel("models/mortarshell.mdl");
+	PrecacheMyModel();
 	RegisterVisual(trailVisual);
 	RegisterAndPrecacheSoundScript(flySoundScript);
 }
@@ -85,7 +86,7 @@ void CMortarShell::Spawn()
 	pev->movetype = MOVETYPE_BOUNCE;
 	pev->solid = SOLID_BBOX;
 
-	SetMyModel("models/mortarshell.mdl");
+	SetMyModel();
 
 	UTIL_SetSize(pev, g_vecZero, g_vecZero);
 	UTIL_SetOrigin(pev, pev->origin);
@@ -180,6 +181,8 @@ public:
 	TakeDamageResult TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, const DamageInfo& damageInfo) override;
 	void Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value) override;
 	void Precache() override;
+	const char* DefaultModel() override { return "models/mortar.mdl"; }
+	float DefaultHealth() override { return 1.0f; }
 	void KeyValue(KeyValueData *pvkd) override;
 	void UpdatePosition(int direction, int controller);
 	void AIUpdatePosition();
@@ -263,7 +266,7 @@ const NamedSoundScript COp4Mortar::launchSoundScript = {
 
 void COp4Mortar::Precache()
 {
-	PrecacheMyModel("models/mortar.mdl");
+	PrecacheMyModel();
 	RegisterAndPrecacheSoundScript(rotateSoundScript);
 	RegisterAndPrecacheSoundScript(launchSoundScript);
 	UTIL_PrecacheOther("mortar_shell", GetProjectileOverrides());
@@ -275,9 +278,9 @@ void COp4Mortar::Spawn()
 
 	UTIL_SetOrigin(pev, pev->origin);
 
-	SetMyModel("models/mortar.mdl");
+	SetMyModel();
 
-	pev->health = 1;
+	SetMyHealth();
 	pev->sequence = LookupSequence("idle");
 
 	ResetSequenceInfo();

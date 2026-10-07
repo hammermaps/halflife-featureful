@@ -34,6 +34,7 @@ class CGenericMonster : public CBaseMonster
 public:
 	void Spawn() override;
 	void Precache() override;
+	float DefaultHealth() override { return 8.0f; }
 	void SetYawSpeed() override;
 	int DefaultClassify() override;
 	void HandleAnimEvent( MonsterEvent_t *pEvent ) override;
@@ -126,7 +127,7 @@ void CGenericMonster::Spawn()
 {
 	Precache();
 
-	SetMyModel(nullptr);
+	SetMyModel();
 	if (FStringNull(pev->model))
 	{
 		ALERT(at_console, "Spawning monster_generic without model!\n");
@@ -145,7 +146,7 @@ void CGenericMonster::Spawn()
 	pev->solid = SOLID_SLIDEBOX;
 	pev->movetype = MOVETYPE_STEP;
 	SetMyBloodColor( BLOOD_COLOR_RED );
-	SetMyHealth( 8 );
+	SetMyHealth();
 	SetMyFieldOfView(0.5f);// indicates the width of this monster's forward view cone ( as a dotproduct result )
 	m_MonsterState = MONSTERSTATE_NONE;
 
@@ -171,7 +172,7 @@ void CGenericMonster::Spawn()
 //=========================================================
 void CGenericMonster::Precache()
 {
-	PrecacheMyModel(nullptr);
+	PrecacheMyModel();
 	PrecacheMyGibModel();
 }
 
@@ -244,6 +245,7 @@ class CDeadGenericMonster : public CBaseMonster
 public:
 	void Precache() override;
 	void Spawn() override;
+	float DefaultHealth() override { return 8.0f; }
 	void KeyValue( KeyValueData *pkvd ) override;
 	int DefaultClassify() override { return CLASS_HUMAN_PASSIVE; }
 	bool ShouldCollide(CBaseEntity* pOther) override;
@@ -253,14 +255,14 @@ LINK_ENTITY_TO_CLASS( monster_generic_dead, CDeadGenericMonster )
 
 void CDeadGenericMonster::Precache()
 {
-	PrecacheMyModel(nullptr);
+	PrecacheMyModel();
 	PrecacheMyGibModel();
 }
 
 void CDeadGenericMonster::Spawn()
 {
 	Precache();
-	SetMyModel(nullptr);
+	SetMyModel();
 	if (FStringNull(pev->model))
 	{
 		ALERT(at_console, "Spawning monster_generic_dead without model!\n");
@@ -300,7 +302,7 @@ void CDeadGenericMonster::Spawn()
 		}
 	}
 
-	SetMyHealth( 8 );
+	SetMyHealth();
 	MonsterInitDead();
 	if (pev->spawnflags & SF_GENERICMONSTER_NOTSOLID)
 	{
@@ -336,6 +338,9 @@ class CLoader : public CGenericMonster
 public:
 	void Spawn() override;
 	void Precache() override;
+	const char* DefaultModel() override { return "models/loader.mdl"; }
+	float DefaultHealth() override { return 100; }
+
 	int DefaultClassify() override {return CLASS_NONE;}
 	void TraceAttack( entvars_t *pevInflictor, entvars_t *pevAttacker, const DamageInfo& damageInfo, Vector vecDir, TraceResult *ptr ) override;
 };
@@ -346,14 +351,14 @@ void CLoader::Spawn()
 {
 	Precache();
 
-	SetMyModel("models/loader.mdl");
+	SetMyModel();
 
 	SetMySize( VEC_HUMAN_HULL_MIN, VEC_HUMAN_HULL_MAX );
 
 	pev->solid = SOLID_SLIDEBOX;
 	pev->movetype = MOVETYPE_STEP;
 	SetMyBloodColor(DONT_BLEED);
-	SetMyHealth(100);
+	SetMyHealth();
 	SetMyFieldOfView(0.5f);
 	m_MonsterState = MONSTERSTATE_NONE;
 
@@ -369,7 +374,7 @@ void CLoader::Spawn()
 
 void CLoader::Precache()
 {
-	PrecacheMyModel("models/loader.mdl");
+	PrecacheMyModel();
 	PrecacheMyGibModel();
 }
 

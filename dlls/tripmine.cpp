@@ -35,6 +35,8 @@ class CTripmineGrenade : public CGrenade
 {
 	void Spawn() override;
 	void Precache() override;
+	const char* DefaultModel() { return "models/v_tripmine.mdl"; }
+	float DefaultHealth() { return GetSkillValue("tripmine_health"); }
 	void UpdateOnRemove() override;
 
 	int Save( CSave &save ) override;
@@ -138,7 +140,7 @@ void CTripmineGrenade::Spawn()
 	pev->movetype = MOVETYPE_FLY;
 	pev->solid = SOLID_NOT;
 
-	SetMyModel("models/v_tripmine.mdl");
+	SetMyModel();
 	pev->frame = 0;
 	pev->body = 3;
 	pev->sequence = TRIPMINE_WORLD;
@@ -172,7 +174,7 @@ void CTripmineGrenade::Spawn()
 	pev->nextthink = gpGlobals->time + 0.2f;
 
 	pev->takedamage = DAMAGE_YES;
-	pev->health = GetSkillValue("tripmine_health"); // don't let die normally
+	SetMyHealth(); // don't let die normally
 	pev->max_health = pev->health;
 
 	if (FBitSet(pev->spawnflags, SF_TRIPMINE_TRIGGERABLE))
@@ -196,7 +198,7 @@ void CTripmineGrenade::Spawn()
 void CTripmineGrenade::Precache()
 {
 	PrecacheBaseGrenadeSounds();
-	PrecacheMyModel("models/v_tripmine.mdl");
+	PrecacheMyModel();
 	RegisterAndPrecacheSoundScript(deploySoundScript);
 	RegisterAndPrecacheSoundScript(activateSoundScript);
 	RegisterAndPrecacheSoundScript(chargeSoundScript);

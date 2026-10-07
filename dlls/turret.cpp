@@ -241,6 +241,8 @@ class CTurret : public CBaseTurret
 public:
 	void Spawn() override;
 	void Precache() override;
+	const char* DefaultModel() override { return "models/turret.mdl"; }
+	float DefaultHealth() override { return GetSkillValue("turret_health"); }
 	// Think functions
 	const char* DefaultDisplayName() override { return "Turret"; }
 	void SpinUpCall() override;
@@ -309,6 +311,8 @@ class CMiniTurret : public CBaseTurret
 public:
 	void Spawn() override;
 	void Precache() override;
+	const char* DefaultModel() override { return "models/miniturret.mdl"; }
+	float DefaultHealth() override { return GetSkillValue("miniturret_health"); }
 	// other functions
 	const char* DefaultDisplayName() override { return "Mini-Turret"; }
 	void Shoot( Vector &vecSrc, Vector &vecDirToEnemy ) override;
@@ -420,8 +424,8 @@ void CBaseTurret::UpdateOnRemove()
 void CTurret::Spawn()
 {
 	Precache();
-	SetMyModel( "models/turret.mdl" );
-	SetMyHealth( GetSkillValue("turret_health") );
+	SetMyModel();
+	SetMyHealth();
 	m_HackedGunPos		= Vector( 0, 0, 12.75 );
 	m_flMaxSpin		= TURRET_MAXSPIN;
 	pev->view_ofs.z		= 12.75;
@@ -451,7 +455,7 @@ void CTurret::Spawn()
 void CTurret::Precache()
 {
 	CBaseTurret::Precache();
-	PrecacheMyModel( "models/turret.mdl" );	
+	PrecacheMyModel();
 	RegisterVisual(glowVisual);
 	RegisterAndPrecacheSoundScript(shootSoundScript);
 	RegisterAndPrecacheSoundScript(spinupCallSoundScript);
@@ -461,8 +465,8 @@ void CTurret::Precache()
 void CMiniTurret::Spawn()
 {
 	Precache();
-	SetMyModel( "models/miniturret.mdl" );
-	SetMyHealth( GetSkillValue("miniturret_health") );
+	SetMyModel();
+	SetMyHealth();
 	m_HackedGunPos = Vector( 0.0f, 0.0f, 12.75f );
 	m_flMaxSpin = 0;
 	pev->view_ofs.z = 12.75f;
@@ -480,7 +484,7 @@ void CMiniTurret::Spawn()
 void CMiniTurret::Precache()
 {
 	CBaseTurret::Precache();
-	PrecacheMyModel( "models/miniturret.mdl" );	
+	PrecacheMyModel();
 	RegisterAndPrecacheSoundScript(shootSoundScript, NPC::single9mmSoundScript);
 }
 
@@ -1345,6 +1349,8 @@ class CSentry : public CBaseTurret
 public:
 	void Spawn() override;
 	void Precache() override;
+	const char* DefaultModel() override { return "models/sentry.mdl"; }
+	float DefaultHealth() override { return GetSkillValue("sentry_health"); }
 	// other functions
 	const char* DefaultDisplayName() override { return "Sentry Turret"; }
 	void Shoot( Vector &vecSrc, Vector &vecDirToEnemy ) override;
@@ -1363,15 +1369,15 @@ LINK_ENTITY_TO_CLASS( monster_sentry, CSentry )
 void CSentry::Precache()
 {
 	CBaseTurret::Precache();
-	PrecacheMyModel( "models/sentry.mdl" );
+	PrecacheMyModel();
 	RegisterAndPrecacheSoundScript(shootSoundScript, NPC::single9mmSoundScript);
 }
 
 void CSentry::Spawn()
 {
 	Precache();
-	SetMyModel( "models/sentry.mdl" );
-	SetMyHealth( GetSkillValue("sentry_health") );
+	SetMyModel();
+	SetMyHealth();
 	m_HackedGunPos = Vector( 0, 0, 48 );
 	pev->view_ofs.z = 48;
 	m_flMaxSpin = 1E6;
@@ -1522,10 +1528,6 @@ public:
 	DamageInfo DefaultHandleTraceAttack(entvars_t *pevInflictor, entvars_t *pevAttacker, const DamageInfo &inputDamageInfo, Vector vecDir, TraceResult *ptr) override;
 	void TraceAttack( entvars_t *pevInflictor, entvars_t *pevAttacker, const DamageInfo& damageInfo, Vector vecDir, TraceResult *ptr ) override;
 
-protected:
-	virtual void SetMyModel();
-	virtual const char* DefaultModel() = 0;
-
 	int m_iOrientation; // no need to save
 };
 
@@ -1542,11 +1544,7 @@ void CBaseDeadTurret::KeyValue( KeyValueData *pkvd )
 
 void CBaseDeadTurret::Precache()
 {
-	if (FStringNull(pev->model)) {
-		PRECACHE_MODEL( DefaultModel() );
-	} else {
-		PRECACHE_MODEL( STRING(pev->model) );
-	}
+	PrecacheMyModel();
 }
 
 void CBaseDeadTurret::Spawn()
@@ -1579,15 +1577,6 @@ void CBaseDeadTurret::Spawn()
 	}
 }
 
-void CBaseDeadTurret::SetMyModel()
-{
-	if (FStringNull(pev->model)) {
-		SET_MODEL( ENT( pev ), DefaultModel() );
-	} else {
-		SET_MODEL( ENT( pev ), STRING(pev->model) );
-	}
-}
-
 DamageInfo CBaseDeadTurret::DefaultHandleTraceAttack(entvars_t *pevInflictor, entvars_t *pevAttacker, const DamageInfo &inputDamageInfo, Vector vecDir, TraceResult *ptr)
 {
 	DamageInfo damageInfo = inputDamageInfo;
@@ -1614,10 +1603,7 @@ class CDeadTurret : public CBaseDeadTurret
 {
 public:
 	void Spawn() override;
-protected:
-	const char* DefaultModel() override {
-		return "models/turret.mdl";
-	}
+	const char* DefaultModel() override { return "models/turret.mdl"; }
 };
 
 LINK_ENTITY_TO_CLASS( monster_turret_dead, CDeadTurret )
@@ -1632,10 +1618,7 @@ class CDeadMiniTurret : public CBaseDeadTurret
 {
 public:
 	void Spawn() override;
-protected:
-	const char* DefaultModel() override {
-		return "models/miniturret.mdl";
-	}
+	const char* DefaultModel() override { return "models/miniturret.mdl"; }
 };
 
 LINK_ENTITY_TO_CLASS( monster_miniturret_dead, CDeadMiniTurret )
@@ -1650,10 +1633,7 @@ class CDeadSentry : public CBaseDeadTurret
 {
 public:
 	void Spawn() override;
-protected:
-	const char* DefaultModel() override {
-		return "models/sentry.mdl";
-	}
+	const char* DefaultModel() override { return "models/sentry.mdl"; }
 };
 
 LINK_ENTITY_TO_CLASS( monster_sentry_dead, CDeadSentry )

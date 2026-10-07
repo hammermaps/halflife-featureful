@@ -60,6 +60,8 @@ public:
 	void KeyValue(KeyValueData* pkvd) override;
 	void Spawn() override;
 	void Precache() override;
+	const char* DefaultModel() override { return "models/hgrunt.mdl"; }
+	float DefaultHealth() override { return GetSkillValue("hgrunt_health"); }
 	void SetYawSpeed() override;
 	int DefaultClassify() override;
 	const char* DefaultDisplayName() override { return "Human Grunt"; }
@@ -143,8 +145,8 @@ protected:
 
 	static const char *pGruntSentences[HGRUNT_SENT_COUNT];
 
-	void SpawnHelper(const char* modelName, int health, int bloodColor = BLOOD_COLOR_RED);
-	void PrecacheHelper(const char* modelName);
+	void SpawnHelper(int bloodColor = BLOOD_COLOR_RED);
+	void PrecacheHelper();
 	virtual void PlayFirstBurstSounds();
 	virtual void PlayReloadSound();
 	virtual void PlayGrenadeLaunchSound();

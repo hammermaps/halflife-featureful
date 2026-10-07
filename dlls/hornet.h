@@ -44,6 +44,7 @@ public:
 
 	void Spawn() override;
 	void Precache() override;
+	float DefaultHealth() override { return 1.0f; }
 	int DefaultClassify() override;
 	int Classify() override;
 	int IRelationship( CBaseEntity *pTarget ) override;

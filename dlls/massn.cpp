@@ -71,6 +71,8 @@ public:
 
 	void Spawn() override;
 	void Precache() override;
+	const char* DefaultModel() override { return "models/massn.mdl"; }
+	float DefaultHealth() override { return GetSkillValue("massassin_health"); }
 	bool IsEnabledInMod() override { return g_modFeatures.IsMonsterEnabled("male_assassin"); }
 	void MonsterInit() override;
 
@@ -337,7 +339,7 @@ bool CMassn::CheckRangeAttack2( float flDot, float flDist )
 //=========================================================
 void CMassn::Spawn()
 {
-	SpawnHelper("models/massn.mdl", GetSkillValue("massassin_health"));
+	SpawnHelper();
 
 	if (pev->weapons == 0)
 	{
@@ -380,7 +382,7 @@ void CMassn::MonsterInit()
 //=========================================================
 void CMassn::Precache()
 {
-	PrecacheHelper("models/massn.mdl");
+	PrecacheHelper();
 
 	// Note: these are optional
 	RegisterAndPrecacheSoundScript(painSoundScript);

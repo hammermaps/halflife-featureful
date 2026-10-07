@@ -176,7 +176,7 @@ void CRpgRocket::Spawn()
 		pev->movetype = MOVETYPE_BOUNCE;
 	pev->solid = SOLID_BBOX;
 
-	SetMyModel("models/rpgrocket.mdl");
+	SetMyModel();
 	UTIL_SetSize( pev, Vector( 0, 0, 0 ), Vector( 0, 0, 0 ) );
 	UTIL_SetOrigin( pev, pev->origin );
 
@@ -216,7 +216,7 @@ void CRpgRocket::Spawn()
 void CRpgRocket::Precache()
 {
 	PrecacheBaseGrenadeSounds();
-	PrecacheMyModel("models/rpgrocket.mdl");
+	PrecacheMyModel();
 	RegisterVisual(trailVisual);
 	RegisterAndPrecacheSoundScript(rocketIgniteSoundScript);
 }

@@ -218,6 +218,7 @@ class CMortar : public CGrenade
 public:
 	void Spawn() override;
 	void Precache() override;
+	const char* DefaultModel() override { return nullptr; }
 
 	RadiusDamageInfo GetDefaultProjectileRadiusDamageInfo() override;
 	void EXPORT MortarExplode();

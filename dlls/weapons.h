@@ -146,6 +146,10 @@ public:
 	bool ShouldCollide(CBaseEntity *pOther) override {
 		return pOther->MyWeaponPointer() == nullptr;
 	}
+	const char* DefaultModel() override {
+		const WeaponParameters& params = MyParameters();
+		return params.worldModel.c_str();
+	}
 	virtual int WeaponId() const = 0;
 	bool IsEnabledInMod() override;
 	virtual void PrecacheDefaultModelSounds() {}
@@ -528,6 +532,7 @@ class CWeaponBox : public CBaseDelay
 public:
 	void Precache() override;
 	void Spawn() override;
+	const char* DefaultModel() override { return "models/w_weaponbox.mdl"; }
 	void Touch( CBaseEntity *pOther ) override;
 	void KeyValue( KeyValueData *pkvd ) override;
 	bool IsEmpty();

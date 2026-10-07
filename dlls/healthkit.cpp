@@ -30,6 +30,7 @@ class CHealthKit : public CItem
 public:
 	void Spawn() override;
 	void Precache() override;
+	const char* DefaultModel() override { return "models/w_medkit.mdl"; }
 	bool MyTouch( CBasePlayer *pPlayer ) override;
 
 	static const NamedSoundScript pickupSoundScript;
@@ -48,14 +49,14 @@ const NamedSoundScript CHealthKit::pickupSoundScript = {
 void CHealthKit::Spawn()
 {
 	Precache();
-	SetMyModel( "models/w_medkit.mdl" );
+	SetMyModel();
 
 	CItem::Spawn();
 }
 
 void CHealthKit::Precache()
 {
-	PrecacheMyModel( "models/w_medkit.mdl" );
+	PrecacheMyModel();
 	RegisterAndPrecacheSoundScript(pickupSoundScript);
 }
 
@@ -590,6 +591,7 @@ public:
 	void KeyValue( KeyValueData *pkvd ) override;
 	void Spawn() override;
 	void Precache() override;
+	const char* DefaultModel() override { return "models/health_charger_body.mdl"; }
 	void Activate() override;
 	void EXPORT AnimateAndWork();
 	void SearchForPlayer();
@@ -712,7 +714,7 @@ void CWallHealthDecay::Spawn()
 		pev->movetype = MOVETYPE_NONE;
 	}
 
-	SetMyModel("models/health_charger_body.mdl");
+	SetMyModel();
 
 	bool setSafeBox = false;
 	if (m_collisionType == PS2CHARGER_COLLISION_ACCURATE)
@@ -749,7 +751,7 @@ LINK_ENTITY_TO_CLASS(item_healthcharger, CWallHealthDecay)
 
 void CWallHealthDecay::Precache()
 {
-	PrecacheMyModel("models/health_charger_body.mdl");
+	PrecacheMyModel();
 
 	RegisterAndPrecacheSoundScript(CWallHealth::startSoundScript);
 	RegisterAndPrecacheSoundScript(CWallHealth::denySoundScript);

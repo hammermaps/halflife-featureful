@@ -15,7 +15,6 @@ public:
 	void EXPORT DefaultUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 	void TouchOrUse( CBaseEntity* other );
 
-	virtual const char* MyModel() = 0;
 	virtual int DefaultAmount() = 0;
 	int MyAmount();
 	void SetCustomAmount(int amount);

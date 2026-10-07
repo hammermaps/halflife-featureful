@@ -53,6 +53,8 @@ public:
 
 	void Spawn() override;
 	void Precache() override;
+	const char* DefaultModel() override { return "models/controller.mdl"; }
+	float DefaultHealth() override { return GetSkillValue("controller_health"); }
 	void ClearBalls();
 	void UpdateOnRemove() override;
 	void SetYawSpeed() override;
@@ -361,14 +363,14 @@ void CController::Spawn()
 {
 	Precache();
 
-	SetMyModel( "models/controller.mdl" );
+	SetMyModel();
 	SetMySize();
 
 	pev->solid		= SOLID_SLIDEBOX;
 	pev->movetype		= MOVETYPE_FLY;
 	pev->flags		|= FL_FLY;
 	SetMyBloodColor( BLOOD_COLOR_YELLOW );
-	SetMyHealth( GetSkillValue("controller_health") );
+	SetMyHealth();
 	pev->view_ofs		= Vector( 0.0f, 0.0f, -2.0f );// position of the eyes relative to monster's origin.
 	SetMyFieldOfView(VIEW_FIELD_FULL);// indicates the width of this monster's forward view cone ( as a dotproduct result )
 	m_MonsterState		= MONSTERSTATE_NONE;
@@ -383,7 +385,7 @@ void CController::Spawn()
 //=========================================================
 void CController::Precache()
 {
-	PrecacheMyModel( "models/controller.mdl" );
+	PrecacheMyModel();
 	PrecacheMyGibModel();
 
 	RegisterAndPrecacheSoundScript(idleSoundScript);
@@ -1124,6 +1126,7 @@ class CControllerDead : public CDeadMonster
 public:
 	void Spawn() override;
 	const char* DefaultModel() override { return "models/controller.mdl"; }
+	float DefaultHealth() override { return GetSkillValue("controller_health")/2; }
 	int	DefaultClassify() override { return	CLASS_ALIEN_MILITARY; }
 
 	const char* getPos(int pos) const override;
@@ -1138,7 +1141,7 @@ LINK_ENTITY_TO_CLASS( monster_alien_controller_dead, CControllerDead )
 
 void CControllerDead::Spawn()
 {
-	SpawnHelper(BLOOD_COLOR_YELLOW, GetSkillValue("controller_health")/2);
+	SpawnHelper(BLOOD_COLOR_YELLOW);
 	MonsterInitDead();
 	pev->frame = 255;
 }

@@ -285,6 +285,8 @@ public:
 	bool IsFullyAlive() override { return CBaseMonster::IsFullyAlive() && !IsObserver(); }
 	bool ShouldFadeOnDeath() override { return false; }
 	bool IsPlayer() override { return true; }			// Spectators should return false for this, they aren't "players" as far as game logic is concerned
+	const char* DefaultModel() override { return "models/player.mdl"; }
+	float DefaultHealth() override { return 100.0f; }
 
 	bool IsNetClient() override { return true; }		// Bots should return false for this, they can't receive NET messages
 															// Spectators should return true for this

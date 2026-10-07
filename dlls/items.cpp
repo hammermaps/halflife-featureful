@@ -585,13 +585,14 @@ public:
 	void Spawn() override
 	{
 		Precache();
-		SetMyModel( "models/w_suit.mdl" );
+		SetMyModel();
 		CItem::Spawn();
 	}
 	void Precache() override
 	{
-		PrecacheMyModel( "models/w_suit.mdl" );
+		PrecacheMyModel();
 	}
+	const char* DefaultModel() override { return "models/w_suit.mdl"; }
 	bool MyTouch( CBasePlayer *pPlayer ) override
 	{
 		if( pPlayer->HasSuit() )
@@ -628,14 +629,15 @@ public:
 	void Spawn() override
 	{
 		Precache();
-		SetMyModel( DefaultModel() );
+		SetMyModel();
 		CItem::Spawn();
 	}
 	void Precache() override
 	{
-		PrecacheMyModel( DefaultModel() );
+		PrecacheMyModel();
 		RegisterAndPrecacheSoundScript(pickupSoundScript, Items::pickupSoundScript);
 	}
+	const char* DefaultModel() override { return "models/w_battery.mdl"; }
 	bool MyTouch( CBasePlayer *pPlayer ) override
 	{
 		if( ( pPlayer->pev->armorvalue < pPlayer->MaxArmor() ) && pPlayer->HasSuit() )
@@ -668,7 +670,6 @@ public:
 		return false;
 	}
 protected:
-	virtual const char* DefaultModel() { return "models/w_battery.mdl"; }
 	virtual bool ShouldSetSuitUpdate() { return true; }
 	virtual int DefaultCapacity() { return GetSkillValue("battery"); }
 };
@@ -677,8 +678,9 @@ LINK_ENTITY_TO_CLASS( item_battery, CItemBattery )
 
 class CItemArmorVest : public CItemBattery
 {
-protected:
+public:
 	const char* DefaultModel() override { return "models/barney_vest.mdl"; }
+protected:
 	bool ShouldSetSuitUpdate() override { return false; }
 	int DefaultCapacity() override { return 60; }
 };
@@ -687,8 +689,9 @@ LINK_ENTITY_TO_CLASS( item_armorvest, CItemArmorVest )
 
 class CItemHelmet : public CItemBattery
 {
-protected:
+public:
 	const char* DefaultModel() override { return "models/barney_helmet.mdl"; }
+protected:
 	bool ShouldSetSuitUpdate() override { return false; }
 	int DefaultCapacity() override { return 40; }
 };
@@ -701,17 +704,18 @@ public:
 	void Spawn() override
 	{
 		Precache();
-		SetMyModel( "models/w_antidote.mdl" );
+		SetMyModel();
 		CItem::Spawn();
 	}
 	void Precache() override
 	{
-		PrecacheMyModel( "models/w_antidote.mdl" );
+		PrecacheMyModel();
 		if (!FStringNull(pev->noise))
 			PRECACHE_SOUND( STRING(pev->noise) );
 		else
 			RegisterAndPrecacheSoundScript(pickupSoundScript);
 	}
+	const char* DefaultModel() { return "models/w_antidote.mdl"; }
 	bool MyTouch( CBasePlayer *pPlayer ) override
 	{
 		const int maxCount = g_InventorySpec.GetAntidoteSpec().maxCount;
@@ -746,14 +750,15 @@ public:
 	void Spawn() override
 	{
 		Precache();
-		SetMyModel( "models/w_rad.mdl" );
+		SetMyModel();
 		CItem::Spawn();
 	}
 	void Precache() override
 	{
-		PrecacheMyModel( "models/w_rad.mdl" );
+		PrecacheMyModel();
 		RegisterAndPrecacheSoundScript(pickupSoundScript);
 	}
+	const char* DefaultModel() { return "models/w_rad.mdl"; }
 	bool MyTouch( CBasePlayer *pPlayer ) override
 	{
 		const int maxCount = g_InventorySpec.GetRadcanSpec().maxCount;
@@ -788,14 +793,15 @@ public:
 	void Spawn() override
 	{
 		Precache();
-		SetMyModel( "models/w_adrenaline.mdl" );
+		SetMyModel();
 		CItem::Spawn();
 	}
 	void Precache() override
 	{
-		PrecacheMyModel( "models/w_adrenaline.mdl" );
+		PrecacheMyModel();
 		RegisterAndPrecacheSoundScript(pickupSoundScript);
 	}
+	const char* DefaultModel() { return "models/w_adrenaline.mdl"; }
 	bool MyTouch( CBasePlayer *pPlayer ) override
 	{
 		const int maxCount = g_InventorySpec.GetAdrenalineSpec().maxCount;
@@ -829,15 +835,16 @@ class CItemSecurity : public CItem
 	void Spawn() override
 	{
 		Precache();
-		SetMyModel( "models/w_security.mdl" );
+		SetMyModel();
 		CItem::Spawn();
 	}
 	void Precache() override
 	{
-		PrecacheMyModel( "models/w_security.mdl" );
+		PrecacheMyModel();
 		if (!FStringNull(pev->noise))
 			PRECACHE_SOUND( STRING(pev->noise) );
 	}
+	const char* DefaultModel() { return "models/w_security.mdl"; }
 	void KeyValue(KeyValueData* pkvd) override
 	{
 		if (FStrEq(pkvd->szKeyName, "hudname"))
@@ -871,7 +878,7 @@ public:
 	void Spawn() override
 	{
 		Precache();
-		SetMyModel("models/w_security.mdl");
+		SetMyModel();
 		CItem::Spawn();
 	}
 	void Precache() override
@@ -892,11 +899,12 @@ public:
 			}
 		}
 
-		if (!MyOwnModel(nullptr))
+		if (!MyOwnModel())
 		{
 			ALERT(at_console, "%s without model defined! Fallbacking to the security card model\n", STRING(pev->classname));
+			pev->model = MAKE_STRING("models/w_security.mdl");
 		}
-		PrecacheMyModel("models/w_security.mdl");
+		PrecacheMyModel();
 		RegisterAndPrecacheSoundScript(Items::inventoryPickupSoundScript);
 		if (!FStringNull(pev->noise))
 			PRECACHE_SOUND( STRING(pev->noise) );
@@ -971,13 +979,14 @@ class CItemLongJump : public CItem
 	void Spawn() override
 	{ 
 		Precache();
-		SetMyModel( "models/w_longjump.mdl" );
+		SetMyModel();
 		CItem::Spawn();
 	}
 	void Precache() override
 	{
-		PrecacheMyModel( "models/w_longjump.mdl" );
+		PrecacheMyModel();
 	}
+	const char* DefaultModel() { return "models/w_longjump.mdl"; }
 	bool MyTouch( CBasePlayer *pPlayer ) override
 	{
 		if( pPlayer->m_fLongJump )
@@ -1011,7 +1020,7 @@ public:
 	void Spawn() override
 	{
 		Precache();
-		SetMyModel(DefaultModel());
+		SetMyModel();
 		CItem::Spawn();
 	}
 	void Precache() override
@@ -1028,7 +1037,7 @@ public:
 			g_checkedFlashligthModel = true;
 		}
 
-		PrecacheMyModel (DefaultModel());
+		PrecacheMyModel();
 		RegisterAndPrecacheSoundScript(pickupSoundScript, Items::pickupSoundScript);
 	}
 	const char* DefaultModel()
@@ -1064,13 +1073,14 @@ public:
 	void Spawn() override
 	{
 		Precache();
-		SetMyModel("sprites/iunknown.spr");
+		SetMyModel();
 		CItem::Spawn();
 	}
 	void Precache() override
 	{
-		PrecacheMyModel("sprites/iunknown.spr");
+		PrecacheMyModel();
 	}
+	const char* DefaultModel() override { return "sprites/iunknown.spr"; }
 	bool MyTouch( CBasePlayer *pPlayer ) override
 	{
 		if (g_modFeatures.suit_light_allow_both)
@@ -1251,6 +1261,7 @@ public:
 	void KeyValue( KeyValueData *pkvd ) override;
 	void Spawn() override;
 	void Precache() override;
+	const char* DefaultModel() { return "models/EYE_SCANNER.mdl"; }
 	void PlayBeep();
 	void WaitForSequenceEnd();
 	void Think() override;
@@ -1456,7 +1467,7 @@ void CEyeScanner::Spawn()
 	pev->weapons = 0;
 	m_willUnlock = false;
 
-	SetMyModel("models/EYE_SCANNER.mdl");
+	SetMyModel();
 	if (FBitSet(pev->spawnflags, SF_EYESCANNER_SOLID))
 	{
 		SetSequenceSafeBox(1.0f, 0.0f);
@@ -1475,7 +1486,7 @@ void CEyeScanner::Spawn()
 
 void CEyeScanner::Precache()
 {
-	PrecacheMyModel("models/EYE_SCANNER.mdl");
+	PrecacheMyModel();
 
 	RegisterAndPrecacheSoundScript(grantedSoundScript);
 	RegisterAndPrecacheSoundScript(deniedSoundScript);

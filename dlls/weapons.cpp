@@ -1126,7 +1126,7 @@ void CBasePlayerWeapon::PrecacheWeaponModels()
 {
 	const WeaponParameters& params = MyParameters();
 
-	PrecacheMyModel(params.worldModel.c_str());
+	PrecacheMyModel();
 	PRECACHE_MODEL(params.ViewModel());
 	PrecachePModel(params.PlayerModel());
 
@@ -1454,7 +1454,7 @@ IMPLEMENT_SAVERESTORE( CWeaponBox, CBaseDelay )
 //=========================================================
 void CWeaponBox::Precache()
 {
-	PrecacheMyModel("models/w_weaponbox.mdl");
+	PrecacheMyModel();
 }
 
 //=========================================================
@@ -1496,7 +1496,7 @@ void CWeaponBox::Spawn()
 	const int itemSize = 24;
 	UTIL_SetSize( pev, Vector( -itemSize, -itemSize, 0 ), Vector( itemSize, itemSize, itemSize ) );
 
-	SetMyModel("models/w_weaponbox.mdl");
+	SetMyModel();
 }
 
 //=========================================================

@@ -7458,7 +7458,7 @@ bool CBasePlayer::AssignPlayerTemplate(string_t templateName)
 	m_bloodColor = 0;
 	SetMyBloodColor(BLOOD_COLOR_RED);
 	pev->model = iStringNull;
-	SetMyModel("models/player.mdl");
+	SetMyModel();
 
 	return true;
 }

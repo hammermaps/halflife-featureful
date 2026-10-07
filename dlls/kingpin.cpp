@@ -44,6 +44,8 @@ class CKingpinPlasmaBall : public CBaseMonster
 public:
 	void Spawn() override;
 	void Precache() override;
+	const char* DefaultModel() override { return ballVisual.model; }
+	float DefaultHealth() override { return 0.0f; }
 	void Activate() override;
 	void Launch();
 	void EXPORT HuntThink();
@@ -783,6 +785,8 @@ class CKingpin : public CFollowingMonster
 public:
 	void Spawn() override;
 	void Precache() override;
+	const char* DefaultModel() override { return "models/kingpin.mdl"; }
+	float DefaultHealth() override { return GetSkillValue("kingpin_health"); }
 	bool IsEnabledInMod() override { return g_modFeatures.IsMonsterEnabled("kingpin"); }
 	void SetYawSpeed() override { pev->yaw_speed = 140; }
 	int DefaultClassify() override;
@@ -1189,13 +1193,13 @@ IMPLEMENT_CUSTOM_SCHEDULES(CKingpin, CBaseMonster)
 void CKingpin::Spawn()
 {
 	Precache();
-	SetMyModel( "models/kingpin.mdl" );
+	SetMyModel();
 	SetMySize();
 
 	pev->solid			= SOLID_SLIDEBOX;
 	pev->movetype		= MOVETYPE_STEP;
 	SetMyBloodColor( BLOOD_COLOR_YELLOW );
-	SetMyHealth( GetSkillValue("kingpin_health") );
+	SetMyHealth();
 	SetMyFieldOfView(VIEW_FIELD_FULL);// indicates the width of this monster's forward view cone ( as a dotproduct result )
 	m_MonsterState		= MONSTERSTATE_NONE;
 
@@ -1215,7 +1219,7 @@ void CKingpin::Spawn()
 
 void CKingpin::Precache()
 {
-	PrecacheMyModel("models/kingpin.mdl");
+	PrecacheMyModel();
 	PRECACHE_MODEL("models/stickygibpink.mdl");
 	PRECACHE_SOUND("kingpin/kingpin_moveslow.wav");
 	PRECACHE_SOUND("kingpin/kingpin_move.wav");

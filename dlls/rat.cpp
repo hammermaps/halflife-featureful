@@ -31,6 +31,8 @@ class CRat : public CBaseMonster
 public:
 	void Spawn() override;
 	void Precache() override;
+	const char* DefaultModel() override { return "models/bigrat.mdl"; }
+	float DefaultHealth() override { return 8.0f; }
 	void SetYawSpeed() override;
 	int DefaultClassify() override;
 	int DefaultSizeForGrapple() override { return GRAPPLE_SMALL; }
@@ -74,13 +76,13 @@ void CRat::Spawn()
 {
 	Precache();
 
-	SetMyModel( "models/bigrat.mdl" );
+	SetMyModel();
 	UTIL_SetSize( pev, Vector( 0, 0, 0 ), Vector( 0, 0, 0 ) );
 
 	pev->solid = SOLID_SLIDEBOX;
 	pev->movetype = MOVETYPE_STEP;
 	SetMyBloodColor( BLOOD_COLOR_RED );
-	SetMyHealth( 8 );
+	SetMyHealth();
 	pev->view_ofs = Vector( 0, 0, 6 );// position of the eyes relative to monster's origin.
 	SetMyFieldOfView(0.5f);// indicates the width of this monster's forward view cone ( as a dotproduct result )
 	m_MonsterState = MONSTERSTATE_NONE;
@@ -93,7 +95,7 @@ void CRat::Spawn()
 //=========================================================
 void CRat::Precache()
 {
-	PrecacheMyModel( "models/bigrat.mdl" );
+	PrecacheMyModel();
 	PrecacheMyGibModel();
 }
 
