@@ -1141,6 +1141,7 @@ public:
 	int		m_iMaxRes;
 	int		m_iHudNumbersYOffset;
 	cvar_t  *m_pCvarDeveloper;
+	cvar_t  *m_pCvarCheats;
 	cvar_t  *m_pCvarZoomSensitivityRatio;
 	cvar_t  *m_pCvarStealMouse;
 	cvar_t	*m_pCvarDraw;
@@ -1317,6 +1318,7 @@ public:
 
 	void ParseModConfigs();
 	bool IsDeveloperModeOn();
+	bool CheatsOn();
 	void Init();
 	void VidInit();
 	void Think();

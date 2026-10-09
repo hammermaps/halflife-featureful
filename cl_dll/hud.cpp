@@ -695,6 +695,11 @@ bool CHud::IsDeveloperModeOn()
 	return m_pCvarDeveloper && m_pCvarDeveloper->value;
 }
 
+bool CHud::CheatsOn()
+{
+	return m_pCvarCheats && m_pCvarCheats->value;
+}
+
 // This is called every time the DLL is loaded
 void CHud::Init()
 {
@@ -789,6 +794,7 @@ void CHud::Init()
 	cl_lw = gEngfuncs.pfnGetCvarPointer( "cl_lw" );
 	cl_righthand = CVAR_CREATE( "cl_righthand", "0", 0 );
 	m_pCvarDeveloper = gEngfuncs.pfnGetCvarPointer( "developer" );
+	m_pCvarCheats = gEngfuncs.pfnGetCvarPointer("sv_cheats");
 	r_decals = gEngfuncs.pfnGetCvarPointer( "r_decals" );
 	m_pCvarCrosshair = gEngfuncs.pfnGetCvarPointer( "crosshair" );
 
