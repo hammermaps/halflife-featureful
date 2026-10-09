@@ -40,6 +40,32 @@ entityCategory: object
 
 {{% tabs %}}
 
+{{% tab "Melee attack settings" %}}
+The [trace hull attacks]({{< ref "entity-templates/#trace_hull_attacks" >}}) properties that emulate the tree's native ones. Could be used as a starting point for further changes.
+
+```json
+{
+    "monster_zombie": {
+        "trace_hull_attacks": {
+            "1": {
+                "punchangle": {
+                    "pitch": 15
+                },
+                "knock": {
+                    "forward": 100
+                }
+            }
+        }
+    }
+}
+```
+
+{{% hint warning %}}
+`"distance"`, `"hit_soundscript"` and `"miss_soundscript"` properties currently don't have effect on a xen tree attack.
+{{% /hint %}}
+
+{{% /tab %}}
+
 {{% tab "Custom damage" %}}
 
 Custom damage properties can be set via entity template's [trace_hull_attacks]({{< ref "entity-templates/#trace_hull_attacks" >}}).

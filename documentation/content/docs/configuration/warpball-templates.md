@@ -27,6 +27,8 @@ For a quick start:
 2. Set `Warpball template` parameter of the `monstermaker` to `auto`.
 3. Upon triggering the `monstermaker`, the warpball effect will be played depending on the type of the monster it spawns.
 
+If you want to play a warpball effect separate from monstermaker (just as a visual and sound effect) you can use [env_warpball_templated]({{< ref env_warpball_templated >}}).
+
 ## Format of templates/warpball.json
 
 The root document has two properties: `entity_mappings` and `templates`.
