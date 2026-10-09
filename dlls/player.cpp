@@ -2065,43 +2065,39 @@ std::pair<CBaseEntity*, const ObjectHintSpec*> CBasePlayer::GetInteractiveEntity
 
 		while( ( pObject = UTIL_FindEntityInSphere( pObject, pev->origin, searchRadius ) ) != NULL )
 		{
-			const ObjectHintSpec* hintSpec = gatherHints ? GetHintSpecForEntity(pObject) : nullptr;
+			const ObjectHintSpec* hintSpec = (gatherHints && pObject->CanShowObjectHint()) ? GetHintSpecForEntity(pObject) : nullptr;
 			if (hintSpec && hintSpec->scanVisualSet.HasAnySpriteDefined())
 			{
-				CBasePlayerWeapon* pWeapon = pObject->MyWeaponPointer();
-				if (!pWeapon || !pWeapon->m_pPlayer)
+				const float radius = hintSpec->distance > 0 ? hintSpec->distance : PLAYER_SEARCH_RADIUS;
+				if (ObjectInRadius(pObject, eyePosition, radius))
 				{
-					const float radius = hintSpec->distance > 0 ? hintSpec->distance : PLAYER_SEARCH_RADIUS;
-					if (ObjectInRadius(pObject, eyePosition, radius))
+					vecLOS = (VecBModelOrigin( pObject->pev ) - eyePosition);
+					vecLOS = UTIL_ClampVectorToBox(vecLOS, pObject->pev->size * 0.5f);
+					flDot = DotProduct( vecLOS , gpGlobals->v_forward );
+					if (flDot > 0.5f)
 					{
-						vecLOS = (VecBModelOrigin( pObject->pev ) - eyePosition);
-						vecLOS = UTIL_ClampVectorToBox(vecLOS, pObject->pev->size * 0.5f);
-						flDot = DotProduct( vecLOS , gpGlobals->v_forward );
-						if (flDot > 0.5f)
-						{
-							TraceResult objectTr;
-							UTIL_TraceLine(eyePosition, pObject->Center(), dont_ignore_monsters, edict(), &objectTr);
+						TraceResult objectTr;
+						UTIL_TraceLine(eyePosition, pObject->Center(), dont_ignore_monsters, edict(), &objectTr);
 
-							bool traceOk = objectTr.flFraction == 1.0f || objectTr.pHit == pObject->edict();
-							if (!traceOk)
+						bool traceOk = objectTr.flFraction == 1.0f || objectTr.pHit == pObject->edict();
+						if (!traceOk)
+						{
+							if (objectTr.pHit && ENTINDEX(objectTr.pHit) != 0)
 							{
-								if (objectTr.pHit && ENTINDEX(objectTr.pHit) != 0)
+								entvars_t* objectPev = VARS(objectTr.pHit);
+								const char* model = FStringNull(objectPev->model) ? nullptr : STRING(objectPev->model);
+								if (model && *model == '*' && objectPev->rendermode != kRenderNormal && objectPev->renderamt > 0)
 								{
-									entvars_t* objectPev = VARS(objectTr.pHit);
-									const char* model = FStringNull(objectPev->model) ? nullptr : STRING(objectPev->model);
-									if (model && *model == '*' && objectPev->rendermode != kRenderNormal && objectPev->renderamt > 0)
-									{
-										TraceResult reversedTr;
-										UTIL_TraceLine(pObject->Center(), eyePosition, dont_ignore_monsters, pObject->edict(), &reversedTr);
-										traceOk = reversedTr.pHit == objectTr.pHit;
-									}
+									TraceResult reversedTr;
+									UTIL_TraceLine(pObject->Center(), eyePosition, dont_ignore_monsters, pObject->edict(), &reversedTr);
+									traceOk = reversedTr.pHit == objectTr.pHit;
 								}
 							}
+						}
 
-							if (traceOk)
-							{
-								hintedEntities->push_back(std::make_pair(pObject, hintSpec));
-							}
+						if (traceOk)
+						{
+							hintedEntities->push_back(std::make_pair(pObject, hintSpec));
 						}
 					}
 				}

@@ -162,6 +162,9 @@ public:
 	void EXPORT AttemptToMaterialize();  // the weapon desires to become visible and tangible, if the game rules allow for it
 	CBaseEntity* Respawn() override;// copy a weapon
 	bool IsLockedByMaster() override;
+	bool CanShowObjectHint() override {
+		return !m_pPlayer && !FBitSet(pev->effects, EF_NODRAW);
+	}
 	bool IsUsefulToDisplayHint(CBaseEntity* pPlayer) override;
 	void DropAsAmmoEnt(int amount) override;
 	void FallInit();

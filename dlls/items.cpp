@@ -399,6 +399,11 @@ bool CPickup::IsLockedByMaster()
 	return m_sMaster && !UTIL_IsMasterTriggered(m_sMaster, nullptr);
 }
 
+bool CPickup::CanShowObjectHint()
+{
+	return !FBitSet(pev->effects, EF_NODRAW);
+}
+
 bool CPickup::IsUsefulToDisplayHint(CBaseEntity* pPlayer)
 {
 	if (pPlayer->IsPlayer())

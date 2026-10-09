@@ -691,6 +691,7 @@ public:
 	virtual void BeforeApplyDamageToHealth(float flDamage) {}
 	bool ApplyDamageToHealth(const DamageInfo& damageInfo, entvars_t *pevAttacker, TakeDamageResult& result);
 
+	virtual bool CanShowObjectHint() { return true; }
 	virtual bool IsUsefulToDisplayHint(CBaseEntity* pPlayer) { return true; }
 	virtual bool IsLockedByMaster() { return false; }
 	virtual bool PlaysItsOwnHitSounds() const { return false; }
