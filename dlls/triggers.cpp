@@ -1139,9 +1139,9 @@ class CTriggerCDAudio : public CBaseTrigger
 public:
 	void Spawn() override;
 
-	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value ) override;
+	void EXPORT CDAduioUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 	void PlayTrack();
-	void Touch( CBaseEntity *pOther ) override;
+	void EXPORT CDAduioTouch( CBaseEntity *pOther );
 };
 
 LINK_ENTITY_TO_CLASS( trigger_cdaudio, CTriggerCDAudio )
@@ -1150,7 +1150,7 @@ LINK_ENTITY_TO_CLASS( trigger_cdaudio, CTriggerCDAudio )
 // Changes tracks or stops CD when player touches
 //
 // !!!HACK - overloaded HEALTH to avoid adding new field
-void CTriggerCDAudio::Touch( CBaseEntity *pOther )
+void CTriggerCDAudio::CDAduioTouch( CBaseEntity *pOther )
 {
 	if( !pOther->IsPlayer() )
 	{
@@ -1164,47 +1164,52 @@ void CTriggerCDAudio::Touch( CBaseEntity *pOther )
 void CTriggerCDAudio::Spawn()
 {
 	InitTrigger();
+	SetTouch(&CTriggerCDAudio::CDAduioTouch);
+	SetUse(&CTriggerCDAudio::CDAduioUse);
 }
 
-void CTriggerCDAudio::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
+void CTriggerCDAudio::CDAduioUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 {
 	PlayTrack();
 }
 
 void PlayCDTrack( int iTrack )
 {
-	// manually find the single player.
-	CBaseEntity* pClient = UTIL_PlayerByIndex(1);
-
-	// Can't play if the client is not connected!
-	if( !pClient )
-		return;
-
 	if( iTrack < -1 || iTrack > 30 )
 	{
 		ALERT( at_console, "TriggerCDAudio - Track %d out of range\n" );
 		return;
 	}
 
+	char buffer[64];
+	const char* commandStr = nullptr;
+
 	if( iTrack == -1 )
 	{
-		CLIENT_COMMAND( pClient->edict(), "cd stop\n" );
+		commandStr = "cd stop\n";
 	}
 	else
 	{
-		char string[64];
+		sprintf( buffer, "cd play %3d\n", iTrack );
+		commandStr = buffer;
+	}
 
-		sprintf( string, "cd play %3d\n", iTrack );
-		CLIENT_COMMAND( pClient->edict(), string );
+	for (int i = 1; i <= gpGlobals->maxClients; i++)
+	{
+		CBaseEntity* pClient = UTIL_PlayerByIndex(i);
+		if (pClient)
+		{
+			CLIENT_COMMAND(pClient->edict(), commandStr);
+		}
 	}
 }
 
 // only plays for ONE client, so only use in single play!
 void CTriggerCDAudio::PlayTrack()
 {
+	SetTouch(nullptr);
+	SetUse(nullptr);
 	PlayCDTrack( (int)pev->health );
-
-	SetTouch( NULL );
 	UTIL_Remove( this );
 }
 
@@ -1250,19 +1255,20 @@ void CTargetCDAudio::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYP
 // only plays for ONE client, so only use in single play!
 void CTargetCDAudio::Think()
 {
-	edict_t *pClient;
-
-	// manually find the single player.
-	pClient = g_engfuncs.pfnPEntityOfEntIndex( 1 );
-
-	// Can't play if the client is not connected!
-	if( !pClient )
-		return;
-
 	pev->nextthink = gpGlobals->time + 0.5f;
 
-	if( ( pClient->v.origin - pev->origin ).IsLengthLessThanOrEqual(pev->scale) )
-		Play();
+	for (int i = 1; i <= gpGlobals->maxClients; i++)
+	{
+		CBaseEntity* pClient = UTIL_PlayerByIndex(i);
+		if (pClient)
+		{
+			if ((pClient->pev->origin - pev->origin).IsLengthLessThanOrEqual(pev->scale))
+			{
+				Play();
+				break;
+			}
+		}
+	}
 }
 
 void CTargetCDAudio::Play()
