@@ -1116,6 +1116,7 @@ private:
 	int m_cachedMinAlpha; // cache per frame
 	int m_cachedHudColor;
 	int m_cachedTextColor;
+	std::string m_playerModel;
 	int m_forcedHudColor;
 	int m_forcedHudColorNoSuit;
 	int m_forcedHudColorCritical;
@@ -1390,6 +1391,9 @@ public:
 
 	fixed_vector<FakeMirror, 32> fakeMirrors;
 	bool HasActiveFakeMirrors() const;
+	const char* PlayerModel() const {
+		return m_playerModel.c_str();
+	}
 
 	HudSpriteRenderer hudRenderer;
 	bool hasHudScaleInEngine;

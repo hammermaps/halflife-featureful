@@ -427,7 +427,7 @@ void LinkUserMessages()
 	gmsgWeatherPos = REG_USER_MSG("WeatherPos", -1);
 
 	gmsgJournal = REG_USER_MSG("Journal", -1);
-	gmsgPlTemplate = REG_USER_MSG("PlTemplate", 10);
+	gmsgPlTemplate = REG_USER_MSG("PlTemplate", -1);
 	gmsgSoundScript = REG_USER_MSG("SoundScript", -1);
 	gmsgSoundVolume = REG_USER_MSG("SoundVolume", 2);
 	gmsgSaveDisable = REG_USER_MSG("SaveDisable", 1);
@@ -7460,6 +7460,12 @@ bool CBasePlayer::AssignPlayerTemplate(string_t templateName)
 	pev->model = iStringNull;
 	SetMyModel();
 
+	CBaseEntity* playerMarker = nullptr;
+	while ((playerMarker = UTIL_FindEntityByClassname(playerMarker, "player_marker")) != nullptr)
+	{
+		SET_MODEL(playerMarker->edict(), STRING(pev->model));
+	}
+
 	return true;
 }
 
@@ -7516,7 +7522,10 @@ void CBasePlayer::SendPlayerTemplateData()
 			hudDrawNoSuit = 2;
 	}
 
+	const char* playerModel = MyOwnModel();
+
 	MESSAGE_BEGIN(MSG_ONE, gmsgPlTemplate, NULL, pev);
+		WRITE_STRING(playerModel);
 		WRITE_COLOR(hudColor);
 		WRITE_COLOR(hudColorNoSuit);
 		WRITE_COLOR(hudColorCritical);
