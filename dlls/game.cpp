@@ -44,6 +44,8 @@
 
 #include <chrono>
 
+extern bool g_worldExists;
+
 ModFeatures g_modFeatures;
 
 struct WeaponNameAndId
@@ -1189,6 +1191,58 @@ void PrintSkillReplacementForEntTemplate()
 	}
 }
 
+void PrintPointContents()
+{
+	if (!g_worldExists)
+	{
+		ALERT(at_error, "The map is not running!\n");
+		return;
+	}
+
+	const int argc = CMD_ARGC();
+	if (argc < 4)
+	{
+		ALERT(at_console, "Usage: %s <x> <y> <z>\n", CMD_ARGV(0));
+		return;
+	}
+
+	const float x = atof(CMD_ARGV(1));
+	const float y = atof(CMD_ARGV(2));
+	const float z = atof(CMD_ARGV(3));
+
+	const int contents = UTIL_PointContents(Vector(x, y, z));
+	const char* contentsStr = nullptr;
+	switch(contents)
+	{
+	case CONTENTS_EMPTY:
+		contentsStr = "empty";
+		break;
+	case CONTENTS_SOLID:
+		contentsStr = "solid";
+		break;
+	case CONTENTS_WATER:
+		contentsStr = "water";
+		break;
+	case CONTENTS_SLIME:
+		contentsStr = "slime";
+		break;
+	case CONTENTS_LAVA:
+		contentsStr = "lava";
+		break;
+	case CONTENTS_SKY:
+		contentsStr = "sky";
+		break;
+	case CONTENTS_LADDER:
+		contentsStr = "ladder";
+		break;
+	}
+
+	if (contentsStr)
+		ALERT(at_console, "Point contents at (%g, %g, %g) is %s\n", x, y, z, contentsStr);
+	else
+		ALERT(at_console, "Point contents at (%g, %g, %g) is %d\n", x, y, z, contents);
+}
+
 static void CVAR_REGISTER_INTEGER( cvar_t* cvar, int value )
 {
 	char valueStr[12];
@@ -1717,6 +1771,7 @@ void GameDLLInit()
 	g_engfuncs.pfnAddServerCommand("force_schedule_fail", ForceScheduleFail);
 	g_engfuncs.pfnAddServerCommand("get_skill_for_entity_template", PrintSkillReplacementForEntTemplate);
 	g_engfuncs.pfnAddServerCommand("get_skill", PrintSkillVariable);
+	g_engfuncs.pfnAddServerCommand("point_contents", PrintPointContents);
 }
 
 bool ItemsPickableByTouch()

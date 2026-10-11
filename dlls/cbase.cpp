@@ -39,6 +39,7 @@
 
 bool g_fIsXash3D = false;
 bool g_hasCorrectShouldCollide = false;
+bool g_worldExists = false;
 
 void EntvarsKeyvalue( entvars_t *pev, KeyValueData *pkvd );
 
@@ -117,6 +118,8 @@ void OnFreeEntPrivateData(edict_s* pEdict)
 		ClearPrecachedModels();
 		ClearPrecachedSounds();
 		ResetScheduleWatchers();
+
+		g_worldExists = false;
 	}
 }
 
