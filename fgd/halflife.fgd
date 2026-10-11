@@ -168,7 +168,103 @@
 	]
 ]
 
-@BaseClass size(-16 -16 0, 16 16 32) color(0 0 200) base(Targetname, TargetOnPickup, Delay, Appearflags, Angles, Global, Scalable, CustomObjectHint, EntityTemplate, EntityEffects) = Pickup
+@BaseClass = Colormap
+[
+	colormap(choices) : "Colormap (for colormapable models)" =
+	[
+		0 : "Red top, red bottom"
+		5120 : "Red top, orange bottom"
+		10240 : "Red top, yellow bottom"
+		17920 : "Red top, green bottom"
+		28160 : "Red top, light green bottom"
+		33280 : "Red top, light blue bottom"
+		40960 : "Red top, blue bottom"
+		51200 : "Red top, purple bottom"
+		57600 : "Red top, pink bottom"
+
+		20 : "Orange top, red bottom"
+		5140 : "Orange top, orange bottom"
+		10260 : "Orange top, yellow bottom"
+		17940 : "Orange top, green bottom"
+		28180 : "Orange top, light green bottom"
+		33300 : "Orange top, light blue bottom"
+		40980 : "Orange top, blue bottom"
+		51220 : "Orange top, purple bottom"
+		57620 : "Orange top, pink bottom"
+
+		40 : "Yellow top, red bottom"
+		5160 : "Yellow top, orange bottom"
+		10280 : "Yellow top, yellow bottom"
+		17960 : "Yellow top, green bottom"
+		28200 : "Yellow top, light green bottom"
+		33320 : "Yellow top, light blue bottom"
+		41000 : "Yellow top, blue bottom"
+		51240 : "Yellow top, purple bottom"
+		57640 : "Yellow top, pink bottom"
+
+		70 : "Green top, red bottom"
+		5190 : "Green top, orange bottom"
+		10310 : "Green top, yellow bottom"
+		17990 : "Green top, green bottom"
+		28230 : "Green top, light green bottom"
+		33350 : "Green top, light blue bottom"
+		41030 : "Green top, blue bottom"
+		51270 : "Green top, purple bottom"
+		57670 : "Green top, pink bottom"
+
+		110 : "Light green top, red bottom"
+		5230 : "Light green top, orange bottom"
+		10350 : "Light green top, yellow bottom"
+		18030 : "Light green top, green bottom"
+		28270 : "Light green top, light green bottom"
+		33390 : "Light green top, light blue bottom"
+		41070 : "Light green top, blue bottom"
+		51310 : "Light green top, purple bottom"
+		57710 : "Light green top, pink bottom"
+
+		130 : "Light blue top, red bottom"
+		5250 : "Light blue top, orange bottom"
+		10370 : "Light blue top, yellow bottom"
+		18050 : "Light blue top, green bottom"
+		28290 : "Light blue top, light green bottom"
+		33410 : "Light blue top, light blue bottom"
+		41090 : "Light blue top, blue bottom"
+		51330 : "Light blue top, purple bottom"
+		57730 : "Light blue top, pink bottom"
+
+		160 : "Blue top, red bottom"
+		5280 : "Blue top, orange bottom"
+		10400 : "Blue top, yellow bottom"
+		18080 : "Blue top, green bottom"
+		28320 : "Blue top, light green bottom"
+		33440 : "Blue top, light blue bottom"
+		38560 : "Blue top, blue bottom"
+		51360 : "Blue top, purple bottom"
+		57760 : "Blue top, pink bottom"
+
+		200 : "Purple top, red bottom"
+		5320 : "Purple top, orange bottom"
+		10440 : "Purple top, yellow bottom"
+		18120 : "Purple top, green bottom"
+		28360 : "Purple top, light green bottom"
+		33480 : "Purple top, light blue bottom"
+		41160 : "Purple top, blue bottom"
+		51400 : "Purple top, purple bottom"
+		57800 : "Purple top, pink bottom"
+
+		225 : "Pink top, red bottom"
+		5345 : "Pink top, orange bottom"
+		10465 : "Pink top, yellow bottom"
+		18145 : "Pink top, green bottom"
+		28385 : "Pink top, light green bottom"
+		33505 : "Pink top, light blue bottom"
+		41185 : "Pink top, blue bottom"
+		51425 : "Pink top, purple bottom"
+		57825 : "Pink top, pink bottom"
+	]
+]
+
+@BaseClass size(-16 -16 0, 16 16 32) color(0 0 200) base(Targetname, TargetOnPickup, Delay, Appearflags, Angles, Global, Scalable, CustomObjectHint, EntityTemplate, EntityEffects, Colormap) = Pickup
 [
 	spawnflags(Flags) =
 	[
@@ -310,7 +406,7 @@
 	]
 ]
 
-@BaseClass base(Targetname,RenderFields,Appearflags,Angles,Sequence,BloodColor,EntityEffects) = DeadMonster
+@BaseClass base(Targetname,RenderFields,Appearflags,Angles,Sequence,BloodColor,EntityEffects,Colormap) = DeadMonster
 [
 	health(string) : "Custom Health"
 	model(studio) : "Custom Model"
@@ -1472,7 +1568,7 @@
 @PointClass base(Ammo) studio("models/w_crossbow_clip.mdl") = ammo_crossbow : "Spawns crossbow ammo." : "http://twhl.info/wiki.php?id=8" []
 @PointClass base(Ammo) studio("models/w_saw_clip.mdl") = ammo_556 : "M249 Ammo" []
 @PointClass base(Ammo) studio("models/w_m40a1clip.mdl") = ammo_762 : "Sniper Ammo" []
-@PointClass base(Targetname, Appearflags, Angles, Global, EntityTemplate, EntityEffects) size(-16 -16 -16, 16 16 16) studio("models/spore_ammo.mdl") = ammo_spore : "Spore" []
+@PointClass base(Targetname, Appearflags, Angles, Global, EntityTemplate, EntityEffects, Colormap) size(-16 -16 -16, 16 16 16) studio("models/spore_ammo.mdl") = ammo_spore : "Spore" []
 
 @PointClass base(Ammo) studio() = ammo_45acp : ".45 ACP Ammo" []
 @PointClass base(Ammo) studio() = ammo_57mm : "57mm Ammo" []
@@ -2143,7 +2239,7 @@
 	]
 ]
 
-@PointClass base(Targetname, Angles, RenderFields, Scalable, EntityEffects, EntityTemplate) studio() = env_model : "New alternative to cyclers"
+@PointClass base(Targetname, Angles, RenderFields, Scalable, EntityEffects, Colormap, EntityTemplate) studio() = env_model : "New alternative to cyclers"
 [
 	model(studio) : "Model name"
 	skin(integer) : "Skin" : 0
@@ -4226,7 +4322,7 @@
 //
 
 @PointClass size(-16 -16 0, 16 16 36) base(Item) studio("models/w_adrenaline.mdl") = item_adrenaline : "Adrenaline" []
-@PointClass size(-16 -16 0, 16 16 36) base(Targetname, Appearflags, Angles, Global, Scalable, EntityTemplate, EntityEffects) studio("models/w_oxygen.mdl") = item_airtank : "Oxygen tank"
+@PointClass size(-16 -16 0, 16 16 36) base(Targetname, Appearflags, Angles, Global, Scalable, EntityTemplate, EntityEffects, Colormap) studio("models/w_oxygen.mdl") = item_airtank : "Oxygen tank"
 [
 	model(studio) : "Custom Model"
 	health(string) : "Custom Health"
@@ -4308,7 +4404,7 @@
 	template(string) : "info_item_random entity"
 ]
 
-@PointClass base(Targetname, Appearflags, Angles, Global, RenderFields, Scalable, EntityEffects) studio() = item_generic : "Generic scenery item"
+@PointClass base(Targetname, Appearflags, Angles, Global, RenderFields, Scalable, EntityEffects, Colormap) studio() = item_generic : "Generic scenery item"
 [
 	model(studio) : "Model" : "models/w_security.mdl"
 	sequencename(string) : "Sequence Name"
@@ -4322,7 +4418,7 @@
 	]
 ]
 
-@BaseClass base(Targetname, Angles, EntityTemplate, CustomObjectHint, Global, EntityEffects) = ItemRecharger
+@BaseClass base(Targetname, Angles, EntityTemplate, CustomObjectHint, Global, EntityEffects, Colormap) = ItemRecharger
 [
 	TriggerOnEmpty(target_destination) : "Trigger On Empty"
 	TriggerOnFirstUse(target_destination) : "Trigger On First Use"
@@ -4338,7 +4434,7 @@
 @PointClass size(-12 -16 0, 12 16 36) base(ItemRecharger) studio("models/health_charger_body.mdl") = item_healthcharger : "Wall Health Kit" []
 @PointClass size(-12 -16 0, 12 16 36) base(ItemRecharger) studio("models/hev.mdl") = item_recharge : "Wall Recharger" []
 
-@PointClass base(Targetname, Global, Angles, EntityTemplate, CustomObjectHint, EntityEffects) size(-16 -16 0, 16 16 48 ) studio("models/eye_scanner.mdl") = item_eyescanner : "Retinal Scanner"
+@PointClass base(Targetname, Global, Angles, EntityTemplate, CustomObjectHint, EntityEffects, Colormap) size(-16 -16 0, 16 16 48 ) studio("models/eye_scanner.mdl") = item_eyescanner : "Retinal Scanner"
 [
 	unlocked_target(target_destination) : "Unlocked target"
 	locked_target(target_destination) : "Locked target"
@@ -5490,7 +5586,7 @@
 		21 : "bust"
 	]
 ]
-@PointClass base(Monster, Sequence, EntityEffects) size(-16 -16 -36, 16 16 36) studio() = monster_generic : "Generic Script Monster"
+@PointClass base(Monster, Sequence, EntityEffects, Colormap) size(-16 -16 -36, 16 16 36) studio() = monster_generic : "Generic Script Monster"
 [
 	spawnflags(Flags) =
 	[
@@ -9970,7 +10066,7 @@
 // Xen
 //
 
-@BaseClass base(Targetname, RenderFields, Angles, EntityTemplate, EntityEffects) flags(Angle) = XenPlant
+@BaseClass base(Targetname, RenderFields, Angles, EntityTemplate, EntityEffects, Colormap) flags(Angle) = XenPlant
 [
 	model(studio) : "Custom Model"
 	scale(string) : "Scale (1.0 = normal size)"
@@ -10034,7 +10130,7 @@
     ]
 ]
 
-@PointClass base(Targetname, Classification, EntityTemplate, EntityEffects) studio("models/mortar.mdl") = op4mortar : "Op4 Mortar"
+@PointClass base(Targetname, Classification, EntityTemplate, EntityEffects, Colormap) studio("models/mortar.mdl") = op4mortar : "Op4 Mortar"
 [
 	model(studio) : "Custom Model"
 	spawnflags(Flags) =
