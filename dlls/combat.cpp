@@ -1026,8 +1026,8 @@ bool CBaseEntity::ApplyDamageToHealth(const DamageInfo& damageInfo, entvars_t *p
 		else
 		{
 			pev->health = Q_max(damageInfo.healthFloor, 1.0f);
-			pev->health = Q_min(healthBeforeDamage, pev->health);
 		}
+		pev->health = Q_min(healthBeforeDamage, pev->health);
 		result.SetDeathPrevented();
 	}
 	if (pev->health < healthBeforeDamage)
