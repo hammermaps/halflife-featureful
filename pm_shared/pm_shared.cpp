@@ -2584,7 +2584,8 @@ void PM_CheckFalling()
 		}
 		else if( pmove->flFallVelocity > PLAYER_MAX_SAFE_FALL_SPEED )
 		{
-			PM_PlaySoundScript(PM_GetPlayerSoundScript(pmove->player_index, "Player.FallPain"));
+			if (pmove->movetype != MOVETYPE_NOCLIP)
+				PM_PlaySoundScript(PM_GetPlayerSoundScript(pmove->player_index, "Player.FallPain"));
 			fvol = 1.0f;
 		}
 		else if( pmove->flFallVelocity > PLAYER_MAX_SAFE_FALL_SPEED / 2 )
@@ -2594,7 +2595,8 @@ void PM_CheckFalling()
 
 			if( tfc )
 			{
-				PM_PlaySoundScript(PM_GetPlayerSoundScript(pmove->player_index, "Player.FallPain"));
+				if (pmove->movetype != MOVETYPE_NOCLIP)
+					PM_PlaySoundScript(PM_GetPlayerSoundScript(pmove->player_index, "Player.FallPain"));
 			}
 
 			fvol = 0.85;

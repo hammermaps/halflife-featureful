@@ -4040,17 +4040,17 @@ void CBasePlayer::PostThink()
 			// after this point, we start doing damage
 			float flFallDamage = g_pGameRules->FlPlayerFallDamage( this );
 
-			if( flFallDamage > pev->health )
-			{
-				//splat
-				// note: play on item channel because we play footstep landing on body channel
-				EmitSoundScript(Player::fallBodySplatSoundScript);
-			}
-
-			if( flFallDamage > 0 )
+			if (flFallDamage > 0 && pev->movetype != MOVETYPE_NOCLIP)
 			{
 				TakeDamage( VARS( eoNullEntity ), VARS( eoNullEntity ), DamageInfo(flFallDamage, DMG_FALL) );
 				pev->punchangle.x = 0;
+
+				if (pev->health <= 0.0f)
+				{
+					//splat
+					// note: play on item channel because we play footstep landing on body channel
+					EmitSoundScript(Player::fallBodySplatSoundScript);
+				}
 			}
 		}
 
