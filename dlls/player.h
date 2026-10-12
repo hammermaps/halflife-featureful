@@ -627,6 +627,8 @@ public:
 	int GetMaxAmmo(int ammoIndex);
 	int m_maxAmmoOverride[MAX_AMMO_TYPES];
 
+	bool m_safeFall;
+
 	bool m_bunnyhop;
 };
 

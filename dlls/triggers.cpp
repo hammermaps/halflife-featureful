@@ -7940,3 +7940,48 @@ public:
 };
 
 LINK_ENTITY_TO_CLASS( trigger_cleanse, CTriggerCleanse )
+
+class CTriggerSafeFall : public CBaseEntity
+{
+public:
+	void Spawn()
+	{
+		pev->solid = SOLID_TRIGGER;
+		pev->movetype = MOVETYPE_NONE;
+		SET_MODEL(ENT(pev), STRING(pev->model));
+	}
+	void Touch(CBaseEntity *pOther) override
+	{
+		if (!pOther || !pOther->IsPlayer() || FBitSet(pOther->pev->flags, FL_ONGROUND))
+			return;
+		if (!UTIL_IsMasterTriggered(m_sMaster, pOther))
+			return;
+		CBasePlayer* pPlayer = (CBasePlayer*)pOther;
+		pPlayer->m_safeFall = true;
+	}
+	void KeyValue( KeyValueData* pkvd ) override
+	{
+		if (FStrEq(pkvd->szKeyName, "master"))
+		{
+			m_sMaster = ALLOC_STRING(pkvd->szValue);
+			pkvd->fHandled = true;
+		}
+		else
+			CBaseEntity::KeyValue(pkvd);
+	}
+	int ObjectCaps() override { return CBaseEntity::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
+
+	int Save(CSave &save) override;
+	int Restore(CRestore &restore) override;
+	static  TYPEDESCRIPTION m_SaveData[];
+
+	string_t m_sMaster;
+};
+
+LINK_ENTITY_TO_CLASS( trigger_safe_fall, CTriggerSafeFall )
+
+TYPEDESCRIPTION CTriggerSafeFall::m_SaveData[] =
+{
+	DEFINE_FIELD(CTriggerSafeFall, m_sMaster, FIELD_STRING),
+};
+IMPLEMENT_SAVERESTORE(CTriggerSafeFall, CBaseEntity)

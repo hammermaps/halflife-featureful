@@ -185,6 +185,8 @@ TYPEDESCRIPTION	CBasePlayer::m_playerSaveData[] =
 
 	DEFINE_ARRAY(CBasePlayer, m_maxAmmoOverride, FIELD_INTEGER, MAX_AMMO_TYPES),
 
+	DEFINE_FIELD(CBasePlayer, m_safeFall, FIELD_BOOLEAN),
+
 	//DEFINE_FIELD( CBasePlayer, m_fDeadTime, FIELD_FLOAT ), // only used in multiplayer games
 	//DEFINE_FIELD( CBasePlayer, m_fGameHUDInitialized, FIELD_INTEGER ), // only used in multiplayer games
 	//DEFINE_FIELD( CBasePlayer, m_flStopExtraSoundTime, FIELD_TIME ),
@@ -4040,7 +4042,7 @@ void CBasePlayer::PostThink()
 			// after this point, we start doing damage
 			float flFallDamage = g_pGameRules->FlPlayerFallDamage( this );
 
-			if (flFallDamage > 0 && pev->movetype != MOVETYPE_NOCLIP)
+			if (flFallDamage > 0 && pev->movetype != MOVETYPE_NOCLIP && !m_safeFall)
 			{
 				TakeDamage( VARS( eoNullEntity ), VARS( eoNullEntity ), DamageInfo(flFallDamage, DMG_FALL) );
 				pev->punchangle.x = 0;
@@ -4068,6 +4070,8 @@ void CBasePlayer::PostThink()
 			// ALERT( at_console, "fall %f\n", m_flFallVelocity );
 		}
 		m_flFallVelocity = 0;
+
+		m_safeFall = false;
 	}
 
 	// select the proper animation for the player character	

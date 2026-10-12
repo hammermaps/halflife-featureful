@@ -9860,6 +9860,11 @@
 	]
 ]
 
+@SolidClass base(Targetname) = trigger_safe_fall : "Make next fall deal no damage"
+[
+	master(string) : "Master"
+]
+
 @SolidClass base(Targetname, RoomType) = trigger_sound : "Brush-based DSP Sound"
 [
 	target(target_destination) : "Fire when activated"
