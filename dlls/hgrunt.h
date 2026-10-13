@@ -139,6 +139,9 @@ public:
 
 	int m_iSentence;
 
+	bool m_fStandingGround;
+	float m_flStandGroundRange;
+
 	short m_desiredSkin;
 protected:
 	void OnBecomingLeader() override;

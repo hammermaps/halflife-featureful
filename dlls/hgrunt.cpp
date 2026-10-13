@@ -101,6 +101,8 @@ TYPEDESCRIPTION	CHGrunt::m_SaveData[] =
 	//DEFINE_FIELD( CShotgun, m_iBrassShell, FIELD_INTEGER ),
 	//DEFINE_FIELD( CShotgun, m_iShotgunShell, FIELD_INTEGER ),
 	DEFINE_FIELD( CHGrunt, m_iSentence, FIELD_INTEGER ),
+	DEFINE_FIELD( CHGrunt, m_fStandingGround, FIELD_BOOLEAN ),
+	DEFINE_FIELD( CHGrunt, m_flStandGroundRange, FIELD_FLOAT ),
 };
 
 IMPLEMENT_SAVERESTORE( CHGrunt, CFollowingMonster )
@@ -447,6 +449,11 @@ bool CHGrunt::CheckMeleeAttack1( float flDot, float flDist )
 //=========================================================
 bool CHGrunt::CheckRangeAttack1( float flDot, float flDist )
 {
+	if (m_fStandingGround && m_flStandGroundRange >= flDist)
+	{
+		m_fStandingGround = false;
+	}
+
 	if( !HasConditions( bits_COND_ENEMY_OCCLUDED ) && flDist <= 2048.0f && flDot >= 0.5f && NoFriendlyFire() )
 	{
 		TraceResult tr;
@@ -1038,6 +1045,11 @@ void CHGrunt::SpawnHelper(int bloodColor)
 	m_fFirstEncounter	= true;// this is true when the grunt spawns, because he hasn't encountered an enemy yet.
 
 	m_HackedGunPos = Vector( 0, 0, 55 );
+
+	m_fStandingGround = m_flStandGroundRange > 0.0f;
+
+	if (m_fStandingGround)
+		ALERT(at_console, "%s is standing ground\n", STRING(pev->classname));
 }
 
 void CHGrunt::KeyValue(KeyValueData *pkvd)
@@ -1045,6 +1057,11 @@ void CHGrunt::KeyValue(KeyValueData *pkvd)
 	if( FStrEq(pkvd->szKeyName, "desired_skin" ) )
 	{
 		m_desiredSkin = atoi( pkvd->szValue );
+		pkvd->fHandled = true;
+	}
+	else if (FStrEq("standgroundrange", pkvd->szKeyName))
+	{
+		m_flStandGroundRange = atof(pkvd->szValue);
 		pkvd->fHandled = true;
 	}
 	else
@@ -2053,6 +2070,15 @@ Schedule_t *CHGrunt::GetSchedule()
 			{
 				// call base class, all code to handle dead enemies is centralized there.
 				return CBaseMonster::GetSchedule();
+			}
+
+			if (m_fStandingGround)
+			{
+				if (HasConditions(bits_COND_NO_AMMO_LOADED))
+					return GetScheduleOfType(SCHED_RELOAD);
+				if (HasConditions(bits_COND_CAN_RANGE_ATTACK1))
+					return GetScheduleOfType(SCHED_RANGE_ATTACK1);
+				return GetScheduleOfType(SCHED_STANDOFF);
 			}
 
 			// new enemy

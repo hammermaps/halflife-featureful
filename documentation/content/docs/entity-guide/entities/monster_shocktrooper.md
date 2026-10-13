@@ -5,6 +5,10 @@ bookToC: false
 
 # ![](/images/opfor.png) monster_shocktrooper
 
+### Parameters
+
+* See [monster_human_grunt]({{< ref "monster_human_grunt/#new-parameters" >}}).
+
 ### Skill variables
 
 * **sk_shocktrooper_health** - monster's health. The number is multiplied by **sk_shocktrooper_health_factor** to get the actual health value.

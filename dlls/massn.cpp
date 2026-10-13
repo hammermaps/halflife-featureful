@@ -252,7 +252,7 @@ void CMassn::KeyValue(KeyValueData *pkvd)
 		pkvd->fHandled = true;
 	}
 	else
-		CFollowingMonster::KeyValue( pkvd );
+		CHGrunt::KeyValue( pkvd );
 }
 
 //=========================================================

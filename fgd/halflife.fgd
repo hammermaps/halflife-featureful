@@ -727,6 +727,11 @@
 	]
 ]
 
+@BaseClass = StandGroundRange
+[
+	standgroundrange(string) : "Stand Ground Range"
+]
+
 @BaseClass base(TalkMonster) = Civilian
 [
 ]
@@ -5932,7 +5937,7 @@
 		2 : "On stomach"
 	]
 ]
-@PointClass base(Monster, FollowingMonster) size(-16 -16 0, 16 16 72) studio("models/hgrunt.mdl") = monster_human_grunt : "Human Grunt (camo)"
+@PointClass base(Monster, FollowingMonster, StandGroundRange) size(-16 -16 0, 16 16 72) studio("models/hgrunt.mdl") = monster_human_grunt : "Human Grunt (camo)"
 [
 	spawnflags(Flags) =
 	[
@@ -6802,7 +6807,7 @@
 	]
 ]
 
-@PointClass base(Monster, FollowingMonster, Sequence, MaleAssassinHead) size(-16 -16 0, 16 16 72) studio("models/massn.mdl") = monster_male_assassin : "Male Assassin"
+@PointClass base(Monster, FollowingMonster, StandGroundRange, Sequence, MaleAssassinHead) size(-16 -16 0, 16 16 72) studio("models/massn.mdl") = monster_male_assassin : "Male Assassin"
 [
 	netname(string) : "Squad Name"
 
@@ -7184,7 +7189,7 @@
 	]
 ]
 
-@PointClass base(Monster, FollowingMonster, Sequence) size(-16 -16 0, 16 16 72) studio("models/strooper.mdl") = monster_shocktrooper : "Shock Trooper"
+@PointClass base(Monster, FollowingMonster, StandGroundRange, Sequence) size(-16 -16 0, 16 16 72) studio("models/strooper.mdl") = monster_shocktrooper : "Shock Trooper"
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 10 =
 	[
@@ -7304,7 +7309,7 @@
 
 @PointClass base(Monster) size(-32 -32 0, 32 32 128) studio("models/robocop.mdl") = monster_robocop : "Robocop" []
 
-@PointClass base(Monster, FollowingMonster) size(-16 -16 0, 16 16 72) studio("models/rgrunt.mdl") = monster_robogrunt : "Robot Grunt"
+@PointClass base(Monster, FollowingMonster, StandGroundRange) size(-16 -16 0, 16 16 72) studio("models/rgrunt.mdl") = monster_robogrunt : "Robot Grunt"
 [
 	spawnflags(Flags) =
 	[

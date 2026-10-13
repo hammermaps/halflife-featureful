@@ -12,6 +12,10 @@ bookToC: false
 * When human grunt checks for friendly fire he takes into account all allies, not only those who are in the same squad as him.
 * The model no longer requires the `ACT_RUN_HURT` and `ACT_WALK_HURT` activities to be present. If these are missing the regular `ACT_RUN` and `ACT_WALK` are used when grunt is hurt.
 
+### New parameters
+
+* ![](/images/opfor.png) `Stand Ground Range` - if higher than 0, make the monster hold its position and fight from where it stands, reloading in place. It only gives up that stance when the enemy gets within this range (in units). This is used in Opposing Force in the encounter with male assassin sniper. In Featureful this parameter is available for human grunts as well.
+
 ### Skill variables
 
 * **sk_hgrunt_health** - monster's health.
