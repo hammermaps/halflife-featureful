@@ -35,6 +35,7 @@
 #include "common_soundscripts.h"
 #include "string_utils.h"
 #include "weapons.h" // for trigger_usetool
+#include "graphic_debug.h"
 
 #define FEATURE_TRIGGER_RANDOM 1
 #define FEATURE_TRIGGER_RESPAWN 1
@@ -7985,3 +7986,152 @@ TYPEDESCRIPTION CTriggerSafeFall::m_SaveData[] =
 	DEFINE_FIELD(CTriggerSafeFall, m_sMaster, FIELD_STRING),
 };
 IMPLEMENT_SAVERESTORE(CTriggerSafeFall, CBaseEntity)
+
+// Trigger that jumps a player to a target point
+class CTriggerJump : public CBaseTrigger
+{
+public:
+	void Spawn() override
+	{
+		Precache();
+		InitTrigger();
+		SetTouch(&CTriggerJump::JumpTouch);
+	}
+	void KeyValue( KeyValueData *pkvd ) override
+	{
+		if (FStrEq(pkvd->szKeyName, "height") )
+		{
+			m_flHeight = atof(pkvd->szValue);
+			pkvd->fHandled = true;
+		}
+		else if (FStrEq(pkvd->szKeyName, "trigger_on_jump"))
+		{
+			m_triggerOnJump = ALLOC_STRING(pkvd->szValue);
+			pkvd->fHandled = true;
+		}
+		else
+			CBaseTrigger::KeyValue( pkvd );
+	}
+	void Precache() override
+	{
+		RegisterAndPrecacheSoundScript(jumpSelfSoundScript);
+		RegisterAndPrecacheSoundScript(jumpOtherSoundScript);
+	}
+	void EXPORT JumpTouch( CBaseEntity *pOther )
+	{
+		if (FStringNull(pev->target))
+			return;
+
+		if (!CanTouch(pOther->pev))
+			return;
+
+		if (!UTIL_IsMasterTriggered(m_sMaster, pOther))
+			return;
+
+		// Don't touch again immediately
+		if (pOther->m_flTouchedByJumpPad > gpGlobals->time)
+		{
+			m_flTouchedByJumpPad = gpGlobals->time + 0.1f;
+			return;
+		}
+
+		TraceResult tr;
+		float flGravity = g_psv_gravity->value;
+
+		if (pOther->pev->gravity > 0.0f)
+		{
+			flGravity *= pOther->pev->gravity;
+		}
+
+		Vector vecTargetOrg;
+		if (!TryCalcLocus_Position(this, pOther, STRING(pev->target), vecTargetOrg))
+			return;
+
+		float height = m_flHeight;
+		if (height <= 0.0f)
+		{
+			if (vecTargetOrg.z >= pOther->pev->origin.z)
+			{
+				height = vecTargetOrg.z - pOther->pev->origin.z;
+			}
+			else
+			{
+				height = 0;
+			}
+			height += pOther->pev->maxs.z + 16.0f;
+		}
+
+		// get a rough idea of how high to launch
+		Vector vecMidPoint = pOther->pev->origin + (vecTargetOrg - pOther->pev->origin) * 0.5f;
+		vecMidPoint.z = pOther->pev->origin.z + height;
+
+		//DrawBeamLine(vecMidPoint, vecMidPoint + Vector(0,0,16), Color3(255, 255, 0), 20);
+
+		//UTIL_TraceLine(vecMidPoint, vecMidPoint + Vector(0,0,height), ignore_monsters, ENT(pev), &tr);
+		//vecMidPoint = tr.vecEndPos;
+		//vecMidPoint.z -= 15; (subtract so we don't hit the ceiling)
+
+		// How high should we travel to reach the apex
+		float distance1 = (vecMidPoint.z - pOther->pev->origin.z);
+		float distance2 = (vecMidPoint.z - vecTargetOrg.z);
+
+		distance1 = Q_max(distance1, 0.0f);
+		distance2 = Q_max(distance2, 0.0f);
+
+		// How long will it take to travel this distance
+		float time1 = sqrt( distance1 / (0.5f * flGravity) );
+		float time2 = sqrt( distance2 / (0.5f * flGravity) );
+		if (time1 < 0.1f)
+			return;
+
+		// how hard to launch to get there in time.
+		Vector vecTargetVel = (vecTargetOrg - pOther->pev->origin) / (time1 + time2);
+		vecTargetVel.z = flGravity * time1;
+
+		// don't affect the player again for a bit
+		pOther->m_flTouchedByJumpPad = gpGlobals->time + 0.2f;
+		pOther->pev->velocity = vecTargetVel;
+		ClearBits(pOther->pev->flags, FL_ONGROUND);
+		if ( pOther->IsPlayer() )
+		{
+			((CBasePlayer*)pOther)->SetAnimation( PLAYER_JUMP );
+		}
+
+		EmitSoundScript(jumpSelfSoundScript);
+		pOther->EmitSoundScript(GetSoundScript(jumpOtherSoundScript));
+
+		if (!FStringNull(m_triggerOnJump))
+			FireTargets(STRING(m_triggerOnJump), pOther, this);
+	}
+
+	int Save(CSave &save) override;
+	int Restore(CRestore &restore) override;
+	static  TYPEDESCRIPTION m_SaveData[];
+
+	float m_flHeight;
+	string_t m_triggerOnJump;
+
+	static const NamedSoundScript jumpSelfSoundScript;
+	static const NamedSoundScript jumpOtherSoundScript;
+};
+
+LINK_ENTITY_TO_CLASS( trigger_jump, CTriggerJump )
+
+TYPEDESCRIPTION CTriggerJump::m_SaveData[] =
+{
+	DEFINE_FIELD(CTriggerJump, m_flHeight, FIELD_FLOAT),
+	DEFINE_FIELD(CTriggerJump, m_triggerOnJump, FIELD_STRING),
+};
+IMPLEMENT_SAVERESTORE(CTriggerJump, CBaseTrigger);
+
+const NamedSoundScript CTriggerJump::jumpSelfSoundScript = {
+	CHAN_ITEM,
+	{},
+	"TriggerJump.Self"
+};
+
+const NamedSoundScript CTriggerJump::jumpOtherSoundScript = {
+	CHAN_AUTO,
+	{},
+	"TriggerJump.Other"
+};

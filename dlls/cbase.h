@@ -799,6 +799,8 @@ public:
 	short m_prevRenderFx;
 	short m_prevRenderMode;
 	int m_prevRenderAmt;
+
+	float m_flTouchedByJumpPad;
 };
 
 // Ugly technique to override base member functions

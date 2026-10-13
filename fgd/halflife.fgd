@@ -9617,6 +9617,14 @@
 	armordmg(string) : "Armor damage" : : "Deal damage to armor. Works only if 'Do Armor' flag is selected. When target is out of armor, the damage is not dealt. Can be negative to give an armor instead of draining it."
 ]
 
+@SolidClass base(Targetname, TriggerCond) = trigger_jump : "Trigger Jump"
+[
+	target(target_generic) : "Jump target [LP]"
+	height(string) : "Height [0 = auto]" : 0 : "The vertical distance to the jump apex, relative to the toucher origin at the moment of touch"
+	trigger_on_jump(target_destination) : "Trigger on jump"
+	master(string) : "Master"
+]
+
 @PointClass base(Targetname) = trigger_killmonster : "Trigger Kill Monster"
 [
 	spawnflags(flags) =

@@ -797,6 +797,8 @@ TYPEDESCRIPTION	CBaseEntity::m_SaveData[] =
 	DEFINE_FIELD( CBaseEntity, m_prevRenderColor, FIELD_VECTOR ),
 	DEFINE_FIELD( CBaseEntity, m_prevRenderFx, FIELD_SHORT ),
 	DEFINE_FIELD( CBaseEntity, m_prevRenderMode, FIELD_SHORT ),
+
+	DEFINE_FIELD( CBaseEntity, m_flTouchedByJumpPad, FIELD_TIME ),
 };
 
 void CBaseEntity::KeyValue(KeyValueData* pkvd)
