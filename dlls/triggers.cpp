@@ -4415,7 +4415,8 @@ const char* CTriggerCondition::getValueAsString(const CKeyValue& key)
 #define SF_CAMERA_DONT_FIRE_LOOK_TARGET (1<<12)
 #define SF_CAMERA_DONT_SLOW_DOWN_IF_NOT_FREEZE (1<<13)
 #define SF_CAMERA_DONT_SKIP_FIRST_PATH_CORNER (1<<14)
-#define SF_CAMERA_INSTANT_TURN (1<<15)
+#define SF_CAMERA_INSTANT_INITIAL_TURN (1<<15)
+#define SF_CAMERA_INSTANT_FOLLOW_TURN (1<<16)
 
 class CTriggerCamera : public CBaseDelay
 {
@@ -4613,7 +4614,7 @@ void CTriggerCamera::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYP
 	{
 		pev->velocity = Vector( 0, 0, 0 );
 
-		if (FBitSet(pev->spawnflags, SF_CAMERA_INSTANT_TURN))
+		if (FBitSet(pev->spawnflags, SF_CAMERA_INSTANT_INITIAL_TURN))
 		{
 			Vector vecAnglesGoal = UTIL_VecToAngles( m_hTarget->pev->origin - pev->origin );
 			vecAnglesGoal.x = -vecAnglesGoal.x;
@@ -4680,27 +4681,34 @@ void CTriggerCamera::FollowTarget()
 	Vector vecGoal = UTIL_VecToAngles( m_hTarget->pev->origin - pev->origin );
 	vecGoal.x = -vecGoal.x;
 
-	if( pev->angles.y > 360 )
-		pev->angles.y -= 360;
+	if (!FBitSet(pev->spawnflags, SF_CAMERA_INSTANT_FOLLOW_TURN))
+	{
+		if( pev->angles.y > 360 )
+			pev->angles.y -= 360;
 
-	if( pev->angles.y < 0 )
-		pev->angles.y += 360;
+		if( pev->angles.y < 0 )
+			pev->angles.y += 360;
 
-	float dx = vecGoal.x - pev->angles.x;
-	float dy = vecGoal.y - pev->angles.y;
+		float dx = vecGoal.x - pev->angles.x;
+		float dy = vecGoal.y - pev->angles.y;
 
-	if( dx < -180 )
-		dx += 360;
-	if( dx > 180 )
-		dx = dx - 360;
+		if( dx < -180 )
+			dx += 360;
+		if( dx > 180 )
+			dx = dx - 360;
 
-	if( dy < -180 )
-		dy += 360;
-	if( dy > 180 )
-		dy = dy - 360;
+		if( dy < -180 )
+			dy += 360;
+		if( dy > 180 )
+			dy = dy - 360;
 
-	pev->avelocity.x = dx * 40 * 0.01f;
-	pev->avelocity.y = dy * 40 * 0.01f;
+		pev->avelocity.x = dx * 40 * 0.01f;
+		pev->avelocity.y = dy * 40 * 0.01f;
+	}
+	else
+	{
+		pev->angles = vecGoal;
+	}
 
 	if (!FBitSet(pev->spawnflags, SF_CAMERA_PLAYER_TAKECONTROL) && !FBitSet(pev->spawnflags, SF_CAMERA_DONT_SLOW_DOWN_IF_NOT_FREEZE))
 	{
