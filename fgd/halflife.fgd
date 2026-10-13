@@ -9001,7 +9001,7 @@
 		8: "Reserved (don't use)" : 0 : "Reserved for Sven Co-op 'All Players' flag"
 		16: "Reserved (don't use)" : 0 : "Reserved for Sven Co-op 'Force View' flag"
 		32: "Reserved (don't use)" : 0 : "Reserved for Sven Co-op 'No Instant Turn' flag"
-		64: "Reserved (don't use)" : 0 : "Reserved for Sven Co-op 'Instant Move' flag"
+		64: "Instant Move (no smoothing)" : 0 : "Make the camera move from path to path without any movement smoothing"
 		128: "Reserved (don't use)" : 0 : "Reserved for Sven Co-op 'Mouse Cursor' flag"
 		256: "Player Invulnerable" : 0 : "Player cannot be hurt when camera is active"
 		512: "Ignore Hold Time" : 0 : "Camera ignores hold time and will be turned off when re-triggered"

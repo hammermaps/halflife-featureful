@@ -4408,6 +4408,7 @@ const char* CTriggerCondition::getValueAsString(const CKeyValue& key)
 #define SF_CAMERA_PLAYER_POSITION	1
 #define SF_CAMERA_PLAYER_TARGET		2
 #define SF_CAMERA_PLAYER_TAKECONTROL 4
+#define SF_CAMERA_INSTANT_MOVE 64
 #define SF_CAMERA_PLAYER_INVULRENABLE 256
 #define SF_CAMERA_IGNORE_HOLD_TIME 512
 #define SF_CAMERA_PLAYER_ALIVE_ONLY 1024
@@ -4751,6 +4752,15 @@ void CTriggerCamera::Move()
 			pev->movedir = delta.Normalize();
 			m_flStopTime = gpGlobals->time + m_pentPath->GetDelay();
 		}
+	}
+
+	if (pev->spawnflags & SF_CAMERA_INSTANT_MOVE) {
+		if (m_pentPath)
+		{
+			pev->speed = m_targetSpeed;
+			pev->velocity = pev->movedir * pev->speed;
+		}
+		return;
 	}
 
 	if( m_flStopTime > gpGlobals->time )
