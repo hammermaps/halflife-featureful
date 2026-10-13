@@ -4434,6 +4434,9 @@ public:
 	int ObjectCaps() override { return CBaseEntity :: ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
 	void UpdateOnRemove() override;
 	void ReleasePlayer();
+	float GetTurnSpeed() const {
+		return m_turnspeed > 0.0f ? m_turnspeed : 40.0f;
+	}
 
 	EHANDLE m_hPlayer;
 	EHANDLE m_hTarget;
@@ -4448,6 +4451,7 @@ public:
 	float m_acceleration;
 	float m_deceleration;
 	bool m_state;
+	float m_turnspeed;
 	string_t m_iszTurnedOffTarget;
 	int m_stopByPlayerInput; // don't save, this is going to spawnflags
 };
@@ -4470,6 +4474,7 @@ TYPEDESCRIPTION	CTriggerCamera::m_SaveData[] =
 	DEFINE_FIELD( CTriggerCamera, m_acceleration, FIELD_FLOAT ),
 	DEFINE_FIELD( CTriggerCamera, m_deceleration, FIELD_FLOAT ),
 	DEFINE_FIELD( CTriggerCamera, m_state, FIELD_BOOLEAN ),
+	DEFINE_FIELD( CTriggerCamera, m_turnspeed, FIELD_FLOAT ),
 	DEFINE_FIELD( CTriggerCamera, m_iszTurnedOffTarget, FIELD_STRING ),
 };
 
@@ -4519,6 +4524,11 @@ void CTriggerCamera::KeyValue( KeyValueData *pkvd )
 	else if ( FStrEq(pkvd->szKeyName, "stop_by_player_input" ) )
 	{
 		m_stopByPlayerInput = atoi(pkvd->szValue);
+		pkvd->fHandled = true;
+	}
+	else if ( FStrEq(pkvd->szKeyName, "turnspeed" ) )
+	{
+		m_turnspeed = atof(pkvd->szValue);
 		pkvd->fHandled = true;
 	}
 	else if ( FStrEq(pkvd->szKeyName, "m_iszTurnedOffTarget" ) )
@@ -4702,8 +4712,9 @@ void CTriggerCamera::FollowTarget()
 		if( dy > 180 )
 			dy = dy - 360;
 
-		pev->avelocity.x = dx * 40 * 0.01f;
-		pev->avelocity.y = dy * 40 * 0.01f;
+		const float turnSpeed = GetTurnSpeed();
+		pev->avelocity.x = dx * turnSpeed * 0.01f;
+		pev->avelocity.y = dy * turnSpeed * 0.01f;
 	}
 	else
 	{

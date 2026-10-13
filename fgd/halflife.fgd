@@ -9015,6 +9015,7 @@
 	speed(string) : "Initial Speed" : "0"
 	acceleration(string) : "Acceleration units/sec^2" : "500"
 	deceleration(string) : "Stop Deceleration units/sec^2" : "500"
+	turnspeed(string) : "Camera Rotation Speed" : "40"
 	stop_by_player_input(choices) : "Stop by player input" =
 	[
 		0 : "No"
