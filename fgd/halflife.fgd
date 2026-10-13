@@ -99,7 +99,7 @@
 @BaseClass = ZHLT_point
 [
 	_fade(string) : "ZHLT Fade" : "1.0"
-	_falloff(choices) : "ZHLT Falloff" : 0 =
+	_falloff(choices) : "ZHLT Falloff (removed in VHLT)" : 0 =
 	[
 		0 : "Default"
 		1 : "Inverse Linear"
@@ -299,6 +299,7 @@
 		14: "Constant Glow"
 		15: "Distort"
 		16: "Hologram (Distort + fade)"
+		18: "Explode/Bulge Sideways"
 		19: "Glow Shell"
 	]
 	rendermode(choices) : "Render Mode" : : "Controls the type of rendering that is used for an object. Options are:" =
@@ -350,6 +351,7 @@
 		14: "Constant Glow"
 		15: "Distort"
 		16: "Hologram (Distort + fade)"
+		18: "Explode/Bulge Sideways"
 		19: "Glow Shell"
 	]
 ]
@@ -4514,6 +4516,14 @@
 [
 	pitch(integer) : "Pitch" : 0 : "A negative number will give downward pitch (which is normally what you want)."
 	_light(color255) : "Brightness" : "255 255 128 200" : "First three integer numbers are the color (RGB). The fourth number is the brightness."
+
+	_spread(integer) : "ZHLT Sun Spread [0-10]" : : "Spread angle for soft shadows."
+	_diffuse_light(color255) : "ZHLT Ambient Color (Diffuse Light)" : "" : "Diffuse light color."
+	_fake(choices) : "ZHLT Only Dynamic (only affect models)" : "" =
+	[
+		"" : "No"
+		1  : "Yes"
+	]
 ]
 
 @PointClass base(Targetname) size(-16 -16 -16, 16 16 16) = locus_beam : "Locus System - Beam effect"
@@ -4673,7 +4683,7 @@
 // monsters
 //
 
-@PointClass base(Monster, Sequence) size(-40 -40 0, 40 40 64) studio("models/baby_voltigore.mdl") = monster_alien_babyvoltigore : "Baby Voltigore" 
+@PointClass base(Monster) size(-40 -40 0, 40 40 64) studio("models/baby_voltigore.mdl") = monster_alien_babyvoltigore : "Baby Voltigore" 
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 0 =
 	[
@@ -4701,7 +4711,7 @@
 	]
 ]
 
-@PointClass base(Monster, Sequence) size(-80 -80 0, 80 80 90) studio("models/voltigore.mdl") = monster_alien_voltigore : "Voltigore" 
+@PointClass base(Monster) size(-80 -80 0, 80 80 90) studio("models/voltigore.mdl") = monster_alien_voltigore : "Voltigore" 
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 0 =
 	[
@@ -4729,7 +4739,7 @@
 	]
 ]
 
-@PointClass base(Monster, Sequence) size(-16 -16 0, 16 16 72) studio("models/controller.mdl") = monster_alien_controller : "Controller"
+@PointClass base(Monster) size(-16 -16 0, 16 16 72) studio("models/controller.mdl") = monster_alien_controller : "Controller"
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 0 =
 	[
@@ -4761,7 +4771,7 @@
 		18 : "die1"
 	]
 ]
-@PointClass base(Monster, FollowingMonster, Sequence) size(-32 -32 0, 32 32 64) studio("models/agrunt.mdl") = monster_alien_grunt : "Alien Grunt"
+@PointClass base(Monster, FollowingMonster) size(-32 -32 0, 32 32 64) studio("models/agrunt.mdl") = monster_alien_grunt : "Alien Grunt"
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 0 =
 	[
@@ -4817,7 +4827,7 @@
 		1 : "On Back"
 	]
 ]
-@PointClass base(Monster, FollowingMonster, Sequence) size(-16 -16 0, 16 16 72) studio("models/islave.mdl") = monster_alien_slave : "Vortigaunt"
+@PointClass base(Monster, FollowingMonster) size(-16 -16 0, 16 16 72) studio("models/islave.mdl") = monster_alien_slave : "Vortigaunt"
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 2 =
 	[
@@ -4917,7 +4927,7 @@
 			16 : "180right"
 	]
 ]
-@PointClass base(Monster, Sequence) size(-16 -16 0, 16 16 36) studio("models/baby_headcrab.mdl") = monster_babycrab : "Baby Headcrab"
+@PointClass base(Monster) size(-16 -16 0, 16 16 36) studio("models/baby_headcrab.mdl") = monster_babycrab : "Baby Headcrab"
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 0 =
 	[
@@ -4937,7 +4947,7 @@
 	]
 ]
 @PointClass base(Monster, FollowingMonster, Sequence) size(-32 -32 0, 32 32 64) studio("models/babygarg.mdl") = monster_babygarg : "Baby Gargantua" []
-@PointClass base(Targetname, RenderFields, Sequence, EntityTemplate, BloodColor, SizeForGrapple, MonsterExtraBase) size(-16 -16 -36, 16 16 0) studio("models/barnacle.mdl") = monster_barnacle : "Barnacle Monster"
+@PointClass base(Targetname, RenderFields, EntityTemplate, BloodColor, SizeForGrapple, MonsterExtraBase) size(-16 -16 -36, 16 16 0) studio("models/barnacle.mdl") = monster_barnacle : "Barnacle Monster"
 [
 	model(studio) : "Custom Model"
 	sequence(Choices) : "Animation Sequence (editor)" : 0 =
@@ -4955,7 +4965,7 @@
 		1048576: "Act out of PVS" : 0 : "Act as usual even if there're no players in the PVS"
 	]
 ]
-@PointClass base(Monster,TalkMonster, Sequence) size(-16 -16 0, 16 16 72) studio("models/barney.mdl") = monster_barney : "Barney"
+@PointClass base(Monster,TalkMonster) size(-16 -16 0, 16 16 72) studio("models/barney.mdl") = monster_barney : "Barney"
 [
 	frags(choices) : "Weapon" =
 	[
@@ -5076,7 +5086,7 @@
 		2 : "Custom 2"
 	]
 ]
-@PointClass base(Monster,TalkMonster, Sequence) size(-16 -16 0, 16 16 72) studio("models/barniel.mdl") = monster_barniel : "Barniel"
+@PointClass base(Monster,TalkMonster) size(-16 -16 0, 16 16 72) studio("models/barniel.mdl") = monster_barniel : "Barniel"
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 0 =
 	[
@@ -5185,7 +5195,7 @@
 		37 : "lying_on_stomach"
 	]
 ]
-@PointClass base(Monster,TalkMonster, Sequence) size(-16 -16 0, 16 16 72) studio("models/kate.mdl") = monster_kate : "Kate"
+@PointClass base(Monster,TalkMonster) size(-16 -16 0, 16 16 72) studio("models/kate.mdl") = monster_kate : "Kate"
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 0 =
 	[
@@ -5301,7 +5311,7 @@
 		37 : "lying_on_stomach"
 	]
 ]
-@PointClass base(Monster, Sequence) size(-95 -95 0, 95 95 190) studio("models/big_mom.mdl") = monster_bigmomma : "Big Mamma"
+@PointClass base(Monster) size(-95 -95 0, 95 95 190) studio("models/big_mom.mdl") = monster_bigmomma : "Big Mamma"
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 0 =
 	[
@@ -5334,7 +5344,7 @@
 	]
 ]
 
-@PointClass base(Repel, Sequence) size(-16 -16 0, 16 16 72) studio("models/massn.mdl") = monster_assassin_repel : "Male Assassin (Repel)"
+@PointClass base(Repel) size(-16 -16 0, 16 16 72) studio("models/massn.mdl") = monster_assassin_repel : "Male Assassin (Repel)"
 [
 	head(Choices) : "Heads" : 0 =
 	[
@@ -5416,14 +5426,14 @@
 @PointClass base(Apache) size(-360 -360 -172, 360 360 8) studio("models/blkop_apache.mdl") = monster_blkop_apache : "Black Ops Apache" []
 @PointClass base(Osprey) size(-480 -480 -112, 480 480 24) studio("models/blkop_osprey.mdl") = monster_blkop_osprey : "Black Ops Osprey" []
 
-@PointClass base(Monster, Sequence) size(-16 -16 0, 16 16 72) studio("models/floater.mdl") = monster_bloater : "Bloater"
+@PointClass base(Monster) size(-16 -16 0, 16 16 72) studio("models/floater.mdl") = monster_bloater : "Bloater"
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 0 =
 	[
 		0 : "idle1"
 	]
 ]
-@PointClass base(Monster, Sequence) size(-16 -16 0, 16 16 72) studio("models/floater.mdl") = monster_floater : "Floater"
+@PointClass base(Monster) size(-16 -16 0, 16 16 72) studio("models/floater.mdl") = monster_floater : "Floater"
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 0 =
 	[
@@ -5435,7 +5445,7 @@
 		64 : "IgnorePlayer" : 0 : "Ignore player presence unless provoked by damage or sound"
 	]
 ]
-@PointClass base(Monster, Sequence) size(-32 -32 0, 32 32 64) studio("models/bullsquid.mdl") = monster_bullchicken : "BullChicken"
+@PointClass base(Monster) size(-32 -32 0, 32 32 64) studio("models/bullsquid.mdl") = monster_bullchicken : "BullChicken"
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 7 =
 	[
@@ -5478,7 +5488,7 @@
 	]
 ]
 
-@PointClass base(Monster, Sequence) size(-3 -3 0, 3 3 3) studio("models/roach.mdl") = monster_cockroach : "Cockroach"
+@PointClass base(Monster) size(-3 -3 0, 3 3 3) studio("models/roach.mdl") = monster_cockroach : "Cockroach"
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 0 =
 	[
@@ -5486,7 +5496,7 @@
 		1 : "run"
 	]
 ]
-@PointClass base(Monster,TalkMonster, Sequence) size(-16 -16 0, 16 16 72) studio("models/drill.mdl") = monster_drillsergeant : "Drill Sergeant"
+@PointClass base(Monster,TalkMonster) size(-16 -16 0, 16 16 72) studio("models/drill.mdl") = monster_drillsergeant : "Drill Sergeant"
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 0 =
 	[
@@ -5536,20 +5546,9 @@
 		1 : "Black"
 	]
 ]
-@PointClass base(Monster) size(-24 -24 0, 24 24 24) studio("models/flybee.mdl") = monster_flybee : "Flybee" []
-@PointClass base(Monster, Sequence) size(-16 -16 0, 16 16 16) studio("models/aflock.mdl") = monster_flyer_flock : "Flock of Flyers"
+@PointClass base(Monster, Sequence) size(-24 -24 0, 24 24 24) studio("models/flybee.mdl") = monster_flybee : "Flybee" []
+@PointClass base(Monster, Sequence) size(-16 -16 0, 16 16 16) studio("models/boid.mdl") = monster_flyer_flock : "Flock of Flyers"
 [
-	sequence(Choices) : "Animation Sequence (editor)" : 0 =
-	[
-		0 : "idle"
-		1 : "fly"
-		2 : "fly2"
-		3 : "bankL"
-		4 : "bankR"
-		5 : "hit"
-		6 : "wounded"
-		7 : "crash"
-	]
 	iFlockSize(Integer) : "Flock Size" : 8
 	flFlockRadius(Integer) : "Flock Radius" : 128
 	flySpeed(string) : "Custom Fly Speed" : : "Default is 125. Average speed of the flyer"
@@ -5563,7 +5562,7 @@
 	model(studio) : "model"
 	body(Integer) : "Body" : 0
 ]
-@PointClass base(Monster, FollowingMonster, Sequence) size(-32 -32 0, 32 32 128) studio("models/garg.mdl") = monster_gargantua : "Gargantua"
+@PointClass base(Monster, FollowingMonster) size(-32 -32 0, 32 32 128) studio("models/garg.mdl") = monster_gargantua : "Gargantua"
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 0 =
 	[
@@ -5626,7 +5625,7 @@
 	]
 ]
 
-@PointClass base(Monster, Sequence) size(-16 -16 0, 16 16 72) studio("models/gman.mdl") = monster_gman : "G-Man"
+@PointClass base(Monster) size(-16 -16 0, 16 16 72) studio("models/gman.mdl") = monster_gman : "G-Man"
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 0 =
 	[
@@ -5646,7 +5645,7 @@
 		13 : "lookdown2"
 	]
 ]
-@PointClass base(Repel, Sequence) size(-16 -16 0, 16 16 72) studio("models/hgrunt.mdl") = monster_grunt_repel : "Human Grunt (Repel)"
+@PointClass base(Repel) size(-16 -16 0, 16 16 72) studio("models/hgrunt.mdl") = monster_grunt_repel : "Human Grunt (Repel)"
 [
 	weapons(Choices) : "Weapons" : 1 =
 	[
@@ -5747,7 +5746,7 @@
 	]
 ]
 @PointClass base(Weapon, Targetx, RenderFields, Sequence) studio("models/w_grenade.mdl") = monster_handgrenade : "Live Handgrenade" []
-@PointClass base(Monster, Sequence) size(-16 -16 0, 16 16 36) studio("models/headcrab.mdl") = monster_headcrab : "Head Crab"
+@PointClass base(Monster) size(-16 -16 0, 16 16 36) studio("models/headcrab.mdl") = monster_headcrab : "Head Crab"
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 0 =
 	[
@@ -5825,7 +5824,7 @@
 		46 : "deadsitting"
 	]
 ]
-@PointClass base(Monster, Sequence) size(-16 -16 0, 16 16 36) studio("models/houndeye.mdl") = monster_houndeye : "Houndeye"
+@PointClass base(Monster) size(-16 -16 0, 16 16 36) studio("models/houndeye.mdl") = monster_houndeye : "Houndeye"
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 1 =
 	[
@@ -5895,7 +5894,7 @@
 		5 : "On stomach"
 	]
 ]
-@PointClass base(Monster, FollowingMonster, Sequence) size(-16 -16 0, 16 16 72) studio("models/hassassin.mdl") = monster_human_assassin : "Human Assassin"
+@PointClass base(Monster, FollowingMonster) size(-16 -16 0, 16 16 72) studio("models/hassassin.mdl") = monster_human_assassin : "Human Assassin"
 [
 	spawnflags(Flags) =
 	[
@@ -6295,7 +6294,7 @@
 	]
 ]
 
-@PointClass base(Monster, TalkMonster, Sequence) size(-16 -16 0, 16 16 72) studio("models/hgrunt_medic.mdl") = monster_human_medic_ally : "Medic"
+@PointClass base(Monster, TalkMonster) size(-16 -16 0, 16 16 72) studio("models/hgrunt_medic.mdl") = monster_human_medic_ally : "Medic"
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 6 =
 	[
@@ -6373,7 +6372,7 @@
 	]
 ]
 
-@PointClass base(Repel, Sequence, CustomSentences) size(-16 -16 0, 16 16 72) studio("models/hgrunt_medic.mdl") = monster_medic_ally_repel : "Medic (Repel)"
+@PointClass base(Repel, CustomSentences) size(-16 -16 0, 16 16 72) studio("models/hgrunt_medic.mdl") = monster_medic_ally_repel : "Medic (Repel)"
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 41 =
 	[
@@ -6475,7 +6474,7 @@
 	]
 ]
 
-@PointClass base(Monster, TalkMonster, Sequence) size(-16 -16 0, 16 16 72) studio("models/hgrunt_torch.mdl") = monster_human_torch_ally : "Torch"
+@PointClass base(Monster, TalkMonster) size(-16 -16 0, 16 16 72) studio("models/hgrunt_torch.mdl") = monster_human_torch_ally : "Torch"
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 6 =
 	[
@@ -6546,7 +6545,7 @@
 	]
 ]
 
-@PointClass base(Repel, Sequence, CustomSentences) size(-16 -16 0, 16 16 72) studio("models/hgrunt_torch.mdl") = monster_torch_ally_repel : "Torch (Repel)"
+@PointClass base(Repel, CustomSentences) size(-16 -16 0, 16 16 72) studio("models/hgrunt_torch.mdl") = monster_torch_ally_repel : "Torch (Repel)"
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 39 =
 	[
@@ -6695,7 +6694,7 @@
 	]
 ]
 
-@PointClass base(Monster, Sequence) size(-32 -32 0, 32 32 64) studio("models/icky.mdl") = monster_ichthyosaur : "Ichthyosaur"
+@PointClass base(Monster) size(-32 -32 0, 32 32 64) studio("models/icky.mdl") = monster_ichthyosaur : "Ichthyosaur"
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 0 =
 	[
@@ -6732,7 +6731,7 @@
 	]
 ]
 
-@PointClass base(Monster, Sequence) size(-6 -6 0, 6 6 6) studio("models/leech.mdl") = monster_leech : "Leech"
+@PointClass base(Monster) size(-6 -6 0, 6 6 6) studio("models/leech.mdl") = monster_leech : "Leech"
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 0 =
 	[
@@ -6807,7 +6806,7 @@
 	]
 ]
 
-@PointClass base(Monster, FollowingMonster, StandGroundRange, Sequence, MaleAssassinHead) size(-16 -16 0, 16 16 72) studio("models/massn.mdl") = monster_male_assassin : "Male Assassin"
+@PointClass base(Monster, FollowingMonster, StandGroundRange, MaleAssassinHead) size(-16 -16 0, 16 16 72) studio("models/massn.mdl") = monster_male_assassin : "Male Assassin"
 [
 	netname(string) : "Squad Name"
 
@@ -6909,7 +6908,7 @@
 @PointClass base(MaleAssassinDead) = monster_male_assassin_dead : "Dead Male Assassin" []
 @PointClass base(MaleAssassinDead) = monster_massassin_dead : "Dead Male Assassin" []
 
-@PointClass base(Monster, Sequence) size(-192 -192 0, 192 192 384) studio("models/nihilanth.mdl") = monster_nihilanth : "Nihilanth"
+@PointClass base(Monster) size(-192 -192 0, 192 192 384) studio("models/nihilanth.mdl") = monster_nihilanth : "Nihilanth"
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 0 =
 	[
@@ -6937,7 +6936,7 @@
 	]
 ]
 
-@PointClass base(Monster, Sequence) size(-16 -16 -36, 16 16 36) studio("models/loader.mdl") = monster_op4loader : "Loader machine"
+@PointClass base(Monster) size(-16 -16 -36, 16 16 36) studio("models/loader.mdl") = monster_op4loader : "Loader machine"
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 0 =
 	[
@@ -6980,7 +6979,7 @@
 		1 : "Bald Head"
 	]
 ]
-@PointClass base(Monster, TalkMonster, OtisHead, Sequence) size(-16 -16 0, 16 16 72) studio("models/otis.mdl") = monster_otis : "Otis"
+@PointClass base(Monster, TalkMonster, OtisHead) size(-16 -16 0, 16 16 72) studio("models/otis.mdl") = monster_otis : "Otis"
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 0 =
 	[
@@ -7080,7 +7079,7 @@
 
 @PointClass base(Monster) studio("models/panthereye.mdl") size(-24 -24 0, 24 24 64) = monster_panthereye : "Panthereye" []
 
-@PointClass base(Monster, FollowingMonster, Sequence) size(-24 -24 0, 24 24 32) studio("models/pit_drone.mdl") = monster_pitdrone : "PitDrone"
+@PointClass base(Monster, FollowingMonster) size(-24 -24 0, 24 24 32) studio("models/pit_drone.mdl") = monster_pitdrone : "PitDrone"
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 0 =
 	[
@@ -7122,7 +7121,7 @@
 
 @PointClass base(gibshooterbase) = pitworm_gibshooter : "Pitworm Gib Shooter" []
 
-@PointClass base(Monster, Sequence) size(-16 -16 0, 16 16 32) studio("models/pit_worm_up.mdl") = monster_pitworm_up : "Pit Worm"
+@PointClass base(Monster) size(-16 -16 0, 16 16 32) studio("models/pit_worm_up.mdl") = monster_pitworm_up : "Pit Worm"
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 0 =
 	[
@@ -7143,7 +7142,7 @@
 	]
 ]
 
-@PointClass base(Monster, Sequence) size(-95 -95 0, 95 95 190) studio("models/geneworm.mdl") = monster_geneworm : "Gene Worm"
+@PointClass base(Monster) size(-95 -95 0, 95 95 190) studio("models/geneworm.mdl") = monster_geneworm : "Gene Worm"
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 15 =
 	[
@@ -7189,7 +7188,7 @@
 	]
 ]
 
-@PointClass base(Monster, FollowingMonster, StandGroundRange, Sequence) size(-16 -16 0, 16 16 72) studio("models/strooper.mdl") = monster_shocktrooper : "Shock Trooper"
+@PointClass base(Monster, FollowingMonster, StandGroundRange) size(-16 -16 0, 16 16 72) studio("models/strooper.mdl") = monster_shocktrooper : "Shock Trooper"
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 10 =
 	[
@@ -7277,7 +7276,7 @@
 	]
 ]
 
-@PointClass base(Monster, Sequence) size(-6 -6 0, 6 6 6) studio("models/bigrat.mdl") = monster_rat : "Rat (no ai)"
+@PointClass base(Monster) size(-6 -6 0, 6 6 6) studio("models/bigrat.mdl") = monster_rat : "Rat (no ai)"
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 0 =
 	[
@@ -7292,7 +7291,7 @@
 	]
 ]
 
-@PointClass base(Monster, Sequence) size(-16 -16 0, 16 16 72) studio("models/recruit.mdl") = monster_recruit : "Recruit"
+@PointClass base(Monster) size(-16 -16 0, 16 16 72) studio("models/recruit.mdl") = monster_recruit : "Recruit"
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 0 =
 	[
@@ -7746,7 +7745,7 @@
 @PointClass base(MonsterTarget) = monster_target : "Target for monsters to attack" []
 @PointClass base(MonsterTarget) = monster_bullseye : "Target for monsters to attack" []
 
-@PointClass base(Monster, Sequence) size(-32 -32 0, 32 32 64) studio("models/tentacle2.mdl") = monster_tentacle : "Tentacle Arm"
+@PointClass base(Monster) size(-32 -32 0, 32 32 64) studio("models/tentacle2.mdl") = monster_tentacle : "Tentacle Arm"
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 0 =
 	[
@@ -7862,7 +7861,7 @@
 	]
 ]
 @PointClass base(Monster, Civilian) size(-16 -16 0, 16 16 72) studio("models/wheelchair_sci.mdl") = monster_wheelchair : "Dr. Keller" []
-@PointClass base(Monster, Sequence) size(-16 -16 0, 16 16 72) studio("models/zombie.mdl") = monster_zombie : "Scientist Zombie"
+@PointClass base(Monster) size(-16 -16 0, 16 16 72) studio("models/zombie.mdl") = monster_zombie : "Scientist Zombie"
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 0 =
 	[
@@ -7927,7 +7926,7 @@
 		26 : "slidewall"
 	]
 ]
-@PointClass base(Monster, Sequence) size(-16 -16 0, 16 16 72) studio("models/zombie_barney.mdl") = monster_zombie_barney : "Barney Zombie"
+@PointClass base(Monster) size(-16 -16 0, 16 16 72) studio("models/zombie_barney.mdl") = monster_zombie_barney : "Barney Zombie"
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 0 =
 	[
@@ -7992,7 +7991,7 @@
 		26 : "slidewall"
 	]
 ]
-@PointClass base(Monster, Sequence) size(-16 -16 0, 16 16 72) studio("models/zombie_soldier.mdl") = monster_zombie_soldier : "Soldier Zombie"
+@PointClass base(Monster) size(-16 -16 0, 16 16 72) studio("models/zombie_soldier.mdl") = monster_zombie_soldier : "Soldier Zombie"
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 0 =
 	[
@@ -8036,7 +8035,7 @@
 		21 : "dead_on_stomach"
 	]
 ]
-@PointClass base(Monster, Sequence) size(-16 -16 0, 16 16 72) studio("models/gonome.mdl") = monster_gonome : "Gonome" 
+@PointClass base(Monster) size(-16 -16 0, 16 16 72) studio("models/gonome.mdl") = monster_gonome : "Gonome" 
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 4 =
 	[
