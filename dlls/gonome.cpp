@@ -483,7 +483,6 @@ void CGonome::HandleAnimEvent(MonsterEvent_t *pEvent)
 	break;
 	case GONOME_AE_THROW:
 	{
-		UTIL_MakeVectors(pev->angles);
 		Vector vecArmPos, vecArmAng;
 		GetAttachment(0, vecArmPos, vecArmAng);
 

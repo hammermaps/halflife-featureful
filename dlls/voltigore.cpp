@@ -496,7 +496,6 @@ bool CVoltigore::CheckRangeAttack1(float flDot, float flDist)
 		Vector vecStart, vecDir;
 		TraceResult tr;
 
-		UTIL_MakeVectors( pev->angles );
 		GetAttachment( 3, vecStart, vecDir );
 		UTIL_TraceLine( vecStart, m_hEnemy->BodyTarget( vecStart ), dont_ignore_monsters, ENT( pev ), &tr );
 
@@ -699,9 +698,7 @@ void CVoltigore::HandleAnimEvent(MonsterEvent_t *pEvent)
 		CBaseEntity* pChargedBolt = m_pChargedBolt;
 		if (pChargedBolt)
 		{
-			UTIL_MakeVectors(pev->angles);
-
-			const auto shootPosition = pev->origin + gpGlobals->v_forward * 50 + gpGlobals->v_up * 32;
+			const auto shootPosition = BoltPosition();
 
 			const auto direction = ShootAtEnemy(shootPosition);
 
@@ -1014,8 +1011,6 @@ void CVoltigore::StartTask(Task_t *pTask)
 	{
 	case TASK_RANGE_ATTACK1:
 		{
-			UTIL_MakeVectors(pev->angles);
-
 			const auto vecConverge = BoltPosition();
 
 			for (auto i = 0; i < 3; ++i)
@@ -1092,8 +1087,9 @@ void CVoltigore::ClearBeams()
 
 Vector CVoltigore::BoltPosition()
 {
-	UTIL_MakeVectors(pev->angles);
-	return pev->origin + gpGlobals->v_forward * 50 + gpGlobals->v_up * 32;
+	Vector forward, right, up;
+	UTIL_MakeVectorsPrivate(pev->angles, forward, right, up);
+	return pev->origin + forward * 50 + up * 32;
 }
 
 //=========================================================

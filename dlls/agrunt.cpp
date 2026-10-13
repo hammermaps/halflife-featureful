@@ -943,7 +943,6 @@ bool CAGrunt::CheckRangeAttack1( float flDot, float flDist )
 
 		// verify that a shot fired from the gun will hit the enemy before the world.
 		// !!!LATER - we may wish to do something different for projectile weapons as opposed to instant-hit
-		UTIL_MakeVectors( pev->angles );
 		GetAttachment( 0, vecArmPos, vecArmDir );
 		//UTIL_TraceLine( vecArmPos, vecArmPos + gpGlobals->v_forward * 256.0f, ignore_monsters, ENT( pev ), &tr );
 		UTIL_TraceLine( vecArmPos, m_hEnemy->BodyTarget( vecArmPos ), dont_ignore_monsters, ENT( pev ), &tr );

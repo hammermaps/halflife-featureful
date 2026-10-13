@@ -346,11 +346,8 @@ bool CBarney::CheckRangeAttack1( float flDot, float flDist )
 //=========================================================
 void CBarney::BarneyFirePistol( const char* shotSoundScript, float flDamage )
 {
-	Vector vecShootOrigin;
-
-	UTIL_MakeVectors( pev->angles );
-	vecShootOrigin = pev->origin + Vector( 0, 0, 55 );
-	Vector vecShootDir = ShootAtEnemy( vecShootOrigin );
+	const Vector vecShootOrigin = pev->origin + Vector( 0, 0, 55 );
+	const Vector vecShootDir = ShootAtEnemy( vecShootOrigin );
 
 	Vector angDir = UTIL_VecToAngles( vecShootDir );
 	SetBlending( 0, angDir.x );
