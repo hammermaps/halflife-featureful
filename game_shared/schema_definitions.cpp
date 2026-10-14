@@ -1626,6 +1626,14 @@ R"(
 				"dependencies": {
 					"start_frame_fraction": { "not": { "required": ["animation_event"] } }
 				}
+			},
+			"npc_behavior": {
+				"type": "object",
+				"properties": {
+					"chase_enemy_failed": {
+						"enum": ["fail", "retreat", "wander", "retreat_or_wander"]
+					}
+				}
 			}
 		},
 		"additionalProperties": false,

@@ -1927,6 +1927,33 @@ The `jump` animation in the default **models/islave.mdl** features some horizont
 
 {{% /details %}}
 
+### npc_behavior
+
+A set of properties related to the monster's behaviors.
+
+#### chase_enemy_failed
+
+What monster should do if couldn't chase the enemy (e.g. due to obstruction). Possible values:
+
+* `"fail"` - just stay in place for a while, waiting when for opportunity to attack.
+* `"retreat"` - try to find cover/retreat from the enemy.
+* `"wander"` - roam on nodes. If there're no nodes nearby the monster will go to the left or to the right side.
+* `"retreat_or_wander"` - first try to find a retreat spot, then just wander.
+
+By default some monsters use `"fail"` (zombies, bullsquids, gonomes) and some monsters use `"retreat"` (human NPCs, vortigaunts, alien grunts, gargs, houndeyes, shock troopers, pit drones, voltigores).
+
+{{% details title="Example" %}}
+```json
+{
+    "monster_zombie": {
+        "npc_behavior": {
+            "chase_enemy_failed": "wander"
+        }
+    }
+}
+```
+{{% /details %}}
+
 ## Inheriting templates
 
 Entity templates can be derived from another entity template. Let's say you defined a custom template for a vortigaunt (`monster_alien_slave`), with different visuals, for example. And now you want to define more templates for vortigaunts with the same custom visuals and some additional changes (e.g. a different model or even more custom visuals). Without inheritance you would need to copy the defined properties into the new template and then extend the template with new properties. This is far from ideal, as in case you wanted to change some property value, you would have to go through all the templates and change the value in each instance. This is where the template inheritance comes in handy.

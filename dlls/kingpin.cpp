@@ -1416,8 +1416,6 @@ Schedule_t* CKingpin::GetSchedule()
 	return CFollowingMonster::GetSchedule();
 }
 
-extern Schedule_t slChaseEnemyFailed[];
-
 Schedule_t* CKingpin::GetScheduleOfType(int Type)
 {
 	switch (Type)
@@ -1454,8 +1452,7 @@ Schedule_t* CKingpin::GetScheduleOfType(int Type)
 		}
 		else
 		{
-			m_failSchedule = SCHED_FREEROAM;
-			return slChaseEnemyFailed;
+			return CFollowingMonster::GetScheduleOfType(SCHED_CHASE_ENEMY_FAILED);
 		}
 		break;
 	case SCHED_KINGPIN_TELEPORT:

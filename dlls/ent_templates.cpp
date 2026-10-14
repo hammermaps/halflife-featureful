@@ -1707,6 +1707,32 @@ void EntTemplateSystem::AddTemplateFromJsonValueImpl(const std::string& template
 		entTemplate.SetJumping(std::move(jumping));
 	});
 
+	HandleJSONMember(value, "npc_behavior", [&entTemplate](const Value& value) {
+		EntTemplate::NPCBehavior npcBehavior = entTemplate.GetNPCBehavior();
+
+		HandleJSONMember(value, "chase_enemy_failed", [&npcBehavior](const Value& value) {
+			const char* str = value.GetString();
+			if (strcmp(str, "fail") == 0)
+			{
+				npcBehavior.chaseEnemyFailed = CHASE_ENEMY_FAILED_FAIL;
+			}
+			else if (strcmp(str, "retreat") == 0)
+			{
+				npcBehavior.chaseEnemyFailed = CHASE_ENEMY_FAILED_RETREAT;
+			}
+			else if (strcmp(str, "wander") == 0)
+			{
+				npcBehavior.chaseEnemyFailed = CHASE_ENEMY_FAILED_WANDER;
+			}
+			else if (strcmp(str, "retreat_or_wander") == 0)
+			{
+				npcBehavior.chaseEnemyFailed = CHASE_ENEMY_FAILED_RETREAT_OR_WANDER;
+			}
+		});
+
+		entTemplate.SetNPCBehavior(std::move(npcBehavior));
+	});
+
 	HandleJSONMember(value, "primary_weapon", [&entTemplate](const Value& value) {
 		std::vector<EntTemplate::WeaponDefinition> weapons;
 

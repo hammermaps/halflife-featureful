@@ -623,27 +623,6 @@ bool CSquadMonster::AllyMonsterInRange( const Vector &vecLocation, float flDist 
 	return false;
 }
 
-extern Schedule_t slChaseEnemyFailed[];
-
-Schedule_t *CSquadMonster::GetScheduleOfType( int iType )
-{
-	switch( iType )
-	{
-	case SCHED_CHASE_ENEMY_FAILED:
-		{
-			if (m_flNextJump <= gpGlobals->time)
-			{
-				m_flNextJump = gpGlobals->time + 0.5f;
-				if (CanJumpFreely() && FindJumpToEntity(m_hEnemy))
-					return GetScheduleOfType(SCHED_JUMP_CHASE);
-			}
-			return &slChaseEnemyFailed[0];
-		}
-	default:
-		return CBaseMonster::GetScheduleOfType( iType );
-	}
-}
-
 void CSquadMonster::StartTask(Task_t *pTask)
 {
 	switch (pTask->iTask) {

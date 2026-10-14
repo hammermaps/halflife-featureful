@@ -5906,6 +5906,20 @@ void CBaseMonster::HandleJumpFallTask(const Vector* target, bool allowAttack)
 	}
 }
 
+int CBaseMonster::ChaseEnemyFailedPolicy()
+{
+	const EntTemplate* entTemplate = GetMyEntTemplate();
+	if (entTemplate)
+	{
+		const EntTemplate::NPCBehavior& behavior = entTemplate->GetNPCBehavior();
+		if (behavior.chaseEnemyFailed.has_value())
+		{
+			return *behavior.chaseEnemyFailed;
+		}
+	}
+	return DefaultChaseEnemyFailedPolicy();
+}
+
 void CDeadMonster::KeyValue( KeyValueData *pkvd )
 {
 	if (FStrEq(pkvd->szKeyName, "pose"))

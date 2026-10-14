@@ -12,6 +12,7 @@
 #include "ent_filter.h"
 #include "sentences.h"
 #include "skillbasedvalue.h"
+#include "npc_behavior.h"
 
 #include <map>
 #include <string>
@@ -446,6 +447,11 @@ public:
 		optional<std::string> downSequence;
 	};
 
+	struct NPCBehavior
+	{
+		optional<int> chaseEnemyFailed;
+	};
+
 	struct WeaponDefinition
 	{
 		optional<int> weaponBit;
@@ -766,6 +772,13 @@ public:
 		_jumping = jumping;
 	}
 
+	const NPCBehavior GetNPCBehavior() const {
+		return _npcBehavior;
+	}
+	void SetNPCBehavior(NPCBehavior&& behavior) {
+		_npcBehavior = behavior;
+	}
+
 	const std::vector<WeaponDefinition>& GetWeaponDefinitions() const {
 		return _weaponsDefinitions;
 	}
@@ -838,6 +851,8 @@ private:
 	Cloaking _cloaking;
 
 	Jumping _jumping;
+
+	NPCBehavior _npcBehavior;
 
 	std::vector<WeaponDefinition> _weaponsDefinitions;
 };

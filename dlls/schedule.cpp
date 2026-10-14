@@ -1261,6 +1261,15 @@ void CBaseMonster::StartTask( Task_t *pTask )
 
 			break;
 		}
+	case TASK_FIND_LATERAL_SPOT:
+		{
+			const Vector vecThreat = m_MonsterState == MONSTERSTATE_COMBAT ? m_vecEnemyLKP : pev->origin;
+			if (FindLateralSpotAway(vecThreat, COVER_DELTA, COVER_DELTA * 2.0f, FINDSPOTAWAY_RUN|FINDSPOTAWAY_DONT_AVOID_THREAT_NODE))
+				TaskComplete();
+			else
+				TaskFail("no lateral spot found");
+			break;
+		}
 	case TASK_FACE_HINTNODE:
 		{
 			pev->ideal_yaw = WorldGraph.m_pNodes[m_iHintNode].m_flHintYaw;

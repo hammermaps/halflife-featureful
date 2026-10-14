@@ -123,10 +123,13 @@ public:
 	bool FValidateCover( const Vector &vecCoverLocation ) override;
 
 	MONSTERSTATE GetIdealState() override;
-	Schedule_t *GetScheduleOfType( int iType ) override;
 	void StartTask( Task_t *pTask ) override;
 
 	void ReportAIState(ALERT_TYPE level) override;
+
+	int DefaultChaseEnemyFailedPolicy() override {
+		return CHASE_ENEMY_FAILED_RETREAT;
+	}
 
 protected:
 	virtual void OnBecomingLeader() {}

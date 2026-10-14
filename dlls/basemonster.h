@@ -559,6 +559,11 @@ public:
 	void MakeCurrentJump();
 	void HandleJumpFallTask(const Vector* target, bool allowAttack);
 
+	virtual int DefaultChaseEnemyFailedPolicy() {
+		return CHASE_ENEMY_FAILED_FAIL;
+	}
+	int ChaseEnemyFailedPolicy();
+
 	float m_nextPatrolPathCheck;
 
 	// Custom hull sizes
