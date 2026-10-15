@@ -2689,6 +2689,8 @@ void CSpriteTrain::Spawn()
 		pev->rendermode = kRenderTransAdd;
 	if (!pev->renderamt)
 		pev->renderamt = 255;
+	else if (pev->renderamt < 0)
+		pev->renderamt = 0;
 	m_maxFrame = (float) MODEL_FRAMES( pev->modelindex ) - 1;
 	m_lastTime = gpGlobals->time;
 	pev->frame = 0;

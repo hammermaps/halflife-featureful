@@ -24,4 +24,4 @@ entityCategory: solid
 
 ### Reaction to use-type
 
-Always percieved as `Toggle` (for Half-Life compatibility) unless `Obey Trigger Mode` parameter is set to 'Yes' - in this case the entity handles `On` and `Off` use-types as it should. Changing the state makes the trigger to turn off or on.
+Always perceived as `Toggle` (for Half-Life compatibility) unless `Obey Trigger Mode` parameter is set to 'Yes' - in this case the entity handles `On` and `Off` use-types as it should. Changing the state makes the trigger to turn off or on.

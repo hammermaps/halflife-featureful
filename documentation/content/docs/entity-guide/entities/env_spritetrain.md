@@ -11,9 +11,9 @@ See also: [env_modeltrain]({{< ref env_modeltrain >}})
 
 ### Notes
 
-* If render amount is not specified or 0 it's set automatically to 255.
+* If render amount is not specified or 0 it's set automatically to 255 (Opposing Force compatibility). Set it to a negative value to make `env_spritetrain` invisible from the beginning.
 * If render mode is not specified or 0 it's set automatically to Additive (Opposing Force compatibility).
 
 ### Reaction to use-type
 
-Always percieved as `Toggle` (due to compatibility with Half-Life trains) unless `Obey Trigger Mode` parameter is enabled. Activates or stops the train.
+Always perceived as `Toggle` (due to compatibility with Half-Life trains) unless `Obey Trigger Mode` parameter is enabled. Activates or stops the train.
