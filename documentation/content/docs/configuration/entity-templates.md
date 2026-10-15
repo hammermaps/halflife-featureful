@@ -1954,6 +1954,26 @@ By default some monsters use `"fail"` (zombies, bullsquids, gonomes) and some mo
 ```
 {{% /details %}}
 
+#### player_can_interact
+
+A boolean - whether the player can press '+use' on the monster (if the monster is ally and able to accept interaction at all, see [following monsters]({{< ref "monsters/#following-monsters-features" >}})). This is `true` by default. Set to `false` to disallow monster answering the follow requests - this is useful if you want to make a monster ally but not following the player. This also prevents a monster from speaking their 'decline' voicelines on attempt to use them. The monster still can be made to follow the player via the [scripted_following]({{< ref scripted_following >}}) entity.
+
+{{% hint info %}}
+Same effect can be achieved for a specific monster instance via the `Followage policy` parameter.
+{{% /hint %}}
+
+{{% details title="Example" %}}
+```json
+{
+    "monster_zombie": {
+        "npc_behavior": {
+            "player_can_interact": false
+        }
+    }
+}
+```
+{{% /details %}}
+
 ## Inheriting templates
 
 Entity templates can be derived from another entity template. Let's say you defined a custom template for a vortigaunt (`monster_alien_slave`), with different visuals, for example. And now you want to define more templates for vortigaunts with the same custom visuals and some additional changes (e.g. a different model or even more custom visuals). Without inheritance you would need to copy the defined properties into the new template and then extend the template with new properties. This is far from ideal, as in case you wanted to change some property value, you would have to go through all the templates and change the value in each instance. This is where the template inheritance comes in handy.

@@ -442,6 +442,7 @@ public:
 	struct NPCBehavior
 	{
 		optional<int> chaseEnemyFailed;
+		bool playerCanInteract{true};
 	};
 
 	struct WeaponDefinition

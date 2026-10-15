@@ -1632,6 +1632,9 @@ R"(
 				"properties": {
 					"chase_enemy_failed": {
 						"enum": ["fail", "retreat", "wander", "retreat_or_wander"]
+					},
+					"player_can_interact": {
+						"type": "boolean"
 					}
 				}
 			}

@@ -1400,9 +1400,9 @@ void CTalkMonster::TalkMonsterInit()
 	SetTouch( &CFollowingMonster::FollowerTouch );
 }
 
-bool CTalkMonster::IsFollowCapable()
+bool CTalkMonster::IsAllyToPlayerClass()
 {
-	return IsFullyAlive() && IsFriendWithPlayerBeforeProvoked();
+	return IsFriendWithPlayerBeforeProvoked();
 }
 
 bool CTalkMonster::IsWounded()

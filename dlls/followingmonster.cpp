@@ -284,7 +284,7 @@ void CFollowingMonster::OnDying(bool gibbed, CBaseEntity* pKiller)
 int CFollowingMonster::ObjectCaps()
 {
 	int caps = CSquadMonster::ObjectCaps();
-	if (IsFollowCapable())
+	if (CanAnswerToPlayerUse())
 	{
 		caps |= FCAP_IMPULSE_USE | FCAP_ONLYVISIBLE_USE;
 	}
@@ -737,9 +737,22 @@ void CFollowingMonster::LimitFollowers( CBaseEntity *pPlayer, int maxFollowers )
 	return;
 }
 
-bool CFollowingMonster::IsFollowCapable()
+bool CFollowingMonster::IsAllyToPlayerClass()
 {
-	return IsFullyAlive() && m_pfnUse == &CFollowingMonster::FollowerUse && IDefaultRelationship(CLASS_PLAYER) == R_AL;
+	return IDefaultRelationship(CLASS_PLAYER) == R_AL;
+}
+
+bool CFollowingMonster::CanAnswerToPlayerUse()
+{
+	bool interactionAllowed = true;
+
+	const EntTemplate* entTemplate = GetMyEntTemplate();
+	if (entTemplate)
+	{
+		interactionAllowed = entTemplate->GetNPCBehavior().playerCanInteract;
+	}
+
+	return interactionAllowed && AbleToFollow() && m_pfnUse == &CFollowingMonster::FollowerUse && m_followagePolicy != FOLLOWAGE_SCRIPTED_ONLY && IsAllyToPlayerClass();
 }
 
 bool CFollowingMonster::CanFollow()
@@ -1007,7 +1020,7 @@ bool CFollowingMonster::CanRoamAfterCombat()
 
 bool CFollowingMonster::IsUsefulToDisplayHint(CBaseEntity* pPlayer)
 {
-	if (!IsFollowCapable())
+	if (!CanAnswerToPlayerUse())
 		return false;
 	if (ShouldDiscardFollowing(pPlayer))
 		return false;

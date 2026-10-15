@@ -1730,6 +1730,8 @@ void EntTemplateSystem::AddTemplateFromJsonValueImpl(const std::string& template
 			}
 		});
 
+		UpdatePropertyFromJson(npcBehavior.playerCanInteract, value, "player_can_interact");
+
 		entTemplate.SetNPCBehavior(std::move(npcBehavior));
 	});
 
