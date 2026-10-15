@@ -742,6 +742,7 @@
 [
 	spawnflags(Flags) =
 	[
+		4 : "Wait For Trigger (same as Start Inactive)"
 		8 : "NoWreckage"	: 0
 		64 : "Start Inactive" : 0
 	]
@@ -2807,7 +2808,7 @@
 	soundpitch(integer) : "Movesound Pitch (def.=100)"
 ]
 
-@PointClass studio() base(Targetname, BaseTrain, SoundRadius) size(-16 -16 -16, 16 16 16) color(0 128 255) = env_modeltrain : "Model Train"
+@PointClass studio() base(Targetname, RenderFields, BaseTrain, SoundRadius) size(-16 -16 -16, 16 16 16) color(0 128 255) = env_modeltrain : "Model Train"
 [
 	model(studio) : "Model"
 	scale(string) : "Model Scale"
@@ -3392,7 +3393,7 @@
 		2 : "Reverse Direction" : 0
 		4 : "X Axis" 		: 0
 		8 : "Y Axis" 		: 0
-		16: "Acc/Dcc"		: 0
+		16: "Spin up with acceleration (not instant)"		: 0
 		32: "Fan Pain"		: 0
 		64: "Not Solid"		: 0
 		128: "Small Radius" : 0
@@ -9535,7 +9536,7 @@
 	maximum_runs(integer) : "Maximum Runs (0 for unlimited)"
 ]
 
-@SolidClass base(Trigger) = trigger_gravity : "Trigger Gravity"
+@SolidClass base(Targetname) = trigger_gravity : "Trigger Gravity"
 [
 	gravity(integer) : "Gravity (0-1)" : 1
 ]
