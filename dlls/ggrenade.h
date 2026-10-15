@@ -35,7 +35,6 @@ public:
 	void EXPORT SlideTouch( CBaseEntity *pOther );
 	void EXPORT ExplodeTouch( CBaseEntity *pOther );
 	void EXPORT DangerSoundThink();
-	void EXPORT PreDetonate();
 	void EXPORT Detonate();
 	void EXPORT DetonateUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 	void EXPORT TumbleThink();

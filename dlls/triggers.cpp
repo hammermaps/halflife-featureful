@@ -7974,7 +7974,7 @@ LINK_ENTITY_TO_CLASS( trigger_cleanse, CTriggerCleanse )
 class CTriggerSafeFall : public CBaseEntity
 {
 public:
-	void Spawn()
+	void Spawn() override
 	{
 		pev->solid = SOLID_TRIGGER;
 		pev->movetype = MOVETYPE_NONE;

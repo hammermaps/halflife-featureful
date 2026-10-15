@@ -100,13 +100,10 @@ public:
 	}
 	bool InSquad() { return m_hSquadLeader != 0; }
 	bool IsLeader() { return m_hSquadLeader == this; }
-	int SquadJoin( int searchRadius );
 	int SquadRecruit( int searchRadius, int maxMembers );
 	int SquadCount();
 	void SquadRemove( CSquadMonster *pRemove );
-	void SquadUnlink();
 	bool SquadAdd( CSquadMonster *pAdd );
-	void SquadDisband();
 	void SquadAddConditions( int iConditions );
 	void SquadMakeEnemy( CBaseEntity *pEnemy );
 	void SquadPasteEnemyInfo();

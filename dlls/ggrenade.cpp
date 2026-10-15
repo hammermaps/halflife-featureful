@@ -181,14 +181,6 @@ void CGrenade::DetonateUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_T
 	pev->nextthink = gpGlobals->time;
 }
 
-void CGrenade::PreDetonate()
-{
-	InsertAISound( bits_SOUND_DANGER, pev->origin, 400, 0.3 );
-
-	SetThink( &CGrenade::Detonate );
-	pev->nextthink = gpGlobals->time + 1;
-}
-
 void CGrenade::Detonate()
 {
 	TraceResult tr;

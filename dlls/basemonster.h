@@ -176,7 +176,6 @@ public:
 
 	// monster use function
 	void EXPORT MonsterUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
-	void EXPORT CorpseUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 
 	// overrideable Monster member functions
 	int BloodColor() override { return m_bloodColor; }

@@ -638,10 +638,6 @@ public:
 		return func;
 	}
 #endif
-	// virtual functions used by a few classes
-	
-	// used by monsters that are created by the MonsterMaker
-	virtual	void UpdateOwner() { return; };
 
 	static CBaseEntity *Create( const char *szName, const Vector &vecOrigin, const Vector &vecAngles, edict_t *pentOwner = NULL, EntityOverrides entityOverrides = EntityOverrides() );
 	static CBaseEntity *CreateNoSpawn( const char *szName, const Vector &vecOrigin, const Vector &vecAngles, edict_t *pentOwner = NULL, EntityOverrides entityOverrides = EntityOverrides() );
