@@ -1356,13 +1356,6 @@ Schedule_t *CHoundeye::GetSchedule()
 {
 	switch( m_MonsterState )
 	{
-	case MONSTERSTATE_IDLE:
-		{
-			Schedule_t* utilitySchedule = GetUtilitySchedule();
-			if (utilitySchedule)
-				return utilitySchedule;
-			break;
-		}
 	case MONSTERSTATE_COMBAT:
 		{
 			// dead enemy
@@ -1418,11 +1411,6 @@ Schedule_t *CHoundeye::GetSchedule()
 					return GetScheduleOfType( SCHED_HOUND_EAT );
 				}
 			}
-
-			Schedule_t* followingSchedule = GetFollowingSchedule();
-			if (followingSchedule)
-				return followingSchedule;
-
 			break;
 		}
 	default:

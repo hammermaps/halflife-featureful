@@ -329,7 +329,7 @@ void CHeadCrab::RunTask( Task_t *pTask )
 			if (m_fSequenceFinished)
 			{
 				TaskComplete();
-				SetTouch(nullptr);
+				RestoreTouchAfterLeapAttack();
 				m_IdealActivity = ACT_IDLE;
 				m_leaping = false;
 			}

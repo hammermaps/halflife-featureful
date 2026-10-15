@@ -398,6 +398,7 @@ public:
 		LeapAttackTouch(pOther);
 	}
 	virtual void LeapAttackTouch(CBaseEntity* pOther);
+	virtual void RestoreTouchAfterLeapAttack();
 	//
 	// Leap attack related end
 	//

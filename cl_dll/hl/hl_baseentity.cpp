@@ -115,6 +115,7 @@ CSound *CBaseMonster::PBestScent() { return NULL; }
 float CBaseAnimating::StudioFrameAdvance( float flInterval ) { return 0.0; }
 void CBaseMonster::MonsterThink() { }
 void CBaseMonster::LeapAttackTouch(CBaseEntity* pOther) { }
+void CBaseMonster::RestoreTouchAfterLeapAttack() { }
 int CBaseMonster::IgnoreConditions() { return 0; }
 bool CBaseMonster::FBecomeProne() { return true; }
 bool CBaseMonster::CheckRangeAttack1( float flDot, float flDist ) { return false; }

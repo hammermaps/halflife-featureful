@@ -49,6 +49,8 @@ sk_bullsquid_toxicity 0
 * **Bullsquid.Attack** - spit attack sound.
 * **Bullsquid.AttackToxic** - toxic spit attack sound.
 * **Bullsquid.Bite** - bit someone with a bite attack.
+* **Bullsquid.Use** - start following the ally player. Derived from **Bullsquid.Idle**
+* **Bullsquid.UnUse** - stop following the ally player. Derived from **Bullsquid.Alert**.
 * [squidspit soundscripts]({{< ref "squidspit/#soundscripts" >}})
 * [squidtoxicspit soundscripts]({{< ref "squidtoxicspit/#soundscripts" >}})
 

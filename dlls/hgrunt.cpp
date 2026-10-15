@@ -2220,10 +2220,6 @@ Schedule_t *CHGrunt::GetSchedule()
 		Schedule_t* reloadSched = GetIdleReloadSchedule();
 		if (reloadSched)
 			return reloadSched;
-
-		Schedule_t* utilitySchedule = GetUtilitySchedule();
-		if (utilitySchedule)
-			return utilitySchedule;
 		break;
 	}
 	default:

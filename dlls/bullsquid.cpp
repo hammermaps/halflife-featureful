@@ -28,6 +28,7 @@
 #include	"scripted.h"
 #include	"game.h"
 #include	"bullsquid.h"
+#include	"followingmonster.h"
 #include	"common_soundscripts.h"
 #include	"visuals_utils.h"
 
@@ -41,7 +42,7 @@ const NamedVisual sharedTinySpitVisual = BuildVisual("Bullsquid.TinySpitBase")
 //=========================================================
 enum
 {
-	SCHED_SQUID_HURTHOP = LAST_COMMON_SCHEDULE + 1,
+	SCHED_SQUID_HURTHOP = LAST_FOLLOWINGMONSTER_SCHEDULE + 1,
 	SCHED_SQUID_SMELLFOOD,
 	SCHED_SQUID_SEECRAB,
 	SCHED_SQUID_EAT,
@@ -54,7 +55,7 @@ enum
 //=========================================================
 enum 
 {
-	TASK_SQUID_HOPTURN = LAST_COMMON_TASK + 1
+	TASK_SQUID_HOPTURN = LAST_FOLLOWINGMONSTER_TASK + 1
 };
 
 //=========================================================
@@ -341,7 +342,7 @@ void CSquidToxicSpit::LaunchAsProjectile(const ProjectileParameters& params)
 //=========================================================
 // CBullsquid
 //=========================================================
-class CBullsquid : public CBaseMonster
+class CBullsquid : public CFollowingMonster
 {
 public:
 	void Spawn() override;
@@ -357,6 +358,8 @@ public:
 	void PainSound() override;
 	void DeathSound() override;
 	void AlertSound() override;
+	void PlayUseSentence() override;
+	void PlayUnUseSentence() override;
 	virtual void AttackSound(bool bigSpit);
 	void StartTask(Task_t *pTask) override;
 	void RunTask(Task_t *pTask) override;
@@ -367,6 +370,7 @@ public:
 	bool FValidateHintType(short sHint) override;
 	Schedule_t *GetSchedule() override;
 	Schedule_t *GetScheduleOfType(int Type) override;
+	int DefaultChaseEnemyFailedPolicy() override { return CHASE_ENEMY_FAILED_FAIL; }
 	TakeDamageResult TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, const DamageInfo& damageInfo) override;
 	int IRelationship(CBaseEntity *pTarget) override;
 	int IgnoreConditions() override;
@@ -398,6 +402,8 @@ public:
 	static const NamedSoundScript attackSoundScript;
 	static const NamedSoundScript attackToxicSoundScript;
 	static const NamedSoundScript biteSoundScript;
+	static constexpr const char* useSoundScript = "Bullsquid.Use";
+	static constexpr const char* unuseSoundScript = "Bullsquid.UnUse";
 
 	static const NamedVisual tinySpitVisual;
 	static const NamedVisual toxicTinySpitVisual;
@@ -412,7 +418,7 @@ TYPEDESCRIPTION	CBullsquid::m_SaveData[] =
 	DEFINE_FIELD( CBullsquid, m_flNextHopTime, FIELD_TIME ),
 };
 
-IMPLEMENT_SAVERESTORE( CBullsquid, CBaseMonster )
+IMPLEMENT_SAVERESTORE( CBullsquid, CFollowingMonster )
 
 #define SQUID_ATTN_IDLE	1.5f
 
@@ -478,7 +484,7 @@ const NamedVisual CBullsquid::toxicTinySpitVisual = BuildVisual::Spray("Bullsqui
 //=========================================================
 int CBullsquid::IgnoreConditions()
 {
-	int iIgnore = CBaseMonster::IgnoreConditions();
+	int iIgnore = CFollowingMonster::IgnoreConditions();
 
 	if (gpGlobals->time - m_lastHurtTime <= 20.0f)
 	{
@@ -508,7 +514,7 @@ int CBullsquid::IRelationship( CBaseEntity *pTarget )
 		return R_NO;
 	}
 
-	return CBaseMonster::IRelationship( pTarget );
+	return CFollowingMonster::IRelationship( pTarget );
 }
 
 //=========================================================
@@ -532,7 +538,7 @@ TakeDamageResult CBullsquid::TakeDamage( entvars_t *pevInflictor, entvars_t *pev
 		}
 	}
 
-	return CBaseMonster::TakeDamage( pevInflictor, pevAttacker, damageInfo );
+	return CFollowingMonster::TakeDamage( pevInflictor, pevAttacker, damageInfo );
 }
 
 //=========================================================
@@ -669,6 +675,16 @@ void CBullsquid::PainSound()
 void CBullsquid::AlertSound()
 {
 	EmitSoundScript(alertSoundScript);
+}
+
+void CBullsquid::PlayUseSentence()
+{
+	EmitSoundScript(useSoundScript);
+}
+
+void CBullsquid::PlayUnUseSentence()
+{
+	EmitSoundScript(unuseSoundScript);
 }
 
 //=========================================================
@@ -814,7 +830,7 @@ void CBullsquid::HandleAnimEvent( MonsterEvent_t *pEvent )
 			}
 			break;
 		default:
-			CBaseMonster::HandleAnimEvent( pEvent );
+			CFollowingMonster::HandleAnimEvent( pEvent );
 	}
 }
 
@@ -835,12 +851,13 @@ void CBullsquid::Spawn()
 	SetMyHealth();
 	SetMyFieldOfView(0.2f);// indicates the width of this monster's forward view cone ( as a dotproduct result )
 	m_MonsterState = MONSTERSTATE_NONE;
+	SetMySquadCapabilities();
 	SetMyCanOpenDoors(false);
 
 	m_fCanThreatDisplay = true;
 	m_flNextSpitTime = gpGlobals->time;
 
-	MonsterInit();
+	FollowingMonsterInit();
 }
 
 //=========================================================
@@ -869,6 +886,9 @@ void CBullsquid::Precache()
 	RegisterAndPrecacheSoundScript(attackSoundScript);
 	RegisterAndPrecacheSoundScript(attackToxicSoundScript);
 	RegisterAndPrecacheSoundScript(biteSoundScript);
+
+	RegisterAndPrecacheSoundScript(useSoundScript, idleSoundScript);
+	RegisterAndPrecacheSoundScript(unuseSoundScript, alertSoundScript);
 }
 
 //=========================================================
@@ -898,7 +918,7 @@ void CBullsquid::AttackSound( bool bigSpit )
 void CBullsquid::RunAI()
 {
 	// first, do base class stuff
-	CBaseMonster::RunAI();
+	CFollowingMonster::RunAI();
 
 	if( pev->skin != 0 )
 	{
@@ -1178,7 +1198,7 @@ DEFINE_CUSTOM_SCHEDULES( CBullsquid )
 	slSquidVictoryDance
 };
 
-IMPLEMENT_CUSTOM_SCHEDULES( CBullsquid, CBaseMonster )
+IMPLEMENT_CUSTOM_SCHEDULES( CBullsquid, CFollowingMonster )
 
 //=========================================================
 // GetSchedule 
@@ -1193,6 +1213,10 @@ Schedule_t *CBullsquid::GetSchedule()
 			{
 				return GetScheduleOfType( SCHED_SQUID_HURTHOP );
 			}
+
+			Schedule_t* regenSchedule = GetRegenerationSchedule();
+			if (regenSchedule)
+				return regenSchedule;
 
 			if( HasConditions( bits_COND_ENEMY_DEAD ) && pev->health < pev->max_health )
 			{
@@ -1285,7 +1309,7 @@ Schedule_t *CBullsquid::GetSchedule()
 			break;
 	}
 
-	return CBaseMonster::GetSchedule();
+	return CFollowingMonster::GetSchedule();
 }
 
 //=========================================================
@@ -1324,7 +1348,7 @@ Schedule_t *CBullsquid::GetScheduleOfType( int Type )
 		break;
 	}
 
-	return CBaseMonster::GetScheduleOfType( Type );
+	return CFollowingMonster::GetScheduleOfType( Type );
 }
 
 //=========================================================
@@ -1341,7 +1365,7 @@ void CBullsquid::StartTask( Task_t *pTask )
 	case TASK_MELEE_ATTACK2:
 		{
 			EmitSoundScript(attackGrowlSoundScript);
-			CBaseMonster::StartTask( pTask );
+			CFollowingMonster::StartTask( pTask );
 			break;
 		}
 	case TASK_SQUID_HOPTURN:
@@ -1373,7 +1397,7 @@ void CBullsquid::StartTask( Task_t *pTask )
 		}
 	default:
 		{
-			CBaseMonster::StartTask( pTask );
+			CFollowingMonster::StartTask( pTask );
 			break;
 		}
 	}
@@ -1399,7 +1423,7 @@ void CBullsquid::RunTask( Task_t *pTask )
 		}
 	default:
 		{
-			CBaseMonster::RunTask( pTask );
+			CFollowingMonster::RunTask( pTask );
 			break;
 		}
 	}
@@ -1434,7 +1458,7 @@ MONSTERSTATE CBullsquid::GetIdealState()
 			break;
 	}
 
-	m_IdealMonsterState = CBaseMonster::GetIdealState();
+	m_IdealMonsterState = CFollowingMonster::GetIdealState();
 
 	return m_IdealMonsterState;
 }

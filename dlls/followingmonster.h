@@ -76,10 +76,12 @@ public:
 	void KeyValue( KeyValueData *pkvd ) override;
 
 	// AI functions
+	Schedule_t* GetSchedule() override;
 	Schedule_t *GetScheduleOfType ( int Type ) override;
 	void StartTask( Task_t *pTask ) override;
 	void RunTask( Task_t *pTask ) override;
 	void PrescheduleThink() override;
+	void RestoreTouchAfterLeapAttack() override;
 	TakeDamageResult TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, const DamageInfo& damageInfo) override;
 
 	void FollowingMonsterInit();

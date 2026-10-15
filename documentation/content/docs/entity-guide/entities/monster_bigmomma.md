@@ -33,6 +33,8 @@ bookToC: false
 * **BigMomma.Sack** - plays occasionally when idle.
 * **BigMomma.LaunchMortar** - launching a projectile.
 * **BigMomma.AttackHit** - melee attack hit. Derived from **NPC.AttackHit**
+* **BigMomma.Use** - start following the ally player. Empty by default.
+* **BigMomma.UnUse** - stop following the ally player. Empty by default.
 * [bmortar soundscripts]({{< ref "bmortar#soundscripts" >}})
 
 ### Visuals

@@ -46,7 +46,6 @@ public:
 	const char* DefaultDisplayName() override { return "Panthereye"; }
 
 	void HandleAnimEvent( MonsterEvent_t *pEvent ) override;
-	Schedule_t* GetSchedule() override;
 	Schedule_t* GetScheduleOfType(int Type) override;
 	void OnChangeSchedule(Schedule_t *pNewSchedule) override;
 	void StartTask(Task_t *pTask) override;
@@ -186,6 +185,7 @@ void CPantherEye::Spawn()
 	SetMyFieldOfView(0.5f);
 	m_MonsterState = MONSTERSTATE_NONE;
 	SetMySquadCapabilities(bits_CAP_SQUAD|bits_CAP_SQUAD_SAME_CLASSNAME);
+	SetMyCanOpenDoors(false);
 
 	FollowingMonsterInit();
 }
@@ -292,23 +292,6 @@ void CPantherEye::HandleAnimEvent( MonsterEvent_t *pEvent )
 	}
 }
 
-Schedule_t* CPantherEye::GetSchedule()
-{
-	switch (m_MonsterState)
-	{
-	case MONSTERSTATE_IDLE:
-	case MONSTERSTATE_ALERT:
-	{
-		Schedule_t* utilitySchedule = GetUtilitySchedule();
-		if (utilitySchedule)
-			return utilitySchedule;
-	}
-	default:
-		break;
-	}
-	return CFollowingMonster::GetSchedule();
-}
-
 Schedule_t* CPantherEye::GetScheduleOfType(int Type)
 {
 	if (Type == SCHED_CHASE_ENEMY_FAILED)
@@ -351,7 +334,7 @@ void CPantherEye::RunTask(Task_t *pTask)
 	{
 		if (m_fSequenceFinished)
 		{
-			SetTouch(nullptr);
+			RestoreTouchAfterLeapAttack();
 			m_leaping = false;
 		}
 		else if (!m_leaping && ReadyToLaunchLeapAttackAtCurrentFrame())

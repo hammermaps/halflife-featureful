@@ -65,7 +65,7 @@ For the list of monsters refer to [entities page]({{< ref "entity-guide#monster-
 
 ## Following monsters features
 
-Following monsters are monsters who can follow the player upon being 'used'. Most humanoid monsters automatically become following monsters if they're set to be player's allies.
+Following monsters are monsters who can follow the player upon being 'used' (and stop following upon the next use). Most land monsters (except headcrabs, shockroaches and snarks) automatically become following monsters if they're set to be player's allies.
 
 * New parameter `Follow fail policy` that configures what the following monster should do if can't build a path to the player, with the following options:
     - `Default for monster` - behavior depends on the monster. Most monsters will just stop for a few seconds. Scientists will refuse continuing following altogether.

@@ -153,14 +153,6 @@ const char* CRecruit::DefaultSentenceGroup(int group)
 Schedule_t* CRecruit::GetSchedule()
 {
 	switch (m_MonsterState) {
-	case MONSTERSTATE_IDLE:
-	case MONSTERSTATE_ALERT:
-	{
-		Schedule_t* utilitySchedule = GetUtilitySchedule();
-		if (utilitySchedule)
-			return utilitySchedule;
-	}
-		break;
 	case MONSTERSTATE_COMBAT:
 	{
 		if( HasConditions( bits_COND_ENEMY_DEAD|bits_COND_ENEMY_LOST ) )

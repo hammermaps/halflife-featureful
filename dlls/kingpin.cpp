@@ -1398,21 +1398,6 @@ Schedule_t* CKingpin::GetSchedule()
 			return GetScheduleOfType( SCHED_TAKE_COVER_FROM_BEST_SOUND );
 		}
 	}
-	switch(m_MonsterState)
-	{
-	case MONSTERSTATE_IDLE:
-	case MONSTERSTATE_ALERT:
-	case MONSTERSTATE_HUNT:
-	{
-		Schedule_t* utilitySchedule = GetUtilitySchedule();
-		if (utilitySchedule)
-			return utilitySchedule;
-	}
-		break;
-	default:
-		break;
-	}
-
 	return CFollowingMonster::GetSchedule();
 }
 

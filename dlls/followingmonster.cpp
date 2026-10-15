@@ -307,6 +307,25 @@ void CFollowingMonster::KeyValue( KeyValueData *pkvd )
 		CSquadMonster::KeyValue( pkvd );
 }
 
+Schedule_t *CFollowingMonster::GetSchedule()
+{
+	switch (m_MonsterState)
+	{
+	case MONSTERSTATE_IDLE:
+	case MONSTERSTATE_ALERT:
+	case MONSTERSTATE_HUNT:
+	{
+		Schedule_t* utilitySchedule = GetUtilitySchedule();
+		if (utilitySchedule)
+			return utilitySchedule;
+		break;
+	}
+	default:
+		break;
+	}
+	return CSquadMonster::GetSchedule();
+}
+
 Schedule_t *CFollowingMonster::GetScheduleOfType( int Type )
 {
 	switch( Type )
@@ -629,6 +648,15 @@ void CFollowingMonster::PrescheduleThink()
 		StopFollowing(true, false);
 	}
 	CSquadMonster::PrescheduleThink();
+}
+
+void CFollowingMonster::RestoreTouchAfterLeapAttack()
+{
+	if (IDefaultRelationship(CLASS_PLAYER) == R_AL) {
+		SetTouch(&CFollowingMonster::FollowerTouch);
+	} else {
+		CSquadMonster::RestoreTouchAfterLeapAttack();
+	}
 }
 
 TakeDamageResult CFollowingMonster::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, const DamageInfo& damageInfo )

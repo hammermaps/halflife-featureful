@@ -1107,15 +1107,6 @@ Schedule_t *CAGrunt::GetSchedule()
 			return GetScheduleOfType( SCHED_STANDOFF );
 		}
 		break;
-	case MONSTERSTATE_ALERT:
-	case MONSTERSTATE_IDLE:
-	case MONSTERSTATE_HUNT:
-	{
-		Schedule_t* utilitySchedule = GetUtilitySchedule();
-		if (utilitySchedule)
-			return utilitySchedule;
-		break;
-	}
 	default:
 		break;
 	}

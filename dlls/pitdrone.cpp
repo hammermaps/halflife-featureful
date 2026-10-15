@@ -980,13 +980,6 @@ Schedule_t *CPitdrone::GetSchedule()
 {
 	switch (m_MonsterState)
 	{
-	case MONSTERSTATE_IDLE:
-	{
-		Schedule_t* utilitySchedule = GetUtilitySchedule();
-		if (utilitySchedule)
-			return utilitySchedule;
-		break;
-	}
 	case MONSTERSTATE_ALERT:
 	case MONSTERSTATE_HUNT:
 	{
@@ -1017,11 +1010,6 @@ Schedule_t *CPitdrone::GetSchedule()
 			// food is right out in the open. Just go get it.
 			return GetScheduleOfType(SCHED_PDRONE_EAT);
 		}
-
-		Schedule_t* followingSchedule = GetFollowingSchedule();
-		if (followingSchedule)
-			return followingSchedule;
-
 		break;
 	}
 	case MONSTERSTATE_COMBAT:

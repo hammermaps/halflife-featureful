@@ -1920,9 +1920,6 @@ Schedule_t *CISlave::GetSchedule()
 					return GetScheduleOfType(SCHED_ISLAVE_GIVE_CHARGE);
 			}
 		}
-		Schedule_t* utilitySchedule = GetUtilitySchedule();
-		if (utilitySchedule)
-			return utilitySchedule;
 		break;
 	}
 	default:

@@ -598,12 +598,15 @@ void CBaseMonster::RunTask( Task_t *pTask )
 					TaskComplete();
 					RouteClear();		// Stop moving
 				}
-				else if ( pTask->iTask == TASK_CATCH_WITH_TARGET_RANGE && m_hTargetEnt->IsMoving() )
-					m_movementActivity = ACT_RUN;
-				else if( distance < 190 && m_movementActivity != ACT_WALK )
-					m_movementActivity = ACT_WALK;
-				else if( distance >= 270 && m_movementActivity != ACT_RUN )
-					m_movementActivity = ACT_RUN;
+				else
+				{
+					if ( pTask->iTask == TASK_CATCH_WITH_TARGET_RANGE && m_hTargetEnt->IsMoving() )
+						m_movementActivity = ACT_RUN;
+					else if( distance < 190 && m_movementActivity != ACT_WALK )
+						m_movementActivity = ACT_WALK;
+					else if( distance >= 270 && m_movementActivity != ACT_RUN )
+						m_movementActivity = ACT_RUN;
+				}
 			}
 			break;
 		}

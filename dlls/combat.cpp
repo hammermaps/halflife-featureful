@@ -1792,6 +1792,11 @@ void CBaseMonster::LeapAttackTouch(CBaseEntity* pOther)
 		pev->velocity.y *= 0.5f;
 	}
 
+	RestoreTouchAfterLeapAttack();
+}
+
+void CBaseMonster::RestoreTouchAfterLeapAttack()
+{
 	SetTouch(nullptr);
 }
 

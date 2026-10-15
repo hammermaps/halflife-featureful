@@ -937,13 +937,6 @@ Schedule_t *CVoltigore::GetSchedule()
 {
 	switch (m_MonsterState)
 	{
-	case MONSTERSTATE_IDLE:
-	{
-		Schedule_t* utilitySchedule = GetUtilitySchedule();
-		if (utilitySchedule)
-			return utilitySchedule;
-		break;
-	}
 	case MONSTERSTATE_COMBAT:
 	{
 		// dead enemy
@@ -1321,13 +1314,6 @@ Schedule_t *CBabyVoltigore::GetSchedule()
 {
 	switch (m_MonsterState)
 	{
-	case MONSTERSTATE_IDLE:
-	{
-		Schedule_t* utilitySchedule = GetUtilitySchedule();
-		if (utilitySchedule)
-			return utilitySchedule;
-		break;
-	}
 	case MONSTERSTATE_COMBAT:
 	{
 		// dead enemy

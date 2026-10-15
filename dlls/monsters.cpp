@@ -1505,6 +1505,30 @@ void CBaseMonster::SetActivity( Activity NewActivity )
 	int iSequence = LookupActivity( NewActivity );
 
 	Activity OldActivity = m_Activity;
+
+	if (iSequence == ACTIVITY_NOT_AVAILABLE)
+	{
+		// Try to find WALK if RUN is not available in the model, and vice versa
+		if (NewActivity == ACT_RUN)
+		{
+			iSequence = LookupActivity(ACT_WALK);
+			if (OldActivity == ACT_WALK)
+			{
+				m_IdealActivity = m_Activity = NewActivity;
+				return;
+			}
+		}
+		else if (NewActivity == ACT_WALK)
+		{
+			iSequence = LookupActivity(ACT_RUN);
+			if (OldActivity == ACT_RUN)
+			{
+				m_IdealActivity = m_Activity = NewActivity;
+				return;
+			}
+		}
+	}
+
 	m_Activity = NewActivity; // Go ahead and set this so it doesn't keep trying when the anim is not present
 
 	// In case someone calls this with something other than the ideal activity

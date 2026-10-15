@@ -4683,7 +4683,7 @@
 // monsters
 //
 
-@PointClass base(Monster) size(-40 -40 0, 40 40 64) studio("models/baby_voltigore.mdl") = monster_alien_babyvoltigore : "Baby Voltigore" 
+@PointClass base(Monster, FollowingMonster) size(-40 -40 0, 40 40 64) studio("models/baby_voltigore.mdl") = monster_alien_babyvoltigore : "Baby Voltigore"
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 0 =
 	[
@@ -4711,7 +4711,7 @@
 	]
 ]
 
-@PointClass base(Monster) size(-80 -80 0, 80 80 90) studio("models/voltigore.mdl") = monster_alien_voltigore : "Voltigore" 
+@PointClass base(Monster, FollowingMonster) size(-80 -80 0, 80 80 90) studio("models/voltigore.mdl") = monster_alien_voltigore : "Voltigore"
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 0 =
 	[
@@ -5311,7 +5311,7 @@
 		37 : "lying_on_stomach"
 	]
 ]
-@PointClass base(Monster) size(-95 -95 0, 95 95 190) studio("models/big_mom.mdl") = monster_bigmomma : "Big Mamma"
+@PointClass base(Monster, FollowingMonster) size(-95 -95 0, 95 95 190) studio("models/big_mom.mdl") = monster_bigmomma : "Big Mamma"
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 0 =
 	[
@@ -5445,7 +5445,7 @@
 		64 : "IgnorePlayer" : 0 : "Ignore player presence unless provoked by damage or sound"
 	]
 ]
-@PointClass base(Monster) size(-32 -32 0, 32 32 64) studio("models/bullsquid.mdl") = monster_bullchicken : "BullChicken"
+@PointClass base(Monster, FollowingMonster) size(-32 -32 0, 32 32 64) studio("models/bullsquid.mdl") = monster_bullchicken : "BullChicken"
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 7 =
 	[
@@ -7077,7 +7077,7 @@
 	]
 ]
 
-@PointClass base(Monster) studio("models/panthereye.mdl") size(-24 -24 0, 24 24 64) = monster_panthereye : "Panthereye" []
+@PointClass base(Monster, FollowingMonster) studio("models/panthereye.mdl") size(-24 -24 0, 24 24 64) = monster_panthereye : "Panthereye" []
 
 @PointClass base(Monster, FollowingMonster) size(-24 -24 0, 24 24 32) studio("models/pit_drone.mdl") = monster_pitdrone : "PitDrone"
 [
@@ -7861,7 +7861,7 @@
 	]
 ]
 @PointClass base(Monster, Civilian) size(-16 -16 0, 16 16 72) studio("models/wheelchair_sci.mdl") = monster_wheelchair : "Dr. Keller" []
-@PointClass base(Monster) size(-16 -16 0, 16 16 72) studio("models/zombie.mdl") = monster_zombie : "Scientist Zombie"
+@PointClass base(Monster, FollowingMonster) size(-16 -16 0, 16 16 72) studio("models/zombie.mdl") = monster_zombie : "Scientist Zombie"
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 0 =
 	[
@@ -7926,7 +7926,7 @@
 		26 : "slidewall"
 	]
 ]
-@PointClass base(Monster) size(-16 -16 0, 16 16 72) studio("models/zombie_barney.mdl") = monster_zombie_barney : "Barney Zombie"
+@PointClass base(Monster, FollowingMonster) size(-16 -16 0, 16 16 72) studio("models/zombie_barney.mdl") = monster_zombie_barney : "Barney Zombie"
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 0 =
 	[
@@ -7991,7 +7991,7 @@
 		26 : "slidewall"
 	]
 ]
-@PointClass base(Monster) size(-16 -16 0, 16 16 72) studio("models/zombie_soldier.mdl") = monster_zombie_soldier : "Soldier Zombie"
+@PointClass base(Monster, FollowingMonster) size(-16 -16 0, 16 16 72) studio("models/zombie_soldier.mdl") = monster_zombie_soldier : "Soldier Zombie"
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 0 =
 	[
@@ -8035,7 +8035,7 @@
 		21 : "dead_on_stomach"
 	]
 ]
-@PointClass base(Monster) size(-16 -16 0, 16 16 72) studio("models/gonome.mdl") = monster_gonome : "Gonome" 
+@PointClass base(Monster, FollowingMonster) size(-16 -16 0, 16 16 72) studio("models/gonome.mdl") = monster_gonome : "Gonome"
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 4 =
 	[

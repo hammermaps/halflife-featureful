@@ -24,6 +24,7 @@
 #include	"monsters.h"
 #include	"schedule.h"
 #include	"game.h"
+#include	"followingmonster.h"
 #include	"common_soundscripts.h"
 
 //=========================================================
@@ -35,7 +36,7 @@
 
 #define ZOMBIE_FLINCH_DELAY		2		// at most one flinch every n secs
 
-class CZombie : public CBaseMonster
+class CZombie : public CFollowingMonster
 {
 public:
 	void Spawn() override;
@@ -57,6 +58,8 @@ public:
 	void AlertSound() override;
 	void IdleSound() override;
 	void AttackSound();
+	void PlayUseSentence() override;
+	void PlayUnUseSentence() override;
 
 	static const NamedSoundScript idleSoundScript;
 	static const NamedSoundScript alertSoundScript;
@@ -65,6 +68,8 @@ public:
 	static const NamedSoundScript attackSoundScript;
 	static constexpr const char* attackHitSoundScript = "Zombie.AttackHit";
 	static constexpr const char* attackMissSoundScript = "Zombie.AttackMiss";
+	static constexpr const char* useSoundScript = "Zombie.Use";
+	static constexpr const char* unuseSoundScript = "Zombie.UnUse";
 
 	// No range attacks
 	bool CheckRangeAttack1( float flDot, float flDist ) override { return false; }
@@ -75,6 +80,7 @@ public:
 	bool IsDisplaceable() override { return true; }
 	Vector DefaultMinHullSize() override { return VEC_HUMAN_HULL_MIN; }
 	Vector DefaultMaxHullSize() override { return VEC_HUMAN_HULL_MAX; }
+	int DefaultChaseEnemyFailedPolicy() override { return CHASE_ENEMY_FAILED_FAIL; }
 	virtual float OneSlashDamage() { return GetSkillValue("zombie_dmg_one_slash"); }
 	virtual float BothSlashDamage() { return GetSkillValue("zombie_dmg_both_slash"); }
 protected:
@@ -148,7 +154,7 @@ TakeDamageResult CZombie::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAtt
 		flDamage *= 0.3f;
 #endif
 	}
-	return CBaseMonster::TakeDamage( pevInflictor, pevAttacker, damageInfo );
+	return CFollowingMonster::TakeDamage( pevInflictor, pevAttacker, damageInfo );
 }
 
 PainSoundRule CZombie::DefaultPainSoundRule()
@@ -182,6 +188,16 @@ void CZombie::IdleSound()
 void CZombie::AttackSound()
 {
 	EmitSoundScript(attackSoundScript);
+}
+
+void CZombie::PlayUseSentence()
+{
+	EmitSoundScript(useSoundScript);
+}
+
+void CZombie::PlayUnUseSentence()
+{
+	EmitSoundScript(unuseSoundScript);
 }
 
 //=========================================================
@@ -242,7 +258,7 @@ void CZombie::HandleAnimEvent( MonsterEvent_t *pEvent )
 		break;
 
 		default:
-			CBaseMonster::HandleAnimEvent( pEvent );
+			CFollowingMonster::HandleAnimEvent( pEvent );
 			break;
 	}
 }
@@ -264,9 +280,10 @@ void CZombie::Spawn()
 	pev->view_ofs		= VEC_VIEW;// position of the eyes relative to monster's origin.
 	SetMyFieldOfView(0.5f);// indicates the width of this monster's forward view cone ( as a dotproduct result )
 	m_MonsterState		= MONSTERSTATE_NONE;
+	SetMySquadCapabilities();
 	SetMyCanOpenDoors(true);
 
-	MonsterInit();
+	FollowingMonsterInit();
 }
 
 //=========================================================
@@ -288,6 +305,8 @@ void CZombie::PrecacheSounds()
 	RegisterAndPrecacheSoundScript(attackSoundScript);
 	RegisterAndPrecacheSoundScript(attackHitSoundScript, NPC::attackHitSoundScript);
 	RegisterAndPrecacheSoundScript(attackMissSoundScript, NPC::attackMissSoundScript);
+	RegisterAndPrecacheSoundScript(useSoundScript, idleSoundScript);
+	RegisterAndPrecacheSoundScript(unuseSoundScript, alertSoundScript);
 }
 
 //=========================================================
@@ -296,7 +315,7 @@ void CZombie::PrecacheSounds()
 
 int CZombie::IgnoreConditions()
 {
-	int iIgnore = CBaseMonster::IgnoreConditions();
+	int iIgnore = CFollowingMonster::IgnoreConditions();
 
 	if( ( m_Activity == ACT_MELEE_ATTACK1 ) || ( m_Activity == ACT_MELEE_ATTACK1 ) )
 	{
@@ -322,9 +341,9 @@ Schedule_t* CZombie::GetScheduleOfType(int Type)
 {
 	if (Type == SCHED_CHASE_ENEMY_FAILED && HasMemory(bits_MEMORY_BLOCKER_IS_ENEMY))
 	{
-		return CBaseMonster::GetScheduleOfType(SCHED_CHASE_ENEMY);
+		return CFollowingMonster::GetScheduleOfType(SCHED_CHASE_ENEMY);
 	}
-	return CBaseMonster::GetScheduleOfType(Type);
+	return CFollowingMonster::GetScheduleOfType(Type);
 }
 
 class CDeadZombie : public CDeadMonster

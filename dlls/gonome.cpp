@@ -29,6 +29,7 @@
 #include	"animation.h"
 #include	"studio.h"
 #include	"game.h"
+#include	"followingmonster.h"
 #include	"common_soundscripts.h"
 
 #define		GONOME_MELEE_ATTACK_RADIUS		70
@@ -113,7 +114,7 @@ void CGonomeGuts::Touch( CBaseEntity *pOther )
 //=========================================================
 // CGonome
 //=========================================================
-class CGonome : public CBaseMonster
+class CGonome : public CFollowingMonster
 {
 public:
 	void Spawn() override;
@@ -131,6 +132,8 @@ public:
 	void PainSound() override;
 	void DeathSound() override;
 	void AlertSound() override;
+	void PlayUseSentence() override;
+	void PlayUnUseSentence() override;
 
 	bool CheckMeleeAttack2(float flDot, float flDist) override;
 	bool CheckRangeAttack1(float flDot, float flDist) override;
@@ -139,6 +142,7 @@ public:
 
 	Schedule_t *GetSchedule() override;
 	Schedule_t *GetScheduleOfType( int Type ) override;
+	int DefaultChaseEnemyFailedPolicy() override { return CHASE_ENEMY_FAILED_FAIL; }
 	void RunTask(Task_t* pTask) override;
 
 	TakeDamageResult TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, const DamageInfo& damageInfo) override;
@@ -164,6 +168,8 @@ public:
 	static const NamedSoundScript biteSoundScript;
 	static const NamedSoundScript melee1SoundScript;
 	static const NamedSoundScript melee2SoundScript;
+	static constexpr const char* useSoundScript = "Gonome.Use";
+	static constexpr const char* unuseSoundScript = "Gonome.UnUse";
 
 	int DefaultSizeForGrapple() override { return GRAPPLE_LARGE; }
 	bool IsDisplaceable() override { return true; }
@@ -239,14 +245,14 @@ void CGonome::OnDying(bool gibbed, CBaseEntity* pKiller)
 {
 	ClearGuts();
 	UnlockPlayer();
-	CBaseMonster::OnDying(gibbed, pKiller);
+	CFollowingMonster::OnDying(gibbed, pKiller);
 }
 
 void CGonome::UpdateOnRemove()
 {
 	ClearGuts();
 	UnlockPlayer();
-	CBaseMonster::UpdateOnRemove();
+	CFollowingMonster::UpdateOnRemove();
 }
 
 void CGonome::UnlockPlayer()
@@ -321,7 +327,7 @@ int CGonome::LookupActivity(int activity)
 			return sequence;
 		}
 	}
-	return CBaseMonster::LookupActivity(activity);
+	return CFollowingMonster::LookupActivity(activity);
 }
 
 void CGonome::SetActivity( Activity NewActivity )
@@ -334,7 +340,7 @@ void CGonome::SetActivity( Activity NewActivity )
 	{
 		UnlockPlayer();
 	}
-	CBaseMonster::SetActivity(NewActivity);
+	CFollowingMonster::SetActivity(NewActivity);
 }
 
 //=========================================================
@@ -362,7 +368,7 @@ TakeDamageResult CGonome::TakeDamage(entvars_t *pevInflictor, entvars_t *pevAtta
 		flDamage *= 0.15;
 #endif
 	}
-	return CBaseMonster::TakeDamage(pevInflictor, pevAttacker, damageInfo);
+	return CFollowingMonster::TakeDamage(pevInflictor, pevAttacker, damageInfo);
 }
 
 
@@ -448,6 +454,16 @@ void CGonome::PainSound()
 void CGonome::AlertSound()
 {
 	EmitSoundScript(alertSoundScript);
+}
+
+void CGonome::PlayUseSentence()
+{
+	EmitSoundScript(useSoundScript);
+}
+
+void CGonome::PlayUnUseSentence()
+{
+	EmitSoundScript(unuseSoundScript);
 }
 
 //=========================================================
@@ -580,7 +596,7 @@ void CGonome::HandleAnimEvent(MonsterEvent_t *pEvent)
 
 
 	default:
-		CBaseMonster::HandleAnimEvent(pEvent);
+		CFollowingMonster::HandleAnimEvent(pEvent);
 	}
 }
 
@@ -588,7 +604,7 @@ void CGonome::HandleAnimEvent(MonsterEvent_t *pEvent)
 
 int CGonome::IgnoreConditions()
 {
-	int iIgnore = CBaseMonster::IgnoreConditions();
+	int iIgnore = CFollowingMonster::IgnoreConditions();
 
 	if (m_Activity == ACT_RANGE_ATTACK1)
 	{
@@ -626,11 +642,12 @@ void CGonome::Spawn()
 	SetMyHealth();
 	SetMyFieldOfView(0.2f);// indicates the width of this monster's forward view cone ( as a dotproduct result )
 	m_MonsterState = MONSTERSTATE_NONE;
+	SetMySquadCapabilities();
 	SetMyCanOpenDoors(true);
 
 	m_flNextThrowTime = gpGlobals->time;
 
-	MonsterInit();
+	FollowingMonsterInit();
 }
 
 //=========================================================
@@ -654,6 +671,8 @@ void CGonome::Precache()
 	RegisterAndPrecacheSoundScript(biteSoundScript);
 	RegisterAndPrecacheSoundScript(melee1SoundScript);
 	RegisterAndPrecacheSoundScript(melee2SoundScript);
+	RegisterAndPrecacheSoundScript(useSoundScript, idleSoundScript);
+	RegisterAndPrecacheSoundScript(unuseSoundScript, alertSoundScript);
 
 	if (!ShouldAutoPrecacheSounds())
 	{
@@ -725,7 +744,7 @@ Schedule_t *CGonome::GetSchedule()
 			break;
 	}
 
-	return CBaseMonster::GetSchedule();
+	return CFollowingMonster::GetSchedule();
 }
 
 // primary range attack
@@ -818,7 +837,7 @@ DEFINE_CUSTOM_SCHEDULES( CGonome )
 	slGonomeVictoryDance,
 };
 
-IMPLEMENT_CUSTOM_SCHEDULES( CGonome, CBaseMonster )
+IMPLEMENT_CUSTOM_SCHEDULES( CGonome, CFollowingMonster )
 
 Schedule_t* CGonome::GetScheduleOfType(int Type)
 {
@@ -839,7 +858,7 @@ Schedule_t* CGonome::GetScheduleOfType(int Type)
 	default:
 		break;
 	}
-	return CBaseMonster::GetScheduleOfType(Type);
+	return CFollowingMonster::GetScheduleOfType(Type);
 }
 
 void CGonome::RunTask(Task_t *pTask)
@@ -864,7 +883,7 @@ void CGonome::RunTask(Task_t *pTask)
 	{
 		m_playedAttackSound = false;
 	}
-	CBaseMonster::RunTask(pTask);
+	CFollowingMonster::RunTask(pTask);
 }
 
 //=========================================================

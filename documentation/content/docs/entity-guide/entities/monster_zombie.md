@@ -34,6 +34,8 @@ bookToC: false
 * **Zombie.Attack** - plays occasionally on the slash attack.
 * **Zombie.AttackHit** - melee attack hit. Derived from **NPC.AttackHit**
 * **Zombie.AttackMiss** - melee attack miss. Derived from **NPC.AttackMiss**
+* **Zombie.Use** - start following the ally player. Derived from **Zombie.Idle**
+* **Zombie.UnUse** - stop following the ally player. Derived from **Zombie.Alert**.
 
 ### Attacks
 
