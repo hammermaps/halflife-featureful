@@ -93,4 +93,6 @@ Some Half-Life behavior aspects were changed from vanilla to better alternatives
 
 Also some [vortigaunt's]({{< ref monster_alien_slave >}}) and [bullsquid's]({{< ref monster_bullchicken >}}) new abilities are enabled by default - they can be disabled via the [skill.cfg]({{< ref skill-variables >}}).
 
+[Sentry turrets]({{< ref monster_sentry >}}) now retract after 15 seconds of searching the enemy, like other turrets. In Half-Life they retract after 1 million seconds (essentially never). Use `sk_sentry_searchtime` skill variable to change this duration.
+
 There're also some [cvars]({{< ref "cvars/#server-cvars" >}}) that you might be interested in changing in [featureful_exec.cfg](https://github.com/FreeSlave/halflife-featureful/blob/featureful/features/featureful_exec.cfg).

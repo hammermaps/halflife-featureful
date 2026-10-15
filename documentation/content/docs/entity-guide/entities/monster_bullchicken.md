@@ -49,20 +49,15 @@ sk_bullsquid_toxicity 0
 * **Bullsquid.Attack** - spit attack sound.
 * **Bullsquid.AttackToxic** - toxic spit attack sound.
 * **Bullsquid.Bite** - bit someone with a bite attack.
-* **Bullsquid.SpitTouch** - one of the sounds played when the spit projectile hits something. Emitted from the spit projectile. Derived from **NPC.SpitTouch**
-* **Bullsquid.SpitHit** - one of the sounds played when the spit projectile hits something. Emitted from the spit projectile. Derived from **NPC.SpitHit**
-* **Bullsquid.ToxicSpitTouch** - one of the sounds played when the toxic spit projectile hits something. Emitted from the spit projectile.
-* **Bullsquid.ToxicSpitHit** - one of the sounds played when the toxic spit projectile hits something. Emitted from the spit projectile.
+* [squidspit soundscripts]({{< ref "squidspit/#soundscripts" >}})
+* [squidtoxicspit soundscripts]({{< ref "squidtoxicspit/#soundscripts" >}})
 
 ### Visuals
 
 * **Bullsquid.TinySpit** - sprites sprayed out of bullsquid mouth on spit attack.
-* **Bullsquid.Spit** - the spit projectile sprite.
-* **Bullsquid.Fleck** - sprites sprayed on the spit projectile impact with the wall.
+* [squidspit visuals]({{< ref "squidspit/#visuals" >}})
 * **Bullsquid.ToxicTinySpit** - sprites sprayed out of bullsquid mouth on toxic spit attack.
-* **Bullsquid.ToxicSpit** - the toxic spit projectile sprite.
-* **Bullsquid.ToxicFleck** - sprites sprayed on the toxic spit projectile impact with the wall.
-* **Bullsquid.ToxicParticle** - sprites emitted from the toxic spit projectile as it flies. Note: currently can't be animated.
+* [squidtoxicspit visuals]({{< ref "squidtoxicspit/#visuals" >}})
 
 Shared visuals:
 
