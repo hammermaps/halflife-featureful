@@ -755,12 +755,6 @@ Activity CBaseMonster::GetDeathActivity()
 Activity CBaseMonster::GetSmallFlinchActivity()
 {
 	Activity	flinchActivity;
-	// BOOL		fTriedDirection;
-	//float		flDot;
-
-	// fTriedDirection = false;
-	UTIL_MakeVectors( pev->angles );
-	//flDot = DotProduct( gpGlobals->v_forward, g_vecAttackDir * -1.0f );
 
 	switch( m_LastHitGroup )
 	{
@@ -1983,24 +1977,12 @@ CBaseEntity* CBaseMonster::PerformTraceHullAttack(const TraceHullAttackParams& p
 //=========================================================
 bool CBaseMonster::FInViewCone( CBaseEntity *pEntity )
 {
-	Vector2D	vec2LOS;
-	float	flDot;
-
 	UTIL_MakeVectors( pev->angles );
 
-	vec2LOS = ( pEntity->pev->origin - pev->origin ).Make2D();
-	vec2LOS.NormalizeInPlace();
+	Vector2D vec2LOS = ( pEntity->pev->origin - pev->origin ).Make2D().Normalize();
+	float flDot = DotProduct( vec2LOS, gpGlobals->v_forward.Make2D() );
 
-	flDot = DotProduct( vec2LOS, gpGlobals->v_forward.Make2D() );
-
-	if( flDot > m_flFieldOfView )
-	{
-		return true;
-	}
-	else
-	{
-		return false;
-	}
+	return flDot > m_flFieldOfView;
 }
 
 //=========================================================
@@ -2008,26 +1990,14 @@ bool CBaseMonster::FInViewCone( CBaseEntity *pEntity )
 // the caller's forward view cone. The dot product is performed
 // in 2d, making the view cone infinitely tall. 
 //=========================================================
-bool CBaseMonster::FInViewCone( Vector *pOrigin )
+bool CBaseMonster::FInViewCone( const Vector& origin )
 {
-	Vector2D	vec2LOS;
-	float		flDot;
-
 	UTIL_MakeVectors( pev->angles );
 
-	vec2LOS = ( *pOrigin - pev->origin ).Make2D();
-	vec2LOS.NormalizeInPlace();
+	Vector2D vec2LOS = (origin - pev->origin).Make2D().Normalize();
+	float flDot = DotProduct( vec2LOS, gpGlobals->v_forward.Make2D() );
 
-	flDot = DotProduct( vec2LOS, gpGlobals->v_forward.Make2D() );
-
-	if( flDot > m_flFieldOfView )
-	{
-		return true;
-	}
-	else
-	{
-		return false;
-	}
+	return flDot > m_flFieldOfView;
 }
 
 //=========================================================
