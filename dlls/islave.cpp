@@ -383,8 +383,8 @@ public:
 	void PainSound() override;
 	void AlertSound() override;
 	void IdleSound() override;
-	void PlayUseSentence() override;
-	void PlayUnUseSentence() override;
+	bool PlayUseSentence() override;
+	bool PlayUnUseSentence() override;
 	bool EmitSoundScriptTalk(const char* name) override;
 
 	void OnDying(bool gibbed, CBaseEntity* pKiller) override;
@@ -829,7 +829,7 @@ void CISlave::AlertSound()
 //=========================================================
 void CISlave::IdleSound()
 {
-	if( RANDOM_LONG( 0, 2 ) == 0 )
+	//if( RANDOM_LONG( 0, 2 ) == 0 )
 	{
 		EmitSoundScriptTalk(idleSoundScript);
 	}
@@ -2327,14 +2327,14 @@ bool CISlave::CanSpawnFamiliar()
 	return false;
 }
 
-void CISlave::PlayUseSentence()
+bool CISlave::PlayUseSentence()
 {
-	EmitSoundScriptTalk(useSoundScript);
+	return EmitSoundScriptTalk(useSoundScript);
 }
 
-void CISlave::PlayUnUseSentence()
+bool CISlave::PlayUnUseSentence()
 {
-	EmitSoundScriptTalk(unuseSoundScript);
+	return EmitSoundScriptTalk(unuseSoundScript);
 }
 
 bool CISlave::EmitSoundScriptTalk(const char *name)

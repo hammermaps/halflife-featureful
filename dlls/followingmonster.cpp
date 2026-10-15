@@ -665,7 +665,8 @@ TakeDamageResult CFollowingMonster::TakeDamage( entvars_t *pevInflictor, entvars
 	if (ret.TookDamageToHealth() && IsFullyAlive() && pevAttacker && m_MonsterState != MONSTERSTATE_PRONE && FBitSet(pevAttacker->flags, FL_CLIENT)
 		&& IDefaultRelationship(CLASS_PLAYER) == R_AL)
 	{
-		PlayFriendlyFireComplaint();
+		if (PlayFriendlyFireComplaint())
+			m_flNextIdleTime = gpGlobals->time + 2.8f;
 	}
 	return ret;
 }
@@ -701,7 +702,8 @@ void CFollowingMonster::StopFollowing(bool clearSchedule , bool saySentence)
 	{
 		if( saySentence && !( m_afMemory & bits_MEMORY_PROVOKED ) )
 		{
-			PlayUnUseSentence();
+			if (PlayUnUseSentence())
+				m_flNextIdleTime = gpGlobals->time + 2.8f;
 		}
 
 		if( (m_movementGoal & MOVEGOAL_TARGETENT) && m_hTargetEnt == FollowedPlayer() )
@@ -721,7 +723,8 @@ void CFollowingMonster::StartFollowing(CBaseEntity *pLeader , bool saySentence)
 	m_hTargetEnt = pLeader;
 	if (saySentence)
 	{
-		PlayUseSentence();
+		if (PlayUseSentence())
+			m_flNextIdleTime = gpGlobals->time + 2.8f;
 	}
 
 	ClearConditions( bits_COND_CLIENT_PUSH );

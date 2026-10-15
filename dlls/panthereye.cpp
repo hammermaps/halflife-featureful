@@ -75,11 +75,11 @@ public:
 		EmitSoundScript(attackHitSoundScript);
 	}
 
-	void PlayUseSentence() override {
-		EmitSoundScript(useSoundScript);
+	bool PlayUseSentence() override {
+		return EmitSoundScript(useSoundScript);
 	}
-	void PlayUnUseSentence() override {
-		EmitSoundScript(unuseSoundScript);
+	bool PlayUnUseSentence() override {
+		return EmitSoundScript(unuseSoundScript);
 	}
 
 	bool CheckMeleeAttack1( float flDot, float flDist ) override;

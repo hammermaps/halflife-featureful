@@ -234,8 +234,8 @@ public:
 	void PainSound() override;
 	void AlertSound() override;
 	void DeathSound() override;
-	void PlayUseSentence() override;
-	void PlayUnUseSentence() override;
+	bool PlayUseSentence() override;
+	bool PlayUnUseSentence() override;
 	void BodyChange(int horns);
 	TakeDamageResult TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, const DamageInfo& info) override;
 	int IgnoreConditions() override;
@@ -1147,14 +1147,14 @@ void CPitdrone::RunTask(Task_t *pTask)
 	}
 }
 
-void CPitdrone::PlayUseSentence()
+bool CPitdrone::PlayUseSentence()
 {
-	EmitSoundScript(useSoundScript);
+	return EmitSoundScript(useSoundScript);
 }
 
-void CPitdrone::PlayUnUseSentence()
+bool CPitdrone::PlayUnUseSentence()
 {
-	EmitSoundScript(unuseSoundScript);
+	return EmitSoundScript(unuseSoundScript);
 }
 
 class CDeadPitdrone : public CDeadMonster

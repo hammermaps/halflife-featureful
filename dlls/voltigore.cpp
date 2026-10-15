@@ -356,11 +356,11 @@ public:
 	void PainSound() override;
 	void DeathSound() override;
 	void AlertSound() override;
-	void PlayUseSentence() override {
-		EmitSoundScript(useSoundScript);
+	bool PlayUseSentence() override {
+		return EmitSoundScript(useSoundScript);
 	}
-	void PlayUnUseSentence() override {
-		EmitSoundScript(unuseSoundScript);
+	bool PlayUnUseSentence() override {
+		return EmitSoundScript(unuseSoundScript);
 	}
 	void StartTask(Task_t *pTask) override;
 	bool CheckMeleeAttack1(float flDot, float flDist) override;
@@ -1124,11 +1124,11 @@ public:
 	void AlertSound() override;
 	void PainSound() override;
 	void DeathSound() override;
-	void PlayUseSentence() override {
-		EmitSoundScript(useSoundScript);
+	bool PlayUseSentence() override {
+		return EmitSoundScript(useSoundScript);
 	}
-	void PlayUnUseSentence() override {
-		EmitSoundScript(unuseSoundScript);
+	bool PlayUnUseSentence() override {
+		return EmitSoundScript(unuseSoundScript);
 	}
 	void AttackSound();
 

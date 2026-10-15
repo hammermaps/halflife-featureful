@@ -608,6 +608,8 @@ public:
 	bool m_doingRightAngleJump;
 	bool m_appliedJumpVelocity;
 
+	float m_flNextIdleTime;
+
 	const char* taskFailReason;
 };
 

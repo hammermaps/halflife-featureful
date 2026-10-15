@@ -90,8 +90,8 @@ public:
 	void DeathSound() override;
 	void PainSound() override;
 	void GibMonster() override;
-	void PlayUseSentence() override;
-	void PlayUnUseSentence() override;
+	bool PlayUseSentence() override;
+	bool PlayUnUseSentence() override;
 	bool PlayFriendlyFireComplaint() override;
 
 	DamageInfo DefaultHandleTraceAttack(entvars_t *pevInflictor, entvars_t *pevAttacker, const DamageInfo &inputDamageInfo, Vector vecDir, TraceResult *ptr) override {
@@ -619,14 +619,14 @@ void CShockTrooper::DropShockRoach(bool gibbed)
 	}
 }
 
-void CShockTrooper::PlayUseSentence()
+bool CShockTrooper::PlayUseSentence()
 {
-	PlaySpokenSoundScript(useSoundScript);
+	return PlaySpokenSoundScript(useSoundScript);
 }
 
-void CShockTrooper::PlayUnUseSentence()
+bool CShockTrooper::PlayUnUseSentence()
 {
-	PlaySpokenSoundScript(unuseSoundScript);
+	return PlaySpokenSoundScript(unuseSoundScript);
 }
 
 bool CShockTrooper::PlayFriendlyFireComplaint()

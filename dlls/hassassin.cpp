@@ -77,8 +77,8 @@ public:
 	bool CheckRangeAttack2( float flDot, float flDist ) override;	// throw grenade
 	void StartTask( Task_t *pTask ) override;
 	void RunAI() override;
-	void PlayUseSentence() override;
-	void PlayUnUseSentence() override;
+	bool PlayUseSentence() override;
+	bool PlayUnUseSentence() override;
 	bool PlayFriendlyFireComplaint() override;
 	void DeathSound() override;
 	void IdleSound() override;
@@ -215,14 +215,14 @@ const NamedSoundScript CHAssassin::friendlyFireComplaintSoundScript = {
 	"HAssassin.FriendlyFireComplaint"
 };
 
-void CHAssassin::PlayUseSentence()
+bool CHAssassin::PlayUseSentence()
 {
-	PlaySpokenSoundScript(useSoundScript);
+	return PlaySpokenSoundScript(useSoundScript);
 }
 
-void CHAssassin::PlayUnUseSentence()
+bool CHAssassin::PlayUnUseSentence()
 {
-	PlaySpokenSoundScript(unuseSoundScript);
+	return PlaySpokenSoundScript(unuseSoundScript);
 }
 
 bool CHAssassin::PlayFriendlyFireComplaint()

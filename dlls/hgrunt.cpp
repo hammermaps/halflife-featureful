@@ -209,14 +209,14 @@ bool CHGrunt::EmitSoundScriptTalk(const char* name)
 	return EmitSoundScript(name, paramOverride);
 }
 
-void CHGrunt::PlayUseSentence()
+bool CHGrunt::PlayUseSentence()
 {
-	PlaySpokenSoundScript(useSoundScript);
+	return PlaySpokenSoundScript(useSoundScript);
 }
 
-void CHGrunt::PlayUnUseSentence()
+bool CHGrunt::PlayUnUseSentence()
 {
-	PlaySpokenSoundScript(unuseSoundScript);
+	return PlaySpokenSoundScript(unuseSoundScript);
 }
 
 bool CHGrunt::PlayFriendlyFireComplaint()

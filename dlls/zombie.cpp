@@ -58,8 +58,8 @@ public:
 	void AlertSound() override;
 	void IdleSound() override;
 	void AttackSound();
-	void PlayUseSentence() override;
-	void PlayUnUseSentence() override;
+	bool PlayUseSentence() override;
+	bool PlayUnUseSentence() override;
 
 	static const NamedSoundScript idleSoundScript;
 	static const NamedSoundScript alertSoundScript;
@@ -190,14 +190,14 @@ void CZombie::AttackSound()
 	EmitSoundScript(attackSoundScript);
 }
 
-void CZombie::PlayUseSentence()
+bool CZombie::PlayUseSentence()
 {
-	EmitSoundScript(useSoundScript);
+	return EmitSoundScript(useSoundScript);
 }
 
-void CZombie::PlayUnUseSentence()
+bool CZombie::PlayUnUseSentence()
 {
-	EmitSoundScript(unuseSoundScript);
+	return EmitSoundScript(unuseSoundScript);
 }
 
 //=========================================================

@@ -90,8 +90,8 @@ public:
 	bool PlayGruntSentence(int sentence, int flags = 0);
 	bool PlaySentenceGroup(const char* group, int flags = 0);
 	bool EmitSoundScriptTalk(const char* soundScript) override;
-	void PlayUseSentence() override;
-	void PlayUnUseSentence() override;
+	bool PlayUseSentence() override;
+	bool PlayUnUseSentence() override;
 	bool PlayFriendlyFireComplaint() override;
 
 	int Save( CSave &save ) override;

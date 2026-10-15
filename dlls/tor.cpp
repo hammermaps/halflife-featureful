@@ -93,8 +93,8 @@ public:
 	void AlertSound() override;
 	void IdleSound() override;
 
-	void PlayUseSentence() override;
-	void PlayUnUseSentence() override;
+	bool PlayUseSentence() override;
+	bool PlayUnUseSentence() override;
 
 	CUSTOM_SCHEDULES
 
@@ -779,12 +779,12 @@ void CTor::IdleSound()
 	EmitSoundScript(idleSoundScript);
 }
 
-void CTor::PlayUseSentence() {
-	EmitSoundScript(useSoundScript);
+bool CTor::PlayUseSentence() {
+	return EmitSoundScript(useSoundScript);
 }
 
-void CTor::PlayUnUseSentence() {
-	EmitSoundScript(unuseSoundScript);
+bool CTor::PlayUnUseSentence() {
+	return EmitSoundScript(unuseSoundScript);
 }
 
 void CTor::SlamAttack()

@@ -37,8 +37,8 @@ public:
 	void EXPORT Spark();
 	void EXPORT Explode();
 
-	void PlayUseSentence() override;
-	void PlayUnUseSentence() override;
+	bool PlayUseSentence() override;
+	bool PlayUnUseSentence() override;
 	bool PlayFriendlyFireComplaint() override;
 
 	void DeathSound() override;
@@ -210,14 +210,14 @@ void CRGrunt::Precache()
 	m_iShotgunShell = PRECACHE_MODEL( "models/shotgunshell.mdl" );
 }
 
-void CRGrunt::PlayUseSentence()
+bool CRGrunt::PlayUseSentence()
 {
-	PlaySpokenSoundScript(useSoundScript);
+	return PlaySpokenSoundScript(useSoundScript);
 }
 
-void CRGrunt::PlayUnUseSentence()
+bool CRGrunt::PlayUnUseSentence()
 {
-	PlaySpokenSoundScript(unuseSoundScript);
+	return PlaySpokenSoundScript(unuseSoundScript);
 }
 
 bool CRGrunt::PlayFriendlyFireComplaint()

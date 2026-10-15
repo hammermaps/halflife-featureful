@@ -456,8 +456,8 @@ public:
 	void StartTask( Task_t *pTask ) override;
 	void RunTask( Task_t *pTask ) override;
 
-	void PlayUseSentence() override;
-	void PlayUnUseSentence() override;
+	bool PlayUseSentence() override;
+	bool PlayUnUseSentence() override;
 
 	void PrescheduleThink() override;
 	void OnChangeSchedule(Schedule_t *pNewSchedule) override;
@@ -1693,16 +1693,20 @@ Vector CGargantua::StompAttackStartVec()
 	return pev->origin + Vector(0,0,60) + 35 * gpGlobals->v_forward;
 }
 
-void CGargantua::PlayUseSentence()
+bool CGargantua::PlayUseSentence()
 {
-	m_breatheTime = gpGlobals->time + 1.5;
-	EmitSoundScript(useSoundScript);
+	bool result = EmitSoundScript(useSoundScript);
+	if (result)
+		m_breatheTime = gpGlobals->time + 1.5f;
+	return result;
 }
 
-void CGargantua::PlayUnUseSentence()
+bool CGargantua::PlayUnUseSentence()
 {
-	m_breatheTime = gpGlobals->time + 1.5;
-	EmitSoundScript(unuseSoundScript);
+	bool result = EmitSoundScript(unuseSoundScript);
+	if (result)
+		m_breatheTime = gpGlobals->time + 1.5f;
+	return result;
 }
 
 #define SF_SMOKER_ACTIVE 1
@@ -2037,8 +2041,8 @@ public:
 	const char* DefaultGibModel() override { return CFollowingMonster::DefaultGibModel(); }
 	void StartTask( Task_t *pTask ) override;
 	void RunTask( Task_t *pTask ) override;
-	void PlayUseSentence() override;
-	void PlayUnUseSentence() override;
+	bool PlayUseSentence() override;
+	bool PlayUnUseSentence() override;
 	void HandleAnimEvent( MonsterEvent_t *pEvent ) override;
 	void PainSound() override;
 	void DeathSound() override;
@@ -2398,14 +2402,18 @@ void CBabyGargantua::SetYawSpeed()
 	pev->yaw_speed = ys;
 }
 
-void CBabyGargantua::PlayUseSentence()
+bool CBabyGargantua::PlayUseSentence()
 {
-	m_breatheTime = gpGlobals->time + 1.5;
-	EmitSoundScript(useSoundScript);
+	bool result = EmitSoundScript(useSoundScript);
+	if (result)
+		m_breatheTime = gpGlobals->time + 1.5;
+	return result;
 }
 
-void CBabyGargantua::PlayUnUseSentence()
+bool CBabyGargantua::PlayUnUseSentence()
 {
-	m_breatheTime = gpGlobals->time + 1.5;
-	EmitSoundScript(unuseSoundScript);
+	bool result = EmitSoundScript(unuseSoundScript);
+	if (result)
+		m_breatheTime = gpGlobals->time + 1.5;
+	return result;
 }

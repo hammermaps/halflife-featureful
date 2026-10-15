@@ -117,8 +117,8 @@ public:
 	void WarnSound();
 	void PainSound() override;
 	void IdleSound() override;
-	void PlayUseSentence() override;
-	void PlayUnUseSentence() override;
+	bool PlayUseSentence() override;
+	bool PlayUnUseSentence() override;
 	void StartTask( Task_t *pTask ) override;
 	void RunTask( Task_t *pTask ) override;
 	void SonicAttack();
@@ -1486,14 +1486,14 @@ void CHoundeye::UseSleeping(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_T
 	SetTouch( &CFollowingMonster::FollowerTouch );
 }
 
-void CHoundeye::PlayUseSentence()
+bool CHoundeye::PlayUseSentence()
 {
-	EmitSoundScript(useSoundScript);
+	return EmitSoundScript(useSoundScript);
 }
 
-void CHoundeye::PlayUnUseSentence()
+bool CHoundeye::PlayUnUseSentence()
 {
-	EmitSoundScript(unuseSoundScript);
+	return EmitSoundScript(unuseSoundScript);
 }
 
 void CHoundeye::ReportAIState(ALERT_TYPE level)

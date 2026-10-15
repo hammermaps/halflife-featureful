@@ -63,8 +63,8 @@ public:
 	void StartTask( Task_t *pTask ) override;
 	void RunTask( Task_t *pTask ) override;
 
-	void PlayUseSentence() override;
-	void PlayUnUseSentence() override;
+	bool PlayUseSentence() override;
+	bool PlayUnUseSentence() override;
 	bool PlayFriendlyFireComplaint() override;
 
 	void DeathSound() override;
@@ -419,14 +419,14 @@ void CHWGrunt::RunTask( Task_t *pTask )
 
 #define HWGRUNT_VOLUME 0.4
 
-void CHWGrunt::PlayUseSentence()
+bool CHWGrunt::PlayUseSentence()
 {
-	PlaySpokenSoundScript(useSoundScript);
+	return PlaySpokenSoundScript(useSoundScript);
 }
 
-void CHWGrunt::PlayUnUseSentence()
+bool CHWGrunt::PlayUnUseSentence()
 {
-	PlaySpokenSoundScript(unuseSoundScript);
+	return PlaySpokenSoundScript(unuseSoundScript);
 }
 
 bool CHWGrunt::PlayFriendlyFireComplaint()

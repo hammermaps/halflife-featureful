@@ -101,8 +101,8 @@ public:
 	int IRelationship( CBaseEntity *pTarget ) override;
 	void StopTalking();
 	bool ShouldSpeak();
-	void PlayUseSentence() override;
-	void PlayUnUseSentence() override;
+	bool PlayUseSentence() override;
+	bool PlayUnUseSentence() override;
 	CUSTOM_SCHEDULES
 
 	int Save( CSave &save ) override;
@@ -1168,16 +1168,20 @@ Schedule_t *CAGrunt::GetScheduleOfType( int Type )
 	return CFollowingMonster::GetScheduleOfType( Type );
 }
 
-void CAGrunt::PlayUseSentence()
+bool CAGrunt::PlayUseSentence()
 {
-	EmitSoundScript(useSoundScript);
-	StopTalking();
+	bool result = EmitSoundScript(useSoundScript);
+	if (result)
+		StopTalking();
+	return result;
 }
 
-void CAGrunt::PlayUnUseSentence()
+bool CAGrunt::PlayUnUseSentence()
 {
-	EmitSoundScript(unuseSoundScript);
-	StopTalking();
+	bool result = EmitSoundScript(unuseSoundScript);
+	if (result)
+		StopTalking();
+	return result;
 }
 
 class CDeadAgrunt : public CDeadMonster

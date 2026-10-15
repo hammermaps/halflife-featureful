@@ -221,8 +221,8 @@ public:
 	int DefaultChaseEnemyFailedPolicy() override { return CHASE_ENEMY_FAILED_FAIL; }
 	PainSoundRule DefaultPainSoundRule() override;
 	void PainSound() override;
-	void PlayUseSentence() override;
-	void PlayUnUseSentence() override;
+	bool PlayUseSentence() override;
+	bool PlayUnUseSentence() override;
 	DamageInfo DefaultHandleTraceAttack(entvars_t *pevInflictor, entvars_t *pevAttacker, const DamageInfo &inputDamageInfo, Vector vecDir, TraceResult *ptr) override;
 	void NodeStart(string_t iszNextNode );
 	void NodeReach();
@@ -641,14 +641,14 @@ void CBigMomma::PainSound()
 	EmitSoundScript(painSoundScript);
 }
 
-void CBigMomma::PlayUseSentence()
+bool CBigMomma::PlayUseSentence()
 {
-	EmitSoundScript(useSoundScript);
+	return EmitSoundScript(useSoundScript);
 }
 
-void CBigMomma::PlayUnUseSentence()
+bool CBigMomma::PlayUnUseSentence()
 {
-	EmitSoundScript(unuseSoundScript);
+	return EmitSoundScript(unuseSoundScript);
 }
 
 DamageInfo CBigMomma::DefaultHandleTraceAttack(entvars_t *pevInflictor, entvars_t *pevAttacker, const DamageInfo &inputDamageInfo, Vector vecDir, TraceResult *ptr)

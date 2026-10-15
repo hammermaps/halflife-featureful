@@ -132,8 +132,8 @@ public:
 	void PainSound() override;
 	void DeathSound() override;
 	void AlertSound() override;
-	void PlayUseSentence() override;
-	void PlayUnUseSentence() override;
+	bool PlayUseSentence() override;
+	bool PlayUnUseSentence() override;
 
 	bool CheckMeleeAttack2(float flDot, float flDist) override;
 	bool CheckRangeAttack1(float flDot, float flDist) override;
@@ -456,14 +456,14 @@ void CGonome::AlertSound()
 	EmitSoundScript(alertSoundScript);
 }
 
-void CGonome::PlayUseSentence()
+bool CGonome::PlayUseSentence()
 {
-	EmitSoundScript(useSoundScript);
+	return EmitSoundScript(useSoundScript);
 }
 
-void CGonome::PlayUnUseSentence()
+bool CGonome::PlayUnUseSentence()
 {
-	EmitSoundScript(unuseSoundScript);
+	return EmitSoundScript(unuseSoundScript);
 }
 
 //=========================================================

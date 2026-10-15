@@ -735,16 +735,20 @@ bool CTalkMonster::AllowUseDuringScriptedSentence()
 	return m_allowUseScriptedSentence;
 }
 
-void CTalkMonster::PlayUseSentence()
+bool CTalkMonster::PlayUseSentence()
 {
-	if (PlaySentence( SentenceGroup(TLK_USE), RANDOM_FLOAT( 2.8f, 3.2f ), VOL_NORM, ATTN_IDLE ))
+	bool result = PlaySentence( SentenceGroup(TLK_USE), RANDOM_FLOAT( 2.8f, 3.2f ), VOL_NORM, ATTN_IDLE );
+	if (result)
 		m_hTalkTarget = FollowedPlayer();
+	return result;
 }
 
-void CTalkMonster::PlayUnUseSentence()
+bool CTalkMonster::PlayUnUseSentence()
 {
-	if (PlaySentence( SentenceGroup(TLK_UNUSE), RANDOM_FLOAT( 2.8f, 3.2f ), VOL_NORM, ATTN_IDLE ))
+	bool result = PlaySentence( SentenceGroup(TLK_UNUSE), RANDOM_FLOAT( 2.8f, 3.2f ), VOL_NORM, ATTN_IDLE );
+	if (result)
 		m_hTalkTarget = FollowedPlayer();
+	return result;
 }
 
 void CTalkMonster::DeclineFollowing(CBaseEntity *pCaller)

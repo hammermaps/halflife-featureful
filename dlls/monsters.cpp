@@ -199,6 +199,8 @@ TYPEDESCRIPTION	CBaseMonster::m_SaveData[] =
 	DEFINE_FIELD( CBaseMonster, m_vecJumpTarget, FIELD_VECTOR ),
 	DEFINE_FIELD( CBaseMonster, m_doingRightAngleJump, FIELD_BOOLEAN ),
 	DEFINE_FIELD( CBaseMonster, m_appliedJumpVelocity, FIELD_BOOLEAN ),
+
+	DEFINE_FIELD( CBaseMonster, m_flNextIdleTime, FIELD_TIME ),
 };
 
 //IMPLEMENT_SAVERESTORE( CBaseMonster, CBaseToggle )

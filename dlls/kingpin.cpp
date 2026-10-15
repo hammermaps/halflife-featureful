@@ -805,8 +805,8 @@ public:
 	PainSoundRule DefaultPainSoundRule() override;
 	void PainSound() override;
 	void DeathSound() override;
-	void PlayUseSentence() override;
-	void PlayUnUseSentence() override;
+	bool PlayUseSentence() override;
+	bool PlayUnUseSentence() override;
 
 	bool CheckRangeAttack1(float flDot, float flDist) override { return false; }
 	bool CheckRangeAttack2( float flDot, float flDist ) override;
@@ -1740,14 +1740,14 @@ void CKingpin::DeathSound()
 	EmitSoundScript(dieSoundScript);
 }
 
-void CKingpin::PlayUseSentence()
+bool CKingpin::PlayUseSentence()
 {
-	EmitSoundScript(useSoundScript);
+	return EmitSoundScript(useSoundScript);
 }
 
-void CKingpin::PlayUnUseSentence()
+bool CKingpin::PlayUnUseSentence()
 {
-	EmitSoundScript(unuseSoundScript);
+	return EmitSoundScript(unuseSoundScript);
 }
 
 void CKingpin::UpdateGlows(int target, int speed)

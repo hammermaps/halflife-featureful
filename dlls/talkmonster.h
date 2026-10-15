@@ -192,8 +192,8 @@ public:
 	virtual int		TalkFriendCategory() { return TALK_FRIEND_PERSONNEL; }
 	bool	InScriptedSentence() override;
 	bool AllowUseDuringScriptedSentence() override;
-	void PlayUseSentence() override;
-	void PlayUnUseSentence() override;
+	bool PlayUseSentence() override;
+	bool PlayUnUseSentence() override;
 	void DeclineFollowing(CBaseEntity* pCaller) override;
 	CTalkMonster* MyTalkMonsterPointer() override { return this; }
 

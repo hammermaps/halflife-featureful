@@ -358,8 +358,8 @@ public:
 	void PainSound() override;
 	void DeathSound() override;
 	void AlertSound() override;
-	void PlayUseSentence() override;
-	void PlayUnUseSentence() override;
+	bool PlayUseSentence() override;
+	bool PlayUnUseSentence() override;
 	virtual void AttackSound(bool bigSpit);
 	void StartTask(Task_t *pTask) override;
 	void RunTask(Task_t *pTask) override;
@@ -677,14 +677,14 @@ void CBullsquid::AlertSound()
 	EmitSoundScript(alertSoundScript);
 }
 
-void CBullsquid::PlayUseSentence()
+bool CBullsquid::PlayUseSentence()
 {
-	EmitSoundScript(useSoundScript);
+	return EmitSoundScript(useSoundScript);
 }
 
-void CBullsquid::PlayUnUseSentence()
+bool CBullsquid::PlayUnUseSentence()
 {
-	EmitSoundScript(unuseSoundScript);
+	return EmitSoundScript(unuseSoundScript);
 }
 
 //=========================================================

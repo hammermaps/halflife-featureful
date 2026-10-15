@@ -57,8 +57,8 @@ public:
 	bool CheckRangeAttack2(float flDot, float flDist) override;
 	void Sniperrifle();
 	void GibMonster() override;
-	void PlayUseSentence() override;
-	void PlayUnUseSentence() override;
+	bool PlayUseSentence() override;
+	bool PlayUnUseSentence() override;
 	bool PlayFriendlyFireComplaint() override;
 	int	DefaultClassify() override
 	{
@@ -147,14 +147,14 @@ const NamedSoundScript CMassn::friendlyFireComplaintSoundScript = {
 	"Massn.FriendlyFireComplaint"
 };
 
-void CMassn::PlayUseSentence()
+bool CMassn::PlayUseSentence()
 {
-	PlaySpokenSoundScript(useSoundScript);
+	return PlaySpokenSoundScript(useSoundScript);
 }
 
-void CMassn::PlayUnUseSentence()
+bool CMassn::PlayUnUseSentence()
 {
-	PlaySpokenSoundScript(unuseSoundScript);
+	return PlaySpokenSoundScript(unuseSoundScript);
 }
 
 bool CMassn::PlayFriendlyFireComplaint()

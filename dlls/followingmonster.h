@@ -133,8 +133,8 @@ public:
 		}
 		return false;
 	}
-	virtual void PlayUseSentence() {}
-	virtual void PlayUnUseSentence() {}
+	virtual bool PlayUseSentence() { return false; }
+	virtual bool PlayUnUseSentence() { return false; }
 	virtual bool PlayFriendlyFireComplaint() { return false; }
 	virtual void JustSpoke();
 
