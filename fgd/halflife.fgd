@@ -2818,6 +2818,12 @@
 	idle_framerate(string) : "Custom idle framerate [default=1.0]"
 	move_sequence(string) : "Move sequence" : : "The name of the model sequence to play while the train is active."
 	move_framerate(string) : "Custom move framerate [default=1.0]"
+	turn_policy(choices) : "Turn Policy" =
+	[
+		0 : "Instant (face to next target)"
+		1 : "Instant, only YAW"
+		2 : "No turn"
+	]
 ]
 
 @PointClass sprite() base(Targetname, RenderFields, BaseTrain, SoundRadius) size(-16 -16 -16, 16 16 16) color(0 128 255) = env_spritetrain : "Sprite Train"

@@ -2728,6 +2728,13 @@ void CSpriteTrain::TrainThink()
 class CModelTrain : public CFuncTrain
 {
 public:
+	enum
+	{
+		TURN_INSTANT = 0,
+		TURN_INSTANT_YAW_ONLY,
+		TURN_NO,
+	};
+
 	void Spawn() override;
 	void Precache() override;
 	void KeyValue(KeyValueData *pkvd) override;
@@ -2745,6 +2752,7 @@ public:
 	string_t m_moveSequence;
 	float m_idleFramerate;
 	float m_moveFramerate;
+	int m_turnPolicy;
 };
 
 LINK_ENTITY_TO_CLASS(env_modeltrain, CModelTrain)
@@ -2755,6 +2763,7 @@ TYPEDESCRIPTION	CModelTrain::m_SaveData[] =
 	DEFINE_FIELD( CModelTrain, m_moveSequence, FIELD_STRING ),
 	DEFINE_FIELD( CModelTrain, m_idleFramerate, FIELD_FLOAT ),
 	DEFINE_FIELD( CModelTrain, m_moveFramerate, FIELD_FLOAT ),
+	DEFINE_FIELD( CModelTrain, m_turnPolicy, FIELD_INTEGER ),
 };
 
 IMPLEMENT_SAVERESTORE( CModelTrain, CFuncTrain )
@@ -2820,6 +2829,11 @@ void CModelTrain::KeyValue(KeyValueData *pkvd)
 		m_moveFramerate = atof(pkvd->szValue);
 		pkvd->fHandled = true;
 	}
+	else if (FStrEq(pkvd->szKeyName, "turn_policy"))
+	{
+		m_turnPolicy = atoi(pkvd->szValue);
+		pkvd->fHandled = true;
+	}
 	else
 		CFuncTrain::KeyValue(pkvd);
 }
@@ -2827,13 +2841,13 @@ void CModelTrain::KeyValue(KeyValueData *pkvd)
 void CModelTrain::AdvanceAnimation()
 {
 	// Advance frames and dispatch events.
-	StudioFrameAdvance();
-	DispatchAnimEvents();
+	float flInterval = StudioFrameAdvance();
+	DispatchAnimEvents(flInterval);
 
 	// Restart sequence
 	if (m_fSequenceFinished)
 	{
-		pev->frame = 0;
+		pev->frame = std::fmod(pev->frame, 255.0f);
 		ResetSequenceInfo();
 
 		m_fSequenceFinished = true;
@@ -2860,7 +2874,17 @@ void CModelTrain::Next()
 		const Vector diff = m_pevCurrentTarget->origin - pev->origin;
 		if (diff != g_vecZero)
 		{
-			pev->angles = UTIL_VecToAngles(m_pevCurrentTarget->origin - pev->origin);
+			switch(m_turnPolicy)
+			{
+			case TURN_INSTANT:
+				pev->angles = UTIL_VecToAngles(m_pevCurrentTarget->origin - pev->origin);
+				break;
+			case TURN_INSTANT_YAW_ONLY:
+				pev->angles.y = UTIL_VecToAngles(m_pevCurrentTarget->origin - pev->origin).y;
+				break;
+			default:
+				break;
+			}
 
 			if (!FStringNull(m_moveSequence))
 			{
