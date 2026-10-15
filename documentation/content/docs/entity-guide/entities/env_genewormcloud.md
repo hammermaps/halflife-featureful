@@ -20,3 +20,7 @@ Speed: 1000
 
 * Damage: **sk_geneworm_dmg_spit**
 * Type: acid
+
+### Visuals
+
+* **GeneWorm.Cloud** - projectile sprite.

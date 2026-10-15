@@ -38,12 +38,11 @@ bookToC: false
 * **Gonome.AttackMiss** - melee attack miss. Derived from **NPC.AttackMiss**
 * **Gonome.Use** - start following the ally player. Derived from **Gonome.Idle**
 * **Gonome.UnUse** - stop following the ally player. Derived from **Gonome.Alert**.
-* **Gonome.SpitTouch** - one of the sounds played when the guts projectile hits something. Emitted from the guts projectile. Derived from **NPC.SpitTouch**
-* **Gonome.SpitHit** - one of the sounds played when the guts projectile hits something. Emitted from the guts projectile. Derived from **NPC.SpitHit**
+* [gonomeguts soundscripts]({{< ref "gonomeguts/#soundscripts" >}})
 
 ### Visuals
 
-* **Gonome.Guts** - guts projectile visual.
+* [gonomeguts visuals]({{< ref "gonomeguts/#visuals" >}})
 
 ### Attacks
 

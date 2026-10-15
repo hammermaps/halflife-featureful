@@ -65,10 +65,6 @@ Shared visuals:
 
 * **Bullsquid.TinySpitBase** - defines a sprite used by **Bullsquid.TinySpit**, **Bullsquid.ToxicTinySpit**, **Bullsquid.Fleck** and **Bullsquid.ToxicFleck**.
 
-Notes:
-
-* Spit customizations are also applied to [env_blowercannon]({{< ref env_blowercannon >}}).
-
 ### Attacks
 
 * *Melee Attack 1* - tail whip.

@@ -54,12 +54,10 @@ If you just remove the aircraft (without turning it off first) while it's moving
 * **Apache.Rotor** - rotor sound during the flight. Must be looped.
 * **Apache.FireGun** - firing a bullet.
 * **Apache.Crash** - death sound. Derived from **NPC.Crash**
-* **Apache.RPG** - rocket launch sound. Emitted from the rocket projectile.
+* [hvr_rocket soundscripts]({{< ref "hvr_rocket/#soundscripts" >}})
 
 ### Visuals
 
-* **Apache.RocketModel** - Apache rocket model.
-* **Apache.RocketTrail** - Apache rocket trailing beam.
 * **Apache.FallingSmoke** - smokes produced while Apache is falling.
 * **Apache.CrashSmoke** - big smoke on crash.
 * **Apache.RocketSmoke** - smoke when launching rocket.
@@ -67,6 +65,7 @@ If you just remove the aircraft (without turning it off first) while it's moving
 * **Apache.Fireball** - big fireball played when Apache crashes.
 * **Apache.BlastCircle** - wave played when Apache crashes.
 * **Wreckage.Smoke** - smokes played after the Apache crashed.
+* [hvr_rocket visuals]({{< ref "hvr_rocket/#visuals" >}})
 
 ### Entity template examples
 

@@ -20,3 +20,12 @@ Speed: 900
 
 * Damage: **sk_gonome_dmg_guts**
 * Type: generic
+
+### Soundscripts
+
+* **Gonome.SpitTouch** - one of the sounds played when the guts projectile hits something. Derived from **NPC.SpitTouch**
+* **Gonome.SpitHit** - one of the sounds played when the guts projectile hits something. Derived from **NPC.SpitHit**
+
+### Visuals
+
+* **Gonome.Guts** - projectile sprite.

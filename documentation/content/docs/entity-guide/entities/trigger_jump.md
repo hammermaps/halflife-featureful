@@ -9,6 +9,7 @@ entityCategory: solid
 A trigger entity that can be used to create jump pads - to launch the toucher to the designated point. Similar to the one from Ricochet but with several changes:
 
 * The jump evaluation is a bit different from Ricochet, especially in terms of how the height parameter is handled: in Ricochet the height is relative to the midpoint between the toucher origin and the target destination; in Featureful the height is relative to the toucher origin.
+* The jump evaluation takes into consideration the player's gravity (e.g. if set from `trigger_gravity`).
 * By default it can be touched by players only, but has filters for other entities, like `trigger_multiple`.
 
 ### Parameters

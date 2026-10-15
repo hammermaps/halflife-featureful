@@ -41,7 +41,7 @@ The final boss in Opposing Force.
 ### Visuals
 
 * **GeneWorm.EyeLight** - eye entity light.
-* **GeneWorm.Cloud** - acid cloud projectile.
+* [env_genewormcloud visuals]({{< ref "env_genewormcloud/#visuals" >}})
 * **GeneWorm.SpawnGlow** - glow sprite spawned in in the opening orifice when GeneWorm is in pain.
 * **GeneWorm.SpawnGlowLight** - entity light at the orifice.
 * **GeneWorm.SpawnTeleSprite** - sprite that comes out of the orifice after enough damage has been dealt to the orifice. This visual is applied to the same entity that poses as a sprite in the orifice, so the effect inherits its properties.
