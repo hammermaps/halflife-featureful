@@ -1027,6 +1027,7 @@ bool CBaseEntity::ApplyDamageToHealth(const DamageInfo& damageInfo, entvars_t *p
 	if (pev->health < healthBeforeDamage)
 	{
 		result.SetTookDamageToHealth();
+		m_lastHurtTime = gpGlobals->time;
 		return true;
 	}
 	return false;
@@ -1406,10 +1407,7 @@ TakeDamageResult CBaseMonster::TakeDamage( entvars_t *pevInflictor, entvars_t *p
 	if ((m_MonsterState == MONSTERSTATE_SCRIPT && takeDamagePolicy == SCRIPT_TAKE_DAMAGE_POLICY_NONLETHAL))
 		damageInfo.SetNonLethal();
 
-	if (ApplyDamageToHealth(damageInfo, pevAttacker, takeDamageResult))
-	{
-		m_lastHurtTime = gpGlobals->time;
-	}
+	ApplyDamageToHealth(damageInfo, pevAttacker, takeDamageResult);
 
 	// HACKHACK Don't kill monsters in a script.  Let them break their scripts first
 	if( m_MonsterState == MONSTERSTATE_SCRIPT )
