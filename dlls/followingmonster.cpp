@@ -284,7 +284,7 @@ void CFollowingMonster::OnDying(bool gibbed, CBaseEntity* pKiller)
 int CFollowingMonster::ObjectCaps()
 {
 	int caps = CSquadMonster::ObjectCaps();
-	if ((m_afCapability & bits_CAP_USABLE) && IsFullyAlive())
+	if (IsFollowCapable())
 	{
 		caps |= FCAP_IMPULSE_USE | FCAP_ONLYVISIBLE_USE;
 	}
@@ -673,11 +673,8 @@ TakeDamageResult CFollowingMonster::TakeDamage( entvars_t *pevInflictor, entvars
 void CFollowingMonster::FollowingMonsterInit()
 {
 	MonsterInit();
-	if (IDefaultRelationship(CLASS_PLAYER) == R_AL) {
-		m_afCapability |= bits_CAP_USABLE;
-		SetUse( &CFollowingMonster::FollowerUse );
-		SetTouch( &CFollowingMonster::FollowerTouch );
-	}
+	SetUse( &CFollowingMonster::FollowerUse );
+	SetTouch( &CFollowingMonster::FollowerTouch );
 }
 
 // turn head towards supplied origin
@@ -735,6 +732,11 @@ void CFollowingMonster::StartFollowing(CBaseEntity *pLeader , bool saySentence)
 void CFollowingMonster::LimitFollowers( CBaseEntity *pPlayer, int maxFollowers )
 {
 	return;
+}
+
+bool CFollowingMonster::IsFollowCapable()
+{
+	return IsFullyAlive() && m_pfnUse == &CFollowingMonster::FollowerUse && IDefaultRelationship(CLASS_PLAYER) == R_AL;
 }
 
 bool CFollowingMonster::CanFollow()
@@ -1002,7 +1004,7 @@ bool CFollowingMonster::CanRoamAfterCombat()
 
 bool CFollowingMonster::IsUsefulToDisplayHint(CBaseEntity* pPlayer)
 {
-	if (!(m_afCapability & bits_CAP_USABLE))
+	if (!IsFollowCapable())
 		return false;
 	if (ShouldDiscardFollowing(pPlayer))
 		return false;

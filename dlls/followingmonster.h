@@ -99,6 +99,7 @@ public:
 	virtual void DeclineFollowing( CBaseEntity* pCaller ) {}
 	virtual void LimitFollowers( CBaseEntity *pPlayer, int maxFollowers );
 	virtual int MaxFollowers() { return -1; }
+	virtual bool IsFollowCapable();
 
 	CFollowingMonster* MyFollowingMonsterPointer() override { return this; }
 	virtual bool InScriptedSentence();

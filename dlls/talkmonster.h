@@ -159,6 +159,7 @@ public:
 	void			PrescheduleThink() override;
 	void			ReactToPlayerHit(entvars_t* pevInflictor, entvars_t* pevAttacker, const DamageInfo& damageInfo);
 	void			TalkMonsterInit();
+	bool			IsFollowCapable() override;
 
 	// Conversations / communication
 	int				GetVoicePitch();

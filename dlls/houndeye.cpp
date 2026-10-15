@@ -632,7 +632,6 @@ void CHoundeye::StartTask( Task_t *pTask )
 			if (FBitSet(pev->spawnflags, SF_HOUNDEYE_START_SLEEPING))
 			{
 				ClearBits(pev->spawnflags, SF_HOUNDEYE_START_SLEEPING);
-				ClearBits(m_afCapability, bits_CAP_USABLE);
 				SetTouch(&CHoundeye::TouchSleeping);
 				SetUse(&CHoundeye::UseSleeping);
 				m_iAsleep = HOUNDEYE_DEEP_SLEEPING;
@@ -1470,16 +1469,8 @@ void CHoundeye::TouchSleeping(CBaseEntity *pToucher)
 			m_iAsleep = HOUNDEYE_FORCE_URGENT_WAKING;
 			MakeIdealYaw( pToucher->pev->origin );
 		}
-		if (IDefaultRelationship(CLASS_PLAYER) == R_AL) {
-			m_afCapability |= bits_CAP_USABLE;
-			SetUse( &CFollowingMonster::FollowerUse );
-			SetTouch( &CFollowingMonster::FollowerTouch );
-		}
-		else
-		{
-			SetTouch(NULL);
-			SetUse( &CBaseMonster::MonsterUse );
-		}
+		SetUse( &CFollowingMonster::FollowerUse );
+		SetTouch( &CFollowingMonster::FollowerTouch );
 	}
 }
 
@@ -1491,16 +1482,8 @@ void CHoundeye::UseSleeping(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_T
 		m_iAsleep = useType == USE_ON ? HOUNDEYE_FORCE_URGENT_WAKING : HOUNDEYE_FORCE_LAZY_WAKING;
 	}
 
-	if (IDefaultRelationship(CLASS_PLAYER) == R_AL) {
-		m_afCapability |= bits_CAP_USABLE;
-		SetUse( &CFollowingMonster::FollowerUse );
-		SetTouch( &CFollowingMonster::FollowerTouch );
-	}
-	else
-	{
-		SetTouch(NULL);
-		SetUse( &CBaseMonster::MonsterUse );
-	}
+	SetUse( &CFollowingMonster::FollowerUse );
+	SetTouch( &CFollowingMonster::FollowerTouch );
 }
 
 void CHoundeye::PlayUseSentence()

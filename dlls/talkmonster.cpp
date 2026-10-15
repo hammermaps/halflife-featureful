@@ -1392,11 +1392,13 @@ void CTalkMonster::TalkMonsterInit()
 {
 	PrepareVoicePitch();
 	MonsterInit();
-	if (IsFriendWithPlayerBeforeProvoked()) {
-		m_afCapability |= bits_CAP_USABLE;
-		SetUse( &CTalkMonster::FollowerUse );
-		SetTouch( &CFollowingMonster::FollowerTouch );
-	}
+	SetUse( &CTalkMonster::FollowerUse );
+	SetTouch( &CFollowingMonster::FollowerTouch );
+}
+
+bool CTalkMonster::IsFollowCapable()
+{
+	return IsFullyAlive() && IsFriendWithPlayerBeforeProvoked();
 }
 
 bool CTalkMonster::IsWounded()
