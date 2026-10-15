@@ -1078,7 +1078,6 @@ void CFuncTrain::Activate()
 		{	// not triggered, so start immediately
 			pev->nextthink = pev->ltime + 0.1f;
 			SetThink( &CFuncTrain::ThinkNext );
-			ALERT(at_console, "CFuncTrain::Activate start\n");
 		}
 		else
 			pev->spawnflags |= SF_TRAIN_WAIT_RETRIGGER;
@@ -1109,7 +1108,7 @@ void CFuncTrain::SetDefaultTrainValues()
 		pev->speed = 100;
 
 	if( FStringNull(pev->target) )
-		ALERT( at_console, "%s with no target\n", STRING(pev->classname) );
+		ALERT( at_error, "%s with no target\n", STRING(pev->classname) );
 
 	if( pev->dmg == 0 && !FBitSet(pev->spawnflags, SF_TRAIN_NO_DAMAGE) )
 		pev->dmg = 2;
@@ -1702,7 +1701,7 @@ void CFuncTrackTrain::NearestPath()
 
 	if( !pNearest )
 	{
-		ALERT( at_console, "Can't find a nearby track !!!\n" );
+		ALERT( at_warning, "Can't find a nearby track !!!\n" );
 		SetThink( NULL );
 		return;
 	}
@@ -1758,7 +1757,7 @@ void CFuncTrackTrain::Spawn()
 	m_dir = 1;
 
 	if( FStringNull( pev->target ) )
-		ALERT( at_console, "%s with no target\n", STRING(pev->classname) );
+		ALERT( at_error, "%s with no target\n", STRING(pev->classname) );
 
 	if( pev->spawnflags & SF_TRACKTRAIN_PASSABLE )
 		pev->solid = SOLID_NOT;
@@ -1880,7 +1879,7 @@ void CFuncTrainControls::Find()
 
 	if( FNullEnt( pTarget ) )
 	{
-		ALERT( at_console, "No train %s\n", STRING( pev->target ) );
+		ALERT( at_warning, "No train %s\n", STRING( pev->target ) );
 		return;
 	}
 
@@ -1909,7 +1908,7 @@ public:
 	{
 		if (FStringNull(pev->target))
 		{
-			ALERT(at_console, "%s has no target!\n", STRING(pev->classname));
+			ALERT(at_error, "%s has no target!\n", STRING(pev->classname));
 			return;
 		}
 
