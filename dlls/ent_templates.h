@@ -37,14 +37,6 @@ struct SquadCapabilities
 	tribool requireSameEntTemplate;
 };
 
-struct PainSoundRule
-{
-	FloatRange delay = 0.25f;
-	float chance = 1.0f;
-	float lowerBound = 0.0f;
-	bool allowWhenDying = false;
-};
-
 enum class FlagSetMatch
 {
 	INVALID = -1,

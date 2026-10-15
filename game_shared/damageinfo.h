@@ -138,4 +138,12 @@ struct RadiusDamageInfoPatch
 
 int ParseDamageType(const char *type);
 
+struct PainSoundRule
+{
+	FloatRange delay = 0.25f;
+	float chance = 1.0f;
+	float lowerBound = 0.0f;
+	bool allowWhenDying = false;
+};
+
 #endif

@@ -447,7 +447,6 @@ public:
 	void PowerShieldTakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, DamageInfo& damageInfo);
 	TakeDamageResult TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, const DamageInfo& damageInfo) override;
 	void ReactToDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, const DamageInfo& damageInfo, TakeDamageResult& takeDamageResult);
-	void PainReaction(const DamageInfo& damageInfo);
 	TakeDamageResult DeadTakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, const DamageInfo& damageInfo );
 
 	bool IsMoving() override { return m_movementGoal != MOVEGOAL_NONE; }
@@ -458,8 +457,6 @@ public:
 	virtual void DeathSound() { return; }
 	virtual void AlertSound() { return; }
 	virtual void IdleSound() { return; }
-	virtual PainSoundRule DefaultPainSoundRule() { return PainSoundRule{}; }
-	virtual void PainSound() { return; }
 
 	virtual void StopFollowing( bool clearSchedule, bool saySentence = true ) {}
 
@@ -593,7 +590,6 @@ public:
 	short m_gibPolicy;
 	bool m_bForceConditionsGather;
 	bool m_bForceTakeDamageTriggerCondition;
-	float m_flNextPainTime;
 	float m_equalDislikeTime;
 	string_t m_triggerOnDeath;
 

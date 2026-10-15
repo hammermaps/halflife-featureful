@@ -731,6 +731,8 @@ TakeDamageResult CBaseEntity::TakeDamage( entvars_t *pevInflictor, entvars_t *pe
 		pev->velocity = pev->velocity + vecDir * flForce;
 	}
 
+	PainReaction(damageInfo);
+
 	ApplyDamageToHealth(damageInfo, pevAttacker, takeDamageResult);
 
 	if( pev->health <= 0 )
@@ -799,6 +801,7 @@ TYPEDESCRIPTION	CBaseEntity::m_SaveData[] =
 	DEFINE_FIELD( CBaseEntity, m_prevRenderMode, FIELD_SHORT ),
 
 	DEFINE_FIELD( CBaseEntity, m_flTouchedByJumpPad, FIELD_TIME ),
+	DEFINE_FIELD( CBaseEntity, m_flNextPainTime, FIELD_TIME ),
 };
 
 void CBaseEntity::KeyValue(KeyValueData* pkvd)

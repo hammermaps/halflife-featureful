@@ -1034,7 +1034,6 @@ void CHGrunt::SpawnHelper(int bloodColor)
 	SetMyFieldOfView(0.2f);// indicates the width of this monster's forward view cone ( as a dotproduct result )
 	m_MonsterState		= MONSTERSTATE_NONE;
 	m_flNextGrenadeCheck	= gpGlobals->time + 1;
-	m_flNextPainTime	= gpGlobals->time;
 	m_iSentence		= HGRUNT_SENT_NONE;
 
 	m_afCapability		= bits_CAP_TURN_HEAD;

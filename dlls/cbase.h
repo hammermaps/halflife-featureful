@@ -690,6 +690,9 @@ public:
 
 	virtual void BeforeApplyDamageToHealth(float flDamage) {}
 	bool ApplyDamageToHealth(const DamageInfo& damageInfo, entvars_t *pevAttacker, TakeDamageResult& result);
+	virtual PainSoundRule DefaultPainSoundRule() { return PainSoundRule{}; }
+	virtual void PainSound() {}
+	void PainReaction(const DamageInfo& damageInfo);
 
 	virtual bool CanShowObjectHint() { return true; }
 	virtual bool IsUsefulToDisplayHint(CBaseEntity* pPlayer) { return true; }
@@ -801,6 +804,7 @@ public:
 	int m_prevRenderAmt;
 
 	float m_flTouchedByJumpPad;
+	float m_flNextPainTime;
 };
 
 // Ugly technique to override base member functions

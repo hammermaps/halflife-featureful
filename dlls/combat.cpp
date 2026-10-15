@@ -1508,7 +1508,7 @@ void CBaseMonster::ReactToDamage( entvars_t *pevInflictor, entvars_t *pevAttacke
 	}
 }
 
-void CBaseMonster::PainReaction(const DamageInfo &damageInfo)
+void CBaseEntity::PainReaction(const DamageInfo &damageInfo)
 {
 	PainSoundRule painSoundRule = DefaultPainSoundRule();
 

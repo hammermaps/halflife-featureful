@@ -157,7 +157,6 @@ void CHWGrunt::Spawn()
 	SetMyHealth();
 	SetMyFieldOfView(0.2);// indicates the width of this monster's forward view cone ( as a dotproduct result )
 	m_MonsterState		= MONSTERSTATE_NONE;
-	m_flNextPainTime	= gpGlobals->time;
 
 	m_afCapability		= bits_CAP_TURN_HEAD;
 	SetMySquadCapabilities(bits_CAP_SQUAD);
