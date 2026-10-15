@@ -1954,6 +1954,27 @@ By default some monsters use `"fail"` (zombies, bullsquids, gonomes) and some mo
 ```
 {{% /details %}}
 
+#### investigate_sounds
+
+A boolean - whether the monster should investigate combat sounds while in non-combat state. If set to `true`, the monster will try going to the source of the combat sound (gunshot, melee hit, etc.). After arriving the monster will stay in place for 10 seconds and then return to the former position. In Half-Life only [monster_human_assassin]({{< ref monster_human_assassin >}}) expresses this behavior. Set it to false for `monster_human_assassin` to suppress sound investigation behavior.
+
+{{% details title="Example" %}}
+```json
+{
+    "monster_barney": {
+        "npc_behavior": {
+            "investigate_sounds": true
+        }
+    },
+    "monster_human_assassin": {
+        "npc_behavior": {
+            "investigate_sounds": false
+        }
+    }
+}
+```
+{{% /details %}}
+
 #### player_can_interact
 
 A boolean - whether the player can press '+use' on the monster (if the monster is ally and able to accept interaction at all, see [following monsters]({{< ref "monsters/#following-monsters-features" >}})). This is `true` by default. Set to `false` to disallow monster answering the follow requests - this is useful if you want to make a monster ally but not following the player. This also prevents a monster from speaking their 'decline' voicelines on attempt to use them. The monster still can be made to follow the player via the [scripted_following]({{< ref scripted_following >}}) entity.

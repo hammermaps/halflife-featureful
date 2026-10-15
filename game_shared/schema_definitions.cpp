@@ -1635,6 +1635,9 @@ R"(
 					},
 					"player_can_interact": {
 						"type": "boolean"
+					},
+					"investigate_sounds": {
+						"type": "boolean"
 					}
 				}
 			}

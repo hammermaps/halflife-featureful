@@ -5945,6 +5945,20 @@ int CBaseMonster::ChaseEnemyFailedPolicy()
 	return DefaultChaseEnemyFailedPolicy();
 }
 
+bool CBaseMonster::WantsInvestigateSounds()
+{
+	const EntTemplate* entTemplate = GetMyEntTemplate();
+	if (entTemplate)
+	{
+		const EntTemplate::NPCBehavior& behavior = entTemplate->GetNPCBehavior();
+		if (!indeterminate(behavior.investigateSounds))
+		{
+			return (bool)behavior.investigateSounds;
+		}
+	}
+	return DefaultWantsInvestigateSounds();
+}
+
 void CDeadMonster::KeyValue( KeyValueData *pkvd )
 {
 	if (FStrEq(pkvd->szKeyName, "pose"))

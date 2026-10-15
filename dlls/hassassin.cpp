@@ -122,6 +122,10 @@ public:
 		return LookupActivity(ACT_HOP);
 	}
 
+	bool DefaultWantsInvestigateSounds() override {
+		return true;
+	}
+
 	float m_flLastShot;
 	float m_flDiviation;
 
@@ -970,11 +974,6 @@ Schedule_t *CHAssassin::GetSchedule()
 			Schedule_t* utilitySchedule = GetUtilitySchedule();
 			if (utilitySchedule)
 				return utilitySchedule;
-
-			if( pSound &&( pSound->m_iType & bits_SOUND_COMBAT ) )
-			{
-				return GetScheduleOfType( SCHED_INVESTIGATE_SOUND );
-			}
 		}
 		break;
 	case MONSTERSTATE_COMBAT:

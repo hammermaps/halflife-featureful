@@ -561,6 +561,11 @@ public:
 	}
 	int ChaseEnemyFailedPolicy();
 
+	virtual bool DefaultWantsInvestigateSounds() {
+		return false;
+	}
+	bool WantsInvestigateSounds();
+
 	float m_nextPatrolPathCheck;
 
 	// Custom hull sizes

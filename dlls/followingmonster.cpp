@@ -844,6 +844,18 @@ Schedule_t* CFollowingMonster::GetUtilitySchedule()
 	if (followingSchedule)
 		return followingSchedule;
 
+	if (WantsInvestigateSounds())
+	{
+		if (HasConditions(bits_COND_HEAR_SOUND))
+		{
+			CSound *pSound = PBestSound();
+			if (pSound && FBitSet(pSound->m_iType, bits_SOUND_COMBAT))
+			{
+				return GetScheduleOfType(SCHED_INVESTIGATE_SOUND);
+			}
+		}
+	}
+
 	return nullptr;
 }
 

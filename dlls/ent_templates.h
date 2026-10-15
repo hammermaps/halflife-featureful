@@ -443,6 +443,7 @@ public:
 	{
 		optional<int> chaseEnemyFailed;
 		bool playerCanInteract{true};
+		tribool investigateSounds;
 	};
 
 	struct WeaponDefinition

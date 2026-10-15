@@ -1731,6 +1731,7 @@ void EntTemplateSystem::AddTemplateFromJsonValueImpl(const std::string& template
 		});
 
 		UpdatePropertyFromJson(npcBehavior.playerCanInteract, value, "player_can_interact");
+		UpdatePropertyFromJson(npcBehavior.investigateSounds, value, "investigate_sounds");
 
 		entTemplate.SetNPCBehavior(std::move(npcBehavior));
 	});
