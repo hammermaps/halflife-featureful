@@ -163,7 +163,7 @@ public:
 	bool CheckRangeAttack1( float flDot, float flDist ) override;
 	bool CheckRangeAttack2( float flDot, float flDist ) override;
 	bool CheckMeleeAttack1( float flDot, float flDist ) override;
-	int TalkFriendCategory() override { return TALK_FRIEND_SOLDIER; }
+	short AlertFriendsDefaultPolicy() override { return ALERT_FRIENDS_ON_DEATH_IF_NOT_IN_COMBAT; }
 	void PlayCallForMedic() override;
 	void PrescheduleThink() override;
 	bool ShouldAnticipateLanding();
@@ -1953,7 +1953,7 @@ void CHFGrunt::Precache()
 	TalkInit();
 
 	CTalkMonster::Precache();
-	RegisterTalkMonster();
+	RegisterTalkMonster(true, true);
 }
 
 void CHFGrunt::PrecacheCommon()
@@ -3002,7 +3002,7 @@ void CTorch::Precache()
 
 	TalkInit();
 	CTalkMonster::Precache();
-	RegisterTalkMonster();
+	RegisterTalkMonster(true, true);
 }
 
 void CTorch::Activate()
@@ -3767,7 +3767,7 @@ void CMedic::Precache()
 
 	TalkInit();
 	CTalkMonster::Precache();
-	RegisterTalkMonster();
+	RegisterTalkMonster(true, true);
 	RegisterMedic();
 
 	if (pev->modelindex)

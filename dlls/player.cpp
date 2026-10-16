@@ -1060,7 +1060,7 @@ TakeDamageResult CBasePlayer::TakeDamage( entvars_t *pevInflictor, entvars_t *pe
 				CTalkMonster::TalkFriend friendClass = CTalkMonster::m_szFriends[i];
 				if (!friendClass.name[0])
 					break;
-				if (friendClass.category == TALK_FRIEND_SOLDIER)
+				if (friendClass.attackAttackers)
 				{
 					CBaseEntity* pEntity = NULL;
 					while((pEntity = UTIL_FindEntityByClassname(pEntity, friendClass.name)) != NULL)

@@ -39,13 +39,6 @@
 #define TLK_CFRIENDS		20
 #define NUM_MEDICS 5
 
-enum
-{
-	TALK_FRIEND_UNKNOWN = 0,
-	TALK_FRIEND_PERSONNEL = 1,
-	TALK_FRIEND_SOLDIER = 2,
-};
-
 typedef enum
 {
 	TLK_ANSWER = 0,
@@ -188,8 +181,6 @@ public:
 
 	// Following related
 	void			StartFollowing( CBaseEntity *pLeader, bool saySentence = true ) override;
-	void			LimitFollowers( CBaseEntity *pPlayer, int maxFollowers ) override;
-	virtual int		TalkFriendCategory() { return TALK_FRIEND_PERSONNEL; }
 	bool	InScriptedSentence() override;
 	bool AllowUseDuringScriptedSentence() override;
 	bool PlayUseSentence() override;
@@ -223,7 +214,7 @@ public:
 	int MyToleranceLevel() { return m_iTolerance ? m_iTolerance : DefaultToleranceLevel(); }
 
 	virtual short AlertFriendsDefaultPolicy();
-	short AlertFriendsPolicy() { return m_alertFriendsPolicy ? m_alertFriendsPolicy : AlertFriendsDefaultPolicy(); }
+	short AlertFriendsPolicy();
 	bool ShouldAlertFriendsOnDeath();
 
 	virtual bool AlertableByFriendDeathDefault();
@@ -237,13 +228,13 @@ public:
 	{
 		char name[64];
 		bool canFollow;
-		short category;
+		bool attackAttackers;
 	};
 
 	static TalkFriend m_szFriends[TLK_CFRIENDS];		// array of friend names
 	static char m_szMedics[NUM_MEDICS][64];
-	static void RegisterTalkMonster(const char* className, bool canFollow, short followerCategory);
-	void RegisterTalkMonster(bool canFollow = true);
+	static void RegisterTalkMonster(const char* className, bool canFollow, bool attackAttackers);
+	void RegisterTalkMonster(bool canFollow = true, bool attackAttackers = false);
 	static void RegisterMedic(const char* className);
 	void RegisterMedic();
 

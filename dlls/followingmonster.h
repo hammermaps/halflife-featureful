@@ -97,8 +97,6 @@ public:
 	void StopFollowing(bool clearSchedule, bool saySentence = true ) override;
 	virtual void StartFollowing( CBaseEntity *pLeader, bool saySentence = true );
 	virtual void DeclineFollowing( CBaseEntity* pCaller ) {}
-	virtual void LimitFollowers( CBaseEntity *pPlayer, int maxFollowers );
-	virtual int MaxFollowers() { return -1; }
 	virtual bool IsAllyToPlayerClass();
 	bool CanAnswerToPlayerUse();
 

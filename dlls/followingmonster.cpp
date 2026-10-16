@@ -732,11 +732,6 @@ void CFollowingMonster::StartFollowing(CBaseEntity *pLeader , bool saySentence)
 		ClearSchedule();
 }
 
-void CFollowingMonster::LimitFollowers( CBaseEntity *pPlayer, int maxFollowers )
-{
-	return;
-}
-
 bool CFollowingMonster::IsAllyToPlayerClass()
 {
 	return IDefaultRelationship(CLASS_PLAYER) == R_AL;
@@ -925,8 +920,6 @@ int CFollowingMonster::DoFollowerUse(CBaseEntity *pCaller, bool saySentence, USE
 		}
 		if (!isFollowing && (useType == USE_TOGGLE || useType == USE_ON))
 		{
-			LimitFollowers( pCaller, MaxFollowers() );
-
 			if( m_afMemory & bits_MEMORY_PROVOKED )
 			{
 				ALERT( at_aiconsole, "%s: I'm not following you, you evil person!\n", STRING(pev->classname) );
