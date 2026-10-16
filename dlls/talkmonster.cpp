@@ -1803,7 +1803,8 @@ bool CTalkMonster::ShouldAlertFriendsOnDeath()
 	case ALERT_FRIENDS_ON_DEATH_ALWAYS:
 		return true;
 	case ALERT_FRIENDS_ON_DEATH_IF_NOT_IN_COMBAT:
-		return m_hEnemy == 0;
+		// Wasn't in combat or was fighting player who provoked them in the first place
+		return m_hEnemy == 0 || m_hEnemy->IsPlayer();
 	case ALERT_FRIENDS_ON_DEATH_NEVER:
 		return false;
 	default:
