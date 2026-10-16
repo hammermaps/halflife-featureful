@@ -476,8 +476,9 @@ void CFlybee::HandleAnimEvent( MonsterEvent_t *pEvent )
 		{
 			UTIL_MakeVectors( pev->angles );
 
-			Vector vecSrc	= pev->origin + gpGlobals->v_up * 24 + gpGlobals->v_forward * 32;
-			Vector ang		= UTIL_VecToAngles( (m_hEnemy->Center() - vecSrc).Normalize() );
+			const Vector vecSrc	= pev->origin + gpGlobals->v_up * 24 + gpGlobals->v_forward * 32;
+			const Vector enemyPosition = m_hEnemy != 0 ? m_hEnemy->Center() : m_vecEnemyLKP;
+			const Vector ang		= UTIL_VecToAngles( (enemyPosition - vecSrc).Normalize() );
 
 			EntityOverrides flyBallOverrides = GetProjectileOverrides();
 
@@ -721,7 +722,7 @@ Schedule_t* CFlybee::GetSchedule()
 			}
 			else
 			{
-				if ((Center() - m_hEnemy->Center()).IsLengthLessThanOrEqual(300) && fabs(pev->origin.z - m_hEnemy->pev->origin.z) <= 128)
+				if (m_hEnemy != 0 && (Center() - m_hEnemy->Center()).IsLengthLessThanOrEqual(300) && fabs(pev->origin.z - m_hEnemy->pev->origin.z) <= 128)
 					return slFlybeeRunAttack;
 			}
 		}
@@ -916,19 +917,25 @@ void CFlybee::RunTask ( Task_t *pTask )
 			}
 			else if (m_fSequenceFinished )
 				TaskComplete();
-
-			TraceResult tr;
-			UTIL_TraceHull( pev->origin, m_hEnemy->Center(), ignore_monsters, large_hull, m_hEnemy->edict(), &tr );
-
-			if (tr.flFraction < 0.9f)
+			else if (m_hEnemy == 0)
 			{
-				TaskFail("path is obstructed");
+				TaskFail("no enemy");
 				break;
 			}
+			else
+			{
+				TraceResult tr;
+				UTIL_TraceHull( pev->origin, m_hEnemy->Center(), ignore_monsters, large_hull, m_hEnemy->edict(), &tr );
 
-			m_SaveVelocity = (tr.vecEndPos - pev->origin).Normalize() * m_flightSpeed;
+				if (tr.flFraction < 0.9f)
+				{
+					TaskFail("path is obstructed");
+					break;
+				}
 
-			m_flightSpeed = Q_min ( m_flMaxSpeed, m_flightSpeed * 1.2f );
+				m_SaveVelocity = (tr.vecEndPos - pev->origin).Normalize() * m_flightSpeed;
+				m_flightSpeed = Q_min ( m_flMaxSpeed, m_flightSpeed * 1.2f );
+			}
 
 			break;
 		}
