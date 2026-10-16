@@ -89,14 +89,10 @@ public:
 	static const NamedSoundScript painLaughSoundScript; // vocalization: play sometimes when hit and still has lots of health
 	static const NamedSoundScript friendBeamSoundScript;
 
-	static const char *pShootSounds[];	// grunting vocalization: play sometimes when he launches an attack // unused?
-
 	static const NamedVisual irritationBallVisual;
 	static const NamedVisual irritationLightVisual;
 	static const NamedVisual handLightVisual;
 	static const NamedVisual dyingBeamVisual;
-
-	// x_teleattack1.wav	the looping sound of the teleport attack ball.
 
 	float m_flForce;
 
@@ -399,11 +395,6 @@ const NamedSoundScript CNihilanth::friendBeamSoundScript = {
 	"Nihilanth.FriendBeam"
 };
 
-const char *CNihilanth::pShootSounds[] =
-{
-	"X/x_shoot1.wav",
-};
-
 const NamedVisual CNihilanth::irritationBallVisual = BuildVisual("Nihilanth.IrritationBall")
 		.Model("sprites/tele1.spr")
 		.RenderProps(kRenderTransAdd, Color3(255, 255, 255), 255, kRenderFxNoDissipation)
@@ -500,8 +491,6 @@ void CNihilanth::Precache()
 	RegisterAndPrecacheSoundScript(rechargeSoundScript);
 	RegisterAndPrecacheSoundScript(painLaughSoundScript);
 	RegisterAndPrecacheSoundScript(friendBeamSoundScript);
-
-	PRECACHE_SOUND_ARRAY( pShootSounds );
 
 	RegisterVisual(irritationBallVisual);
 	RegisterVisual(irritationLightVisual);

@@ -501,8 +501,6 @@ void CBarney::Precache()
 	RegisterAndPrecacheSoundScript(firePistolSoundScript);
 	RegisterAndPrecacheSoundScript(firePythonSoundScript, NPC::pythonSoundScript);
 
-	PRECACHE_SOUND( "barney/ba_attack1.wav" );
-
 	// every new barney must call this, otherwise
 	// when a level is loaded, nobody will talk (time is reset to 0)
 	TalkInit();
@@ -1051,8 +1049,6 @@ void CBarniel::Precache()
 	RegisterAndPrecacheSoundScript(dieSoundScript);
 	RegisterAndPrecacheSoundScript(firePistolSoundScript);
 
-	PRECACHE_SOUND( "barniel/bn_attack1.wav" );
-
 	TalkInit();
 	CTalkMonster::Precache();
 	RegisterTalkMonster();
@@ -1244,8 +1240,6 @@ void CKate::Precache()
 	RegisterAndPrecacheSoundScript(dieSoundScript);
 	RegisterAndPrecacheSoundScript(firePistolSoundScript);
 	RegisterAndPrecacheSoundScript(NPC::swishSoundScript);
-
-	PRECACHE_SOUND( "kate/ka_attack1.wav" );
 
 	if (!ShouldAutoPrecacheSounds())
 	{

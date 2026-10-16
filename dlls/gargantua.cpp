@@ -531,8 +531,6 @@ protected:
 	static constexpr const char* useSoundScript = "Garg.Use";
 	static constexpr const char* unuseSoundScript = "Garg.UnUse";
 
-	static const char *pRicSounds[];
-
 	static const NamedVisual eyeVisual;
 	static const NamedVisual flameVisual;
 	static const NamedVisual bigFlameVisual;
@@ -663,14 +661,6 @@ const NamedSoundScript CGargantua::breathSoundScript = {
 	ATTN_GARG,
 	IntRange(90, 110),
 	"Garg.Breath"
-};
-
-const char *CGargantua::pRicSounds[] =
-{
-	"debris/metal4.wav",
-	"debris/metal6.wav",
-	"weapons/ric4.wav",
-	"weapons/ric5.wav",
 };
 
 const NamedVisual CGargantua::eyeVisual = BuildVisual("Garg.Eye")
@@ -1145,8 +1135,6 @@ void CGargantua::Precache()
 	RegisterAndPrecacheSoundScript(useSoundScript, idleSoundScript);
 	RegisterAndPrecacheSoundScript(unuseSoundScript, alertSoundScript);
 
-	PRECACHE_SOUND_ARRAY( pRicSounds );
-
 	m_eyeVisual = RegisterVisual(eyeVisual);
 	RegisterVisual(bigFlameVisual);
 	RegisterVisual(smallFlameVisual);
@@ -1175,8 +1163,6 @@ DamageInfo CGargantua::DefaultHandleTraceAttack(entvars_t *pevInflictor, entvars
 		{
 			UTIL_Ricochet( ptr->vecEndPos, RANDOM_FLOAT( 0.5 ,1.5 ) );
 			pev->dmgtime = gpGlobals->time;
-			//if ( RANDOM_LONG( 0, 100 ) < 25 )
-			//	EMIT_SOUND_DYN( ENT( pev ), CHAN_BODY, pRicSounds[RANDOM_LONG( 0, ARRAYSIZE( pRicSounds ) - 1 )], 1.0, ATTN_NORM, 0, PITCH_NORM );
 		}
 		damageInfo.damage = 0;
 	}

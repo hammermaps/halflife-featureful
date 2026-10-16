@@ -424,7 +424,6 @@ void CBaseTurret::Precache()
 	RegisterAndPrecacheSoundScript(deploySoundScript);
 	RegisterAndPrecacheSoundScript(undeploySoundScript);
 	RegisterAndPrecacheSoundScript(alertSoundScript);
-	PRECACHE_SOUND( "turret/tu_search.wav" );
 }
 
 void CBaseTurret::UpdateOnRemove()
