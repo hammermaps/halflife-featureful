@@ -246,6 +246,13 @@ void CFlockingFlyerFlock::Precache()
 	EntityOverrides entityOverrides;
 	entityOverrides.model = pev->model;
 	entityOverrides.entTemplate = m_entTemplate;
+
+	if (FStringNull(entityOverrides.entTemplate))
+	{
+		if (g_EntTemplateSystem.GetTemplate(STRING(pev->classname)) != nullptr)
+			entityOverrides.entTemplate = pev->classname;
+	}
+
 	UTIL_PrecacheOther("monster_flyer", entityOverrides);
 }
 
@@ -281,6 +288,13 @@ void CFlockingFlyerFlock::SpawnFlock()
 		pBoid->pev->model = pev->model;
 		pBoid->pev->scale = pev->scale;
 		pBoid->m_entTemplate = m_entTemplate;
+
+		if (FStringNull(pBoid->m_entTemplate))
+		{
+			if (g_EntTemplateSystem.GetTemplate(STRING(pev->classname)) != nullptr)
+				pBoid->m_entTemplate = pev->classname;
+		}
+
 		UTIL_SetOrigin( pBoid->pev, vecSpot );
 		pBoid->pev->movetype = MOVETYPE_FLY;
 		pBoid->m_customFlySpeed = m_customFlySpeed;
