@@ -1733,6 +1733,7 @@ class CTriggerMultiple : public CBaseTrigger
 {
 public:
 	void Spawn() override;
+	void Precache() override;
 	void KeyValue( KeyValueData *pkvd ) override;
 
 	USE_TYPE UseType() override;
@@ -1742,6 +1743,8 @@ LINK_ENTITY_TO_CLASS( trigger_multiple, CTriggerMultiple )
 
 void CTriggerMultiple::Spawn()
 {
+	Precache();
+
 	if( m_flWait == 0 )
 		m_flWait = 0.2f;
 
@@ -1749,6 +1752,12 @@ void CTriggerMultiple::Spawn()
 
 	ASSERTSZ( pev->health == 0, "trigger_multiple with health" );
 	SetTouch( &CBaseTrigger::MultiTouch );
+}
+
+void CTriggerMultiple::Precache()
+{
+	if (!FStringNull(pev->noise))
+		PRECACHE_SOUND(STRING(pev->noise));
 }
 
 void CTriggerMultiple::KeyValue( KeyValueData *pkvd )
