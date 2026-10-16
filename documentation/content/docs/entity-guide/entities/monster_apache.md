@@ -124,4 +124,47 @@ The smoke behavior can't be currently expressed via entity templates, so the sta
 ```
 {{% /tab %}}
 
+{{% tab "Condition Zero Deleted Scenes gunships" %}}
+
+![](/images/czeror.png) Enemy gunships used in some CZDS missions are actually `monster_apache` with custom model and sounds.
+
+```json
+{
+    "harrier_gunship": {
+        "own_visual": {
+            "model": "models/props/harrier_gunship.mdl"
+        },
+        "soundscripts": {
+            "Apache.Rotor": {
+                "waves": ["vehicles/harrier_loop.wav"]
+            },
+            "Apache.FireGun": {
+                "waves": ["vehicles/harrier_fire.wav"]
+            },
+            "Apache.Crash": {
+                "waves": ["vehicles/harrier_death.wav"]
+            }
+        }
+    },
+    "hind_gunship": {
+        "own_visual": {
+            "model": "models/props/hind_gunship.mdl"
+        },
+        "soundscripts": {
+            "Apache.Rotor": {
+                "waves": ["vehicles/hind_loop.wav"]
+            },
+            "Apache.FireGun": {
+                "waves": ["vehicles/hind_fire.wav"]
+            },
+            "Apache.Crash": {
+                "waves": ["vehicles/hind_death.wav"]
+            }
+        }
+    }
+}
+```
+
+{{% /tab %}}
+
 {{% /tabs %}}
