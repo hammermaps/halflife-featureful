@@ -5535,6 +5535,11 @@ void CBasePlayer::ItemPostFrame()
 
 	ImpulseCommands();
 
+	if (!m_pActiveItem)
+		return;
+
+	m_pActiveItem->ItemPostFrameAlways();
+
 #if CLIENT_WEAPONS
 	if( m_flNextAttack > 0 )
 #else
@@ -5543,9 +5548,6 @@ void CBasePlayer::ItemPostFrame()
 	{
 		return;
 	}
-
-	if( !m_pActiveItem )
-		return;
 
 	m_pActiveItem->ItemPostFrame();
 }
