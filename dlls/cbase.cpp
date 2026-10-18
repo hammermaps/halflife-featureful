@@ -481,7 +481,12 @@ int DispatchRestore( edict_t *pent, SAVERESTOREDATA *pSaveData, int globalEntity
 			}
 		}
 
-		if( pEntity->ObjectCaps() & FCAP_MUST_SPAWN )
+		bool mustSpawn = FBitSet(pEntity->ObjectCaps(), FCAP_MUST_SPAWN);
+		// ObjectCaps might have called GetCacheableEntTemplate. Mark templates as not checked
+		pEntity->m_entTemplateChecked = false;
+		pEntity->m_ownerEntTemplateChecked = false;
+
+		if (mustSpawn)
 		{
 			pEntity->Restore( restoreHelper );
 			pEntity->Spawn();
