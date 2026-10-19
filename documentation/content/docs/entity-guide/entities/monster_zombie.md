@@ -124,6 +124,31 @@ Zombified assassins from Delta Paricles that are cloaked while moving.
 
 {{% /tab %}}
 
+{{% tab "Blood colors" %}}
+
+Zombie who bleeds in yellow from a head (headcrab) and red from other parts.
+
+```json
+{
+    "monster_zombie": {
+        "gib_visual": {
+            "model": "models/agibs.mdl"
+        },
+        "blood": {
+            "color": "red",
+            "by_hitgroup": [
+                {
+                    "hitgroup": "head",
+                    "color": "yellow"
+                }
+            ]
+        }
+    }
+}
+```
+
+{{% /tab %}}
+
 {{% tab "Gib disposition" %}}
 
 The [gib disposition]({{< ref "entity-templates/#gib_disposition" >}}) that mixes human and alien gibs.

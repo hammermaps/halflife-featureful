@@ -431,6 +431,9 @@ In the following example we set the main blood color of zombie to red, and the h
 ```json
 {
     "monster_zombie": {
+        "gib_visual": {
+            "model": "models/agibs.mdl"
+        },
         "blood": {
             "color": "red",
             "by_hitgroup": [
@@ -443,6 +446,8 @@ In the following example we set the main blood color of zombie to red, and the h
     }
 }
 ```
+
+Note that the main blood color can change the default gib model for a monster. So we explicitly set the gib model to alien type.
 
 ### field_of_view
 
@@ -685,14 +690,19 @@ Not all monsters affected by these properties. The list of affected monsters cur
 
 * All grunt-like monsters, like human grunts, heavy weapons grunts, male assassins, shock troopers and robogrunts.
 * Houndeyes
+* Bullsquids
+* Zombies
 * Alien slaves
 * Alien grunts
 * Gargantuas (note that they have a separate relationship classification by default, so they won't participate in squads of other aliens).
 * Alien controllers
+* Big Momma
 * Female assassins
 * All talk monsters like security guards, scientists and opfor human grunts.
 * Pitdrones
 * Voltigores
+* Gonomes
+* Panthereyes
 {{% /hint %}}
 
 ### open_door_capability
