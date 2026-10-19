@@ -2257,7 +2257,10 @@ void CConfigurableWeapon::SwitchMode(SwitchModeReason reason)
 		m_pPlayer->m_flNextAttack = UTIL_WeaponTimeBase() + delay;
 
 	if (!m_inAltMode)
+	{
 		m_pPlayer->m_bResumeZoom = false;
+		m_pPlayer->pev->fov = m_pPlayer->m_iFOV = 0;
+	}
 
 	//ALERT(at_console, "New mode: %s\n", m_inAltMode ? "alternative" : "primary");
 }
