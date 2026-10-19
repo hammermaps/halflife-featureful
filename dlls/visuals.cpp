@@ -38,6 +38,11 @@ void VisualSystem::AddVisualFromJsonValue(const char *name, const Value &value)
 	_visuals[name] = ParseVisualFromJSON(value, [this](const char* str){ return MakeStringInSet(_modelStringSet, str); });
 }
 
+Visual VisualSystem::ParseVisualAndCacheModelName(const Value &value)
+{
+	return ParseVisualFromJSON(value, [this](const char* str){ return MakeStringInSet(_modelStringSet, str); });
+}
+
 void VisualSystem::EnsureVisualExists(const std::string& name)
 {
 	auto it = _visuals.find(name);

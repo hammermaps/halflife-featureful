@@ -199,6 +199,92 @@ The [visual]({{< ref visuals >}}) definition or the name of the visual from the 
 }
 ```
 
+### gib_disposition
+
+An array of gib dispositions - allows to specify how many of which submodels should spawn and even allows spawning gibs of different models. Without a disposition defined the gib submodel is selected randomly, unless it's a **models/hgibs.mdl** - then the default gib disposition for human gibs is used (one skull at maximum; submodels for the rest of the gibs are selected in range `[1, 6]`).
+
+{{% hint warning %}}
+Setting a `Custom gib model` parameter on the entity instance completely disables gib disposition. Setting a custom model via `"gib_visual"` entity property doesn't affect the disposition.
+{{% /hint %}}
+
+Each array item can have the following properties:
+
+* `"count"` - the number of gibs to spawn. Non-negative integer or range. Default value is 1.
+* `"visual"` - the custom visual to apply to the gib. This allows to set a model different from the main monster gib model, or to set custom render parameters. The omitted properties are taken from the monster's `"gib_visual"` and default gib model for the monster.
+* `"min_body"` - minimum gib submodel. The default value is 0.
+* `"max_body"` - maximim gib submodel. If not set, it depends on the number of submodels in the model. The submodel will be randomized in range `[min_body, max_body]` for each spawned gib in this disposition.
+* `"body"` - an alternative to `"min_body"` and `"max_body"`. Just one integer number to define the required submodel.
+* `"position"` - where to spawn gibs. Possible values:
+    - `"box"` - somewhere in the monster's bounding volume. This is the default.
+    - `"head"` - at the eye position. Used by a human skull.
+* `"fly_away"` - how the gibs should move after spawn. Possible values:
+    - `"directed"` - depends on the attack direction. This is the default.
+    - `"random"` - randomized direction. Used by a human skull.
+* `"throw_at_player_chance"` - the chance of throwing the gib at the player's face (presumably for a spooky effect). This is used by a human skull. Default value is 0.0 (no chance). If the chance is passed, the `"fly_away"` property is ignored.
+* `"blood"` - the blood color (see [blood](#blood) for possible color values). The decals drawn when gib touches the world geometry depend on the blood color. If omitted, the gib blood color will depend on the monster's blood color.
+
+```json
+{
+    "monster_zombie": {
+        "gib_disposition": [
+            {
+                "count": 1,
+                "visual": {
+                    "model": "models/hgibs.mdl"
+                },
+                "body": 0,
+                "position": "head",
+                "fly_away": "random",
+                "throw_at_player_chance": 0.05,
+                "blood": "red"
+            },
+            {
+                "count": 2
+            },
+            {
+                "count": 2,
+                "visual": {
+                    "model": "models/hgibs.mdl"
+                },
+                "min_body": 1,
+                "max_body": 6,
+                "blood": "red"
+            }
+        ]
+    },
+    "human_gibs_no_skull": {
+        "gib_disposition": [
+            {
+                "count": 4,
+                "visual": {
+                    "model": "models/hgibs.mdl",
+                },
+                "min_body": 1,
+                "max_body": 6,
+                "blood": "red"
+            }
+        ]
+    },
+    "monster_alien_slave": {
+        "gib_disposition": [
+            {
+                "count": 4,
+            },
+            {
+                "count": 1,
+                "visual": {
+                    "model": "models/islave_gibs1.mdl"
+                }
+            }
+        ]
+    }
+}
+```
+
+In this example we make `monster_zombie` to spawn the human skull on gibbing (with same parameters as default skull), along with 2 default gibs for the monster and 2 more human non-skull gibs (i.e. 5 gibs in total).
+
+We also define the `"human_gibs_no_skull"` entity template that define the gib disposition for human gibs without a human skull. This is useful if you want to reuse the **models/hgibs.mdl** for the creatures without a human head (dogs, bears, etc.).
+
 ### classify
 
 Default relationship classification for the monsters belonging to this template. Possible values:

@@ -446,6 +446,32 @@ public:
 		tribool investigateSounds;
 	};
 
+	struct GibInfo
+	{
+		GibInfo() = default;
+		GibInfo(int gibCount, int body): count(gibCount), bodyRange(body) {}
+
+		enum {
+			POSITION_BOX,
+			POSITION_HEAD
+		};
+
+		enum {
+			FLY_AWAY_DIRECTED,
+			FLY_AWAY_RANDOM
+		};
+
+		IntRange count{1};
+		IntRange bodyRange{0, -1};
+		Visual visual;
+		int position{FLY_AWAY_DIRECTED};
+		int flyAway{FLY_AWAY_DIRECTED};
+		float throwAtPlayerChance{0.0f};
+		optional<int> bloodColor;
+	};
+
+	typedef std::vector<GibInfo> GibDisposition;
+
 	struct WeaponDefinition
 	{
 		optional<int> weaponBit;
@@ -773,6 +799,13 @@ public:
 		_npcBehavior = behavior;
 	}
 
+	const GibDisposition& GetGibDisposition() const {
+		return _gibDisposition;
+	}
+	void SetGibDisposition(GibDisposition&& gibDisposition) {
+		_gibDisposition = gibDisposition;
+	}
+
 	const std::vector<WeaponDefinition>& GetWeaponDefinitions() const {
 		return _weaponsDefinitions;
 	}
@@ -847,6 +880,8 @@ private:
 	Jumping _jumping;
 
 	NPCBehavior _npcBehavior;
+
+	GibDisposition _gibDisposition;
 
 	std::vector<WeaponDefinition> _weaponsDefinitions;
 };

@@ -1217,7 +1217,6 @@ void CKingpin::Precache()
 {
 	PrecacheMyModel();
 	PrecacheMyGibModel();
-	PRECACHE_MODEL("models/stickygibpink.mdl");
 
 	if (!ShouldAutoPrecacheSounds())
 	{
@@ -1626,8 +1625,8 @@ void CKingpin::RunTask( Task_t *pTask )
 				g_vecAttackDir = Vector(0,0,-1);
 				GibMonster();
 				::RadiusDamage(pev->origin, pev, pev, RadiusDamageInfo(DamageInfo{GetSkillValue("kingpin_plasma_blast"), DMG_SHOCK}), Classify());
-				m_bloodColor = BLOOD_COLOR_RED; // HACK to change blood color of pink gibs
-				CGib::SpawnRandomGibs( pev, DefaultGibCount(), "models/stickygibpink.mdl" );
+				//m_bloodColor = BLOOD_COLOR_RED; // HACK to change blood color of pink gibs
+				//CGib::SpawnRandomGibs( pev, DefaultGibCount(), "models/stickygibpink.mdl" );
 			}
 			return;
 		}

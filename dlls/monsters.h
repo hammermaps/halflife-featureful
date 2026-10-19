@@ -19,6 +19,7 @@
 
 #include "cbase.h"
 #include "hitgroup.h"
+#include "ent_templates.h"
 
 /*
 
@@ -181,10 +182,12 @@ public:
 
 	int ObjectCaps() override { return ( CBaseEntity::ObjectCaps() & ~FCAP_ACROSS_TRANSITION ); }
 	void LaunchAsProjectile(const ProjectileParameters& params) override;
-	static void SpawnHeadGib( entvars_t *pevVictim, const Visual* visual = nullptr );
-	static void SpawnHumanGibs(entvars_t *pevVictim, int cGibs = 4, const Visual* visual = nullptr );
-	static void SpawnRandomGibs( entvars_t *pevVictim, int cGibs, const char* gibModel, int gibBodiesNum = 0, int startGibIndex = 0, const Visual* visual = nullptr );
-	static void SpawnRandomGibs( entvars_t *pevVictim, int cGibs, const char* gibModel, const Visual* visual );
+	static void SpawnHeadGib( entvars_t *pevVictim, const Visual& gibVisual);
+	static void SpawnHumanGibs(entvars_t *pevVictim, int cGibs, const Visual& gibVisual );
+	static void SpawnHumanGibs(entvars_t *pevVictim, int cGibs );
+	static void SpawnRandomGibs( entvars_t *pevVictim, int cGibs, const Visual& gibVisual );
+	static void SpawnGibsByGibInfo( entvars_t *pevVictim, const Visual& mainGibVisual, const EntTemplate::GibInfo& gibInfo );
+	static void SpawnGibsByDisposition( entvars_t *pevVictim, const Visual& mainGibVisual, const EntTemplate::GibDisposition& gibDisposition);
 	static void SpawnStickyGibs( entvars_t *pevVictim, Vector vecOrigin, int cGibs );
 	static void SpawnRandomClientGibs(entvars_t *pevVictim, int cGibs, const char* gibModel, int gibBodiesNum = 0, int startGibIndex = 0 );
 

@@ -124,4 +124,42 @@ Zombified assassins from Delta Paricles that are cloaked while moving.
 
 {{% /tab %}}
 
+{{% tab "Gib disposition" %}}
+
+The [gib disposition]({{< ref "entity-templates/#gib_disposition" >}}) that mixes human and alien gibs.
+
+```json
+{
+    "monster_zombie": {
+        "gib_disposition": [
+            {
+                "count": 1,
+                "visual": {
+                    "model": "models/hgibs.mdl"
+                },
+                "body": 0,
+                "position": "head",
+                "fly_away": "random",
+                "throw_at_player_chance": 0.05,
+                "blood": "red"
+            },
+            {
+                "count": 2
+            },
+            {
+                "count": 2,
+                "visual": {
+                    "model": "models/hgibs.mdl"
+                },
+                "min_body": 1,
+                "max_body": 6,
+                "blood": "red"
+            }
+        ]
+    }
+}
+```
+
+{{% /tab %}}
+
 {{% /tabs %}}

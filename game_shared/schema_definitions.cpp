@@ -1071,6 +1071,46 @@ R"(
 			"gib_visual": {
 				"$ref": "#/visual_object"
 			},
+			"gib_disposition": {
+				"type": "array",
+				"items": {
+					"type": "object",
+					"properties": {
+						"count": {
+							"$ref": "#/range_int_non_negative"
+						},
+						"min_body": {
+							"type": "integer",
+							"minimum": 0
+						},
+						"max_body": {
+							"type": "integer",
+							"minimum": 0
+						},
+						"body": {
+							"type": "integer",
+							"minimum": 0
+						},
+						"position": {
+							"enum": ["box", "head"]
+						},
+						"fly_away": {
+							"enum": ["directed", "random"]
+						},
+						"throw_at_player_chance": {
+							"minimum": 0.0,
+							"maximum": 1.0
+						},
+						"visual": {
+							"$ref": "#/visual_object"
+						},
+						"blood": {
+							"$ref": "#/blood_color"
+						}
+					},
+					"additionalProperties": false
+				}
+			},
 			"size": {
 				"$ref": "#/object_size"
 			},

@@ -929,7 +929,17 @@ void CFloater::GibMonster()
 
 	EmitSoundScript(NPC::bodySplatSoundScript);
 
-	CGib::SpawnRandomClientGibs( pev, GibCount(), GibModel() );
+	const EntTemplate::GibDisposition& gibDisposition = GibDisposition();
+	if (gibDisposition.empty())
+	{
+		CGib::SpawnRandomGibs( pev, GibCount(), MyGibVisual() );
+	}
+	else
+	{
+		CGib::SpawnGibsByDisposition(pev, MyGibVisual(), gibDisposition);
+	}
+
+	//CGib::SpawnRandomClientGibs( pev, GibCount(), GibModel() );
 
 	SetThink( &CBaseEntity::SUB_Remove );
 	pev->nextthink = gpGlobals->time;

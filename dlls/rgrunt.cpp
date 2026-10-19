@@ -361,7 +361,15 @@ void CRGrunt::Explode()
 		UTIL_DecalTrace( &tr, DECAL_SCORCH2 );
 	}
 
-	CGib::SpawnRandomGibs( pev, GibCount(), GibModel(), MyGibVisual() );
+	const EntTemplate::GibDisposition& gibDisposition = GibDisposition();
+	if (gibDisposition.empty())
+	{
+		CGib::SpawnRandomGibs( pev, GibCount(), MyGibVisual() );
+	}
+	else
+	{
+		CGib::SpawnGibsByDisposition(pev, MyGibVisual(), gibDisposition);
+	}
 
 	SetThink( &CBaseEntity::SUB_Remove );
 	pev->nextthink = gpGlobals->time;

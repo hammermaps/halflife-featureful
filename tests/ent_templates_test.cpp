@@ -129,7 +129,35 @@ const char entities[] = R"(
 				}
 			],
 			"max_weight": 2
-		}
+		},
+		"gib_disposition": [
+			{
+				"count": 1,
+				"visual": {
+					"model": "models/hgibs.mdl"
+				},
+				"body": 0,
+				"position": "head",
+				"fly_away": "random",
+				"throw_at_player_chance": 0.05,
+				"blood": "red"
+			},
+			{
+				"count": [2, 3],
+				"visual": {
+					"rendermode": "Texture",
+					"alpha": 200
+				},
+				"min_body": 1,
+				"max_body": 5,
+				"position": "box",
+				"fly_away": "directed",
+				"blood": "yellow"
+			},
+			{
+				"count": 2
+			}
+		]
 	},
 	"monster_zombie_barney": {
 		"loot_drop": [
@@ -453,6 +481,32 @@ TEST(EntityTemplates, Parse)
 
 		EXPECT_EQ(dropItemSet.items[3].classname, "weapon_shotgun");
 		EXPECT_EQ(dropItemSet.items[3].weight, 2.0f);
+
+		const EntTemplate::GibDisposition& gibDisposition = zombie->GetGibDisposition();
+
+		ASSERT_EQ(gibDisposition.size(), 3);
+
+		EXPECT_EQ(gibDisposition[0].count, 1);
+		EXPECT_STREQ(gibDisposition[0].visual.model, "models/hgibs.mdl");
+		EXPECT_EQ(gibDisposition[0].bodyRange.min, 0);
+		EXPECT_EQ(gibDisposition[0].bodyRange.max, 0);
+		EXPECT_EQ(gibDisposition[0].position, EntTemplate::GibInfo::POSITION_HEAD);
+		EXPECT_EQ(gibDisposition[0].flyAway, EntTemplate::GibInfo::FLY_AWAY_RANDOM);
+		EXPECT_FLOAT_EQ(gibDisposition[0].throwAtPlayerChance, 0.05f);
+		EXPECT_TRUE(gibDisposition[0].bloodColor.has_value());
+		EXPECT_EQ(*gibDisposition[0].bloodColor, BLOOD_COLOR_RED);
+
+		EXPECT_EQ(gibDisposition[1].count.min, 2);
+		EXPECT_EQ(gibDisposition[1].count.max, 3);
+		EXPECT_EQ(gibDisposition[1].visual.rendermode, kRenderTransTexture);
+		EXPECT_EQ(gibDisposition[1].visual.renderamt, 200);
+		EXPECT_EQ(gibDisposition[1].position, EntTemplate::GibInfo::POSITION_BOX);
+		EXPECT_EQ(gibDisposition[1].flyAway, EntTemplate::GibInfo::FLY_AWAY_DIRECTED);
+		EXPECT_TRUE(gibDisposition[1].bloodColor.has_value());
+		EXPECT_EQ(*gibDisposition[1].bloodColor, BLOOD_COLOR_YELLOW);
+
+		EXPECT_EQ(gibDisposition[2].count, 2);
+		EXPECT_FALSE(gibDisposition[2].bloodColor);
 	}
 
 	{

@@ -3812,9 +3812,9 @@ void CBaseMonster::ReportAIState( ALERT_TYPE level )
 
 	if (pev->model)
 		ALERT(level, "Model: %s. ", STRING(pev->model));
-	const char* gibModel = GibModel();
-	if (gibModel)
-		ALERT(level, "Gib Model: %s. ", gibModel);
+	Visual gibVisual = MyGibVisual();
+	if (gibVisual.model)
+		ALERT(level, "Gib Model: %s. ", gibVisual.model);
 
 	ALERT(level, "Rendermode: %s. Color: (%g, %g, %g). Alpha: %g. Renderfx: %s. ",
 		  RenderModeToString(pev->rendermode),
@@ -4084,6 +4084,15 @@ void CBaseMonster::PrecacheEntTemplateResources()
 		else
 		{
 			canCloak = CanCloakByDefault();
+		}
+
+		const EntTemplate::GibDisposition& gibDisposition = entTemplate->GetGibDisposition();
+		for (const auto& gibInfo : gibDisposition)
+		{
+			if (gibInfo.visual.model)
+			{
+				PRECACHE_MODEL(gibInfo.visual.model);
+			}
 		}
 	}
 	else
@@ -4830,12 +4839,23 @@ const char* CBaseMonster::MyNonDefaultGibModel()
 	return nullptr;
 }
 
-const Visual* CBaseMonster::MyGibVisual()
+Visual CBaseMonster::MyGibVisual()
 {
+	Visual result;
 	const EntTemplate* entTemplate = GetMyEntTemplate();
 	if (entTemplate)
-		return g_VisualSystem.GetVisual(entTemplate->GibVisualName());
-	return nullptr;
+	{
+		const Visual* templateGibVisual = g_VisualSystem.GetVisual(entTemplate->GibVisualName());
+		if (templateGibVisual)
+			result = *templateGibVisual;
+	}
+
+	if (!FStringNull(m_gibModel))
+		result.SetModel(STRING(m_gibModel));
+	else if (!result.model)
+		result.SetModel(DefaultGibModel());
+
+	return result;
 }
 
 int CBaseMonster::PrecacheMyGibModel(const char *model)

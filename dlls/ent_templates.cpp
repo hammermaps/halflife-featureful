@@ -836,6 +836,72 @@ void EntTemplateSystem::AddTemplateFromJsonValueImpl(const std::string& template
 		}
 	});
 
+	HandleJSONMember(value, "gib_disposition", [&entTemplate, this](const Value& value) {
+		Value::ConstArray arr = value.GetArray();
+		EntTemplate::GibDisposition gibDisposition;
+		gibDisposition.reserve(arr.Size());
+
+		for (auto& item : arr)
+		{
+			EntTemplate::GibInfo gibInfo;
+
+			UpdatePropertyFromJson(gibInfo.count, item, "count");
+			UpdatePropertyFromJson(gibInfo.bodyRange.min, item, "min_body");
+			UpdatePropertyFromJson(gibInfo.bodyRange.max, item, "max_body");
+
+			int body;
+			if (UpdatePropertyFromJson(body, item, "body"))
+				gibInfo.bodyRange.min = gibInfo.bodyRange.max = body;
+
+			HandleJSONMember(item, "visual", [this, &gibInfo](const Value& value) {
+				gibInfo.visual = _visualSystem->ParseVisualAndCacheModelName(value);
+			});
+
+			HandleJSONMember(item, "position", [&gibInfo](const Value& value) {
+				const char* str = value.GetString();
+				if (strcmp(str, "box") == 0)
+				{
+					gibInfo.position = EntTemplate::GibInfo::POSITION_BOX;
+				}
+				else if (strcmp(str, "head") == 0)
+				{
+					gibInfo.position = EntTemplate::GibInfo::POSITION_HEAD;
+				}
+			});
+
+			HandleJSONMember(item, "fly_away", [&gibInfo](const Value& value) {
+				const char* str = value.GetString();
+				if (strcmp(str, "directed") == 0)
+				{
+					gibInfo.flyAway = EntTemplate::GibInfo::FLY_AWAY_DIRECTED;
+				}
+				else if (strcmp(str, "random") == 0)
+				{
+					gibInfo.flyAway = EntTemplate::GibInfo::FLY_AWAY_RANDOM;
+				}
+			});
+
+			UpdatePropertyFromJson(gibInfo.throwAtPlayerChance, item, "throw_at_player_chance");
+
+			HandleJSONMember(item, "blood", [&gibInfo](const Value& value) {
+				const char* bloodTypeName = value.GetString();
+				const int bloodType = BloodTypeFromName(bloodTypeName);
+				if (bloodType == BLOOD_COLOR_INVALID)
+				{
+					LOG_WARNING("Unknown blood type '%s'\n", bloodTypeName);
+				}
+				else
+				{
+					gibInfo.bloodColor = bloodType;
+				}
+			});
+
+			gibDisposition.push_back(gibInfo);
+		}
+
+		entTemplate.SetGibDisposition(std::move(gibDisposition));
+	});
+
 	HandleJSONMember(value, "soundscripts", [&entTemplate, &templateName, this](const Value& value) {
 		for (auto scriptIt = value.MemberBegin(); scriptIt != value.MemberEnd(); ++scriptIt)
 		{

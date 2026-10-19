@@ -483,7 +483,7 @@ public:
 	}
 
 	const char* MyNonDefaultGibModel();
-	const Visual* MyGibVisual();
+	Visual MyGibVisual();
 	int PrecacheMyGibModel( const char* model = nullptr );
 	void SetMyBloodColor( int defaultBloodColor );
 	void SetMyFieldOfView(const float defaultFieldOfView );
@@ -496,9 +496,13 @@ public:
 	virtual CDeadMonster* MyDeadMonsterPointer() {return nullptr;}
 
 	virtual const char* DefaultGibModel();
-	const char* GibModel();
 	virtual int DefaultGibCount();
 	int GibCount();
+	virtual const EntTemplate::GibDisposition& DefaultGibDisposition() {
+		static const EntTemplate::GibDisposition noDisposition;
+		return noDisposition;
+	}
+	const EntTemplate::GibDisposition& GibDisposition();
 
 	bool IsAlienMonster() override;
 

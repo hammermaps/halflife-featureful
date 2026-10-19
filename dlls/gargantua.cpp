@@ -1474,28 +1474,36 @@ void CGargantua::RunTask( Task_t *pTask )
 			StopAnimation();
 			pev->nextthink = gpGlobals->time + 0.15f;
 			SetThink( &CBaseEntity::SUB_Remove );
-			int i;
 			int parts = MODEL_FRAMES( m_GargGibModel );
-			const Visual* gibVisual = MyGibVisual();
-			const char* gibModel = GibModel();
-			for( i = 0; i < 10; i++ )
+			Visual gibVisual = MyGibVisual();
+			const EntTemplate::GibDisposition& gibDisposition = GibDisposition();
+
+			if (gibDisposition.empty())
 			{
-				CGib *pGib = GetClassPtr( (CGib *)NULL );
+				for (int i = 0; i < 10; i++)
+				{
+					CGib *pGib = GetClassPtr( (CGib *)NULL );
 
-				pGib->SpawnGib( gibModel, gibVisual );
+					pGib->SpawnGib( nullptr, &gibVisual );
 
-				int bodyPart = 0;
-				if( parts > 1 )
-					bodyPart = RANDOM_LONG( 0, parts - 1 );
+					int bodyPart = 0;
+					if( parts > 1 )
+						bodyPart = RANDOM_LONG( 0, parts - 1 );
 
-				pGib->pev->body = bodyPart;
-				pGib->m_bloodColor = BloodColor();
-				pGib->m_material = matNone;
-				pGib->pev->origin = pev->origin;
-				pGib->pev->velocity = UTIL_RandomBloodVector() * RANDOM_FLOAT( 300, 500 );
-				pGib->pev->nextthink = gpGlobals->time + 1.25f;
-				pGib->SetThink( &CBaseEntity::SUB_FadeOut );
+					pGib->pev->body = bodyPart;
+					pGib->m_bloodColor = BloodColor();
+					pGib->m_material = matNone;
+					pGib->pev->origin = pev->origin;
+					pGib->pev->velocity = UTIL_RandomBloodVector() * RANDOM_FLOAT( 300, 500 );
+					pGib->pev->nextthink = gpGlobals->time + 1.25f;
+					pGib->SetThink( &CBaseEntity::SUB_FadeOut );
+				}
 			}
+			else
+			{
+				CGib::SpawnGibsByDisposition(pev, gibVisual, gibDisposition);
+			}
+
 			MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, pev->origin );
 				WRITE_BYTE( TE_BREAKMODEL );
 

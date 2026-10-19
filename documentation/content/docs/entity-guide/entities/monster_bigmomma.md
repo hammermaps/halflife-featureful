@@ -102,4 +102,34 @@ The [trace attack]({{< ref "entity-templates/#trace_attack" >}}) and [take damag
 ```
 {{% /tab %}}
 
+{{% tab "Gib disposition" %}}
+
+The [gib disposition]({{< ref "entity-templates/#gib_disposition" >}}) that utilizes the bigmomma-specific gibs instead of base alien gibs (in Half-Life campaign the bigmomma gibs are spawned by mapping, via [env_shooter]({{< ref env_shooter >}})).
+
+```json
+{
+    "monster_bigmomma": {
+        "gib_visual": {
+            "model": "models/big_momgibs.mdl"
+        },
+        "gib_disposition": [
+            {
+                "count": 1,
+                "body": 0
+            },
+            {
+                "count": 1,
+                "body": 1
+            },
+            {
+                "count": 4,
+                "body": 2
+            }
+        ]
+    }
+}
+```
+
+{{% /tab %}}
+
 {{% /tabs %}}
