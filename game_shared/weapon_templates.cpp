@@ -12,6 +12,7 @@
 
 #include "const.h"
 #include "skill.h"
+#include "string_set.h"
 
 #include "rapidjson/writer.h"
 #include "rapidjson/ostreamwrapper.h"
@@ -1598,13 +1599,7 @@ bool WeaponTemplateSystem::ReadFromDocument(const Document &document, const char
 
 const char* WeaponTemplateSystem::MakeConstantString(const char* str)
 {
-	auto strIt = _stringSet.find(str);
-	if (strIt == _stringSet.end())
-	{
-		auto p = _stringSet.insert(str);
-		strIt = p.first;
-	}
-	return strIt->c_str();
+	return ::MakeStringInSet(_stringSet, str);
 }
 
 WeaponTemplateSystem g_WeaponTemplateSystem;
