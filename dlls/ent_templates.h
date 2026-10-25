@@ -260,6 +260,8 @@ public:
 
 		std::string hitSoundScript;
 		std::string missSoundScript;
+		std::string soundScript;
+		float soundScriptChance{1.0f};
 	};
 
 	struct LeapAttack

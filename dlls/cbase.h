@@ -274,6 +274,8 @@ struct TraceHullAttackParams
 
 	const char* hitSoundScript = nullptr;
 	const char* missSoundScript = nullptr;
+	const char* soundScript = nullptr;
+	float soundScriptChance = 1.0f;
 };
 
 #define SF_ITEM_TOUCH_ONLY 128

@@ -2316,6 +2316,11 @@ bool CBaseEntity::SetTraceHullAttackParamsFromTemplate(int eventIndex, TraceHull
 			{
 				params.missSoundScript = attack->missSoundScript.c_str();
 			}
+			if (!attack->soundScript.empty())
+			{
+				params.soundScript = attack->soundScript.c_str();
+			}
+			params.soundScriptChance = attack->soundScriptChance;
 
 			return true;
 		}

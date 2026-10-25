@@ -1895,6 +1895,11 @@ CBaseEntity* CBaseMonster::PerformTraceHullAttack(const TraceHullAttackParams& p
 	CBaseEntity* pHurtTry = nullptr;
 	std::pair<TraceResult, Vector> trAndVec;
 
+	if (params.soundScript && params.soundScriptChance > 0.0f && (params.soundScriptChance >= 1.0f || RANDOM_FLOAT(0.0f, 1.0f) <= params.soundScriptChance))
+	{
+		EmitSoundScript(params.soundScript);
+	}
+
 	// check if we're trying to hit enemy on top of our head
 	if (m_hEnemy != 0 && m_IdealMonsterState != MONSTERSTATE_SCRIPT && IsEntityOnTopOfAnother(m_hEnemy, this))
 	{

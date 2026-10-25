@@ -1233,7 +1233,7 @@ void EntTemplateSystem::AddTemplateFromJsonValueImpl(const std::string& template
 
 			UpdatePropertyFromJson(traceHullAttack.spawnBlood, attackValue, "spawn_blood");
 
-			auto setSoundScript = [&](const char* propertyName, std::string& outStr)
+			auto setSoundScript = [&](const char* propertyName, std::string& outStr, int channel)
 			{
 				HandleJSONMember(attackValue, propertyName, [&](const Value& value) {
 					if (value.IsString())
@@ -1245,14 +1245,16 @@ void EntTemplateSystem::AddTemplateFromJsonValueImpl(const std::string& template
 					else if (value.IsObject())
 					{
 						std::string soundScriptName = templateName + "#trace_hull_attacks#" + eventIndexStr + '#' + propertyName;
-						_soundScriptSystem->AddSoundScriptFromJsonValue(soundScriptName.c_str(), value, CHAN_WEAPON);
+						_soundScriptSystem->AddSoundScriptFromJsonValue(soundScriptName.c_str(), value, channel);
 						entTemplate.AddPrecachedSoundScript(soundScriptName);
 						outStr = soundScriptName;
 					}
 				});
 			};
-			setSoundScript("hit_soundscript", traceHullAttack.hitSoundScript);
-			setSoundScript("miss_soundscript", traceHullAttack.missSoundScript);
+			setSoundScript("hit_soundscript", traceHullAttack.hitSoundScript, CHAN_WEAPON);
+			setSoundScript("miss_soundscript", traceHullAttack.missSoundScript, CHAN_WEAPON);
+			setSoundScript("soundscript", traceHullAttack.soundScript, CHAN_VOICE);
+			UpdatePropertyFromJson(traceHullAttack.soundScriptChance, attackValue, "soundscript_chance");
 
 			entTemplate.SetTraceHullAttackForEvent(eventIndex, traceHullAttack);
 		}

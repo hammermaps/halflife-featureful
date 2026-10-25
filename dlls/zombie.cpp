@@ -57,7 +57,6 @@ public:
 	void DeathSound() override;
 	void AlertSound() override;
 	void IdleSound() override;
-	void AttackSound();
 	bool PlayUseSentence() override;
 	bool PlayUnUseSentence() override;
 
@@ -84,7 +83,6 @@ public:
 	virtual float OneSlashDamage() { return GetSkillValue("zombie_dmg_one_slash"); }
 	virtual float BothSlashDamage() { return GetSkillValue("zombie_dmg_both_slash"); }
 protected:
-	void SlashAttack(const TraceHullAttackParams& params);
 	void PrecacheSounds();
 };
 
@@ -185,11 +183,6 @@ void CZombie::IdleSound()
 	EmitSoundScript(idleSoundScript);
 }
 
-void CZombie::AttackSound()
-{
-	EmitSoundScript(attackSoundScript);
-}
-
 bool CZombie::PlayUseSentence()
 {
 	return EmitSoundScript(useSoundScript);
@@ -204,14 +197,6 @@ bool CZombie::PlayUnUseSentence()
 // HandleAnimEvent - catches the monster-specific messages
 // that occur when tagged animation frames are played.
 //=========================================================
-void CZombie::SlashAttack(const TraceHullAttackParams& params)
-{
-	PerformTraceHullAttack(params);
-
-	if (RANDOM_LONG(0,1))
-		AttackSound();
-}
-
 void CZombie::HandleAnimEvent( MonsterEvent_t *pEvent )
 {
 	switch( pEvent->event )
@@ -225,8 +210,10 @@ void CZombie::HandleAnimEvent( MonsterEvent_t *pEvent )
 			params.punchAngle.x = 5;
 			params.hitSoundScript = attackHitSoundScript;
 			params.missSoundScript = attackMissSoundScript;
+			params.soundScript = attackSoundScript;
+			params.soundScriptChance = 0.5f;
 			SetTraceHullAttackParamsFromTemplate(pEvent->event, params);
-			SlashAttack(params);
+			PerformTraceHullAttack(params);
 		}
 		break;
 
@@ -239,8 +226,10 @@ void CZombie::HandleAnimEvent( MonsterEvent_t *pEvent )
 			params.punchAngle.x = 5;
 			params.hitSoundScript = attackHitSoundScript;
 			params.missSoundScript = attackMissSoundScript;
+			params.soundScript = attackSoundScript;
+			params.soundScriptChance = 0.5f;
 			SetTraceHullAttackParamsFromTemplate(pEvent->event, params);
-			SlashAttack(params);
+			PerformTraceHullAttack(params);
 		}
 		break;
 
@@ -252,8 +241,10 @@ void CZombie::HandleAnimEvent( MonsterEvent_t *pEvent )
 			params.punchAngle.x = 5;
 			params.hitSoundScript = attackHitSoundScript;
 			params.missSoundScript = attackMissSoundScript;
+			params.soundScript = attackSoundScript;
+			params.soundScriptChance = 0.5f;
 			SetTraceHullAttackParamsFromTemplate(pEvent->event, params);
-			SlashAttack(params);
+			PerformTraceHullAttack(params);
 		}
 		break;
 

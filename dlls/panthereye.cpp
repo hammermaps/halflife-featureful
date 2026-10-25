@@ -87,8 +87,6 @@ public:
 	bool CheckRangeAttack1( float flDot, float flDist ) override;
 	bool CheckRangeAttack2( float flDot, float flDist ) override {return false;}
 
-	void PerformStrike(const TraceHullAttackParams& params);
-
 	int DefaultSizeForGrapple() override { return GRAPPLE_MEDIUM; }
 	bool IsDisplaceable() override { return true; }
 
@@ -221,14 +219,6 @@ bool CPantherEye::CheckRangeAttack1( float flDot, float flDist )
 	return FBitSet(pev->flags, FL_ONGROUND) && flDist > 80.0f && flDist <= 256 && flDot >= 0.65f && m_flNextLeapAttack <= gpGlobals->time;
 }
 
-void CPantherEye::PerformStrike(const TraceHullAttackParams& params)
-{
-	PerformTraceHullAttack( params );
-
-	if (RANDOM_LONG(0,1))
-		EmitSoundScript(attackSoundScript);
-}
-
 void CPantherEye::HandleAnimEvent( MonsterEvent_t *pEvent )
 {
 	switch (pEvent->event)
@@ -245,9 +235,10 @@ void CPantherEye::HandleAnimEvent( MonsterEvent_t *pEvent )
 			params.damageInfo.damage = GetSkillValue("panthereye_dmg_claw");
 			params.hitSoundScript = attackHitSoundScript;
 			params.missSoundScript = attackMissSoundScript;
+			params.soundScript = attackSoundScript;
+			params.soundScriptChance = 0.5f;
 			SetTraceHullAttackParamsFromTemplate(pEvent->event, params);
-
-			PerformStrike(params);
+			PerformTraceHullAttack(params);
 			break;
 		}
 
@@ -263,9 +254,10 @@ void CPantherEye::HandleAnimEvent( MonsterEvent_t *pEvent )
 			params.damageInfo.damage = GetSkillValue("panthereye_dmg_claw");
 			params.hitSoundScript = attackHitSoundScript;
 			params.missSoundScript = attackMissSoundScript;
+			params.soundScript = attackSoundScript;
+			params.soundScriptChance = 0.5f;
 			SetTraceHullAttackParamsFromTemplate(pEvent->event, params);
-
-			PerformStrike(params);
+			PerformTraceHullAttack(params);
 			break;
 		}
 
@@ -281,9 +273,10 @@ void CPantherEye::HandleAnimEvent( MonsterEvent_t *pEvent )
 			params.damageInfo.damage = GetSkillValue("panthereye_dmg_claw");
 			params.hitSoundScript = attackHitSoundScript;
 			params.missSoundScript = attackMissSoundScript;
+			params.soundScript = attackSoundScript;
+			params.soundScriptChance = 0.5f;
 			SetTraceHullAttackParamsFromTemplate(pEvent->event, params);
-
-			PerformStrike(params);
+			PerformTraceHullAttack(params);
 			break;
 		}
 	default:

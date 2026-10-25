@@ -812,8 +812,10 @@ The property keys must be stringified numbers equal to the animation event indic
     - `"player_only"` - whether the knockback is applied to player only.
 * `"damage_info"` - [damage info](#damage_info). This allows to change the damage type of the attack and other damage characteristics.
 * `"spawn_blood"` - a boolean denoting whether melee attack should make the hit target bleed (if it can) if damage has been dealt.
-* `"hit_soundscript"` - soundscript to play if trace hull attack hit something. Must be either the name of the soundscript from **sound/soundscripts.json** or the object defining the soundscript. You should prefer replacing the monster's soundscript via [soundscripts](#soundscripts) when possible.
-* `"miss_soundscript"` - soundscript to play if trace hull attack didn't hit anything. Must be either the name of the soundscript from **sound/soundscripts.json** or the object defining the soundscript. You should prefer replacing the monster's soundscript via [soundscripts](#soundscripts) when possible.
+* `"hit_soundscript"` - a soundscript to play if trace hull attack hit something. Must be either the name of the soundscript from **sound/soundscripts.json** or the object defining the soundscript. You should prefer replacing the monster's soundscript via [soundscripts](#soundscripts) when possible.
+* `"miss_soundscript"` - a soundscript to play if trace hull attack didn't hit anything. Must be either the name of the soundscript from **sound/soundscripts.json** or the object defining the soundscript. You should prefer replacing the monster's soundscript via [soundscripts](#soundscripts) when possible.
+* `"soundscript"` - a soundscript to play independent of whether the attack hit something or not. This should be played on a different channel than the `"hit_soundscript"` and `"miss_soundscript"`.
+* `"soundscript_chance"` - the chance of playing the `"soundscript"`, the value in range `[0.0, 1.0]` where 1.0 means play always. This is 1.0 by default for most attacks, with the exception for zombies and panthereyes who have it set to 0.5 for their attacks by default.
 
 {{% hint warning %}}
 The distance must be large enough for the checking hull to leave the monster's geometry.

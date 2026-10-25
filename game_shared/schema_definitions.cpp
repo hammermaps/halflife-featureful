@@ -737,6 +737,14 @@ const char* const json_schemas::definitions = R"(
 			},
 			"miss_soundscript": {
 				"$ref": "#/soundscript"
+			},
+			"soundscript": {
+				"$ref": "#/soundscript"
+			},
+			"soundscript_chance": {
+				"type": "number",
+				"minimum": 0.0,
+				"maximum": 1.0
 			}
 		},
 		"additionalProperties": false

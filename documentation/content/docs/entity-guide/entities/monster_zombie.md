@@ -43,9 +43,9 @@ bookToC: false
 
 ### Animation events
 
-* `1` - trace hull attack with right arm. Deals **sk_zombie_dmg_one_slash** damage. Plays **Zombie.AttackHit** or **Zombie.AttackMiss**. Plays **Zombie.Attack** with 50% chance.
-* `2` - trace hull attack with left arm. Deals **sk_zombie_dmg_one_slash** damage. Plays **Zombie.AttackHit** or **Zombie.AttackMiss**. Plays **Zombie.Attack** with 50% chance.
-* `3` - trace hull attack with both arms. Deals **sk_zombie_dmg_both_slash** damage. Plays **Zombie.AttackHit** or **Zombie.AttackMiss**. Plays **Zombie.Attack** with 50% chance.
+* `1` - trace hull attack with right arm. Deals **sk_zombie_dmg_one_slash** damage. Plays **Zombie.AttackHit** or **Zombie.AttackMiss**. Plays **Zombie.Attack** with 50% chance (configurable via the `"soundscript_chance"`).
+* `2` - trace hull attack with left arm. Deals **sk_zombie_dmg_one_slash** damage. Plays **Zombie.AttackHit** or **Zombie.AttackMiss**. Plays **Zombie.Attack** with 50% chance (configurable via the `"soundscript_chance"`).
+* `3` - trace hull attack with both arms. Deals **sk_zombie_dmg_both_slash** damage. Plays **Zombie.AttackHit** or **Zombie.AttackMiss**. Plays **Zombie.Attack** with 50% chance (configurable via the `"soundscript_chance"`).
 
 ### Entity template examples
 
@@ -70,7 +70,8 @@ The [check melee]({{< ref "entity-templates/#check_melee_attack1" >}}) rules and
                 },
                 "knock": {
                     "right": -100
-                }
+                },
+                "soundscript_chance": 0.5
             },
             "2": {
                 "distance": 70,
@@ -80,7 +81,8 @@ The [check melee]({{< ref "entity-templates/#check_melee_attack1" >}}) rules and
                 },
                 "knock": {
                     "right": 100
-                }
+                },
+                "soundscript_chance": 0.5
             },
             "3": {
                 "distance": 70,
@@ -89,7 +91,8 @@ The [check melee]({{< ref "entity-templates/#check_melee_attack1" >}}) rules and
                 },
                 "knock": {
                     "forward": -100
-                }
+                },
+                "soundscript_chance": 0.5
             }
         }
     }

@@ -71,7 +71,8 @@ The [check melee]({{< ref "entity-templates/#check_melee_attack1" >}}) rules and
                     "right": 100,
                     "forward": -50,
                     "up": 50
-                }
+                },
+                "soundscript_chance": 0.5
             },
             "2": {
                 "distance": 84,
@@ -83,7 +84,8 @@ The [check melee]({{< ref "entity-templates/#check_melee_attack1" >}}) rules and
                     "right": -25,
                     "forward": -25,
                     "up": 25
-                }
+                },
+                "soundscript_chance": 0.5
             },
             "3": {
                 "distance": 84,
@@ -95,7 +97,8 @@ The [check melee]({{< ref "entity-templates/#check_melee_attack1" >}}) rules and
                     "right": -100,
                     "forward": -50,
                     "up": 50
-                }
+                },
+                "soundscript_chance": 0.5
             }
         }
     }
