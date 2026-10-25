@@ -94,6 +94,7 @@
 		6 : "Opaque + Concave Fix"
 	]
 	light_origin(string) : "Light Origin Target"
+	_minlight(string) : "Minimum light level"
 ]
 
 @BaseClass = ZHLT_point
@@ -819,7 +820,7 @@
 	pattern(string) : "Custom Appearance" : : "Use a string of letters to provide a custom light style. The property allows you to enter a string of letters from a to z, representing brightness. If you entered 'abcdefghihgfedcba' then the light would go from bright to dim and back again and then repeat. Complicating things, to use this feature, you must name the light. However, if you then use a trigger to activate it, then it will behave as a normal light."
 ]
 
-@BaseClass base(Targetname,Global) = Breakable
+@BaseClass base(Targetname, Global) = Breakable
 [
 	target(target_destination) : "Target on break"
 	whenhit(string) : "Trigger when hit (locus = position)"
@@ -1072,8 +1073,13 @@
 	]
 ]
 
-@BaseClass base(Appearflags, Targetname, RenderFields, Global, Angles, SoundRadius, BaseLockable, StartStopable, OpenClosable, CustomObjectHint, CollisionWithCorpses, InstantGibCorpses, TinyCreaturesHandling) = Door
+@BaseClass = DoorBase
 [
+	wait(integer) : "delay before close, -1 stay open " : 4
+	lip(integer) : "Lip"
+	dmg(integer) : "Damage inflicted when blocked" : 0
+	target(target_destination) : "Target"
+	delay(integer) : "Delay before fire"
 	killtarget(target_destination) : "KillTarget"
 	speed(integer) : "Speed" : 100
 	master(string) : "Master"
@@ -1116,11 +1122,10 @@
 		8: "Snappy Metal Stop (doors/doorstop8.wav)"
 		255: "No Sound"
 	]
-	wait(integer) : "delay before close, -1 stay open " : 4
-	lip(integer) : "Lip"
-	dmg(integer) : "Damage inflicted when blocked" : 0
-	target(target_destination) : "Target"
-	delay(integer) : "Delay before fire"
+]
+
+@BaseClass base(Appearflags, Targetname, Global, RenderFields, DoorBase, Angles, SoundRadius, BaseLockable, StartStopable, OpenClosable, CustomObjectHint, CollisionWithCorpses, InstantGibCorpses, TinyCreaturesHandling) = Door
+[
 	netname(string) : "Fire on Close" : : "Fire when door has been closed"
 	message(string) : "Fire on Open" : : "Fire when door has been opened. SoHL compatible"
 	health(integer) : "Health (shoot open)"
@@ -1160,10 +1165,9 @@
 		1 : "Yes, continue"
 		2 : "No, go back (classic)"
 	]
-	_minlight(string) : "Minimum light level"
 ]
 
-@BaseClass base(Targetname, Target, RenderFields, Global, Angles) = BaseTank
+@BaseClass base(Targetname, Global, Target, RenderFields, Angles) = BaseTank
 [
 	spawnflags(flags) =
 	[
@@ -1266,7 +1270,7 @@
 	customstopsnd(sound) : "Custom stop sound"
 ]
 
-@BaseClass base(Targetname, RenderFields, Global, PlatSounds) = Trackchange
+@BaseClass base(Targetname, Global, RenderFields, PlatSounds) = Trackchange
 [
 	height(integer) : "Travel altitude" : 0
 	spawnflags(flags) =
@@ -1305,7 +1309,7 @@
 	]
 ]
 
-@BaseClass base(Targetname) = Recharger
+@BaseClass base(Targetname, Global) = Recharger
 [
 	TriggerOnEmpty(target_destination) : "Trigger On Empty"
 	TriggerOnRecharged(target_destination) : "Trigger On Recharged"
@@ -1588,7 +1592,7 @@
 @PointClass base(Ammo) studio() = ammo_rounds : "Rounds Ammo" []
 @PointClass base(Ammo) studio() = ammo_slugs : "Slugs Ammo" []
 
-@SolidClass base(Targetname, Target, ZHLT, RenderFields, EntityTemplate) = button_target : "Target Button"
+@SolidClass base(Targetname, Target, RenderFields, EntityTemplate, ZHLT) = button_target : "Target Button"
 [
 	spawnflags(flags) =
 	[
@@ -3049,7 +3053,7 @@
 	]
 ]
 
-@SolidClass base(Breakable, BreakableSpawnFlags, RenderFields, ZHLT, EntityTemplate, VisibleBreakable) = func_breakable : "Breakable Object"
+@SolidClass base(Breakable, BreakableSpawnFlags, RenderFields, EntityTemplate, VisibleBreakable, ZHLT) = func_breakable : "Breakable Object"
 [
 	spawnflags(flags) =
 	[
@@ -3065,7 +3069,6 @@
 		1024: "Op4Mortar only (deprecated)" : 0 : "Prefer using entity template based approach with configured take_damage property"
 		4096: "Not solid" : 0
 	]
-	_minlight(string) : "Minimum light level"
 	displayname(string) : "HUD Info name" : : "Name to display when player is looking at this breakable. Requires 'Show HUD Info' spawnflag."
 ]
 
@@ -3123,7 +3126,7 @@
 ]
 @BaseClass base(BaseLockable, ButtonUseType, EntityUsePolicy, ButtonTrigger, ButtonWaitToggle, CustomObjectHint) = ButtonBase []
 
-@SolidClass base(Global, Targetname, Targetx, RenderFields, Angles, ZHLT, ButtonBase, EntityTemplate) = func_button : "Button"
+@BaseClass = FuncButtonBase
 [
 	speed(integer) : "Speed" : 5
 	health(integer) : "Health (shootable if > 0)"
@@ -3159,16 +3162,12 @@
 		16384:"Player Can't Use": 0
 	]
 	target_on_locked(target_destination) : "Target on locked" : : "Trigger if used when locked"
-	_minlight(string) : "Minimum light level"
 ]
 
-@SolidClass base(Global,RenderFields, Targetname, Angles, ZHLT) = func_conveyor : "Conveyor Belt"
+@SolidClass base(Targetname, Global, Targetx, RenderFields, Angles, ButtonBase, FuncButtonBase, EntityTemplate, ZHLT) = func_button : "Button" []
+
+@BaseClass = FuncConveyorBase
 [
-	spawnflags(flags) =
-	[
-		1 : "No Push" : 0
-		2 : "Not Solid" : 0
-	]
 	speed(string) : "Conveyor Speed" : "100"
 	useset_policy(choices) : "Use Set Policy" : : "Allows changing the speed value via game_counter_set" =
 	[
@@ -3176,12 +3175,25 @@
 		1 : "Set speed value"
 		2 : "Add speed value"
 	]
-	_minlight(string) : "Minimum light level"
+]
+
+@SolidClass base(Targetname, Global, RenderFields, Angles, FuncConveyorBase, ZHLT) = func_conveyor : "Conveyor Belt"
+[
+	spawnflags(flags) =
+	[
+		1 : "No Push" : 0
+		2 : "Not Solid" : 0
+	]
 ]
 
 @SolidClass base(Door, EntityUsePolicy, ZHLT) = func_door : "Basic door" []
 
-@SolidClass base(Door, EntityUsePolicy, ZHLT) = func_door_rotating : "Rotating door"
+@BaseClass = FuncDoorRotatingBase
+[
+	distance(integer) : "Distance (deg)" : 90
+]
+
+@SolidClass base(Door, FuncDoorRotatingBase, EntityUsePolicy, ZHLT) = func_door_rotating : "Rotating door"
 [
 	spawnflags(flags) =
 	[
@@ -3190,7 +3202,6 @@
 		64: "X Axis" : 0
 		128: "Y Axis" : 0
 	]
-	distance(integer) : "Distance (deg)" : 90
 ]
 
 @SolidClass base(Appearflags, RenderFields, ZHLT) = func_friction : "Surface with a change in friction"
@@ -3198,24 +3209,23 @@
 	modifier(integer) : "Percentage of standard (0 - 100)" : 15
 ]
 
-@SolidClass base(Targetname, RenderFields, Global, ZHLT, Classification, EntityTemplate) = func_guntarget : "Moving platform"
+@BaseClass = FuncGunTargetBase
 [
 	speed(integer) : "Speed (units per second)" : 100
 	target(target_destination) : "First stop target"
 	message(target_destination) : "Fire on damage"
 	health(integer) : "Damage to Take" : 0
-	_minlight(string) : "Minimum light level"
+]
+
+@SolidClass base(Targetname, Global, RenderFields, FuncGunTargetBase, Classification, EntityTemplate, ZHLT) = func_guntarget : "Moving platform"
+[
 	spawnflags(flags) =
 	[
 		1 : "Start On" : 0
 	]
 ]
 
-@SolidClass base(Global, Recharger, EntityTemplate, RenderFields, ZHLT, CustomObjectHint) = func_healthcharger: "Wall health recharger"
-[
-	// dmdelay(integer) : "Deathmatch recharge delay" : 0
-	_minlight(string) : "Minimum light level"
-]
+@SolidClass base(Recharger, EntityTemplate, RenderFields, CustomObjectHint, ZHLT) = func_healthcharger: "Wall health recharger" []
 
 @SolidClass base(Targetname, RenderFields, ZHLT) = func_illusionary : "Fake Wall/Light"
 [
@@ -3228,7 +3238,6 @@
 		-1: "Empty"
 		-7: "Volumetric Light"
 	]
-	_minlight(string) : "Minimum light level"
 ]
 
 @SolidClass base(func_illusionary) = func_illusionary_toggle : "Fake toggleable Wall/Light"
@@ -3268,12 +3277,16 @@
 	]
 ]
 
-@SolidClass base(Global,Appearflags, Targetname, RenderFields, Angles, ZHLT) = func_pendulum : "Swings back and forth"
+@BaseClass = FuncPendulumBase
 [
 	speed(integer) : "Speed" : 100
 	distance(integer) : "Distance (deg)" : 90
 	damp(integer) : "Damping (0-1000)" : 0
 	dmg(integer) : "Damage inflicted when blocked" : 0
+]
+
+@SolidClass base(Appearflags, Targetname, Global, RenderFields, Angles, FuncPendulumBase, ZHLT) = func_pendulum : "Swings back and forth"
+[
 	spawnflags(flags) =
 	[
 		1: "Start ON" : 0
@@ -3283,21 +3296,30 @@
 		128: "Y Axis" : 0
 		256: "Rotate both ways" : 0
 	]
-	_minlight(string) : "Minimum light level"
 ]
 
-@SolidClass base(Targetname,Global,RenderFields, PlatSounds, ZHLT, StartStopable, OpenClosable, CollisionWithCorpses, InstantGibCorpses, TinyCreaturesHandling) = func_plat : "Elevator"
+@BaseClass = FuncPlatBase
+[
+	height(integer) : "Travel altitude (can be negative)" : 0
+	speed(integer) : "Speed" : 50
+]
+
+@SolidClass base(Targetname, Global, RenderFields, FuncPlatBase, PlatSounds, StartStopable, OpenClosable, CollisionWithCorpses, InstantGibCorpses, TinyCreaturesHandling, ZHLT) = func_plat : "Elevator"
 [
 	spawnflags(Flags) =
 	[
 		1: "Toggle" : 0
 	]
-	height(integer) : "Travel altitude (can be negative)" : 0
-	speed(integer) : "Speed" : 50
-	_minlight(string) : "Minimum light level"
 ]
 
-@SolidClass base(Targetname, Global, RenderFields, PlatSounds, Angles, ZHLT, StartStopable, OpenClosable, CollisionWithCorpses, InstantGibCorpses, TinyCreaturesHandling) = func_platrot : "Moving Rotating platform"
+@BaseClass = FuncPlatRotBase
+[
+	speed(integer) : "Speed of rotation" : 50
+	height(integer) : "Travel altitude (can be negative)" : 0
+	rotation(integer) : "Spin amount" : 0
+]
+
+@SolidClass base(Targetname, Global, RenderFields, FuncPlatRotBase, PlatSounds, Angles, StartStopable, OpenClosable, CollisionWithCorpses, InstantGibCorpses, TinyCreaturesHandling, ZHLT) = func_platrot : "Moving Rotating platform"
 [
 	spawnflags(Flags) =
 	[
@@ -3305,13 +3327,21 @@
 		64: "X Axis" : 0
 		128: "Y Axis" : 0
 	]
-	speed(integer) : "Speed of rotation" : 50
-	height(integer) : "Travel altitude (can be negative)" : 0
-	rotation(integer) : "Spin amount" : 0
-	_minlight(string) : "Minimum light level"
 ]
 
-@SolidClass base(Breakable, BreakableSpawnFlags, RenderFields, ZHLT, EntityTemplate, VisibleBreakable, CollisionWithCorpses, InstantGibCorpses, TinyCreaturesHandling, SizeForGrapple) = func_pushable : "Pushable object"
+@BaseClass = FuncPushableBase
+[
+	friction(integer) : "Friction (0-400)" : 50
+	buoyancy(integer) : "Buoyancy" : 20
+	displayname(string) : "HUD Info name" : : "Name to display when player is looking at this pushable. Requires 'Show HUD Info' spawnflag."
+	toggleable_push(choices) : "Toggleable pushability" =
+	[
+		0: "No"
+		1: "Yes"
+	]
+]
+
+@SolidClass base(Breakable, BreakableSpawnFlags, RenderFields, FuncPushableBase, EntityTemplate, VisibleBreakable, CollisionWithCorpses, InstantGibCorpses, TinyCreaturesHandling, SizeForGrapple, ZHLT) = func_pushable : "Pushable object"
 [
 	spawnflags(flags) =
 	[
@@ -3321,24 +3351,11 @@
 		128: "Breakable" : 0
 		512: "Explosives only": 0
 	]
-	friction(integer) : "Friction (0-400)" : 50
-	buoyancy(integer) : "Buoyancy" : 20
-	_minlight(string) : "Minimum light level"
-	displayname(string) : "HUD Info name" : : "Name to display when player is looking at this pushable. Requires 'Show HUD Info' spawnflag."
-	toggleable_push(choices) : "Toggleable pushability" =
-	[
-		0: "No"
-		1: "Yes"
-	]
 ]
 
-@SolidClass base(Global, Recharger, EntityTemplate, RenderFields, ZHLT, CustomObjectHint) = func_recharge: "Battery recharger"
-[
-	// dmdelay(integer) : "Deathmatch recharge delay" : 0
-	_minlight(string) : "Minimum light level"
-]
+@SolidClass base(Recharger, EntityTemplate, RenderFields, CustomObjectHint, ZHLT) = func_recharge: "Battery recharger" []
 
-@SolidClass base(Targetname, Global, RenderFields, Angles, ZHLT, ButtonBase) = func_rot_button : "RotatingButton"
+@BaseClass = FuncRotButtonBase
 [
 	target(target_destination) : "Targetted object"
 	// changetarget will change the button's target's TARGET field to the button's changetarget.
@@ -3362,6 +3379,10 @@
 	]
 	delay(string) : "Delay before trigger" : "0"
 	distance(integer) : "Distance (deg)" : 90
+]
+
+@SolidClass base(Targetname, Global, RenderFields, Angles, ButtonBase, FuncRotButtonBase, ZHLT) = func_rot_button : "RotatingButton"
+[
 	spawnflags(flags) =
 	[
 		1 : "Not solid" : 0
@@ -3375,10 +3396,9 @@
 		1024:"Check master on return": 0
 		16384:"Player Can't Use": 0
 	]
-	_minlight(string) : "Minimum light level"
 ]
 
-@SolidClass base(Targetname, Global, RenderFields, Angles, ZHLT) = func_rotating : "Rotating Object"
+@BaseClass = FuncRotatingBase
 [
 	speed(integer)	: "Rotation Speed" : 0
 	volume(integer) : "Volume (10 = loudest)" : 10
@@ -3406,7 +3426,6 @@
 		256: "Medium Radius" : 0
 		512: "Large Radius" : 1
 	]
-	_minlight(integer) : "Minimum light level"
 	spawnorigin(string) : "X Y Z - Move here after lighting" : "0 0 0"
 	dmg(integer) : "Damage inflicted when blocked" : 0
 	m_iObeyTriggerMode(choices) : "Obey Trigger Mode" : : "Originally func_rotating doesn't interpret use-types. This parameter allows to take use-type (on and off) into account" =
@@ -3415,6 +3434,8 @@
 		1 : "Yes"
 	]
 ]
+
+@SolidClass base(Targetname, Global, RenderFields, Angles, FuncRotatingBase, ZHLT) = func_rotating : "Rotating Object" []
 
 @SolidClass base(BaseTank, ZHLT) = func_tank : "Brush Gun Turret"
 [
@@ -3486,17 +3507,11 @@
 	iMagnitude(Integer) : "Explosion Magnitude" : 100
 ]
 
-@SolidClass base(Trackchange, ZHLT) = func_trackautochange : "Automatic track changing platform"
-[
-	_minlight(string) : "Minimum light level"
-]
+@SolidClass base(Trackchange, ZHLT) = func_trackautochange : "Automatic track changing platform" []
 
-@SolidClass base(Trackchange, ZHLT) = func_trackchange : "Train track changing platform"
-[
-	_minlight(string) : "Minimum light level"
-]
+@SolidClass base(Trackchange, ZHLT) = func_trackchange : "Train track changing platform" []
 
-@SolidClass base(Targetname, Global, RenderFields, ZHLT, SoundRadius, CollisionWithCorpses, InstantGibCorpses, TinyCreaturesHandling) = func_tracktrain : "Track Train"
+@BaseClass = FuncTrackTrainBase
 [
 	spawnflags(flags) =
 	[
@@ -3527,6 +3542,10 @@
 	volume(integer) : "Volume (10 = loudest)" : 10
 	bank(string) : "Bank angle on turns" : "0"
 	touch_proxy_name(string) : "Touch proxy targetname" : : "The name of the proxy entity at the train's origin to touch triggers"
+]
+
+@SolidClass base(Targetname, Global, RenderFields, FuncTrackTrainBase, SoundRadius, CollisionWithCorpses, InstantGibCorpses, TinyCreaturesHandling, ZHLT) = func_tracktrain : "Track Train"
+[
 	_minlight(string) : "Minimum light level"
 ]
 
@@ -3535,7 +3554,7 @@
 	target(target_destination) : "Train Name"
 ]
 
-@SolidClass base(Targetname, Global, RenderFields, ZHLT, BaseTrain, SoundRadius, CollisionWithCorpses, InstantGibCorpses, TinyCreaturesHandling) = func_train : "Moving platform"
+@BaseClass = FuncTrainBase
 [
 	movesnd(choices) : "Move Sound" : 0 =
 	[
@@ -3567,7 +3586,7 @@
 		8: "quick stop (plats/talkstop1.wav)"
 	]
 	avelocity(string) : "Angular Veocity (y z x)"
-	dmg(integer) : "Damage on crush" : 0
+	dmg(integer) : "Damage on crush"
 	skin(integer) : "Contents"
 	custommovesnd(sound) : "Custom move sound"
 	customstopsnd(sound) : "Custom stop sound"
@@ -3577,10 +3596,12 @@
 		8 : "Not solid" : 0
 		64 : "No default damage" : 0
 	]
-	_minlight(string) : "Minimum light level"
 ]
 
-@SolidClass base(Targetname, Angles, RenderFields, ZHLT, Global) = func_vehicle : "Drivable Vehicles" 
+@SolidClass base(Targetname, Global, RenderFields, BaseTrain, FuncTrainBase, SoundRadius, CollisionWithCorpses, InstantGibCorpses, TinyCreaturesHandling, ZHLT) = func_train : "Moving platform"
+[]
+
+@BaseClass = FuncVehicleBase
 [
 	spawnflags(flags) =
 	[
@@ -3620,8 +3641,9 @@
 	brake_sound(sound): "Custom brake sound"
 	ignition_sound(sound): "Custom ignition sound"
 	touch_proxy_name(string) : "Touch proxy targetname" : : "The name of the proxy entity at the vehicle's origin to touch triggers"
-	_minlight(string) : "Minimum light level"
 ]
+
+@SolidClass base(Targetname, Global, Angles, RenderFields, FuncVehicleBase, ZHLT) = func_vehicle : "Drivable Vehicles"  []
 
 @SolidClass = func_vehiclecontrols : "Vehicle Controls"
 [
@@ -3632,9 +3654,8 @@
 	]
 ]
 
-@SolidClass base(Targetname, Appearflags, RenderFields, Global, ZHLT) = func_wall : "Wall"
+@SolidClass base(Targetname, Global, Appearflags, RenderFields, ZHLT) = func_wall : "Wall"
 [
-	_minlight(string) : "Minimum light level"
 	spawnflags(flags) =
 	[
 		2 : "Use Angles" : 0
@@ -3649,13 +3670,8 @@
 	]
 ]
 
-@SolidClass base(Door, ZHLT) = func_water : "Liquid"
+@BaseClass = FuncWaterBase
 [
-	spawnflags(flags) =
-	[
-		1 : "Starts Open" : 0
-		256:"Use Only" : 0
-	]
 	skin(choices) : "Contents" : -3 =
 	[
 		-3: "Water"
@@ -3663,6 +3679,15 @@
 		-5: "Lava"
 	]
 	WaveHeight(string) : "Wave Height" : "3.2"
+]
+
+@SolidClass base(Door, FuncWaterBase, ZHLT) = func_water : "Liquid"
+[
+	spawnflags(flags) =
+	[
+		1 : "Starts Open" : 0
+		256:"Use Only" : 0
+	]
 ]
 
 //
@@ -4432,7 +4457,7 @@
 	]
 ]
 
-@BaseClass base(Targetname, Angles, EntityTemplate, CustomObjectHint, Global, EntityEffects, Colormap) = ItemRecharger
+@BaseClass base(Targetname, Global, Angles, EntityTemplate, CustomObjectHint, EntityEffects, Colormap) = ItemRecharger
 [
 	TriggerOnEmpty(target_destination) : "Trigger On Empty"
 	TriggerOnFirstUse(target_destination) : "Trigger On First Use"
@@ -4642,16 +4667,15 @@
 	]
 ]
 
-@SolidClass base(Appearflags, Targetname, RenderFields, Global, Angles, MomentaryDoor, SoundRadius, StartStopableMomentary, OpenClosable, CustomObjectHint, CollisionWithCorpses, InstantGibCorpses, TinyCreaturesHandling, ZHLT) = momentary_door : "Momentary/Continuous door"
+@SolidClass base(Appearflags, Targetname, Global, RenderFields, Angles, MomentaryDoor, SoundRadius, StartStopableMomentary, OpenClosable, CustomObjectHint, CollisionWithCorpses, InstantGibCorpses, TinyCreaturesHandling, ZHLT) = momentary_door : "Momentary/Continuous door"
 [
 	spawnflags(flags) =
 	[
 		1 : "Starts Open" : 0
 	]
-	_minlight(integer) : "Minimum light level"
 ]
 
-@SolidClass base(Targetname, Target, Angles, RenderFields, ZHLT, CustomObjectHint) = momentary_rot_button : "Direct wheel control"
+@BaseClass = MomentaryRotButtonBase
 [
 	speed(integer) : "Speed" : 50
 	master(string) : "Master"
@@ -4675,6 +4699,10 @@
 	]
 	distance(integer) : "Distance (deg)" : 90
 	returnspeed(integer) : "Auto-return speed" : 0
+]
+
+@SolidClass base(Targetname, Global, Target, Angles, RenderFields, MomentaryRotButtonBase, CustomObjectHint, ZHLT) = momentary_rot_button : "Direct wheel control"
+[
 	spawnflags(flags) =
 	[
 		1: "Door Hack" : 0
@@ -4683,7 +4711,6 @@
 		64: "X Axis" : 0
 		128: "Y Axis" : 0
 	]
-	_minlight(integer) : "Minimum light level"
 ]
 
 //
