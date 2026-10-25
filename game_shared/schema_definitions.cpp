@@ -1066,10 +1066,10 @@ R"(
 				"type": "string"
 			},
 			"own_visual": {
-				"$ref": "#/visual_object"
+				"$ref": "#/visual"
 			},
 			"gib_visual": {
-				"$ref": "#/visual_object"
+				"$ref": "#/visual"
 			},
 			"gib_disposition": {
 				"type": "array",
