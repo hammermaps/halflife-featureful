@@ -684,6 +684,12 @@ void CFollowingMonster::IdleHeadTurn( Vector &vecFriend )
 	// turn head in desired direction only if ent has a turnable head
 	if( m_afCapability & bits_CAP_TURN_HEAD )
 	{
+		if (!IsFullyAlive())
+		{
+			SetBoneController(0, 0);
+			return;
+		}
+
 		float yaw = VecToYaw( vecFriend - pev->origin ) - pev->angles.y;
 
 		if( yaw > 180 )
