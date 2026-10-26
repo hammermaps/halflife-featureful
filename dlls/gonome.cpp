@@ -702,6 +702,9 @@ void CGonome::DeathSound()
 //=========================================================
 Schedule_t *CGonome::GetSchedule()
 {
+	if (ShouldCoverFromDanger())
+		return GetScheduleOfType( SCHED_TAKE_COVER_FROM_BEST_SOUND );
+
 	switch( m_MonsterState )
 	{
 	case MONSTERSTATE_COMBAT:

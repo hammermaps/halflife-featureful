@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include "warpball.h"
+#include "soundent_bits.h"
 
 const char warpballs[] = R"(
 {
@@ -166,6 +167,11 @@ const char warpballs[] = R"(
 			"position": {
 				"vertical_shift": 40
 			}
+		},
+		"ai_sound_test": {
+			"ai_sound": {
+				"type": "danger"
+			}
 		}
 	}
 }
@@ -312,6 +318,12 @@ TEST(WarpballTemplates, Parse) {
 		EXPECT_EQ(t->sound1.attenuation, ATTN_NONE);
 
 		EXPECT_TRUE(t->shake.IsDefined());
+	}
+
+	{
+		const WarpballTemplate* t = c.FindWarpballTemplate("ai_sound_test");
+		ASSERT_TRUE(t != nullptr);
+		EXPECT_EQ(t->aiSound.type, bits_SOUND_DANGER);
 	}
 
 	{

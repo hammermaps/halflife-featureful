@@ -1800,8 +1800,43 @@ void EntTemplateSystem::AddTemplateFromJsonValueImpl(const std::string& template
 
 		UpdatePropertyFromJson(npcBehavior.playerCanInteract, value, "player_can_interact");
 		UpdatePropertyFromJson(npcBehavior.investigateSounds, value, "investigate_sounds");
+		UpdatePropertyFromJson(npcBehavior.coverFromDanger, value, "cover_from_danger");
 
 		entTemplate.SetNPCBehavior(std::move(npcBehavior));
+	});
+
+	HandleJSONMember(value, "soundmask", [&entTemplate](const Value& value) {
+		int soundMask = 0;
+		EntTemplate::SoundMaskOp soundMaskOp = EntTemplate::SoundMaskOp::Replace;
+
+		if (value.IsArray())
+		{
+			soundMask = JSONStringSetToFlags(value, ParseAISoundType);
+		}
+		else if (value.IsObject())
+		{
+			HandleJSONMember(value, "sounds", [&soundMask](const Value& value) {
+				soundMask = JSONStringSetToFlags(value, ParseAISoundType);
+			});
+
+			HandleJSONMember(value, "op", [&soundMaskOp](const Value& value) {
+				const char* str = value.GetString();
+				if (stricmp(str, "replace") == 0)
+				{
+					soundMaskOp = EntTemplate::SoundMaskOp::Replace;
+				}
+				else if (stricmp(str, "add") == 0)
+				{
+					soundMaskOp = EntTemplate::SoundMaskOp::Add;
+				}
+				else if (stricmp(str, "remove") == 0)
+				{
+					soundMaskOp = EntTemplate::SoundMaskOp::Remove;
+				}
+			});
+		}
+
+		entTemplate.SetSoundMask(soundMask, soundMaskOp);
 	});
 
 	HandleJSONMember(value, "primary_weapon", [&entTemplate](const Value& value) {

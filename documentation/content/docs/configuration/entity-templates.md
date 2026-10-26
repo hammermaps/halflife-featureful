@@ -2054,7 +2054,7 @@ By default some monsters use `"fail"` (zombies, bullsquids, gonomes) and some mo
 
 #### investigate_sounds
 
-A boolean - whether the monster should investigate combat sounds while in non-combat state. If set to `true`, the monster will try going to the source of the combat sound (gunshot, melee hit, etc.). After arriving the monster will stay in place for 10 seconds and then return to the former position. In Half-Life only [monster_human_assassin]({{< ref monster_human_assassin >}}) expresses this behavior. Set it to false for `monster_human_assassin` to suppress sound investigation behavior.
+A boolean - whether the monster should investigate combat sounds while in non-combat state. If set to `true`, the monster will try going to the source of the combat sound (gunshot, melee hit, etc.). After arriving the monster will stay in place for 10 seconds and then return to the former position. In original Half-Life only [monster_human_assassin]({{< ref monster_human_assassin >}}) expresses this behavior. Set it to false for `monster_human_assassin` to suppress sound investigation behavior.
 
 {{% details title="Example" %}}
 ```json
@@ -2092,6 +2092,58 @@ Same effect can be achieved for a specific monster instance via the `Followage p
 }
 ```
 {{% /details %}}
+
+#### cover_from_danger
+
+A boolean - whether the monster should try to find a cover from danger (like grenades about to explode). By default all talking monsters (like barneys, opfor human grunts, etc.), alien grunts, alien slaves, human grunts, assassins (both male and female) and shock troopers can cover from danger.
+
+Note that this won't work if the monster doesn't regard the danger sounds at all. This can be configured via the [soundmask](#soundmask) property.
+
+{{% details title="Example" %}}
+```json
+{
+    "monster_zombie": {
+        "npc_behavior": {
+            "cover_from_danger": true
+        },
+        "soundmask": {
+            "sounds": ["danger"],
+            "op": "add"
+        }
+    }
+}
+```
+
+In this example we let zombies flee from danger sounds. We add the danger sound to the list of sounds the monster can regard. Note that in practice it doesn't make sense for zombies to flee from danger as they're not fast enough anyway.
+{{% /details %}}
+
+### soundmask
+
+Configuring the monster's soundmask - the set of sounds the monster can hear (and react to). See [AI sounds]({{< ref "ai-sound" >}}) for more information.
+
+This property can be defined in two forms: array and object.
+
+In the array form it just lists the sound types. See [ai_sound_type](#ai_sound_type) for possible types. Setting an empty array will make a monster deaf.
+
+In the object form it should define the sound types array in the `"sounds"` property and the operation which decides what to do with the said mask:
+
+* `"replace"` - fully replace the soundmask with the provided list (this is the default).
+* `"add"` - add sound types to the default monster's sound list.
+* `"remove"` - remove sound types from the default monster's sound list.
+
+```json
+{
+    "monster_zombie": {
+        "soundmask": {
+            "sounds": ["danger"],
+            "op": "add"
+        }
+    },
+    "monster_zombie_barney": {
+        "soundmask": ["combat", "player"]
+    }
+}
+```
 
 ## Inheriting templates
 
@@ -2252,3 +2304,17 @@ The tracer particles support only a handful of colors defined by the renderer in
 * `"golden"` or `"yellow"`
 * `"orange"`
 * `"purple"`
+
+### ai_sound_type
+
+The list of AI sound types:
+
+* `"danger"`
+* `"combat"`
+* `"world"`
+* `"player"`
+* `"carcass"`
+* `"meat"`
+* `"garbage"`
+
+See also: [AI sounds]({{< ref "ai-sound" >}})

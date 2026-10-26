@@ -1383,19 +1383,13 @@ bool CKingpin::CheckRangeAttack2(float flDot, float flDist)
 
 Schedule_t* CKingpin::GetSchedule()
 {
-	if( HasConditions( bits_COND_HEAR_SOUND ) )
+	if (ShouldCoverFromDanger())
 	{
-		CSound *pSound = PBestSound();
-
-		ASSERT( pSound != NULL );
-		if( pSound && (pSound->m_iType & bits_SOUND_DANGER) )
+		if (CanTeleportNow())
 		{
-			if (CanTeleportNow())
-			{
-				return GetScheduleOfType(SCHED_KINGPIN_TELEPORT);
-			}
-			return GetScheduleOfType( SCHED_TAKE_COVER_FROM_BEST_SOUND );
+			return GetScheduleOfType(SCHED_KINGPIN_TELEPORT);
 		}
+		return GetScheduleOfType( SCHED_TAKE_COVER_FROM_BEST_SOUND );
 	}
 	return CFollowingMonster::GetSchedule();
 }

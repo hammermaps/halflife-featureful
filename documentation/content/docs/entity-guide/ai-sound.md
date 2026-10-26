@@ -96,9 +96,9 @@ Featureful SDK provides some new features in this regard.
 
 ### Custom soundmask
 
-Soundmask is a set of sounds/scents the monster can hear/smell. The default soundmask depends on the monster type. E.g. alien slave do listen to danger, combat and player sounds but don't care for scents, while bullsquids smell meat and carcass but can't recognize the danger sound.
+Soundmask is a set of sounds/scents the monster can hear/smell. The default soundmask depends on the monster type. E.g. alien slave do listen to danger, combat and player sounds but don't care for scents, while bullsquids smell meat and carcass but can't recognize the danger sound. The default soundmask for the monster can be changed via the [soundmask]({{< ref "entity-templates/#soundmask" >}}) entity template property.
 
-The soundmask can be changed via the monster's `Custom Sound Mask` parameter. For example it's possible to make the monster deaf to player's footsteps to prevent the monster turning when the player is approaching from behind.
+The soundmask can be changed for the specific monster instance via the `Custom Sound Mask` parameter. For example it's possible to make the monster deaf to player's footsteps to prevent the monster turning when the player is approaching from behind.
 
 {{% hint info %}}
 Monsters who see player as a friend usually don't react to his footsteps. This is done so ally monsters won't constantly turn to the player when he moves around like if they were watching him with suspicion.
@@ -113,6 +113,8 @@ In Featureful SDK its behavior has changed:
 * Changing the `displaysoundlist` value doesn't require the level restart: the reporting starts or stops right away.
 * When `displaysoundlist` is set to 1 it reports the number of active sounds in the console every 0.3 seconds but only if the number of sounds has been changed inbetween (in Half-Life it has been reported unconditionally). This also reports insertions and expirations of sounds.
 * When `displaysoundlist` is set to 2 it does the same as above and additionally visualizes the sound locations with temporary beams. The beam color denotes the sound type: red means danger, orange means combat and pink means carcass/meat. The width and height of the beam show relative sound volume.
+
+To get the monster's soundmask (the list of sound type the monster regard) in-game use the `impulse 103` or `report_ai_state` commands: it will be printed along with other information.
 
 ## Notes
 

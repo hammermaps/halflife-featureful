@@ -46,6 +46,7 @@ public:
 	const char* DefaultDisplayName() override { return "Panthereye"; }
 
 	void HandleAnimEvent( MonsterEvent_t *pEvent ) override;
+	Schedule_t* GetSchedule() override;
 	Schedule_t* GetScheduleOfType(int Type) override;
 	void OnChangeSchedule(Schedule_t *pNewSchedule) override;
 	void StartTask(Task_t *pTask) override;
@@ -283,6 +284,13 @@ void CPantherEye::HandleAnimEvent( MonsterEvent_t *pEvent )
 		CFollowingMonster::HandleAnimEvent(pEvent);
 		break;
 	}
+}
+
+Schedule_t* CPantherEye::GetSchedule()
+{
+	if (ShouldCoverFromDanger())
+		return GetScheduleOfType( SCHED_TAKE_COVER_FROM_BEST_SOUND );
+	return CFollowingMonster::GetSchedule();
 }
 
 Schedule_t* CPantherEye::GetScheduleOfType(int Type)

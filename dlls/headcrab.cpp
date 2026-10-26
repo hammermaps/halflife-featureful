@@ -102,6 +102,7 @@ public:
 		CBaseMonster::OnChangeSchedule(pNewSchedule);
 		m_leaping = false;
 	}
+	Schedule_t* GetSchedule() override;
 	Schedule_t* GetScheduleOfType ( int Type ) override;
 
 	virtual Schedule_t* GetLeapAttackSchedule();
@@ -452,6 +453,13 @@ void CHeadCrab::PainSound()
 void CHeadCrab::DeathSound()
 {
 	EmitSoundScript(dieSoundScript);
+}
+
+Schedule_t* CHeadCrab::GetSchedule()
+{
+	if (ShouldCoverFromDanger())
+		return GetScheduleOfType( SCHED_TAKE_COVER_FROM_BEST_SOUND );
+	return CBaseMonster::GetSchedule();
 }
 
 Schedule_t *CHeadCrab::GetScheduleOfType( int Type )

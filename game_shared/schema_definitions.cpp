@@ -991,7 +991,17 @@ R"(
 			"Danger",
 			"danger",
 			"Combat",
-			"combat"
+			"combat",
+			"World",
+			"world",
+			"Player",
+			"player",
+			"Carcass",
+			"carcass",
+			"Meat",
+			"meat",
+			"Garbage",
+			"garbage"
 		]
 	},
 	"blood_color": {
@@ -1686,8 +1696,33 @@ R"(
 					},
 					"investigate_sounds": {
 						"type": "boolean"
+					},
+					"cover_from_danger": {
+						"type": "boolean"
 					}
-				}
+				},
+				"additionalProperties": false
+			},
+			"soundmask": {
+				"type": ["array", "object"],
+				"items": {
+					"$ref": "#/ai_sound_type"
+				},
+				"uniqueItems": true,
+				"properties": {
+					"sounds": {
+						"type": "array",
+						"items": {
+							"$ref": "#/ai_sound_type"
+						},
+						"uniqueItems": true
+					},
+					"op": {
+						"enum": ["replace", "add", "remove"]
+					}
+				},
+				"required": ["sounds"],
+				"additionalProperties": false
 			}
 		},
 		"additionalProperties": false,

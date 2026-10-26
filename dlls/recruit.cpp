@@ -152,6 +152,9 @@ const char* CRecruit::DefaultSentenceGroup(int group)
 
 Schedule_t* CRecruit::GetSchedule()
 {
+	if (ShouldCoverFromDanger())
+		return GetScheduleOfType( SCHED_TAKE_COVER_FROM_BEST_SOUND );
+
 	switch (m_MonsterState) {
 	case MONSTERSTATE_COMBAT:
 	{
@@ -161,7 +164,19 @@ Schedule_t* CRecruit::GetSchedule()
 			return CBaseMonster::GetSchedule();
 		}
 		if( HasConditions( bits_COND_HEAR_SOUND ) )
-			return GetScheduleOfType( SCHED_TAKE_COVER_FROM_BEST_SOUND );	// Cower and panic from the scary sound!
+		{
+			CSound *pSound = PBestSound();
+			if (pSound)
+			{
+				const bool isCombat = FBitSet(pSound->m_iType, bits_SOUND_COMBAT);
+				const bool isPlayer = FBitSet(pSound->m_iType, bits_SOUND_PLAYER);
+
+				if (isCombat && (!isPlayer && IDefaultRelationship(CLASS_PLAYER) != R_AL))
+				{
+					return GetScheduleOfType( SCHED_TAKE_COVER_FROM_BEST_SOUND );	// Cower and panic from the scary sound!
+				}
+			}
+		}
 
 		Schedule_t* regenSchedule = GetRegenerationSchedule();
 		if (regenSchedule)

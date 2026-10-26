@@ -446,6 +446,7 @@ public:
 		optional<int> chaseEnemyFailed;
 		bool playerCanInteract{true};
 		tribool investigateSounds;
+		tribool coverFromDanger;
 	};
 
 	struct GibInfo
@@ -473,6 +474,13 @@ public:
 	};
 
 	typedef std::vector<GibInfo> GibDisposition;
+
+	enum class SoundMaskOp
+	{
+		Replace,
+		Add,
+		Remove
+	};
 
 	struct WeaponDefinition
 	{
@@ -794,11 +802,25 @@ public:
 		_jumping = jumping;
 	}
 
-	const NPCBehavior GetNPCBehavior() const {
+	const NPCBehavior& GetNPCBehavior() const {
 		return _npcBehavior;
 	}
 	void SetNPCBehavior(NPCBehavior&& behavior) {
 		_npcBehavior = behavior;
+	}
+
+	bool IsSoundMaskDefined() const {
+		return _soundMask.has_value();
+	}
+	int GetSoundMask() const {
+		return _soundMask.value_or(0);
+	}
+	SoundMaskOp GetSoundMaskOp() const {
+		return _soundMaskOp;
+	}
+	void SetSoundMask(int soundMask, SoundMaskOp op) {
+		_soundMask = soundMask;
+		_soundMaskOp = op;
 	}
 
 	const GibDisposition& GetGibDisposition() const {
@@ -882,6 +904,9 @@ private:
 	Jumping _jumping;
 
 	NPCBehavior _npcBehavior;
+
+	optional<int> _soundMask;
+	SoundMaskOp _soundMaskOp{SoundMaskOp::Replace};
 
 	GibDisposition _gibDisposition;
 

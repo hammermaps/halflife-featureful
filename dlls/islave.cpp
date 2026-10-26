@@ -407,6 +407,7 @@ public:
 	Schedule_t* GetHealOrReviveSchedule();
 	Schedule_t *GetSchedule() override;
 	Schedule_t *GetScheduleOfType( int Type ) override;
+	bool DefaultInterestedInCoverFromDanger() override { return true; }
 	CUSTOM_SCHEDULES
 
 	int Save( CSave &save ) override;
@@ -1836,24 +1837,16 @@ Schedule_t* CISlave::GetHealOrReviveSchedule()
 
 Schedule_t *CISlave::GetSchedule()
 {
-/*
-	if( pev->spawnflags )
-	{
-		pev->spawnflags = 0;
-		return GetScheduleOfType( SCHED_RELOAD );
-	}
-*/
+	if (ShouldCoverFromDanger())
+		return GetScheduleOfType( SCHED_TAKE_COVER_FROM_BEST_SOUND );
+
 	if( HasConditions( bits_COND_HEAR_SOUND ) )
 	{
 		CSound *pSound = PBestSound();
-
 		ASSERT( pSound != NULL );
-
-		if( pSound )
+		if (pSound)
 		{
-			if( pSound->m_iType & bits_SOUND_DANGER )
-				return GetScheduleOfType( SCHED_TAKE_COVER_FROM_BEST_SOUND );
-			if( pSound->m_iType & bits_SOUND_COMBAT )
+			if (pSound->m_iType & bits_SOUND_COMBAT)
 				m_afMemory |= bits_MEMORY_ISLAVE_PROVOKED;
 		}
 	}

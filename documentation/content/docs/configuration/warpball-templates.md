@@ -190,7 +190,7 @@ Set `"shake"` to `null` to disable shake effect inherited from the parent warpba
 
 `"ai_sound"` defines the optional AI sound produced when the effect starts (e.g. to attract other monsters' attention).
 
-* `"type"` - the type of AI sound. Possible values are `"combat"` and `"danger"`.
+* `"type"` - the type of [AI sound]({{< ref "ai-sound" >}}). Possible values are `"combat"` and `"danger"`.
 * `"duration"` - duration of sound. Default value is 0.3.
 * `"radius"` - the effective radius. Default value is 192.
 

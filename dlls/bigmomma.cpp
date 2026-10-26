@@ -1061,6 +1061,9 @@ Schedule_t *CBigMomma::GetSchedule()
 		return GetScheduleOfType( SCHED_BIG_NODE );
 	}
 
+	if (ShouldCoverFromDanger())
+		return GetScheduleOfType( SCHED_TAKE_COVER_FROM_BEST_SOUND );
+
 	return CFollowingMonster::GetSchedule();
 }
 

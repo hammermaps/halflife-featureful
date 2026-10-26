@@ -978,6 +978,9 @@ IMPLEMENT_CUSTOM_SCHEDULES(CPitdrone, CFollowingMonster)
 //=========================================================
 Schedule_t *CPitdrone::GetSchedule()
 {
+	if (ShouldCoverFromDanger())
+		return GetScheduleOfType( SCHED_TAKE_COVER_FROM_BEST_SOUND );
+
 	switch (m_MonsterState)
 	{
 	case MONSTERSTATE_ALERT:

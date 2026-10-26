@@ -2030,35 +2030,20 @@ Schedule_t *CHGrunt::GetSchedule()
 	}
 
 	// grunts place HIGH priority on running away from danger sounds.
-	if( HasConditions( bits_COND_HEAR_SOUND ) )
+	if (ShouldCoverFromDanger())
 	{
-		CSound *pSound = PBestSound();
+		// dangerous sound nearby!
 
-		ASSERT( pSound != NULL );
-		if( pSound )
+		//!!!KELLY - currently, this is the grunt's signal that a grenade has landed nearby,
+		// and the grunt should find cover from the blast
+		// good place for "SHIT!" or some other colorful verbal indicator of dismay.
+		// It's not safe to play a verbal order here "Scatter", etc cause
+		// this may only affect a single individual in a squad.
+		if( FOkToSpeak() )
 		{
-			if( pSound->m_iType & bits_SOUND_DANGER )
-			{
-				// dangerous sound nearby!
-
-				//!!!KELLY - currently, this is the grunt's signal that a grenade has landed nearby,
-				// and the grunt should find cover from the blast
-				// good place for "SHIT!" or some other colorful verbal indicator of dismay.
-				// It's not safe to play a verbal order here "Scatter", etc cause
-				// this may only affect a single individual in a squad.
-				if( FOkToSpeak() )
-				{
-					PlayGruntSentence(HGRUNT_SENT_GREN);
-				}
-				return GetScheduleOfType( SCHED_TAKE_COVER_FROM_BEST_SOUND );
-			}
-			/*
-			if( !HasConditions( bits_COND_SEE_ENEMY ) && ( pSound->m_iType & ( bits_SOUND_PLAYER | bits_SOUND_COMBAT ) ) )
-			{
-				MakeIdealYaw( pSound->m_vecOrigin );
-			}
-			*/
+			PlayGruntSentence(HGRUNT_SENT_GREN);
 		}
+		return GetScheduleOfType( SCHED_TAKE_COVER_FROM_BEST_SOUND );
 	}
 	switch( m_MonsterState )
 	{

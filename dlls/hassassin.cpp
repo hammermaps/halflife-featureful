@@ -71,6 +71,7 @@ public:
 	void HandleAnimEvent( MonsterEvent_t *pEvent ) override;
 	Schedule_t *GetSchedule() override;
 	Schedule_t *GetScheduleOfType( int Type ) override;
+	bool DefaultInterestedInCoverFromDanger() override { return true; }
 	bool CheckMeleeAttack1( float flDot, float flDist ) override;	// jump
 	// BOOL CheckMeleeAttack2( float flDot, float flDist );
 	bool CheckRangeAttack1( float flDot, float flDist ) override;	// shoot
@@ -955,17 +956,8 @@ Schedule_t *CHAssassin::GetSchedule()
 			{
 				pev->movetype = MOVETYPE_STEP;
 			}
-			CSound *pSound = NULL;
-			if( HasConditions( bits_COND_HEAR_SOUND ) )
-			{
-				pSound = PBestSound();
-
-				ASSERT( pSound != NULL );
-				if( pSound &&( pSound->m_iType & bits_SOUND_DANGER ) )
-				{
-					return GetScheduleOfType( SCHED_TAKE_COVER_FROM_BEST_SOUND );
-				}
-			}
+			if (ShouldCoverFromDanger())
+				return GetScheduleOfType( SCHED_TAKE_COVER_FROM_BEST_SOUND );
 
 			Schedule_t* reloadSched = GetIdleReloadSchedule();
 			if (reloadSched)

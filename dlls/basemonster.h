@@ -565,6 +565,12 @@ public:
 	}
 	int ChaseEnemyFailedPolicy();
 
+	virtual bool DefaultInterestedInCoverFromDanger() {
+		return false;
+	}
+	bool InterestedInCoverFromDanger();
+	bool ShouldCoverFromDanger();
+
 	virtual bool DefaultWantsInvestigateSounds() {
 		return false;
 	}

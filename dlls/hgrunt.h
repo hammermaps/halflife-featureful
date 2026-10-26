@@ -101,6 +101,7 @@ public:
 	void PerformKick(int eventIndex, float damage, float zpunch = 0);
 	Schedule_t *GetSchedule() override;
 	Schedule_t *GetScheduleOfType( int Type ) override;
+	bool DefaultInterestedInCoverFromDanger() override { return true; }
 	DamageInfo DefaultHandleTraceAttack(entvars_t *pevInflictor, entvars_t *pevAttacker, const DamageInfo &inputDamageInfo, Vector vecDir, TraceResult *ptr) override;
 	TakeDamageResult TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, const DamageInfo& damageInfo ) override;
 

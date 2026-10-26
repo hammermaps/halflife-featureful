@@ -2,6 +2,7 @@
 #include "random_utils.h"
 #include "string_utils.h"
 #include "const_render.h"
+#include "soundent_bits.h"
 #include <cmath>
 #include <cstdlib>
 #include <utility>
@@ -292,6 +293,29 @@ int ParseTracerColor(const char *name)
 		}
 	}
 	return -1;
+}
+
+int ParseAISoundType(const char *name)
+{
+	constexpr std::pair<const char*, int> sounds[] = {
+		{"combat", bits_SOUND_COMBAT},
+		{"world", bits_SOUND_WORLD},
+		{"player", bits_SOUND_PLAYER},
+		{"carcass", bits_SOUND_CARCASS},
+		{"meat", bits_SOUND_MEAT},
+		{"danger", bits_SOUND_DANGER},
+		{"garbage", bits_SOUND_GARBAGE},
+	};
+
+	for (auto& p : sounds)
+	{
+		if (stricmp(name, p.first) == 0)
+		{
+			return p.second;
+		}
+	}
+
+	return 0;
 }
 
 float RandomizeNumberFromRange(const FloatRange& r)

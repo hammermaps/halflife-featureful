@@ -153,6 +153,7 @@ public:
 	void			ReactToPlayerHit(entvars_t* pevInflictor, entvars_t* pevAttacker, const DamageInfo& damageInfo);
 	void			TalkMonsterInit();
 	bool			IsAllyToPlayerClass() override;
+	bool DefaultInterestedInCoverFromDanger() override { return true; }
 
 	// Conversations / communication
 	int				GetVoicePitch();

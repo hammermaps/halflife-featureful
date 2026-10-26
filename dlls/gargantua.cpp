@@ -452,6 +452,7 @@ public:
 		SetMyObjectCollisionBox(Vector( -80, -80, 0 ), Vector( 80, 80, 214 ));
 	}
 
+	Schedule_t *GetSchedule() override;
 	Schedule_t *GetScheduleOfType( int Type ) override;
 	void StartTask( Task_t *pTask ) override;
 	void RunTask( Task_t *pTask ) override;
@@ -1389,6 +1390,13 @@ void CGargantua::HandleAnimEvent( MonsterEvent_t *pEvent )
 		CFollowingMonster::HandleAnimEvent( pEvent );
 		break;
 	}
+}
+
+Schedule_t* CGargantua::GetSchedule()
+{
+	if (ShouldCoverFromDanger())
+		return GetScheduleOfType( SCHED_TAKE_COVER_FROM_BEST_SOUND );
+	return CFollowingMonster::GetSchedule();
 }
 
 Schedule_t *CGargantua::GetScheduleOfType( int Type )

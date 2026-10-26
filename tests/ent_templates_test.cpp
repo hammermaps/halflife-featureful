@@ -6,6 +6,7 @@
 #include "gib.h"
 #include "hitgroup.h"
 #include "grapple_target.h"
+#include "soundent_bits.h"
 
 #include <algorithm>
 
@@ -157,7 +158,17 @@ const char entities[] = R"(
 			{
 				"count": 2
 			}
-		]
+		],
+		"npc_behavior": {
+			"chase_enemy_failed": "retreat",
+			"player_can_interact": false,
+			"investigate_sounds": true,
+			"cover_from_danger": true
+		},
+		"soundmask": {
+			"sounds": ["danger", "meat"],
+			"op": "add"
+		}
 	},
 	"monster_zombie_barney": {
 		"loot_drop": [
@@ -174,7 +185,8 @@ const char entities[] = R"(
 				"pickup_name": "battery_red",
 				"chance": 0.2
 			}
-		]
+		],
+		"soundmask": ["combat", "player", "danger"]
 	},
 	"monster_headcrab": {
 		"leap_attack": {
@@ -507,6 +519,19 @@ TEST(EntityTemplates, Parse)
 
 		EXPECT_EQ(gibDisposition[2].count, 2);
 		EXPECT_FALSE(gibDisposition[2].bloodColor);
+
+		const EntTemplate::NPCBehavior& behavior = zombie->GetNPCBehavior();
+		EXPECT_TRUE(behavior.chaseEnemyFailed.has_value());
+		EXPECT_EQ(*behavior.chaseEnemyFailed, CHASE_ENEMY_FAILED_RETREAT);
+		EXPECT_FALSE(behavior.playerCanInteract);
+		EXPECT_FALSE(indeterminate(behavior.investigateSounds));
+		EXPECT_TRUE((bool)behavior.investigateSounds);
+		EXPECT_FALSE(indeterminate(behavior.coverFromDanger));
+		EXPECT_TRUE((bool)behavior.coverFromDanger);
+
+		EXPECT_TRUE(zombie->IsSoundMaskDefined());
+		EXPECT_EQ(zombie->GetSoundMask(), bits_SOUND_DANGER|bits_SOUND_MEAT);
+		EXPECT_EQ(zombie->GetSoundMaskOp(), EntTemplate::SoundMaskOp::Add);
 	}
 
 	{
@@ -526,6 +551,10 @@ TEST(EntityTemplates, Parse)
 		EXPECT_EQ(dropItemSet.items[2].classname, "item_pickup");
 		EXPECT_EQ(dropItemSet.items[2].pickupName, "battery_red");
 		EXPECT_EQ(dropItemSet.items[2].chance, 0.2f);
+
+		EXPECT_TRUE(zombie->IsSoundMaskDefined());
+		EXPECT_EQ(zombie->GetSoundMask(), bits_SOUND_COMBAT|bits_SOUND_PLAYER|bits_SOUND_DANGER);
+		EXPECT_EQ(zombie->GetSoundMaskOp(), EntTemplate::SoundMaskOp::Replace);
 	}
 
 	{

@@ -48,6 +48,7 @@ public:
 	const char* DefaultDisplayName() override { return "Zombie"; }
 	void HandleAnimEvent( MonsterEvent_t *pEvent ) override;
 	int IgnoreConditions() override;
+	Schedule_t* GetSchedule() override;
 	Schedule_t* GetScheduleOfType(int Type) override;
 
 	float m_flNextFlinch;
@@ -326,6 +327,13 @@ int CZombie::IgnoreConditions()
 	}
 
 	return iIgnore;
+}
+
+Schedule_t* CZombie::GetSchedule()
+{
+	if (ShouldCoverFromDanger())
+		return GetScheduleOfType( SCHED_TAKE_COVER_FROM_BEST_SOUND );
+	return CFollowingMonster::GetSchedule();
 }
 
 Schedule_t* CZombie::GetScheduleOfType(int Type)

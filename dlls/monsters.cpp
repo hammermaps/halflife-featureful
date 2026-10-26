@@ -536,14 +536,33 @@ int CBaseMonster::DefaultISoundMask()
 
 int CBaseMonster::ISoundMask()
 {
-	if (m_customSoundMask == 0)
+	auto getDefaultSoundMask = [this]() {
+		const EntTemplate* entTemplate = GetMyEntTemplate();
+		if (entTemplate && entTemplate->IsSoundMaskDefined())
+		{
+			int soundMask = entTemplate->GetSoundMask();
+			EntTemplate::SoundMaskOp soundMaskOp = entTemplate->GetSoundMaskOp();
+
+			switch(soundMaskOp)
+			{
+			case EntTemplate::SoundMaskOp::Add:
+				return DefaultISoundMask() | soundMask;
+			case EntTemplate::SoundMaskOp::Remove:
+				return DefaultISoundMask() & ~soundMask;
+			default:
+				return soundMask;
+			}
+		}
 		return DefaultISoundMask();
+	};
+
+	if (m_customSoundMask == 0)
+		return getDefaultSoundMask();
 	if (m_customSoundMask == -1)
 		return 0;
 	if (FBitSet(m_customSoundMask, bits_SOUND_REMOVE_FROM_DEFAULT))
 	{
-		int defaultMask = DefaultISoundMask();
-		return defaultMask & ~m_customSoundMask;
+		return getDefaultSoundMask() & ~m_customSoundMask;
 	}
 	return m_customSoundMask;
 }
@@ -3910,6 +3929,38 @@ void CBaseMonster::ReportAIState( ALERT_TYPE level )
 		}
 	}
 
+	const int soundMask = ISoundMask();
+	ALERT(level, "Soundmask: [");
+	if (FBitSet(soundMask, bits_SOUND_COMBAT))
+	{
+		ALERT(level, "Combat; ");
+	}
+	if (FBitSet(soundMask, bits_SOUND_WORLD))
+	{
+		ALERT(level, "World; ");
+	}
+	if (FBitSet(soundMask, bits_SOUND_PLAYER))
+	{
+		ALERT(level, "Player; ");
+	}
+	if (FBitSet(soundMask, bits_SOUND_CARCASS))
+	{
+		ALERT(level, "Carcass; ");
+	}
+	if (FBitSet(soundMask, bits_SOUND_MEAT))
+	{
+		ALERT(level, "Meat; ");
+	}
+	if (FBitSet(soundMask, bits_SOUND_DANGER))
+	{
+		ALERT(level, "Danger; ");
+	}
+	if (FBitSet(soundMask, bits_SOUND_GARBAGE))
+	{
+		ALERT(level, "Garbage; ");
+	}
+	ALERT(level, "]; ");
+
 	if (shouldReportRoute)
 	{
 		int iMyNode = WorldGraph.FindNearestNode( pev->origin, this );
@@ -5963,6 +6014,33 @@ int CBaseMonster::ChaseEnemyFailedPolicy()
 		}
 	}
 	return DefaultChaseEnemyFailedPolicy();
+}
+
+bool CBaseMonster::InterestedInCoverFromDanger()
+{
+	const EntTemplate* entTemplate = GetMyEntTemplate();
+	if (entTemplate)
+	{
+		const EntTemplate::NPCBehavior& behavior = entTemplate->GetNPCBehavior();
+		if (!indeterminate(behavior.coverFromDanger))
+		{
+			return (bool)behavior.coverFromDanger;
+		}
+	}
+	return DefaultInterestedInCoverFromDanger();
+}
+
+bool CBaseMonster::ShouldCoverFromDanger()
+{
+	if (HasConditions(bits_COND_HEAR_SOUND) && InterestedInCoverFromDanger())
+	{
+		CSound *pSound = PBestSound();
+		if (pSound && FBitSet(pSound->m_iType, bits_SOUND_DANGER))
+		{
+			return true;
+		}
+	}
+	return false;
 }
 
 bool CBaseMonster::WantsInvestigateSounds()

@@ -956,21 +956,11 @@ Schedule_t *CScientist::GetScheduleOfType( int Type )
 
 Schedule_t *CScientist::GetSchedule()
 {
+	if (ShouldCoverFromDanger())
+		return GetScheduleOfType( SCHED_TAKE_COVER_FROM_BEST_SOUND );
+
 	// so we don't keep calling through the EHANDLE stuff
 	CBaseEntity *pEnemy = m_hEnemy;
-
-	CSound *pSound = NULL;
-	if( HasConditions( bits_COND_HEAR_SOUND ) )
-	{
-		pSound = PBestSound();
-
-		ASSERT( pSound != NULL );
-		if( pSound && ( pSound->m_iType & bits_SOUND_DANGER ) )
-		{
-			Scream();
-			return GetScheduleOfType( SCHED_TAKE_COVER_FROM_BEST_SOUND );
-		}
-	}
 
 	const bool wantsToDisarm = NeedleIsEquiped();
 
@@ -1004,6 +994,7 @@ Schedule_t *CScientist::GetSchedule()
 		// Cower when you hear something scary
 		if( HasConditions( bits_COND_HEAR_SOUND ) )
 		{
+			CSound *pSound = PBestSound();
 			if( pSound )
 			{
 				if( pSound->m_iType & ( bits_SOUND_DANGER | bits_SOUND_COMBAT ) )

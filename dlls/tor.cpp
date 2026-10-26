@@ -484,16 +484,8 @@ void CTor::HandleAnimEvent(MonsterEvent_t* pEvent)
 
 Schedule_t* CTor::GetSchedule()
 {
-	if( HasConditions( bits_COND_HEAR_SOUND ) )
-	{
-		CSound *pSound = PBestSound();
-
-		ASSERT( pSound != NULL );
-		if( pSound && ( pSound->m_iType & bits_SOUND_DANGER ) )
-		{
-			return GetScheduleOfType( SCHED_TAKE_COVER_FROM_BEST_SOUND );
-		}
-	}
+	if (ShouldCoverFromDanger())
+		return GetScheduleOfType( SCHED_TAKE_COVER_FROM_BEST_SOUND );
 	return CFollowingMonster::GetSchedule();
 }
 

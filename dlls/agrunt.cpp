@@ -86,6 +86,7 @@ public:
 
 	Schedule_t *GetSchedule() override;
 	Schedule_t *GetScheduleOfType( int Type ) override;
+	bool DefaultInterestedInCoverFromDanger() override { return true; }
 	bool FCanCheckAttacks() override;
 	bool CheckMeleeAttack1( float flDot, float flDist ) override;
 	bool CheckRangeAttack1( float flDot, float flDist ) override;
@@ -1049,17 +1050,8 @@ void CAGrunt::StartTask( Task_t *pTask )
 //=========================================================
 Schedule_t *CAGrunt::GetSchedule()
 {
-	if( HasConditions( bits_COND_HEAR_SOUND ) )
-	{
-		CSound *pSound = PBestSound();
-
-		ASSERT( pSound != NULL );
-		if( pSound && ( pSound->m_iType & bits_SOUND_DANGER ) )
-		{
-			// dangerous sound nearby!
-			return GetScheduleOfType( SCHED_TAKE_COVER_FROM_BEST_SOUND );
-		}
-	}
+	if (ShouldCoverFromDanger())
+		return GetScheduleOfType( SCHED_TAKE_COVER_FROM_BEST_SOUND );
 
 	switch( m_MonsterState )
 	{

@@ -660,14 +660,9 @@ Schedule_t *CBarney::GetScheduleOfType( int Type )
 //=========================================================
 Schedule_t *CBarney::GetSchedule()
 {
-	if( HasConditions( bits_COND_HEAR_SOUND ) )
-	{
-		CSound *pSound = PBestSound();
+	if (ShouldCoverFromDanger())
+		return GetScheduleOfType( SCHED_TAKE_COVER_FROM_BEST_SOUND );
 
-		ASSERT( pSound != NULL );
-		if( pSound && (pSound->m_iType & bits_SOUND_DANGER) )
-			return GetScheduleOfType( SCHED_TAKE_COVER_FROM_BEST_SOUND );
-	}
 	if( HasConditions( bits_COND_ENEMY_DEAD ) && FOkToSpeak(SPEAK_DISREGARD_ENEMY) )
 	{
 		PlaySentence( SentenceGroup(TLK_KILL), 4, VOL_NORM, ATTN_NORM );
