@@ -39,6 +39,7 @@
 
 bool g_fIsXash3D = false;
 bool g_hasCorrectShouldCollide = false;
+bool g_worldExists = false;
 
 void EntvarsKeyvalue( entvars_t *pev, KeyValueData *pkvd );
 
@@ -117,6 +118,8 @@ void OnFreeEntPrivateData(edict_s* pEdict)
 		ClearPrecachedModels();
 		ClearPrecachedSounds();
 		ResetScheduleWatchers();
+
+		g_worldExists = false;
 	}
 }
 
@@ -478,7 +481,12 @@ int DispatchRestore( edict_t *pent, SAVERESTOREDATA *pSaveData, int globalEntity
 			}
 		}
 
-		if( pEntity->ObjectCaps() & FCAP_MUST_SPAWN )
+		bool mustSpawn = FBitSet(pEntity->ObjectCaps(), FCAP_MUST_SPAWN);
+		// ObjectCaps might have called GetCacheableEntTemplate. Mark templates as not checked
+		pEntity->m_entTemplateChecked = false;
+		pEntity->m_ownerEntTemplateChecked = false;
+
+		if (mustSpawn)
 		{
 			pEntity->Restore( restoreHelper );
 			pEntity->Spawn();
@@ -728,6 +736,8 @@ TakeDamageResult CBaseEntity::TakeDamage( entvars_t *pevInflictor, entvars_t *pe
 		pev->velocity = pev->velocity + vecDir * flForce;
 	}
 
+	PainReaction(damageInfo);
+
 	ApplyDamageToHealth(damageInfo, pevAttacker, takeDamageResult);
 
 	if( pev->health <= 0 )
@@ -794,6 +804,9 @@ TYPEDESCRIPTION	CBaseEntity::m_SaveData[] =
 	DEFINE_FIELD( CBaseEntity, m_prevRenderColor, FIELD_VECTOR ),
 	DEFINE_FIELD( CBaseEntity, m_prevRenderFx, FIELD_SHORT ),
 	DEFINE_FIELD( CBaseEntity, m_prevRenderMode, FIELD_SHORT ),
+
+	DEFINE_FIELD( CBaseEntity, m_flTouchedByJumpPad, FIELD_TIME ),
+	DEFINE_FIELD( CBaseEntity, m_flNextPainTime, FIELD_TIME ),
 };
 
 void CBaseEntity::KeyValue(KeyValueData* pkvd)
@@ -1501,9 +1514,22 @@ static void PrecacheSequenceSounds(CBaseEntity* pEntity, bool precacheSounds, bo
 	if (!precacheSounds && !precacheSoundScripts)
 		return;
 
-	void *pmodel = GET_MODEL_PTR( pEntity->edict() );
+	void *pmodel = GET_MODEL_PTR(pEntity->edict());
 	if (!pmodel)
-		return;
+	{
+		// Doens't have a model? It means entity is not spawned and if we're doing precache for the spawner
+		// This must happen AFTER the model has been precached!
+		const char* model = pEntity->MyOwnModel();
+		if (model)
+		{
+			SET_MODEL(pEntity->edict(), model);
+			pmodel = GET_MODEL_PTR(pEntity->edict());
+			if (!pmodel)
+				return;
+		}
+		else
+			return;
+	}
 
 	studiohdr_t *pstudiohdr = (studiohdr_t *)pmodel;
 	for( int i = 0; i < pstudiohdr->numseq; i++ )
@@ -2290,6 +2316,11 @@ bool CBaseEntity::SetTraceHullAttackParamsFromTemplate(int eventIndex, TraceHull
 			{
 				params.missSoundScript = attack->missSoundScript.c_str();
 			}
+			if (!attack->soundScript.empty())
+			{
+				params.soundScript = attack->soundScript.c_str();
+			}
+			params.soundScriptChance = attack->soundScriptChance;
 
 			return true;
 		}

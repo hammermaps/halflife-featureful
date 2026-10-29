@@ -138,6 +138,7 @@ class VisualSystem : public JSONConfig
 {
 public:
 	void AddVisualFromJsonValue(const char* name, const rapidjson::Value& value);
+	Visual ParseVisualAndCacheModelName(const rapidjson::Value& value);
 	void EnsureVisualExists(const std::string& name);
 	const Visual* GetVisual(const char* name);
 	const Visual* ProvideDefaultVisual(const char* name, const Visual& visual, bool doPrecache);

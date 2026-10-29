@@ -22,6 +22,12 @@ const char visuals[] = R"(
 	"Hornet.Model": {
 		"renderfx": "hologram",
 	},
+	"SameModel1": {
+		"model": "models/same.mdl"
+	},
+	"SameModel2": {
+		"model": "models/same.mdl"
+	},
 	"Controller.EnergyBallLight": {
 		"radius": [32, 48]
 	},
@@ -82,6 +88,18 @@ TEST(Visuals, Parse) {
 		ASSERT_TRUE(energyBallLight != nullptr);
 		EXPECT_TRUE(energyBallLight->HasDefined(Visual::RADIUS_DEFINED));
 		EXPECT_EQ(energyBallLight->radius, IntRange(32, 48));
+	}
+
+	{
+		const Visual* sameModel1 = s.GetVisual("SameModel1");
+		const Visual* sameModel2 = s.GetVisual("SameModel2");
+
+		ASSERT_TRUE(sameModel1 != nullptr);
+		ASSERT_TRUE(sameModel2 != nullptr);
+		ASSERT_TRUE(sameModel1->model != nullptr);
+		ASSERT_TRUE(sameModel2->model != nullptr);
+		EXPECT_STREQ(sameModel1->model, "models/same.mdl");
+		EXPECT_EQ(sameModel1->model, sameModel2->model);
 	}
 
 	{

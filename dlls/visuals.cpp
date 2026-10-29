@@ -3,6 +3,7 @@
 #include "error_collector.h"
 #include "logger.h"
 #include "util_shared.h"
+#include "string_set.h"
 
 using namespace rapidjson;
 
@@ -34,18 +35,12 @@ bool VisualSystem::ReadFromDocument(const Document& document, const char *fileNa
 
 void VisualSystem::AddVisualFromJsonValue(const char *name, const Value &value)
 {
-	auto makeConstantString = [this](const char* modelStr) {
-		std::string str = modelStr;
-		auto strIt = _modelStringSet.find(str);
-		if (strIt == _modelStringSet.end())
-		{
-			auto p = _modelStringSet.insert(str);
-			strIt = p.first;
-		}
-		return strIt->c_str();
-	};
+	_visuals[name] = ParseVisualFromJSON(value, [this](const char* str){ return MakeStringInSet(_modelStringSet, str); });
+}
 
-	_visuals[name] = ParseVisualFromJSON(value, makeConstantString);
+Visual VisualSystem::ParseVisualAndCacheModelName(const Value &value)
+{
+	return ParseVisualFromJSON(value, [this](const char* str){ return MakeStringInSet(_modelStringSet, str); });
 }
 
 void VisualSystem::EnsureVisualExists(const std::string& name)

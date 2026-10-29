@@ -71,6 +71,9 @@ public:
 	void EXPORT CommandUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 
 	TakeDamageResult TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, const DamageInfo& damageInfo ) override;
+	void PainSound() override {
+		EmitSoundScript(painSoundScript);
+	}
 	void TraceAttack( entvars_t *pevInflictor, entvars_t *pevAttacker, const DamageInfo& damageInfo, Vector vecDir, TraceResult *ptr ) override;
 	void ReportAIState(ALERT_TYPE level) override;
 	void ShowDamage();
@@ -131,6 +134,7 @@ public:
 	bool m_iObeyTriggerMode;
 
 	static const NamedSoundScript rotorSoundScript;
+	static const NamedSoundScript painSoundScript;
 	static constexpr const char* crashSoundScript = "Osprey.Crash";
 
 	static const NamedVisual sharedSmokeVisual;
@@ -229,6 +233,12 @@ const NamedSoundScript COsprey::rotorSoundScript = {
 	"Osprey.Rotor"
 };
 
+const NamedSoundScript COsprey::painSoundScript = {
+	CHAN_VOICE,
+	{},
+	"Osprey.Pain"
+};
+
 const NamedVisual COsprey::sharedSmokeVisual = BuildVisual("Osprey.SmokeBase")
 		.Model(g_pModelNameSmoke)
 		.Alpha(255)
@@ -312,6 +322,7 @@ void COsprey::PrecacheImpl(const char* tailGibs, const char* bodyGibs, const cha
 	PrecacheMyModel();
 
 	RegisterAndPrecacheSoundScript(rotorSoundScript);
+	RegisterAndPrecacheSoundScript(painSoundScript);
 	RegisterAndPrecacheSoundScript(crashSoundScript, NPC::crashSoundScript);
 
 	RegisterVisual(fallingSmokeVisual);
@@ -1223,7 +1234,6 @@ public:
 	void Precache() override;
 	const char* DefaultModel() override { return "models/blkop_osprey.mdl"; }
 	float DefaultHealth() override { return GetSkillValue("blkopsosprey"); }
-	bool IsEnabledInMod() override { return g_modFeatures.IsMonsterEnabled("blkop_osprey"); }
 	void PrepareGruntBeforeSpawn(CBaseEntity* pGrunt) override;
 	int	DefaultClassify() override
 	{

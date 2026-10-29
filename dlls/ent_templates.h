@@ -12,6 +12,7 @@
 #include "ent_filter.h"
 #include "sentences.h"
 #include "skillbasedvalue.h"
+#include "npc_behavior.h"
 
 #include <map>
 #include <string>
@@ -34,14 +35,6 @@ struct SquadCapabilities
 	tribool allowDifferentClassification;
 	tribool requireSameClassname;
 	tribool requireSameEntTemplate;
-};
-
-struct PainSoundRule
-{
-	FloatRange delay = 0.25f;
-	float chance = 1.0f;
-	float lowerBound = 0.0f;
-	bool allowWhenDying = false;
 };
 
 enum class FlagSetMatch
@@ -267,6 +260,8 @@ public:
 
 		std::string hitSoundScript;
 		std::string missSoundScript;
+		std::string soundScript;
+		float soundScriptChance{1.0f};
 	};
 
 	struct LeapAttack
@@ -444,6 +439,47 @@ public:
 		optional<std::string> startSequence;
 		optional<std::string> upSequence;
 		optional<std::string> downSequence;
+	};
+
+	struct NPCBehavior
+	{
+		optional<int> chaseEnemyFailed;
+		bool playerCanInteract{true};
+		tribool investigateSounds;
+		tribool coverFromDanger;
+	};
+
+	struct GibInfo
+	{
+		GibInfo() = default;
+		GibInfo(int gibCount, int body): count(gibCount), bodyRange(body) {}
+
+		enum {
+			POSITION_BOX,
+			POSITION_HEAD
+		};
+
+		enum {
+			FLY_AWAY_DIRECTED,
+			FLY_AWAY_RANDOM
+		};
+
+		IntRange count{1};
+		IntRange bodyRange{0, -1};
+		Visual visual;
+		int position{FLY_AWAY_DIRECTED};
+		int flyAway{FLY_AWAY_DIRECTED};
+		float throwAtPlayerChance{0.0f};
+		optional<int> bloodColor;
+	};
+
+	typedef std::vector<GibInfo> GibDisposition;
+
+	enum class SoundMaskOp
+	{
+		Replace,
+		Add,
+		Remove
 	};
 
 	struct WeaponDefinition
@@ -766,6 +802,34 @@ public:
 		_jumping = jumping;
 	}
 
+	const NPCBehavior& GetNPCBehavior() const {
+		return _npcBehavior;
+	}
+	void SetNPCBehavior(NPCBehavior&& behavior) {
+		_npcBehavior = behavior;
+	}
+
+	bool IsSoundMaskDefined() const {
+		return _soundMask.has_value();
+	}
+	int GetSoundMask() const {
+		return _soundMask.value_or(0);
+	}
+	SoundMaskOp GetSoundMaskOp() const {
+		return _soundMaskOp;
+	}
+	void SetSoundMask(int soundMask, SoundMaskOp op) {
+		_soundMask = soundMask;
+		_soundMaskOp = op;
+	}
+
+	const GibDisposition& GetGibDisposition() const {
+		return _gibDisposition;
+	}
+	void SetGibDisposition(GibDisposition&& gibDisposition) {
+		_gibDisposition = gibDisposition;
+	}
+
 	const std::vector<WeaponDefinition>& GetWeaponDefinitions() const {
 		return _weaponsDefinitions;
 	}
@@ -838,6 +902,13 @@ private:
 	Cloaking _cloaking;
 
 	Jumping _jumping;
+
+	NPCBehavior _npcBehavior;
+
+	optional<int> _soundMask;
+	SoundMaskOp _soundMaskOp{SoundMaskOp::Replace};
+
+	GibDisposition _gibDisposition;
 
 	std::vector<WeaponDefinition> _weaponsDefinitions;
 };

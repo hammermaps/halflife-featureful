@@ -86,6 +86,7 @@ public:
 
 	Schedule_t *GetSchedule() override;
 	Schedule_t *GetScheduleOfType( int Type ) override;
+	bool DefaultInterestedInCoverFromDanger() override { return true; }
 	bool FCanCheckAttacks() override;
 	bool CheckMeleeAttack1( float flDot, float flDist ) override;
 	bool CheckRangeAttack1( float flDot, float flDist ) override;
@@ -101,8 +102,8 @@ public:
 	int IRelationship( CBaseEntity *pTarget ) override;
 	void StopTalking();
 	bool ShouldSpeak();
-	void PlayUseSentence() override;
-	void PlayUnUseSentence() override;
+	bool PlayUseSentence() override;
+	bool PlayUnUseSentence() override;
 	CUSTOM_SCHEDULES
 
 	int Save( CSave &save ) override;
@@ -943,7 +944,6 @@ bool CAGrunt::CheckRangeAttack1( float flDot, float flDist )
 
 		// verify that a shot fired from the gun will hit the enemy before the world.
 		// !!!LATER - we may wish to do something different for projectile weapons as opposed to instant-hit
-		UTIL_MakeVectors( pev->angles );
 		GetAttachment( 0, vecArmPos, vecArmDir );
 		//UTIL_TraceLine( vecArmPos, vecArmPos + gpGlobals->v_forward * 256.0f, ignore_monsters, ENT( pev ), &tr );
 		UTIL_TraceLine( vecArmPos, m_hEnemy->BodyTarget( vecArmPos ), dont_ignore_monsters, ENT( pev ), &tr );
@@ -1050,17 +1050,8 @@ void CAGrunt::StartTask( Task_t *pTask )
 //=========================================================
 Schedule_t *CAGrunt::GetSchedule()
 {
-	if( HasConditions( bits_COND_HEAR_SOUND ) )
-	{
-		CSound *pSound = PBestSound();
-
-		ASSERT( pSound != NULL );
-		if( pSound && ( pSound->m_iType & bits_SOUND_DANGER ) )
-		{
-			// dangerous sound nearby!
-			return GetScheduleOfType( SCHED_TAKE_COVER_FROM_BEST_SOUND );
-		}
-	}
+	if (ShouldCoverFromDanger())
+		return GetScheduleOfType( SCHED_TAKE_COVER_FROM_BEST_SOUND );
 
 	switch( m_MonsterState )
 	{
@@ -1108,15 +1099,6 @@ Schedule_t *CAGrunt::GetSchedule()
 			return GetScheduleOfType( SCHED_STANDOFF );
 		}
 		break;
-	case MONSTERSTATE_ALERT:
-	case MONSTERSTATE_IDLE:
-	case MONSTERSTATE_HUNT:
-	{
-		Schedule_t* utilitySchedule = GetUtilitySchedule();
-		if (utilitySchedule)
-			return utilitySchedule;
-		break;
-	}
 	default:
 		break;
 	}
@@ -1178,16 +1160,20 @@ Schedule_t *CAGrunt::GetScheduleOfType( int Type )
 	return CFollowingMonster::GetScheduleOfType( Type );
 }
 
-void CAGrunt::PlayUseSentence()
+bool CAGrunt::PlayUseSentence()
 {
-	EmitSoundScript(useSoundScript);
-	StopTalking();
+	bool result = EmitSoundScript(useSoundScript);
+	if (result)
+		StopTalking();
+	return result;
 }
 
-void CAGrunt::PlayUnUseSentence()
+bool CAGrunt::PlayUnUseSentence()
 {
-	EmitSoundScript(unuseSoundScript);
-	StopTalking();
+	bool result = EmitSoundScript(unuseSoundScript);
+	if (result)
+		StopTalking();
+	return result;
 }
 
 class CDeadAgrunt : public CDeadMonster

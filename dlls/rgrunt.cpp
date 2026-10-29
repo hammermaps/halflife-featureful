@@ -28,7 +28,6 @@ public:
 	void Precache() override;
 	const char* DefaultModel() override { return "models/rgrunt.mdl"; }
 	float DefaultHealth() override { return GetSkillValue("hgrunt_health"); }
-	bool IsEnabledInMod() override { return g_modFeatures.IsMonsterEnabled("robogrunt"); }
 	int DefaultClassify() override { return CLASS_MACHINE; }
 	const char* DefaultDisplayName() override { return "Robo Grunt"; }
 	const char* ReverseRelationshipModel() override { return "models/rgruntf.mdl"; }
@@ -38,8 +37,8 @@ public:
 	void EXPORT Spark();
 	void EXPORT Explode();
 
-	void PlayUseSentence() override;
-	void PlayUnUseSentence() override;
+	bool PlayUseSentence() override;
+	bool PlayUnUseSentence() override;
 	bool PlayFriendlyFireComplaint() override;
 
 	void DeathSound() override;
@@ -211,14 +210,14 @@ void CRGrunt::Precache()
 	m_iShotgunShell = PRECACHE_MODEL( "models/shotgunshell.mdl" );
 }
 
-void CRGrunt::PlayUseSentence()
+bool CRGrunt::PlayUseSentence()
 {
-	PlaySpokenSoundScript(useSoundScript);
+	return PlaySpokenSoundScript(useSoundScript);
 }
 
-void CRGrunt::PlayUnUseSentence()
+bool CRGrunt::PlayUnUseSentence()
 {
-	PlaySpokenSoundScript(unuseSoundScript);
+	return PlaySpokenSoundScript(unuseSoundScript);
 }
 
 bool CRGrunt::PlayFriendlyFireComplaint()
@@ -362,7 +361,15 @@ void CRGrunt::Explode()
 		UTIL_DecalTrace( &tr, DECAL_SCORCH2 );
 	}
 
-	CGib::SpawnRandomGibs( pev, GibCount(), GibModel(), MyGibVisual() );
+	const EntTemplate::GibDisposition& gibDisposition = GibDisposition();
+	if (gibDisposition.empty())
+	{
+		CGib::SpawnRandomGibs( pev, GibCount(), MyGibVisual() );
+	}
+	else
+	{
+		CGib::SpawnGibsByDisposition(pev, MyGibVisual(), gibDisposition);
+	}
 
 	SetThink( &CBaseEntity::SUB_Remove );
 	pev->nextthink = gpGlobals->time;

@@ -31,3 +31,23 @@ If the flyers tend to bump into the walls on your map try do the following:
 
 * **FlockingFlyer.Idle** - idle sounds.
 * **FlockingFlyer.Alert** - played when some flyer in the flock is gettng killed. Not used because killable boids are not implemented yet.
+
+{{% tabs %}}
+
+{{% tab "Custom model" %}}
+
+In original Half-Life resources there's a different model available for flocking flyers. It's left unused in Half-Life campaign, but is used in Blue Shift (although as a prop).
+
+```json
+{
+    "monster_flyer_flock": {
+        "own_visual": {
+            "model": "models/aflock.mdl"
+        }
+    }
+}
+```
+
+{{% /tab %}}
+
+{{% /tabs %}}

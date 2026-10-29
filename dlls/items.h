@@ -42,6 +42,7 @@ public:
 	virtual void OnMaterialize() = 0;
 
 	bool IsLockedByMaster() override;
+	bool CanShowObjectHint() override;
 	bool IsUsefulToDisplayHint(CBaseEntity* pPlayer) override;
 
 	int Save(CSave &save) override;

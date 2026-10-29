@@ -162,6 +162,9 @@ public:
 	void EXPORT AttemptToMaterialize();  // the weapon desires to become visible and tangible, if the game rules allow for it
 	CBaseEntity* Respawn() override;// copy a weapon
 	bool IsLockedByMaster() override;
+	bool CanShowObjectHint() override {
+		return !m_pPlayer && !FBitSet(pev->effects, EF_NODRAW);
+	}
 	bool IsUsefulToDisplayHint(CBaseEntity* pPlayer) override;
 	void DropAsAmmoEnt(int amount) override;
 	void FallInit();
@@ -252,6 +255,7 @@ public:
 	void ReloadClipNow(int ammoCountPerReload);
 	void PrecachePModel(const char* name);
 
+	virtual void ItemPostFrameAlways() {}
 	virtual void ItemPostFrame();	// called each frame by the player PostThink
 	virtual void UpdateInaccuracy() {}
 	// called by CBasePlayerWeapons ItemPostFrame()
@@ -372,6 +376,7 @@ public:
 
 	bool IsUseable() override;
 	void EjectBrassLate();
+	void ItemPostFrameAlways() override;
 	void ItemPostFrame() override;
 	void UpdateInaccuracy() override;
 	void SendScreenShake(const PlayerShake& shake);
@@ -384,6 +389,7 @@ public:
 	void ResetInaccuracy();
 	void PrimaryAttack() override;
 	void PrintSwitchMessage(bool prevMode);
+	void SwitchModeNow();
 	void SwitchMode(SwitchModeReason reason = SwitchModeReason::Regular);
 	void SecondaryAttack() override;
 	int GetReloadAnim(const WeaponParameters::ReloadAnimArray& arr);

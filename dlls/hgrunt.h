@@ -90,8 +90,8 @@ public:
 	bool PlayGruntSentence(int sentence, int flags = 0);
 	bool PlaySentenceGroup(const char* group, int flags = 0);
 	bool EmitSoundScriptTalk(const char* soundScript) override;
-	void PlayUseSentence() override;
-	void PlayUnUseSentence() override;
+	bool PlayUseSentence() override;
+	bool PlayUnUseSentence() override;
 	bool PlayFriendlyFireComplaint() override;
 
 	int Save( CSave &save ) override;
@@ -101,6 +101,7 @@ public:
 	void PerformKick(int eventIndex, float damage, float zpunch = 0);
 	Schedule_t *GetSchedule() override;
 	Schedule_t *GetScheduleOfType( int Type ) override;
+	bool DefaultInterestedInCoverFromDanger() override { return true; }
 	DamageInfo DefaultHandleTraceAttack(entvars_t *pevInflictor, entvars_t *pevAttacker, const DamageInfo &inputDamageInfo, Vector vecDir, TraceResult *ptr) override;
 	TakeDamageResult TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, const DamageInfo& damageInfo ) override;
 
@@ -138,6 +139,9 @@ public:
 	int m_iShotgunShell;
 
 	int m_iSentence;
+
+	bool m_fStandingGround;
+	float m_flStandGroundRange;
 
 	short m_desiredSkin;
 protected:

@@ -572,7 +572,6 @@ KilledResult CTalkMonster::Killed( entvars_t *pevInflictor, entvars_t *pevAttack
 			&& IsFriendWithPlayerBeforeProvoked() ) // no point in alerting friends if player is already foe
 	{
 		AlertFriends();
-		LimitFollowers( CBaseEntity::Instance( pevAttacker ), 0 );
 	}
 	return CFollowingMonster::Killed( pevInflictor, pevAttacker, iGib );
 }
@@ -639,10 +638,7 @@ CBaseEntity *CTalkMonster::EnumFriends(CBaseEntity *pPrevious, const char* pszFr
 
 void CTalkMonster::AlertFriends()
 {
-	int i;
-
-	// for each friend in this bsp...
-	for( i = 0; i < TLK_CFRIENDS; i++ )
+	for (int i = 0; i < TLK_CFRIENDS; i++)
 	{
 		CBaseEntity *pFriend = NULL;
 		while( ( pFriend = EnumFriends( pFriend, i, true ) ) != NULL )
@@ -653,7 +649,10 @@ void CTalkMonster::AlertFriends()
 				// don't provoke a friend that's playing a death animation. They're a goner
 				CTalkMonster* pTalkMonster = pMonster->MyTalkMonsterPointer();
 				if (pTalkMonster->AlertableByFriendDeath())
+				{
+					pTalkMonster->StopFollowing(true, false);
 					pMonster->m_afMemory |= bits_MEMORY_PROVOKED;
+				}
 			}
 		}
 	}
@@ -684,46 +683,6 @@ void CTalkMonster::StartFollowing(CBaseEntity *pLeader, bool saySentence)
 	SetBits( m_bitsSaid, bit_saidHelloPlayer );	// Don't say hi after you've started following
 }
 
-// UNDONE: Keep a follow time in each follower, make a list of followers in this function and do LRU
-// UNDONE: Check this in Restore to keep restored monsters from joining a full list of followers
-void CTalkMonster::LimitFollowers( CBaseEntity *pPlayer, int maxFollowers )
-{
-	if (maxFollowers < 0)
-		return;
-	int i, count = 0;
-
-	// for each friend in this bsp...
-	for( i = 0; i < TLK_CFRIENDS; i++ )
-	{
-		TalkFriend& talkFriend = m_szFriends[i];
-		if (!talkFriend.name[0])
-			break;
-		if (!talkFriend.canFollow) // no sense in limiting friends who can't move, like sitting scientists
-			continue;
-		if (maxFollowers && talkFriend.category != TalkFriendCategory()) // so scientists and security guards won't limit soldiers
-			continue;
-		CBaseEntity *pFriend = NULL;
-		while( ( pFriend = EnumFriends( pFriend, talkFriend.name, false ) ) )
-		{
-			CBaseMonster* pMonster = pFriend->MyMonsterPointer();
-			if (pMonster)
-			{
-				CTalkMonster *pTalkMonster = pMonster->MyTalkMonsterPointer();
-				if( pTalkMonster )
-				{
-					if( pTalkMonster->FollowedPlayer() == pPlayer )
-					{
-						count++;
-						if( count > maxFollowers )
-							pTalkMonster->StopFollowing( true );
-					}
-				}
-			}
-
-		}
-	}
-}
-
 bool CTalkMonster::InScriptedSentence()
 {
 	// Don't allow use during a scripted_sentence
@@ -735,16 +694,20 @@ bool CTalkMonster::AllowUseDuringScriptedSentence()
 	return m_allowUseScriptedSentence;
 }
 
-void CTalkMonster::PlayUseSentence()
+bool CTalkMonster::PlayUseSentence()
 {
-	if (PlaySentence( SentenceGroup(TLK_USE), RANDOM_FLOAT( 2.8f, 3.2f ), VOL_NORM, ATTN_IDLE ))
+	bool result = PlaySentence( SentenceGroup(TLK_USE), RANDOM_FLOAT( 2.8f, 3.2f ), VOL_NORM, ATTN_IDLE );
+	if (result)
 		m_hTalkTarget = FollowedPlayer();
+	return result;
 }
 
-void CTalkMonster::PlayUnUseSentence()
+bool CTalkMonster::PlayUnUseSentence()
 {
-	if (PlaySentence( SentenceGroup(TLK_UNUSE), RANDOM_FLOAT( 2.8f, 3.2f ), VOL_NORM, ATTN_IDLE ))
+	bool result = PlaySentence( SentenceGroup(TLK_UNUSE), RANDOM_FLOAT( 2.8f, 3.2f ), VOL_NORM, ATTN_IDLE );
+	if (result)
 		m_hTalkTarget = FollowedPlayer();
+	return result;
 }
 
 void CTalkMonster::DeclineFollowing(CBaseEntity *pCaller)
@@ -1392,11 +1355,13 @@ void CTalkMonster::TalkMonsterInit()
 {
 	PrepareVoicePitch();
 	MonsterInit();
-	if (IsFriendWithPlayerBeforeProvoked()) {
-		m_afCapability |= bits_CAP_USABLE;
-		SetUse( &CTalkMonster::FollowerUse );
-		SetTouch( &CFollowingMonster::FollowerTouch );
-	}
+	SetUse( &CTalkMonster::FollowerUse );
+	SetTouch( &CFollowingMonster::FollowerTouch );
+}
+
+bool CTalkMonster::IsAllyToPlayerClass()
+{
+	return IsFriendWithPlayerBeforeProvoked();
 }
 
 bool CTalkMonster::IsWounded()
@@ -1757,7 +1722,7 @@ bool CTalkMonster::EmitSoundScriptTalk(const char* name)
 	return EmitSoundScript(name, paramOverride);
 }
 
-void CTalkMonster::RegisterTalkMonster(const char *className, bool canFollow, short followerCategory)
+void CTalkMonster::RegisterTalkMonster(const char *className, bool canFollow, bool attackAttackers)
 {
 	int i;
 	for (i=0; i<TLK_CFRIENDS; ++i)
@@ -1766,7 +1731,7 @@ void CTalkMonster::RegisterTalkMonster(const char *className, bool canFollow, sh
 		{
 			strncpyEnsureTermination(m_szFriends[i].name, className);
 			m_szFriends[i].canFollow = canFollow;
-			m_szFriends[i].category = followerCategory;
+			m_szFriends[i].attackAttackers = attackAttackers;
 
 			ALERT(at_aiconsole, "Registered %s as talk friend\n", className);
 			return;
@@ -1782,9 +1747,9 @@ void CTalkMonster::RegisterTalkMonster(const char *className, bool canFollow, sh
 	}
 }
 
-void CTalkMonster::RegisterTalkMonster(bool canFollow)
+void CTalkMonster::RegisterTalkMonster(bool canFollow, bool attackAttackers)
 {
-	CTalkMonster::RegisterTalkMonster(STRING(pev->classname), canFollow, TalkFriendCategory());
+	CTalkMonster::RegisterTalkMonster(STRING(pev->classname), canFollow, attackAttackers);
 }
 
 void CTalkMonster::RegisterMedic(const char* className)
@@ -1817,13 +1782,19 @@ void CTalkMonster::RegisterMedic()
 
 short CTalkMonster::AlertFriendsDefaultPolicy()
 {
+	return ALERT_FRIENDS_ON_DEATH_ALWAYS;
+}
+
+short CTalkMonster::AlertFriendsPolicy()
+{
+	if (m_alertFriendsPolicy)
+		return m_alertFriendsPolicy;
+
 	const int tolerance = MyToleranceLevel();
 	if (tolerance == TOLERANCE_ABSOLUTE_NO_ALERTS)
 		return ALERT_FRIENDS_ON_DEATH_NEVER;
-	if (TalkFriendCategory() == TALK_FRIEND_SOLDIER)
-		return ALERT_FRIENDS_ON_DEATH_IF_NOT_IN_COMBAT;
-	else
-		return ALERT_FRIENDS_ON_DEATH_ALWAYS;
+
+	return AlertFriendsDefaultPolicy();
 }
 
 bool CTalkMonster::ShouldAlertFriendsOnDeath()
@@ -1832,7 +1803,8 @@ bool CTalkMonster::ShouldAlertFriendsOnDeath()
 	case ALERT_FRIENDS_ON_DEATH_ALWAYS:
 		return true;
 	case ALERT_FRIENDS_ON_DEATH_IF_NOT_IN_COMBAT:
-		return m_hEnemy == 0;
+		// Wasn't in combat or was fighting player who provoked them in the first place
+		return m_hEnemy == 0 || m_hEnemy->IsPlayer();
 	case ALERT_FRIENDS_ON_DEATH_NEVER:
 		return false;
 	default:

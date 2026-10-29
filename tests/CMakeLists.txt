@@ -1,4 +1,4 @@
-set (CMAKE_CXX_STANDARD 14)
+set (CMAKE_CXX_STANDARD 17)
 
 cmake_minimum_required(VERSION 3.9)
 
@@ -45,6 +45,7 @@ add_executable(test
 	../game_shared/soundscripts.cpp
 	../game_shared/schema_definitions.cpp
 	../game_shared/schema_weapons.cpp
+	../game_shared/string_set.cpp
 	../game_shared/tex_materials.cpp
 	../game_shared/visual_object.cpp
 	../game_shared/util_shared.cpp

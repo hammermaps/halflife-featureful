@@ -41,7 +41,6 @@ public:
 	void Precache() override;
 	const char* DefaultModel() override { return "models/hwgrunt.mdl"; }
 	float DefaultHealth() override { return GetSkillValue("hwgrunt_health"); }
-	bool IsEnabledInMod() override { return g_modFeatures.IsMonsterEnabled("hwgrunt"); }
 	void SetYawSpeed() override;
 	int DefaultClassify() override { return CLASS_HUMAN_MILITARY; }
 	const char* DefaultDisplayName() override { return "Heavy Weapons Grunt"; }
@@ -64,8 +63,8 @@ public:
 	void StartTask( Task_t *pTask ) override;
 	void RunTask( Task_t *pTask ) override;
 
-	void PlayUseSentence() override;
-	void PlayUnUseSentence() override;
+	bool PlayUseSentence() override;
+	bool PlayUnUseSentence() override;
 	bool PlayFriendlyFireComplaint() override;
 
 	void DeathSound() override;
@@ -158,7 +157,6 @@ void CHWGrunt::Spawn()
 	SetMyHealth();
 	SetMyFieldOfView(0.2);// indicates the width of this monster's forward view cone ( as a dotproduct result )
 	m_MonsterState		= MONSTERSTATE_NONE;
-	m_flNextPainTime	= gpGlobals->time;
 
 	m_afCapability		= bits_CAP_TURN_HEAD;
 	SetMySquadCapabilities(bits_CAP_SQUAD);
@@ -421,14 +419,14 @@ void CHWGrunt::RunTask( Task_t *pTask )
 
 #define HWGRUNT_VOLUME 0.4
 
-void CHWGrunt::PlayUseSentence()
+bool CHWGrunt::PlayUseSentence()
 {
-	PlaySpokenSoundScript(useSoundScript);
+	return PlaySpokenSoundScript(useSoundScript);
 }
 
-void CHWGrunt::PlayUnUseSentence()
+bool CHWGrunt::PlayUnUseSentence()
 {
-	PlaySpokenSoundScript(unuseSoundScript);
+	return PlaySpokenSoundScript(unuseSoundScript);
 }
 
 bool CHWGrunt::PlayFriendlyFireComplaint()
@@ -705,17 +703,11 @@ Schedule_t *CHWGrunt::GetSchedule()
 		}
 	}
 
+	if (ShouldCoverFromDanger())
+		return GetScheduleOfType( SCHED_TAKE_COVER_FROM_BEST_SOUND );
+
 	switch (m_MonsterState)
 	{
-	case MONSTERSTATE_IDLE:
-	case MONSTERSTATE_ALERT:
-	case MONSTERSTATE_HUNT:
-	{
-		Schedule_t* utilitySchedule = GetUtilitySchedule();
-		if (utilitySchedule)
-			return utilitySchedule;
-		break;
-	}
 	case MONSTERSTATE_COMBAT:
 		if( HasConditions( bits_COND_ENEMY_DEAD|bits_COND_ENEMY_LOST ) )
 			return CBaseMonster::GetSchedule();

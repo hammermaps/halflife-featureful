@@ -57,7 +57,6 @@ public:
 	void Precache() override;
 	const char* DefaultModel() override { return "models/Tor.mdl"; }
 	float DefaultHealth() override { return GetSkillValue("tor_health"); }
-	bool IsEnabledInMod() override { return g_modFeatures.IsMonsterEnabled("tor"); }
 	void SetYawSpeed() override;
 	int DefaultClassify() override {
 		return CLASS_ALIEN_MILITARY;
@@ -94,8 +93,8 @@ public:
 	void AlertSound() override;
 	void IdleSound() override;
 
-	void PlayUseSentence() override;
-	void PlayUnUseSentence() override;
+	bool PlayUseSentence() override;
+	bool PlayUnUseSentence() override;
 
 	CUSTOM_SCHEDULES
 
@@ -485,31 +484,8 @@ void CTor::HandleAnimEvent(MonsterEvent_t* pEvent)
 
 Schedule_t* CTor::GetSchedule()
 {
-	if( HasConditions( bits_COND_HEAR_SOUND ) )
-	{
-		CSound *pSound = PBestSound();
-
-		ASSERT( pSound != NULL );
-		if( pSound && ( pSound->m_iType & bits_SOUND_DANGER ) )
-		{
-			return GetScheduleOfType( SCHED_TAKE_COVER_FROM_BEST_SOUND );
-		}
-	}
-
-	switch( m_MonsterState )
-	{
-	case MONSTERSTATE_ALERT:
-	case MONSTERSTATE_IDLE:
-	case MONSTERSTATE_HUNT:
-	{
-		Schedule_t* utilitySchedule = GetUtilitySchedule();
-		if (utilitySchedule)
-			return utilitySchedule;
-		break;
-	}
-	default:
-		break;
-	}
+	if (ShouldCoverFromDanger())
+		return GetScheduleOfType( SCHED_TAKE_COVER_FROM_BEST_SOUND );
 	return CFollowingMonster::GetSchedule();
 }
 
@@ -737,6 +713,7 @@ void CTor::Precache()
 	CFollowingMonster::Precache();
 
 	PrecacheMyModel();
+	PrecacheMyGibModel();
 
 	RegisterAndPrecacheSoundScript(attackSoundScript);
 	RegisterAndPrecacheSoundScript(idleSoundScript);
@@ -794,12 +771,12 @@ void CTor::IdleSound()
 	EmitSoundScript(idleSoundScript);
 }
 
-void CTor::PlayUseSentence() {
-	EmitSoundScript(useSoundScript);
+bool CTor::PlayUseSentence() {
+	return EmitSoundScript(useSoundScript);
 }
 
-void CTor::PlayUnUseSentence() {
-	EmitSoundScript(unuseSoundScript);
+bool CTor::PlayUnUseSentence() {
+	return EmitSoundScript(unuseSoundScript);
 }
 
 void CTor::SlamAttack()

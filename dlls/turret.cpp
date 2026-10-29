@@ -67,6 +67,10 @@ public:
 
 	void GibMonster() override {}	// UNDONE: Throw turret gibs?
 
+	void PainSound() override {
+		EmitSoundScript(painSoundScript);
+	}
+
 	// Think functions
 	void EXPORT ActiveThink();
 	void EXPORT SearchThink();
@@ -150,6 +154,7 @@ public:
 	float m_flSpinUpTime;	// Amount of time until the barrel should spin down when searching
 
 	static const NamedSoundScript alertSoundScript;
+	static const NamedSoundScript painSoundScript;
 	static const NamedSoundScript dieSoundScript;
 	static const NamedSoundScript deploySoundScript;
 	static const NamedSoundScript undeploySoundScript;
@@ -197,6 +202,12 @@ const NamedSoundScript CBaseTurret::alertSoundScript = {
 	TURRET_MACHINE_VOLUME,
 	ATTN_NORM,
 	"Turret.Alert"
+};
+
+const NamedSoundScript CBaseTurret::painSoundScript = {
+	CHAN_VOICE,
+	{},
+	"Turret.Pain"
 };
 
 const NamedSoundScript CBaseTurret::dieSoundScript = {
@@ -408,11 +419,11 @@ void CBaseTurret::Precache()
 {
 	RegisterAndPrecacheSoundScript(pingSoundScript);
 	RegisterAndPrecacheSoundScript(spinupSoundScript);
+	RegisterAndPrecacheSoundScript(painSoundScript);
 	RegisterAndPrecacheSoundScript(dieSoundScript);
 	RegisterAndPrecacheSoundScript(deploySoundScript);
 	RegisterAndPrecacheSoundScript(undeploySoundScript);
 	RegisterAndPrecacheSoundScript(alertSoundScript);
-	PRECACHE_SOUND( "turret/tu_search.wav" );
 }
 
 void CBaseTurret::UpdateOnRemove()
@@ -1183,6 +1194,8 @@ TakeDamageResult CBaseTurret::TakeDamage( entvars_t *pevInflictor, entvars_t *pe
 
 	PowerShieldTakeDamage(pevInflictor, pevAttacker, dmgInfo);
 
+	PainReaction(dmgInfo);
+
 	AddScoreForDamage(pevAttacker, this, dmgInfo.damage);
 
 	ApplyDamageToHealth(dmgInfo, pevAttacker, takeDamageResult);
@@ -1419,6 +1432,8 @@ TakeDamageResult CSentry::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAtt
 		return takeDamageResult;
 
 	PowerShieldTakeDamage(pevInflictor, pevAttacker, dmgInfo);
+
+	PainReaction(dmgInfo);
 
 	AddScoreForDamage(pevAttacker, this, dmgInfo.damage);
 

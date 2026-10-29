@@ -6,6 +6,7 @@
 #include "gib.h"
 #include "hitgroup.h"
 #include "grapple_target.h"
+#include "soundent_bits.h"
 
 #include <algorithm>
 
@@ -129,6 +130,44 @@ const char entities[] = R"(
 				}
 			],
 			"max_weight": 2
+		},
+		"gib_disposition": [
+			{
+				"count": 1,
+				"visual": {
+					"model": "models/hgibs.mdl"
+				},
+				"body": 0,
+				"position": "head",
+				"fly_away": "random",
+				"throw_at_player_chance": 0.05,
+				"blood": "red"
+			},
+			{
+				"count": [2, 3],
+				"visual": {
+					"rendermode": "Texture",
+					"alpha": 200
+				},
+				"min_body": 1,
+				"max_body": 5,
+				"position": "box",
+				"fly_away": "directed",
+				"blood": "yellow"
+			},
+			{
+				"count": 2
+			}
+		],
+		"npc_behavior": {
+			"chase_enemy_failed": "retreat",
+			"player_can_interact": false,
+			"investigate_sounds": true,
+			"cover_from_danger": true
+		},
+		"soundmask": {
+			"sounds": ["danger", "meat"],
+			"op": "add"
 		}
 	},
 	"monster_zombie_barney": {
@@ -146,7 +185,8 @@ const char entities[] = R"(
 				"pickup_name": "battery_red",
 				"chance": 0.2
 			}
-		]
+		],
+		"soundmask": ["combat", "player", "danger"]
 	},
 	"monster_headcrab": {
 		"leap_attack": {
@@ -453,6 +493,45 @@ TEST(EntityTemplates, Parse)
 
 		EXPECT_EQ(dropItemSet.items[3].classname, "weapon_shotgun");
 		EXPECT_EQ(dropItemSet.items[3].weight, 2.0f);
+
+		const EntTemplate::GibDisposition& gibDisposition = zombie->GetGibDisposition();
+
+		ASSERT_EQ(gibDisposition.size(), 3);
+
+		EXPECT_EQ(gibDisposition[0].count, 1);
+		EXPECT_STREQ(gibDisposition[0].visual.model, "models/hgibs.mdl");
+		EXPECT_EQ(gibDisposition[0].bodyRange.min, 0);
+		EXPECT_EQ(gibDisposition[0].bodyRange.max, 0);
+		EXPECT_EQ(gibDisposition[0].position, EntTemplate::GibInfo::POSITION_HEAD);
+		EXPECT_EQ(gibDisposition[0].flyAway, EntTemplate::GibInfo::FLY_AWAY_RANDOM);
+		EXPECT_FLOAT_EQ(gibDisposition[0].throwAtPlayerChance, 0.05f);
+		EXPECT_TRUE(gibDisposition[0].bloodColor.has_value());
+		EXPECT_EQ(*gibDisposition[0].bloodColor, BLOOD_COLOR_RED);
+
+		EXPECT_EQ(gibDisposition[1].count.min, 2);
+		EXPECT_EQ(gibDisposition[1].count.max, 3);
+		EXPECT_EQ(gibDisposition[1].visual.rendermode, kRenderTransTexture);
+		EXPECT_EQ(gibDisposition[1].visual.renderamt, 200);
+		EXPECT_EQ(gibDisposition[1].position, EntTemplate::GibInfo::POSITION_BOX);
+		EXPECT_EQ(gibDisposition[1].flyAway, EntTemplate::GibInfo::FLY_AWAY_DIRECTED);
+		EXPECT_TRUE(gibDisposition[1].bloodColor.has_value());
+		EXPECT_EQ(*gibDisposition[1].bloodColor, BLOOD_COLOR_YELLOW);
+
+		EXPECT_EQ(gibDisposition[2].count, 2);
+		EXPECT_FALSE(gibDisposition[2].bloodColor);
+
+		const EntTemplate::NPCBehavior& behavior = zombie->GetNPCBehavior();
+		EXPECT_TRUE(behavior.chaseEnemyFailed.has_value());
+		EXPECT_EQ(*behavior.chaseEnemyFailed, CHASE_ENEMY_FAILED_RETREAT);
+		EXPECT_FALSE(behavior.playerCanInteract);
+		EXPECT_FALSE(indeterminate(behavior.investigateSounds));
+		EXPECT_TRUE((bool)behavior.investigateSounds);
+		EXPECT_FALSE(indeterminate(behavior.coverFromDanger));
+		EXPECT_TRUE((bool)behavior.coverFromDanger);
+
+		EXPECT_TRUE(zombie->IsSoundMaskDefined());
+		EXPECT_EQ(zombie->GetSoundMask(), bits_SOUND_DANGER|bits_SOUND_MEAT);
+		EXPECT_EQ(zombie->GetSoundMaskOp(), EntTemplate::SoundMaskOp::Add);
 	}
 
 	{
@@ -472,6 +551,10 @@ TEST(EntityTemplates, Parse)
 		EXPECT_EQ(dropItemSet.items[2].classname, "item_pickup");
 		EXPECT_EQ(dropItemSet.items[2].pickupName, "battery_red");
 		EXPECT_EQ(dropItemSet.items[2].chance, 0.2f);
+
+		EXPECT_TRUE(zombie->IsSoundMaskDefined());
+		EXPECT_EQ(zombie->GetSoundMask(), bits_SOUND_COMBAT|bits_SOUND_PLAYER|bits_SOUND_DANGER);
+		EXPECT_EQ(zombie->GetSoundMaskOp(), EntTemplate::SoundMaskOp::Replace);
 	}
 
 	{

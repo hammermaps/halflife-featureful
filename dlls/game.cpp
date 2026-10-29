@@ -44,6 +44,8 @@
 
 #include <chrono>
 
+extern bool g_worldExists;
+
 ModFeatures g_modFeatures;
 
 struct WeaponNameAndId
@@ -61,10 +63,8 @@ cvar_t handle_tiny_creatures = {"handle_tiny_creatures", "0"};
 
 ModFeatures::ModFeatures()
 {
-	memset(monsters, 0, sizeof(monsters));
 	memset(weapons, 0, sizeof(weapons));
 	memset(maxAmmos, 0, sizeof(maxAmmos));
-	monstersCount = 0;
 	maxAmmoCount = 0;
 
 	EnableDefaultWeapons();
@@ -380,40 +380,6 @@ const char* ModFeatures::DeadHazModel() const
 		return "models/player.mdl";
 }
 
-void ModFeatures::EnableMonster(const char *name)
-{
-	for (unsigned int i=0; i<monstersCount; ++i)
-	{
-		if (strcmp(monsters[i], name) == 0)
-		{
-			ALERT(at_warning, "Monster '%s' is already enabled\n", name);
-			return;
-		}
-	}
-
-	if (monstersCount >= ARRAYSIZE(monsters))
-	{
-		ALERT(at_error, "Can't enable monster '%s' due to monster count limit\n", name);
-		return;
-	}
-
-	strncpyEnsureTermination(monsters[monstersCount], name);
-	monstersCount++;
-}
-
-bool ModFeatures::IsMonsterEnabled(const char *name) const
-{
-	// TODO: optimize
-	for (unsigned int i=0; i<monstersCount; ++i)
-	{
-		if (strcmp(monsters[i], name) == 0)
-		{
-			return true;
-		}
-	}
-	return false;
-}
-
 bool ModFeatures::DoorsOpenInMoveDirection() const
 {
 	return ::doors_open_in_move_direction.value != 0;
@@ -538,30 +504,6 @@ void ReadEnabledWeapons()
 				ALERT(at_console, "%s weapon '%s'\n", enable ? "Enabled" : "Disabled", weaponName);
 			else
 				ALERT(at_warning, "Unknown weapon '%s' in %s\n", weaponName, fileName);
-		}
-	}
-	g_engfuncs.pfnFreeFile( pMemFile );
-}
-
-void ReadEnabledMonsters()
-{
-	const char* fileName = "features/featureful_monsters.cfg";
-	int filePos = 0, fileSize;
-	byte *pMemFile = g_engfuncs.pfnLoadFileForMe(fileName, &fileSize);
-	if (!pMemFile)
-		return;
-
-	ALERT(at_console, "Parsing enabled monsters from %s\n", fileName);
-
-	char buffer[128];
-	memset(buffer, 0, sizeof(buffer));
-	while( memfgets( pMemFile, fileSize, filePos, buffer, sizeof(buffer)-1 ) )
-	{
-		char* monsterName = TryConsumeToken(buffer, sizeof(buffer));
-		if (monsterName)
-		{
-			ALERT(at_console, "Enabling monster '%s'\n", monsterName);
-			g_modFeatures.EnableMonster(monsterName);
 		}
 	}
 	g_engfuncs.pfnFreeFile( pMemFile );
@@ -1249,6 +1191,58 @@ void PrintSkillReplacementForEntTemplate()
 	}
 }
 
+void PrintPointContents()
+{
+	if (!g_worldExists)
+	{
+		ALERT(at_error, "The map is not running!\n");
+		return;
+	}
+
+	const int argc = CMD_ARGC();
+	if (argc < 4)
+	{
+		ALERT(at_console, "Usage: %s <x> <y> <z>\n", CMD_ARGV(0));
+		return;
+	}
+
+	const float x = atof(CMD_ARGV(1));
+	const float y = atof(CMD_ARGV(2));
+	const float z = atof(CMD_ARGV(3));
+
+	const int contents = UTIL_PointContents(Vector(x, y, z));
+	const char* contentsStr = nullptr;
+	switch(contents)
+	{
+	case CONTENTS_EMPTY:
+		contentsStr = "empty";
+		break;
+	case CONTENTS_SOLID:
+		contentsStr = "solid";
+		break;
+	case CONTENTS_WATER:
+		contentsStr = "water";
+		break;
+	case CONTENTS_SLIME:
+		contentsStr = "slime";
+		break;
+	case CONTENTS_LAVA:
+		contentsStr = "lava";
+		break;
+	case CONTENTS_SKY:
+		contentsStr = "sky";
+		break;
+	case CONTENTS_LADDER:
+		contentsStr = "ladder";
+		break;
+	}
+
+	if (contentsStr)
+		ALERT(at_console, "Point contents at (%g, %g, %g) is %s\n", x, y, z, contentsStr);
+	else
+		ALERT(at_console, "Point contents at (%g, %g, %g) is %d\n", x, y, z, contents);
+}
+
 static void CVAR_REGISTER_INTEGER( cvar_t* cvar, int value )
 {
 	char valueStr[12];
@@ -1608,7 +1602,6 @@ static void ExecuteServerCommand(const char* pfile, int size)
 void GameDLLInit()
 {
 	ReadServerFeatures();
-	ReadEnabledMonsters();
 	ReadEnabledWeapons();
 	ReadMaxAmmos();
 	ReadAmmoAmounts();
@@ -1778,6 +1771,7 @@ void GameDLLInit()
 	g_engfuncs.pfnAddServerCommand("force_schedule_fail", ForceScheduleFail);
 	g_engfuncs.pfnAddServerCommand("get_skill_for_entity_template", PrintSkillReplacementForEntTemplate);
 	g_engfuncs.pfnAddServerCommand("get_skill", PrintSkillVariable);
+	g_engfuncs.pfnAddServerCommand("point_contents", PrintPointContents);
 }
 
 bool ItemsPickableByTouch()

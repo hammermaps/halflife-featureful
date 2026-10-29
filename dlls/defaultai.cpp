@@ -1254,7 +1254,7 @@ Schedule_t slTakeCoverFromEnemy[] =
 		"Take Cover From Enemy"
 	},
 };
-Task_t tlRetreaFromEnemy[] =
+Task_t tlRetreatFromEnemy[] =
 {
 	{ TASK_SET_FAIL_SCHEDULE, (float)SCHED_RETREAT_FROM_ENEMY_FAILED },
 	{ TASK_STOP_MOVING, (float)0 },
@@ -1269,8 +1269,8 @@ Task_t tlRetreaFromEnemy[] =
 Schedule_t slRetreatFromEnemy[] =
 {
 	{
-		tlRetreaFromEnemy,
-		ARRAYSIZE( tlRetreaFromEnemy ),
+		tlRetreatFromEnemy,
+		ARRAYSIZE( tlRetreatFromEnemy ),
 		bits_COND_NEW_ENEMY,
 		0,
 		"Retreat From Enemy"
@@ -1344,6 +1344,66 @@ Schedule_t slFreeroamAlert[] =
 		bits_SOUND_DANGER | bits_SOUND_COMBAT |
 		bits_SOUND_PLAYER_IF_NOT_ALLY,
 		"Free Roaming (alert)"
+	},
+};
+
+Task_t tlFreeroamCombat[] =
+{
+	{ TASK_SET_FAIL_SCHEDULE, (float)SCHED_RUN_TO_SIDE },
+	{ TASK_STOP_MOVING, (float)0 },
+	{ TASK_WAIT_RANDOM, 0.5f },
+	{ TASK_GET_PATH_TO_FREEROAM_NODE, (float)0 },
+	{ TASK_WALK_PATH, (float)0 },
+	{ TASK_WAIT_FOR_MOVEMENT, (float)0 },
+	{ TASK_SET_ACTIVITY, (float)ACT_IDLE },
+	{ TASK_WAIT_FACE_ENEMY, 0.3f },
+	{ TASK_WAIT_RANDOM, 0.2f },
+};
+
+Schedule_t slFreeroamCombat[] =
+{
+	{
+		tlFreeroamCombat,
+		ARRAYSIZE( tlFreeroamCombat ),
+		bits_COND_NEW_ENEMY |
+		bits_COND_ENEMY_DEAD |
+		bits_COND_ENEMY_LOST |
+		bits_COND_CAN_ATTACK |
+		bits_COND_SCHEDULE_SUGGESTED |
+		bits_COND_LIGHT_DAMAGE |
+		bits_COND_HEAVY_DAMAGE |
+		bits_COND_HEAR_SOUND,
+		bits_SOUND_DANGER,
+		"Free Roaming (combat)"
+	},
+};
+
+Task_t tlRunToSide[] =
+{
+	{ TASK_STOP_MOVING, (float)0 },
+	{ TASK_WAIT, (float)0.1 },
+	{ TASK_FIND_LATERAL_SPOT, (float)0 },
+	{ TASK_RUN_PATH, (float)0 },
+	{ TASK_WAIT_FOR_MOVEMENT, (float)0 },
+	{ TASK_SET_ACTIVITY, (float)ACT_IDLE },
+	{ TASK_FACE_ENEMY, (float)0 },
+};
+
+Schedule_t slRunToSide[] =
+{
+	{
+		tlRunToSide,
+		ARRAYSIZE( tlRunToSide ),
+		bits_COND_NEW_ENEMY |
+		bits_COND_ENEMY_DEAD |
+		bits_COND_ENEMY_LOST |
+		bits_COND_CAN_ATTACK |
+		bits_COND_SCHEDULE_SUGGESTED |
+		bits_COND_LIGHT_DAMAGE |
+		bits_COND_HEAVY_DAMAGE |
+		bits_COND_HEAR_SOUND,
+		bits_SOUND_DANGER,
+		"Run to side"
 	},
 };
 
@@ -1533,6 +1593,8 @@ Schedule_t *CBaseMonster::m_scheduleList[] =
 	slTakeCoverFromEnemy,
 	slFreeroam,
 	slFreeroamAlert,
+	slFreeroamCombat,
+	slRunToSide,
 	slMoveToEnemyLKP,
 	slRetreatFromEnemy,
 	slRetreatFromSpot,
@@ -1685,7 +1747,25 @@ Schedule_t* CBaseMonster::GetScheduleOfType( int Type )
 				if (CanJumpFreely() && FindJumpToEntity(m_hEnemy))
 					return GetScheduleOfType(SCHED_JUMP_CHASE);
 			}
-			return GetScheduleOfType(SCHED_FAIL);
+			int policy = ChaseEnemyFailedPolicy();
+			switch(policy)
+			{
+			case CHASE_ENEMY_FAILED_RETREAT:
+				return slChaseEnemyFailed;
+			case CHASE_ENEMY_FAILED_WANDER:
+				return GetScheduleOfType(SCHED_FREEROAM_COMBAT);
+			case CHASE_ENEMY_FAILED_RETREAT_OR_WANDER:
+			{
+				if (HasConditions(bits_COND_ENEMY_OCCLUDED))
+				{
+					return GetScheduleOfType(SCHED_FREEROAM_COMBAT);
+				}
+				return slChaseEnemyFailed;
+			}
+			break;
+			default:
+				return GetScheduleOfType(SCHED_FAIL);
+			}
 		}
 	case SCHED_SMALL_FLINCH:
 		{
@@ -1801,6 +1881,10 @@ Schedule_t* CBaseMonster::GetScheduleOfType( int Type )
 		{
 			return slFreeroamAlert;
 		}
+	case SCHED_FREEROAM_COMBAT:
+		{
+			return slFreeroamCombat;
+		}
 	case SCHED_MOVE_TO_ENEMY_LKP:
 		{
 			return slMoveToEnemyLKP;
@@ -1840,6 +1924,10 @@ Schedule_t* CBaseMonster::GetScheduleOfType( int Type )
 	case SCHED_JUMP_CHASE:
 		{
 			return slJumpChase;
+		}
+	case SCHED_RUN_TO_SIDE:
+		{
+			return slRunToSide;
 		}
 	default:
 		{

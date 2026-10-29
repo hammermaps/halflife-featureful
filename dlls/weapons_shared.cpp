@@ -981,10 +981,13 @@ void CConfigurableWeapon::EjectBrassLate()
 #endif
 }
 
-void CConfigurableWeapon::ItemPostFrame()
+void CConfigurableWeapon::ItemPostFrameAlways()
 {
 	UpdateSpot();
+}
 
+void CConfigurableWeapon::ItemPostFrame()
+{
 	const WeaponParameters& params = MyParameters();
 
 	if (!m_fInReload)
@@ -1083,8 +1086,7 @@ void CConfigurableWeapon::ItemPostFrame()
 			m_pPlayer->m_flNextAttack = Q_max(UTIL_WeaponTimeBase() + animDuration, m_pPlayer->m_flNextAttack);
 		}
 
-		PrintSwitchMessage(m_inAltMode);
-		m_inAltMode = !m_inAltMode;
+		SwitchModeNow();
 	}
 
 	if (m_burstTime != 0.0f)
@@ -2132,6 +2134,32 @@ void CConfigurableWeapon::PrintSwitchMessage(bool prevMode)
 	}
 }
 
+void CConfigurableWeapon::SwitchModeNow()
+{
+	const WeaponParameters& params = MyParameters();
+
+	if (params.altMode.zoomFOV && !m_pPlayer->m_bResumeZoom)
+	{
+		if (m_pPlayer->m_iFOV != 0)
+		{
+			SetZoom(0);
+			PlayWeaponSoundScript(params.altMode.unzoomSound);
+		}
+		else if (m_pPlayer->m_iFOV != params.altMode.zoomFOV)
+		{
+			PlayWeaponSoundScript(params.altMode.zoomSound);
+			SetZoom(params.altMode.zoomFOV);
+		}
+	}
+	if (params.altMode.toggleLaserSpot)
+	{
+		ToggleLaserSpot(true);
+	}
+
+	PrintSwitchMessage(m_inAltMode);
+	m_inAltMode = !m_inAltMode;
+}
+
 void CConfigurableWeapon::SwitchMode(SwitchModeReason reason)
 {
 	const WeaponParameters& params = MyParameters();
@@ -2154,21 +2182,7 @@ void CConfigurableWeapon::SwitchMode(SwitchModeReason reason)
 
 				return;
 			}
-			else
-			{
-				SetZoom(0);
-				PlayWeaponSoundScript(params.altMode.unzoomSound);
-			}
 		}
-		else if (m_pPlayer->m_iFOV != params.altMode.zoomFOV && reason == SwitchModeReason::Regular)
-		{
-			PlayWeaponSoundScript(params.altMode.zoomSound);
-			SetZoom(params.altMode.zoomFOV);
-		}
-	}
-	if (params.altMode.toggleLaserSpot)
-	{
-		ToggleLaserSpot(reason == SwitchModeReason::Regular);
 	}
 
 	const int animIndex = params.altMode.animIndex.Get(m_inAltMode);
@@ -2214,6 +2228,7 @@ void CConfigurableWeapon::SwitchMode(SwitchModeReason reason)
 	{
 		if (!bodySwitchDelay)
 		{
+			m_switchingBody = false;
 			SetBody(params.viewModelBody.Get(!m_inAltMode));
 		}
 		else
@@ -2225,8 +2240,8 @@ void CConfigurableWeapon::SwitchMode(SwitchModeReason reason)
 
 	if (!modeSwitchDelay)
 	{
-		PrintSwitchMessage(m_inAltMode);
-		m_inAltMode = !m_inAltMode;
+		m_switchingMode = false;
+		SwitchModeNow();
 	}
 	else
 		m_switchingMode = true;
@@ -2242,7 +2257,10 @@ void CConfigurableWeapon::SwitchMode(SwitchModeReason reason)
 		m_pPlayer->m_flNextAttack = UTIL_WeaponTimeBase() + delay;
 
 	if (!m_inAltMode)
+	{
 		m_pPlayer->m_bResumeZoom = false;
+		m_pPlayer->pev->fov = m_pPlayer->m_iFOV = 0;
+	}
 
 	//ALERT(at_console, "New mode: %s\n", m_inAltMode ? "alternative" : "primary");
 }
@@ -2855,9 +2873,16 @@ void CConfigurableWeapon::SetZoom(int fov)
 void CConfigurableWeapon::ResetZoom(SwitchModeReason reason)
 {
 	const WeaponParameters& params = MyParameters();
-	if (params.altMode.zoomFOV && m_inAltMode && params.secondaryFireType == SecondaryFireType::SWITCH_MODE)
+	if (params.altMode.zoomFOV && params.secondaryFireType == SecondaryFireType::SWITCH_MODE)
 	{
-		SwitchMode(reason);
+		if (m_inAltMode)
+			SwitchMode(reason);
+		else
+		{
+			m_switchingBody = false;
+			SetBody(params.viewModelBody.Get(false)); // in case it switched body before switching mode
+			m_switchingMode = false; // cancel switching mode in progress, if any
+		}
 	}
 }
 

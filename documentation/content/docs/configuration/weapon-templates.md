@@ -961,7 +961,7 @@ This is `true` by default. You must define [empty_sound](#empty_sound) to change
 
 ### extra_ai_sound
 
-An object defining an extra AI sound produced by player when firing this weapon. Monsters may react to it.
+An object defining an extra [AI sound]({{< ref "ai-sound" >}}) produced by player when firing this weapon. Monsters may react to it.
 
 ```json
 {

@@ -101,6 +101,8 @@ TYPEDESCRIPTION	CHGrunt::m_SaveData[] =
 	//DEFINE_FIELD( CShotgun, m_iBrassShell, FIELD_INTEGER ),
 	//DEFINE_FIELD( CShotgun, m_iShotgunShell, FIELD_INTEGER ),
 	DEFINE_FIELD( CHGrunt, m_iSentence, FIELD_INTEGER ),
+	DEFINE_FIELD( CHGrunt, m_fStandingGround, FIELD_BOOLEAN ),
+	DEFINE_FIELD( CHGrunt, m_flStandGroundRange, FIELD_FLOAT ),
 };
 
 IMPLEMENT_SAVERESTORE( CHGrunt, CFollowingMonster )
@@ -207,14 +209,14 @@ bool CHGrunt::EmitSoundScriptTalk(const char* name)
 	return EmitSoundScript(name, paramOverride);
 }
 
-void CHGrunt::PlayUseSentence()
+bool CHGrunt::PlayUseSentence()
 {
-	PlaySpokenSoundScript(useSoundScript);
+	return PlaySpokenSoundScript(useSoundScript);
 }
 
-void CHGrunt::PlayUnUseSentence()
+bool CHGrunt::PlayUnUseSentence()
 {
-	PlaySpokenSoundScript(unuseSoundScript);
+	return PlaySpokenSoundScript(unuseSoundScript);
 }
 
 bool CHGrunt::PlayFriendlyFireComplaint()
@@ -447,6 +449,11 @@ bool CHGrunt::CheckMeleeAttack1( float flDot, float flDist )
 //=========================================================
 bool CHGrunt::CheckRangeAttack1( float flDot, float flDist )
 {
+	if (m_fStandingGround && m_flStandGroundRange >= flDist)
+	{
+		m_fStandingGround = false;
+	}
+
 	if( !HasConditions( bits_COND_ENEMY_OCCLUDED ) && flDist <= 2048.0f && flDot >= 0.5f && NoFriendlyFire() )
 	{
 		TraceResult tr;
@@ -1027,7 +1034,6 @@ void CHGrunt::SpawnHelper(int bloodColor)
 	SetMyFieldOfView(0.2f);// indicates the width of this monster's forward view cone ( as a dotproduct result )
 	m_MonsterState		= MONSTERSTATE_NONE;
 	m_flNextGrenadeCheck	= gpGlobals->time + 1;
-	m_flNextPainTime	= gpGlobals->time;
 	m_iSentence		= HGRUNT_SENT_NONE;
 
 	m_afCapability		= bits_CAP_TURN_HEAD;
@@ -1038,6 +1044,11 @@ void CHGrunt::SpawnHelper(int bloodColor)
 	m_fFirstEncounter	= true;// this is true when the grunt spawns, because he hasn't encountered an enemy yet.
 
 	m_HackedGunPos = Vector( 0, 0, 55 );
+
+	m_fStandingGround = m_flStandGroundRange > 0.0f;
+
+	if (m_fStandingGround)
+		ALERT(at_console, "%s is standing ground\n", STRING(pev->classname));
 }
 
 void CHGrunt::KeyValue(KeyValueData *pkvd)
@@ -1045,6 +1056,11 @@ void CHGrunt::KeyValue(KeyValueData *pkvd)
 	if( FStrEq(pkvd->szKeyName, "desired_skin" ) )
 	{
 		m_desiredSkin = atoi( pkvd->szValue );
+		pkvd->fHandled = true;
+	}
+	else if (FStrEq("standgroundrange", pkvd->szKeyName))
+	{
+		m_flStandGroundRange = atof(pkvd->szValue);
 		pkvd->fHandled = true;
 	}
 	else
@@ -2014,35 +2030,20 @@ Schedule_t *CHGrunt::GetSchedule()
 	}
 
 	// grunts place HIGH priority on running away from danger sounds.
-	if( HasConditions( bits_COND_HEAR_SOUND ) )
+	if (ShouldCoverFromDanger())
 	{
-		CSound *pSound = PBestSound();
+		// dangerous sound nearby!
 
-		ASSERT( pSound != NULL );
-		if( pSound )
+		//!!!KELLY - currently, this is the grunt's signal that a grenade has landed nearby,
+		// and the grunt should find cover from the blast
+		// good place for "SHIT!" or some other colorful verbal indicator of dismay.
+		// It's not safe to play a verbal order here "Scatter", etc cause
+		// this may only affect a single individual in a squad.
+		if( FOkToSpeak() )
 		{
-			if( pSound->m_iType & bits_SOUND_DANGER )
-			{
-				// dangerous sound nearby!
-
-				//!!!KELLY - currently, this is the grunt's signal that a grenade has landed nearby,
-				// and the grunt should find cover from the blast
-				// good place for "SHIT!" or some other colorful verbal indicator of dismay.
-				// It's not safe to play a verbal order here "Scatter", etc cause
-				// this may only affect a single individual in a squad.
-				if( FOkToSpeak() )
-				{
-					PlayGruntSentence(HGRUNT_SENT_GREN);
-				}
-				return GetScheduleOfType( SCHED_TAKE_COVER_FROM_BEST_SOUND );
-			}
-			/*
-			if( !HasConditions( bits_COND_SEE_ENEMY ) && ( pSound->m_iType & ( bits_SOUND_PLAYER | bits_SOUND_COMBAT ) ) )
-			{
-				MakeIdealYaw( pSound->m_vecOrigin );
-			}
-			*/
+			PlayGruntSentence(HGRUNT_SENT_GREN);
 		}
+		return GetScheduleOfType( SCHED_TAKE_COVER_FROM_BEST_SOUND );
 	}
 	switch( m_MonsterState )
 	{
@@ -2053,6 +2054,15 @@ Schedule_t *CHGrunt::GetSchedule()
 			{
 				// call base class, all code to handle dead enemies is centralized there.
 				return CBaseMonster::GetSchedule();
+			}
+
+			if (m_fStandingGround)
+			{
+				if (HasConditions(bits_COND_NO_AMMO_LOADED))
+					return GetScheduleOfType(SCHED_RELOAD);
+				if (HasConditions(bits_COND_CAN_RANGE_ATTACK1))
+					return GetScheduleOfType(SCHED_RANGE_ATTACK1);
+				return GetScheduleOfType(SCHED_STANDOFF);
 			}
 
 			// new enemy
@@ -2194,10 +2204,6 @@ Schedule_t *CHGrunt::GetSchedule()
 		Schedule_t* reloadSched = GetIdleReloadSchedule();
 		if (reloadSched)
 			return reloadSched;
-
-		Schedule_t* utilitySchedule = GetUtilitySchedule();
-		if (utilitySchedule)
-			return utilitySchedule;
 		break;
 	}
 	default:

@@ -19,3 +19,12 @@ Effect flags: `rocketflare`
 * Damage: 150
 * Type: blast
 * Radius: depends on damage
+
+### Soundscripts
+
+* **Apache.RPG** - rocket launch sound.
+
+### Visuals
+
+* **Apache.RocketModel** - rocket model.
+* **Apache.RocketTrail** - rocket trailing beam.

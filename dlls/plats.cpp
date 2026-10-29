@@ -1078,7 +1078,6 @@ void CFuncTrain::Activate()
 		{	// not triggered, so start immediately
 			pev->nextthink = pev->ltime + 0.1f;
 			SetThink( &CFuncTrain::ThinkNext );
-			ALERT(at_console, "CFuncTrain::Activate start\n");
 		}
 		else
 			pev->spawnflags |= SF_TRAIN_WAIT_RETRIGGER;
@@ -1109,7 +1108,7 @@ void CFuncTrain::SetDefaultTrainValues()
 		pev->speed = 100;
 
 	if( FStringNull(pev->target) )
-		ALERT( at_console, "%s with no target\n", STRING(pev->classname) );
+		ALERT( at_error, "%s with no target\n", STRING(pev->classname) );
 
 	if( pev->dmg == 0 && !FBitSet(pev->spawnflags, SF_TRAIN_NO_DAMAGE) )
 		pev->dmg = 2;
@@ -1702,7 +1701,7 @@ void CFuncTrackTrain::NearestPath()
 
 	if( !pNearest )
 	{
-		ALERT( at_console, "Can't find a nearby track !!!\n" );
+		ALERT( at_warning, "Can't find a nearby track !!!\n" );
 		SetThink( NULL );
 		return;
 	}
@@ -1758,7 +1757,7 @@ void CFuncTrackTrain::Spawn()
 	m_dir = 1;
 
 	if( FStringNull( pev->target ) )
-		ALERT( at_console, "%s with no target\n", STRING(pev->classname) );
+		ALERT( at_error, "%s with no target\n", STRING(pev->classname) );
 
 	if( pev->spawnflags & SF_TRACKTRAIN_PASSABLE )
 		pev->solid = SOLID_NOT;
@@ -1880,7 +1879,7 @@ void CFuncTrainControls::Find()
 
 	if( FNullEnt( pTarget ) )
 	{
-		ALERT( at_console, "No train %s\n", STRING( pev->target ) );
+		ALERT( at_warning, "No train %s\n", STRING( pev->target ) );
 		return;
 	}
 
@@ -1909,7 +1908,7 @@ public:
 	{
 		if (FStringNull(pev->target))
 		{
-			ALERT(at_console, "%s has no target!\n", STRING(pev->classname));
+			ALERT(at_error, "%s has no target!\n", STRING(pev->classname));
 			return;
 		}
 
@@ -2689,6 +2688,8 @@ void CSpriteTrain::Spawn()
 		pev->rendermode = kRenderTransAdd;
 	if (!pev->renderamt)
 		pev->renderamt = 255;
+	else if (pev->renderamt < 0)
+		pev->renderamt = 0;
 	m_maxFrame = (float) MODEL_FRAMES( pev->modelindex ) - 1;
 	m_lastTime = gpGlobals->time;
 	pev->frame = 0;
@@ -2726,6 +2727,13 @@ void CSpriteTrain::TrainThink()
 class CModelTrain : public CFuncTrain
 {
 public:
+	enum
+	{
+		TURN_INSTANT = 0,
+		TURN_INSTANT_YAW_ONLY,
+		TURN_NO,
+	};
+
 	void Spawn() override;
 	void Precache() override;
 	void KeyValue(KeyValueData *pkvd) override;
@@ -2743,6 +2751,7 @@ public:
 	string_t m_moveSequence;
 	float m_idleFramerate;
 	float m_moveFramerate;
+	int m_turnPolicy;
 };
 
 LINK_ENTITY_TO_CLASS(env_modeltrain, CModelTrain)
@@ -2753,6 +2762,7 @@ TYPEDESCRIPTION	CModelTrain::m_SaveData[] =
 	DEFINE_FIELD( CModelTrain, m_moveSequence, FIELD_STRING ),
 	DEFINE_FIELD( CModelTrain, m_idleFramerate, FIELD_FLOAT ),
 	DEFINE_FIELD( CModelTrain, m_moveFramerate, FIELD_FLOAT ),
+	DEFINE_FIELD( CModelTrain, m_turnPolicy, FIELD_INTEGER ),
 };
 
 IMPLEMENT_SAVERESTORE( CModelTrain, CFuncTrain )
@@ -2818,6 +2828,11 @@ void CModelTrain::KeyValue(KeyValueData *pkvd)
 		m_moveFramerate = atof(pkvd->szValue);
 		pkvd->fHandled = true;
 	}
+	else if (FStrEq(pkvd->szKeyName, "turn_policy"))
+	{
+		m_turnPolicy = atoi(pkvd->szValue);
+		pkvd->fHandled = true;
+	}
 	else
 		CFuncTrain::KeyValue(pkvd);
 }
@@ -2825,13 +2840,13 @@ void CModelTrain::KeyValue(KeyValueData *pkvd)
 void CModelTrain::AdvanceAnimation()
 {
 	// Advance frames and dispatch events.
-	StudioFrameAdvance();
-	DispatchAnimEvents();
+	float flInterval = StudioFrameAdvance();
+	DispatchAnimEvents(flInterval);
 
 	// Restart sequence
 	if (m_fSequenceFinished)
 	{
-		pev->frame = 0;
+		pev->frame = std::fmod(pev->frame, 255.0f);
 		ResetSequenceInfo();
 
 		m_fSequenceFinished = true;
@@ -2858,7 +2873,17 @@ void CModelTrain::Next()
 		const Vector diff = m_pevCurrentTarget->origin - pev->origin;
 		if (diff != g_vecZero)
 		{
-			pev->angles = UTIL_VecToAngles(m_pevCurrentTarget->origin - pev->origin);
+			switch(m_turnPolicy)
+			{
+			case TURN_INSTANT:
+				pev->angles = UTIL_VecToAngles(m_pevCurrentTarget->origin - pev->origin);
+				break;
+			case TURN_INSTANT_YAW_ONLY:
+				pev->angles.y = UTIL_VecToAngles(m_pevCurrentTarget->origin - pev->origin).y;
+				break;
+			default:
+				break;
+			}
 
 			if (!FStringNull(m_moveSequence))
 			{

@@ -148,7 +148,6 @@ public:
 	void Precache() override;
 	const char* DefaultModel() override { return "models/floater.mdl"; }
 	float DefaultHealth() override { return GetSkillValue("floater_health"); }
-	bool IsEnabledInMod() override { return g_modFeatures.IsMonsterEnabled("floater"); }
 	void SetYawSpeed() override;
 	int DefaultISoundMask() override;
 	int DefaultClassify() override;
@@ -930,7 +929,17 @@ void CFloater::GibMonster()
 
 	EmitSoundScript(NPC::bodySplatSoundScript);
 
-	CGib::SpawnRandomClientGibs( pev, GibCount(), GibModel() );
+	const EntTemplate::GibDisposition& gibDisposition = GibDisposition();
+	if (gibDisposition.empty())
+	{
+		CGib::SpawnRandomGibs( pev, GibCount(), MyGibVisual() );
+	}
+	else
+	{
+		CGib::SpawnGibsByDisposition(pev, MyGibVisual(), gibDisposition);
+	}
+
+	//CGib::SpawnRandomClientGibs( pev, GibCount(), GibModel() );
 
 	SetThink( &CBaseEntity::SUB_Remove );
 	pev->nextthink = gpGlobals->time;

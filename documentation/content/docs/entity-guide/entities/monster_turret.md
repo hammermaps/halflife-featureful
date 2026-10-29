@@ -29,6 +29,7 @@ bookToC: false
 ### Soundscripts
 
 * **Turret.Alert** - when detected an enemy.
+* **Turret.Pain** - pain sound. Empty by default.
 * **Turret.Deploy** - deploy sound.
 * **Turret.Undeploy** - retire sound.
 * **Turret.Ping** - pinging noise. Played every second while searching for enemy.

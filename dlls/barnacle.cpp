@@ -47,6 +47,7 @@ public:
 	int DefaultClassify() override;
 	Vector DefaultMinHullSize() override { return Vector( -16.0f, -16.0f, -32.0f ); }
 	Vector DefaultMaxHullSize() override { return Vector( 16.0f, 16.0f, 0.0f ); }
+	void PukeOneGib();
 	void HandleAnimEvent( MonsterEvent_t *pEvent ) override;
 	void EXPORT BarnacleThink();
 	void EXPORT WaitTillDead();
@@ -137,26 +138,26 @@ int CBarnacle::DefaultClassify()
 //
 // Returns number of events handled, 0 if none.
 //=========================================================
+void CBarnacle::PukeOneGib()
+{
+	Visual gibVisual = MyGibVisual();
+	if (gibVisual.model && FStrEq(gibVisual.model, "models/hgibs.mdl"))
+	{
+		CGib::SpawnHumanGibs(pev, 1, gibVisual);
+	}
+	else
+	{
+		CGib::SpawnRandomGibs(pev, 1, gibVisual);
+	}
+}
+
 void CBarnacle::HandleAnimEvent( MonsterEvent_t *pEvent )
 {
 	switch( pEvent->event )
 	{
 	case BARNACLE_AE_PUKEGIB:
 	{
-		const char* gibModel = GibModel();
-		const Visual* gibVisual = MyGibVisual();
-
-		if (gibModel)
-		{
-			if (FStrEq(gibModel, "models/hgibs.mdl"))
-			{
-				CGib::SpawnHumanGibs(pev, 1, gibVisual);
-			}
-			else
-			{
-				CGib::SpawnRandomGibs(pev, 1, gibModel, gibVisual);
-			}
-		}
+		PukeOneGib();
 	}
 		break;
 	default:
@@ -338,7 +339,7 @@ void CBarnacle::BarnacleThink()
 		if( m_cGibs && RANDOM_LONG( 0, 99 ) == 1 )
 		{
 			// cough up a gib.
-			CGib::SpawnHumanGibs(pev, 1);
+			PukeOneGib();
 			m_cGibs--;
 
 			EmitSoundScript(chewSoundScript);

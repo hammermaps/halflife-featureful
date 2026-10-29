@@ -57,8 +57,8 @@ public:
 	bool CheckRangeAttack2(float flDot, float flDist) override;
 	void Sniperrifle();
 	void GibMonster() override;
-	void PlayUseSentence() override;
-	void PlayUnUseSentence() override;
+	bool PlayUseSentence() override;
+	bool PlayUnUseSentence() override;
 	bool PlayFriendlyFireComplaint() override;
 	int	DefaultClassify() override
 	{
@@ -73,7 +73,6 @@ public:
 	void Precache() override;
 	const char* DefaultModel() override { return "models/massn.mdl"; }
 	float DefaultHealth() override { return GetSkillValue("massassin_health"); }
-	bool IsEnabledInMod() override { return g_modFeatures.IsMonsterEnabled("male_assassin"); }
 	void MonsterInit() override;
 
 	void DeathSound() override;
@@ -148,14 +147,14 @@ const NamedSoundScript CMassn::friendlyFireComplaintSoundScript = {
 	"Massn.FriendlyFireComplaint"
 };
 
-void CMassn::PlayUseSentence()
+bool CMassn::PlayUseSentence()
 {
-	PlaySpokenSoundScript(useSoundScript);
+	return PlaySpokenSoundScript(useSoundScript);
 }
 
-void CMassn::PlayUnUseSentence()
+bool CMassn::PlayUnUseSentence()
 {
-	PlaySpokenSoundScript(unuseSoundScript);
+	return PlaySpokenSoundScript(unuseSoundScript);
 }
 
 bool CMassn::PlayFriendlyFireComplaint()
@@ -253,7 +252,7 @@ void CMassn::KeyValue(KeyValueData *pkvd)
 		pkvd->fHandled = true;
 	}
 	else
-		CFollowingMonster::KeyValue( pkvd );
+		CHGrunt::KeyValue( pkvd );
 }
 
 //=========================================================
@@ -431,7 +430,6 @@ void CMassn::SetHead(int head)
 class CAssassinRepel : public CHGruntRepel
 {
 public:
-	bool IsEnabledInMod() override { return g_modFeatures.IsMonsterEnabled("male_assassin"); }
 	void KeyValue(KeyValueData* pkvd) override;
 	const char* TrooperName() override {
 		return "monster_male_assassin";
@@ -476,7 +474,6 @@ class CDeadMassn : public CDeadMonster
 public:
 	void Spawn() override;
 	const char* DefaultModel() override { return "models/massn.mdl"; }
-	bool IsEnabledInMod() override { return g_modFeatures.IsMonsterEnabled("male_assassin"); }
 	int	DefaultClassify() override
 	{
 		if (g_modFeatures.blackops_classify)

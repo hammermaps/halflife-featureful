@@ -199,6 +199,92 @@ The [visual]({{< ref visuals >}}) definition or the name of the visual from the 
 }
 ```
 
+### gib_disposition
+
+An array of gib dispositions - allows to specify how many of which submodels should spawn and even allows spawning gibs of different models. Without a disposition defined the gib submodel is selected randomly, unless it's a **models/hgibs.mdl** - then the default gib disposition for human gibs is used (one skull at maximum; submodels for the rest of the gibs are selected in range `[1, 6]`).
+
+{{% hint warning %}}
+Setting a `Custom gib model` parameter on the entity instance completely disables gib disposition. Setting a custom model via `"gib_visual"` entity property doesn't affect the disposition.
+{{% /hint %}}
+
+Each array item can have the following properties:
+
+* `"count"` - the number of gibs to spawn. Non-negative integer or range. Default value is 1.
+* `"visual"` - the custom visual to apply to the gib. This allows to set a model different from the main monster gib model, or to set custom render parameters. The omitted properties are taken from the monster's `"gib_visual"` and default gib model for the monster.
+* `"min_body"` - minimum gib submodel. The default value is 0.
+* `"max_body"` - maximim gib submodel. If not set, it depends on the number of submodels in the model. The submodel will be randomized in range `[min_body, max_body]` for each spawned gib in this disposition.
+* `"body"` - an alternative to `"min_body"` and `"max_body"`. Just one integer number to define the required submodel.
+* `"position"` - where to spawn gibs. Possible values:
+    - `"box"` - somewhere in the monster's bounding volume. This is the default.
+    - `"head"` - at the eye position. Used by a human skull.
+* `"fly_away"` - how the gibs should move after spawn. Possible values:
+    - `"directed"` - depends on the attack direction. This is the default.
+    - `"random"` - randomized direction. Used by a human skull.
+* `"throw_at_player_chance"` - the chance of throwing the gib at the player's face (presumably for a spooky effect). This is used by a human skull. Default value is 0.0 (no chance). If the chance is passed, the `"fly_away"` property is ignored.
+* `"blood"` - the blood color (see [blood](#blood) for possible color values). The decals drawn when gib touches the world geometry depend on the blood color. If omitted, the gib blood color will depend on the monster's blood color.
+
+```json
+{
+    "monster_zombie": {
+        "gib_disposition": [
+            {
+                "count": 1,
+                "visual": {
+                    "model": "models/hgibs.mdl"
+                },
+                "body": 0,
+                "position": "head",
+                "fly_away": "random",
+                "throw_at_player_chance": 0.05,
+                "blood": "red"
+            },
+            {
+                "count": 2
+            },
+            {
+                "count": 2,
+                "visual": {
+                    "model": "models/hgibs.mdl"
+                },
+                "min_body": 1,
+                "max_body": 6,
+                "blood": "red"
+            }
+        ]
+    },
+    "human_gibs_no_skull": {
+        "gib_disposition": [
+            {
+                "count": 4,
+                "visual": {
+                    "model": "models/hgibs.mdl",
+                },
+                "min_body": 1,
+                "max_body": 6,
+                "blood": "red"
+            }
+        ]
+    },
+    "monster_alien_slave": {
+        "gib_disposition": [
+            {
+                "count": 4,
+            },
+            {
+                "count": 1,
+                "visual": {
+                    "model": "models/islave_gibs1.mdl"
+                }
+            }
+        ]
+    }
+}
+```
+
+In this example we make `monster_zombie` to spawn the human skull on gibbing (with same parameters as default skull), along with 2 default gibs for the monster and 2 more human non-skull gibs (i.e. 5 gibs in total).
+
+We also define the `"human_gibs_no_skull"` entity template that define the gib disposition for human gibs without a human skull. This is useful if you want to reuse the **models/hgibs.mdl** for the creatures without a human head (dogs, bears, etc.).
+
 ### classify
 
 Default relationship classification for the monsters belonging to this template. Possible values:
@@ -345,6 +431,9 @@ In the following example we set the main blood color of zombie to red, and the h
 ```json
 {
     "monster_zombie": {
+        "gib_visual": {
+            "model": "models/agibs.mdl"
+        },
         "blood": {
             "color": "red",
             "by_hitgroup": [
@@ -357,6 +446,8 @@ In the following example we set the main blood color of zombie to red, and the h
     }
 }
 ```
+
+Note that the main blood color can change the default gib model for a monster. So we explicitly set the gib model to alien type.
 
 ### field_of_view
 
@@ -599,14 +690,19 @@ Not all monsters affected by these properties. The list of affected monsters cur
 
 * All grunt-like monsters, like human grunts, heavy weapons grunts, male assassins, shock troopers and robogrunts.
 * Houndeyes
+* Bullsquids
+* Zombies
 * Alien slaves
 * Alien grunts
 * Gargantuas (note that they have a separate relationship classification by default, so they won't participate in squads of other aliens).
 * Alien controllers
+* Big Momma
 * Female assassins
 * All talk monsters like security guards, scientists and opfor human grunts.
 * Pitdrones
 * Voltigores
+* Gonomes
+* Panthereyes
 {{% /hint %}}
 
 ### open_door_capability
@@ -716,8 +812,10 @@ The property keys must be stringified numbers equal to the animation event indic
     - `"player_only"` - whether the knockback is applied to player only.
 * `"damage_info"` - [damage info](#damage_info). This allows to change the damage type of the attack and other damage characteristics.
 * `"spawn_blood"` - a boolean denoting whether melee attack should make the hit target bleed (if it can) if damage has been dealt.
-* `"hit_soundscript"` - soundscript to play if trace hull attack hit something. Must be either the name of the soundscript from **sound/soundscripts.json** or the object defining the soundscript. You should prefer replacing the monster's soundscript via [soundscripts](#soundscripts) when possible.
-* `"miss_soundscript"` - soundscript to play if trace hull attack didn't hit anything. Must be either the name of the soundscript from **sound/soundscripts.json** or the object defining the soundscript. You should prefer replacing the monster's soundscript via [soundscripts](#soundscripts) when possible.
+* `"hit_soundscript"` - a soundscript to play if trace hull attack hit something. Must be either the name of the soundscript from **sound/soundscripts.json** or the object defining the soundscript. You should prefer replacing the monster's soundscript via [soundscripts](#soundscripts) when possible.
+* `"miss_soundscript"` - a soundscript to play if trace hull attack didn't hit anything. Must be either the name of the soundscript from **sound/soundscripts.json** or the object defining the soundscript. You should prefer replacing the monster's soundscript via [soundscripts](#soundscripts) when possible.
+* `"soundscript"` - a soundscript to play independent of whether the attack hit something or not. This should be played on a different channel than the `"hit_soundscript"` and `"miss_soundscript"`.
+* `"soundscript_chance"` - the chance of playing the `"soundscript"`, the value in range `[0.0, 1.0]` where 1.0 means play always. This is 1.0 by default for most attacks, with the exception for zombies and panthereyes who have it set to 0.5 for their attacks by default.
 
 {{% hint warning %}}
 The distance must be large enough for the checking hull to leave the monster's geometry.
@@ -1927,6 +2025,126 @@ The `jump` animation in the default **models/islave.mdl** features some horizont
 
 {{% /details %}}
 
+### npc_behavior
+
+A set of properties related to the monster's behaviors.
+
+#### chase_enemy_failed
+
+What monster should do if couldn't chase the enemy (e.g. due to obstruction). Possible values:
+
+* `"fail"` - just stay in place for a while, waiting when for opportunity to attack.
+* `"retreat"` - try to find cover/retreat from the enemy.
+* `"wander"` - roam on nodes. If there're no nodes nearby the monster will go to the left or to the right side.
+* `"retreat_or_wander"` - first try to find a retreat spot, then just wander.
+
+By default some monsters use `"fail"` (zombies, bullsquids, gonomes) and some monsters use `"retreat"` (human NPCs, vortigaunts, alien grunts, gargs, houndeyes, shock troopers, pit drones, voltigores).
+
+{{% details title="Example" %}}
+```json
+{
+    "monster_zombie": {
+        "npc_behavior": {
+            "chase_enemy_failed": "wander"
+        }
+    }
+}
+```
+{{% /details %}}
+
+#### investigate_sounds
+
+A boolean - whether the monster should investigate combat sounds while in non-combat state. If set to `true`, the monster will try going to the source of the combat sound (gunshot, melee hit, etc.). After arriving the monster will stay in place for 10 seconds and then return to the former position. In original Half-Life only [monster_human_assassin]({{< ref monster_human_assassin >}}) expresses this behavior. Set it to false for `monster_human_assassin` to suppress sound investigation behavior.
+
+{{% details title="Example" %}}
+```json
+{
+    "monster_barney": {
+        "npc_behavior": {
+            "investigate_sounds": true
+        }
+    },
+    "monster_human_assassin": {
+        "npc_behavior": {
+            "investigate_sounds": false
+        }
+    }
+}
+```
+{{% /details %}}
+
+#### player_can_interact
+
+A boolean - whether the player can press '+use' on the monster (if the monster is ally and able to accept interaction at all, see [following monsters]({{< ref "monsters/#following-monsters-features" >}})). This is `true` by default. Set to `false` to disallow monster answering the follow requests - this is useful if you want to make a monster ally but not following the player. This also prevents a monster from speaking their 'decline' voicelines on attempt to use them. The monster still can be made to follow the player via the [scripted_following]({{< ref scripted_following >}}) entity.
+
+{{% hint info %}}
+Same effect can be achieved for a specific monster instance via the `Followage policy` parameter.
+{{% /hint %}}
+
+{{% details title="Example" %}}
+```json
+{
+    "monster_zombie": {
+        "npc_behavior": {
+            "player_can_interact": false
+        }
+    }
+}
+```
+{{% /details %}}
+
+#### cover_from_danger
+
+A boolean - whether the monster should try to find a cover from danger (like grenades about to explode). By default all talking monsters (like barneys, opfor human grunts, etc.), alien grunts, alien slaves, human grunts, assassins (both male and female) and shock troopers can cover from danger.
+
+Note that this won't work if the monster doesn't regard the danger sounds at all. This can be configured via the [soundmask](#soundmask) property.
+
+{{% details title="Example" %}}
+```json
+{
+    "monster_zombie": {
+        "npc_behavior": {
+            "cover_from_danger": true
+        },
+        "soundmask": {
+            "sounds": ["danger"],
+            "op": "add"
+        }
+    }
+}
+```
+
+In this example we let zombies flee from danger sounds. We add the danger sound to the list of sounds the monster can regard. Note that in practice it doesn't make sense for zombies to flee from danger as they're not fast enough anyway.
+{{% /details %}}
+
+### soundmask
+
+Configuring the monster's soundmask - the set of sounds the monster can hear (and react to). See [AI sounds]({{< ref "ai-sound" >}}) for more information.
+
+This property can be defined in two forms: array and object.
+
+In the array form it just lists the sound types. See [ai_sound_type](#ai_sound_type) for possible types. Setting an empty array will make a monster deaf.
+
+In the object form it should define the sound types array in the `"sounds"` property and the operation which decides what to do with the said mask:
+
+* `"replace"` - fully replace the soundmask with the provided list (this is the default).
+* `"add"` - add sound types to the default monster's sound list.
+* `"remove"` - remove sound types from the default monster's sound list.
+
+```json
+{
+    "monster_zombie": {
+        "soundmask": {
+            "sounds": ["danger"],
+            "op": "add"
+        }
+    },
+    "monster_zombie_barney": {
+        "soundmask": ["combat", "player"]
+    }
+}
+```
+
 ## Inheriting templates
 
 Entity templates can be derived from another entity template. Let's say you defined a custom template for a vortigaunt (`monster_alien_slave`), with different visuals, for example. And now you want to define more templates for vortigaunts with the same custom visuals and some additional changes (e.g. a different model or even more custom visuals). Without inheritance you would need to copy the defined properties into the new template and then extend the template with new properties. This is far from ideal, as in case you wanted to change some property value, you would have to go through all the templates and change the value in each instance. This is where the template inheritance comes in handy.
@@ -2087,10 +2305,16 @@ The tracer particles support only a handful of colors defined by the renderer in
 * `"orange"`
 * `"purple"`
 
-## Known issues
+### ai_sound_type
 
-### Model sound precaching issue
+The list of AI sound types:
 
-{{% hint warning %}}
-There might be problems with precaching sounds from models for entities (mainly monsters) coming from the [monstermaker]({{< ref monstermaker >}}). Until the issue is resolved you should ensure the map has at least one spawned monster of the same entity template and model as long as such monster can spawn from the monstermaker.
-{{% /hint %}}
+* `"danger"`
+* `"combat"`
+* `"world"`
+* `"player"`
+* `"carcass"`
+* `"meat"`
+* `"garbage"`
+
+See also: [AI sounds]({{< ref "ai-sound" >}})

@@ -115,6 +115,7 @@ CSound *CBaseMonster::PBestScent() { return NULL; }
 float CBaseAnimating::StudioFrameAdvance( float flInterval ) { return 0.0; }
 void CBaseMonster::MonsterThink() { }
 void CBaseMonster::LeapAttackTouch(CBaseEntity* pOther) { }
+void CBaseMonster::RestoreTouchAfterLeapAttack() { }
 int CBaseMonster::IgnoreConditions() { return 0; }
 bool CBaseMonster::FBecomeProne() { return true; }
 bool CBaseMonster::CheckRangeAttack1( float flDot, float flDist ) { return false; }
@@ -136,7 +137,7 @@ int CBaseMonster::IRelationship( CBaseEntity *pTarget ) { return 0; }
 bool CBaseMonster::BuildNearestRoute( Vector vecThreat, Vector vecViewOffset, float flMinDist, float flMaxDist ) { return false; }
 CBaseEntity *CBaseMonster::BestVisibleEnemy() { return NULL; }
 bool CBaseMonster::FInViewCone( CBaseEntity *pEntity ) { return false; }
-bool CBaseMonster::FInViewCone( Vector *pOrigin ) { return false; }
+bool CBaseMonster::FInViewCone( const Vector& origin ) { return false; }
 bool CBaseEntity::FVisible( CBaseEntity *pEntity, CBaseEntity** ppSightBlocker ) { return false; }
 bool CBaseEntity::FVisible( const Vector &vecOrigin, CBaseEntity** ppSightBlocker ) { return false; }
 float CBaseMonster::ChangeYaw( int yawSpeed ) { return 0; }

@@ -25,6 +25,7 @@
 #include	"decals.h"
 #include	"combat.h"
 #include	"game.h"
+#include	"followingmonster.h"
 #include	"common_soundscripts.h"
 #include	"visuals_utils.h"
 
@@ -202,14 +203,13 @@ void MortarSpray( const Vector &position, const Vector &direction, const Visual*
 //
 #define BIG_CHILDCLASS		"monster_babycrab"
 
-class CBigMomma : public CBaseMonster
+class CBigMomma : public CFollowingMonster
 {
 public:
 	void Spawn() override;
 	void Precache() override;
 	const char* DefaultModel() override { return "models/big_mom.mdl"; }
 	float DefaultHealth() override { return 150.0f * GetSkillValue("bigmomma_health_factor"); }
-	void KeyValue( KeyValueData *pkvd ) override;
 	void Activate() override;
 	DamageInfo DefaultTransformDamageInfo(entvars_t *pevInflictor, entvars_t *pevAttacker, const DamageInfo& inputDamageInfo) override;
 	void BeforeApplyDamageToHealth(float flDamage) override;
@@ -218,8 +218,11 @@ public:
 	void StartTask( Task_t *pTask ) override;
 	Schedule_t *GetSchedule() override;
 	Schedule_t *GetScheduleOfType( int Type ) override;
+	int DefaultChaseEnemyFailedPolicy() override { return CHASE_ENEMY_FAILED_FAIL; }
 	PainSoundRule DefaultPainSoundRule() override;
 	void PainSound() override;
+	bool PlayUseSentence() override;
+	bool PlayUnUseSentence() override;
 	DamageInfo DefaultHandleTraceAttack(entvars_t *pevInflictor, entvars_t *pevAttacker, const DamageInfo &inputDamageInfo, Vector vecDir, TraceResult *ptr) override;
 	void NodeStart(string_t iszNextNode );
 	void NodeReach();
@@ -368,6 +371,9 @@ public:
 	static const NamedSoundScript sackSoundScript;
 	static const NamedSoundScript launchMortarSoundScript;
 
+	static const NamedSoundScript useSoundScript;
+	static const NamedSoundScript unuseSoundScript;
+
 	CUSTOM_SCHEDULES
 
 private:
@@ -389,7 +395,7 @@ TYPEDESCRIPTION	CBigMomma::m_SaveData[] =
 	DEFINE_FIELD( CBigMomma, m_crabCount, FIELD_INTEGER ),
 };
 
-IMPLEMENT_SAVERESTORE( CBigMomma, CBaseMonster )
+IMPLEMENT_SAVERESTORE( CBigMomma, CFollowingMonster )
 
 constexpr IntRange bigMommaPitch(95, 105);
 
@@ -469,18 +475,17 @@ const NamedSoundScript CBigMomma::launchMortarSoundScript = {
 	"BigMomma.LaunchMortar"
 };
 
-void CBigMomma::KeyValue( KeyValueData *pkvd )
-{
-#if 0
-	if( FStrEq( pkvd->szKeyName, "volume" ) )
-	{
-		m_volume = atof( pkvd->szValue );
-		pkvd->fHandled = true;
-	}
-	else
-#endif
-		CBaseMonster::KeyValue( pkvd );
-}
+const NamedSoundScript CBigMomma::useSoundScript = {
+	CHAN_VOICE,
+	{},
+	"BigMomma.Use"
+};
+
+const NamedSoundScript CBigMomma::unuseSoundScript = {
+	CHAN_VOICE,
+	{},
+	"BigMomma.UnUse"
+};
 
 //=========================================================
 // Classify - indicates this monster's place in the 
@@ -618,7 +623,7 @@ void CBigMomma::HandleAnimEvent( MonsterEvent_t *pEvent )
 			}
 			break;
 		default:
-			CBaseMonster::HandleAnimEvent( pEvent );
+			CFollowingMonster::HandleAnimEvent( pEvent );
 			break;
 	}
 }
@@ -634,6 +639,16 @@ PainSoundRule CBigMomma::DefaultPainSoundRule()
 void CBigMomma::PainSound()
 {
 	EmitSoundScript(painSoundScript);
+}
+
+bool CBigMomma::PlayUseSentence()
+{
+	return EmitSoundScript(useSoundScript);
+}
+
+bool CBigMomma::PlayUnUseSentence()
+{
+	return EmitSoundScript(unuseSoundScript);
 }
 
 DamageInfo CBigMomma::DefaultHandleTraceAttack(entvars_t *pevInflictor, entvars_t *pevAttacker, const DamageInfo &inputDamageInfo, Vector vecDir, TraceResult *ptr)
@@ -807,9 +822,10 @@ void CBigMomma::Spawn()
 	pev->view_ofs = Vector( 0.0f, 0.0f, 128.0f );// position of the eyes relative to monster's origin.
 	SetMyFieldOfView(0.3f);// indicates the width of this monster's forward view cone ( as a dotproduct result )
 	m_MonsterState = MONSTERSTATE_NONE;
+	SetMySquadCapabilities();
 	SetMyCanOpenDoors(false);
 
-	MonsterInit();
+	FollowingMonsterInit();
 }
 
 //=========================================================
@@ -833,6 +849,9 @@ void CBigMomma::Precache()
 	RegisterAndPrecacheSoundScript(childDieSoundScript);
 	RegisterAndPrecacheSoundScript(launchMortarSoundScript);
 
+	RegisterAndPrecacheSoundScript(useSoundScript);
+	RegisterAndPrecacheSoundScript(unuseSoundScript);
+
 	PrecacheChildren(BIG_CHILDCLASS, m_reverseRelationship);
 	UTIL_PrecacheOther("bmortar", GetProjectileOverrides());
 
@@ -843,7 +862,7 @@ void CBigMomma::Activate()
 {
 	if( m_hTargetEnt == 0 )
 		Remember( bits_MEMORY_ADVANCE_NODE );	// Start 'er up
-	CBaseMonster::Activate();
+	CFollowingMonster::Activate();
 }
 
 void CBigMomma::NodeStart( string_t iszNextNode )
@@ -939,13 +958,13 @@ bool CBigMomma::CheckRangeAttack1( float flDot, float flDist )
 //=========================================================
 enum
 {
-	SCHED_BIG_NODE = LAST_COMMON_SCHEDULE + 1,
+	SCHED_BIG_NODE = LAST_FOLLOWINGMONSTER_SCHEDULE + 1,
 	SCHED_NODE_FAIL
 };
 
 enum
 {
-	TASK_MOVE_TO_NODE_RANGE = LAST_COMMON_TASK + 1,	// Move within node range
+	TASK_MOVE_TO_NODE_RANGE = LAST_FOLLOWINGMONSTER_TASK + 1,	// Move within node range
 	TASK_FIND_NODE,									// Find my next node
 	TASK_PLAY_NODE_PRESEQUENCE,						// Play node pre-script
 	TASK_PLAY_NODE_SEQUENCE,						// Play node script
@@ -1005,7 +1024,7 @@ DEFINE_CUSTOM_SCHEDULES( CBigMomma )
 	slNodeFail,
 };
 
-IMPLEMENT_CUSTOM_SCHEDULES( CBigMomma, CBaseMonster )
+IMPLEMENT_CUSTOM_SCHEDULES( CBigMomma, CFollowingMonster )
 
 Schedule_t *CBigMomma::GetScheduleOfType( int Type )
 {
@@ -1019,7 +1038,7 @@ Schedule_t *CBigMomma::GetScheduleOfType( int Type )
 			break;
 	}
 
-	return CBaseMonster::GetScheduleOfType( Type );
+	return CFollowingMonster::GetScheduleOfType( Type );
 }
 
 bool CBigMomma::ShouldGoToNode()
@@ -1042,7 +1061,10 @@ Schedule_t *CBigMomma::GetSchedule()
 		return GetScheduleOfType( SCHED_BIG_NODE );
 	}
 
-	return CBaseMonster::GetSchedule();
+	if (ShouldCoverFromDanger())
+		return GetScheduleOfType( SCHED_TAKE_COVER_FROM_BEST_SOUND );
+
+	return CFollowingMonster::GetSchedule();
 }
 
 void CBigMomma::StartTask( Task_t *pTask )
@@ -1189,10 +1211,10 @@ void CBigMomma::StartTask( Task_t *pTask )
 	case TASK_MELEE_ATTACK1:
 		// Play an attack sound here
 		EmitSoundScript(attackSoundScript);
-		CBaseMonster::StartTask( pTask );
+		CFollowingMonster::StartTask( pTask );
 		break;
 	default: 
-		CBaseMonster::StartTask( pTask );
+		CFollowingMonster::StartTask( pTask );
 		break;
 	}
 }
@@ -1243,14 +1265,14 @@ void CBigMomma::RunTask( Task_t *pTask )
 		}
 		break;
 	default:
-		CBaseMonster::RunTask( pTask );
+		CFollowingMonster::RunTask( pTask );
 		break;
 	}
 }
 
 void CBigMomma::ReportAIState(ALERT_TYPE level)
 {
-	CBaseMonster::ReportAIState(level);
+	CFollowingMonster::ReportAIState(level);
 	if (HasMemory(bits_MEMORY_PATH_FINISHED))
 		ALERT(level, "Path finished. ");
 	if (!FStringNull(pev->netname))

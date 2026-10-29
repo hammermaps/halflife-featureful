@@ -229,6 +229,7 @@ int CHud::MsgFunc_PlTemplate(const char *pszName, int iSize, void *pbuf)
 {
 	BEGIN_READ(pbuf, iSize);
 
+	m_playerModel = READ_STRING();
 	m_forcedHudColor = PackRGB(READ_COLOR());
 	m_forcedHudColorNoSuit = PackRGB(READ_COLOR());
 	m_forcedHudColorCritical = PackRGB(READ_COLOR());

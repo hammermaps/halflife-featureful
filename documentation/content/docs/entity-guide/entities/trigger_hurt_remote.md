@@ -17,7 +17,7 @@ When dealing damage, the activator of the `trigger_hurt_remote` acts as an attac
 * `Target Classname`. If specified, all entities with the given classname will be affected. This is independent from `Target`, which means the entity might cause damage twice to the same entity if Target is class of Target Class.
 * `Gibbing policy` - the gibbing behavior.
 * `Delay (Only when Constant)` - delay between hurts in the `Constant` mode.
-* `Minimum health threshold` - don't decrease the toucher health beyond this value.
+* `Minimum health threshold` - don't decrease the target health beyond this value.
 * `Armor damage` - deal damage to armor. Works only if 'Do Armor' flag is selected. When target is out of armor, the damage is not dealt. Can be negative to give an armor instead of draining it.
 
 ### Spawnflags

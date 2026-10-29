@@ -76,10 +76,12 @@ public:
 	void KeyValue( KeyValueData *pkvd ) override;
 
 	// AI functions
+	Schedule_t* GetSchedule() override;
 	Schedule_t *GetScheduleOfType ( int Type ) override;
 	void StartTask( Task_t *pTask ) override;
 	void RunTask( Task_t *pTask ) override;
 	void PrescheduleThink() override;
+	void RestoreTouchAfterLeapAttack() override;
 	TakeDamageResult TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, const DamageInfo& damageInfo) override;
 
 	void FollowingMonsterInit();
@@ -95,8 +97,8 @@ public:
 	void StopFollowing(bool clearSchedule, bool saySentence = true ) override;
 	virtual void StartFollowing( CBaseEntity *pLeader, bool saySentence = true );
 	virtual void DeclineFollowing( CBaseEntity* pCaller ) {}
-	virtual void LimitFollowers( CBaseEntity *pPlayer, int maxFollowers );
-	virtual int MaxFollowers() { return -1; }
+	virtual bool IsAllyToPlayerClass();
+	bool CanAnswerToPlayerUse();
 
 	CFollowingMonster* MyFollowingMonsterPointer() override { return this; }
 	virtual bool InScriptedSentence();
@@ -130,8 +132,8 @@ public:
 		}
 		return false;
 	}
-	virtual void PlayUseSentence() {}
-	virtual void PlayUnUseSentence() {}
+	virtual bool PlayUseSentence() { return false; }
+	virtual bool PlayUnUseSentence() { return false; }
 	virtual bool PlayFriendlyFireComplaint() { return false; }
 	virtual void JustSpoke();
 

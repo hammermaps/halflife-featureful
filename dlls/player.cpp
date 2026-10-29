@@ -185,6 +185,8 @@ TYPEDESCRIPTION	CBasePlayer::m_playerSaveData[] =
 
 	DEFINE_ARRAY(CBasePlayer, m_maxAmmoOverride, FIELD_INTEGER, MAX_AMMO_TYPES),
 
+	DEFINE_FIELD(CBasePlayer, m_safeFall, FIELD_BOOLEAN),
+
 	//DEFINE_FIELD( CBasePlayer, m_fDeadTime, FIELD_FLOAT ), // only used in multiplayer games
 	//DEFINE_FIELD( CBasePlayer, m_fGameHUDInitialized, FIELD_INTEGER ), // only used in multiplayer games
 	//DEFINE_FIELD( CBasePlayer, m_flStopExtraSoundTime, FIELD_TIME ),
@@ -427,7 +429,7 @@ void LinkUserMessages()
 	gmsgWeatherPos = REG_USER_MSG("WeatherPos", -1);
 
 	gmsgJournal = REG_USER_MSG("Journal", -1);
-	gmsgPlTemplate = REG_USER_MSG("PlTemplate", 10);
+	gmsgPlTemplate = REG_USER_MSG("PlTemplate", -1);
 	gmsgSoundScript = REG_USER_MSG("SoundScript", -1);
 	gmsgSoundVolume = REG_USER_MSG("SoundVolume", 2);
 	gmsgSaveDisable = REG_USER_MSG("SaveDisable", 1);
@@ -1058,7 +1060,7 @@ TakeDamageResult CBasePlayer::TakeDamage( entvars_t *pevInflictor, entvars_t *pe
 				CTalkMonster::TalkFriend friendClass = CTalkMonster::m_szFriends[i];
 				if (!friendClass.name[0])
 					break;
-				if (friendClass.category == TALK_FRIEND_SOLDIER)
+				if (friendClass.attackAttackers)
 				{
 					CBaseEntity* pEntity = NULL;
 					while((pEntity = UTIL_FindEntityByClassname(pEntity, friendClass.name)) != NULL)
@@ -2065,43 +2067,39 @@ std::pair<CBaseEntity*, const ObjectHintSpec*> CBasePlayer::GetInteractiveEntity
 
 		while( ( pObject = UTIL_FindEntityInSphere( pObject, pev->origin, searchRadius ) ) != NULL )
 		{
-			const ObjectHintSpec* hintSpec = gatherHints ? GetHintSpecForEntity(pObject) : nullptr;
+			const ObjectHintSpec* hintSpec = (gatherHints && pObject->CanShowObjectHint()) ? GetHintSpecForEntity(pObject) : nullptr;
 			if (hintSpec && hintSpec->scanVisualSet.HasAnySpriteDefined())
 			{
-				CBasePlayerWeapon* pWeapon = pObject->MyWeaponPointer();
-				if (!pWeapon || !pWeapon->m_pPlayer)
+				const float radius = hintSpec->distance > 0 ? hintSpec->distance : PLAYER_SEARCH_RADIUS;
+				if (ObjectInRadius(pObject, eyePosition, radius))
 				{
-					const float radius = hintSpec->distance > 0 ? hintSpec->distance : PLAYER_SEARCH_RADIUS;
-					if (ObjectInRadius(pObject, eyePosition, radius))
+					vecLOS = (VecBModelOrigin( pObject->pev ) - eyePosition);
+					vecLOS = UTIL_ClampVectorToBox(vecLOS, pObject->pev->size * 0.5f);
+					flDot = DotProduct( vecLOS , gpGlobals->v_forward );
+					if (flDot > 0.5f)
 					{
-						vecLOS = (VecBModelOrigin( pObject->pev ) - eyePosition);
-						vecLOS = UTIL_ClampVectorToBox(vecLOS, pObject->pev->size * 0.5f);
-						flDot = DotProduct( vecLOS , gpGlobals->v_forward );
-						if (flDot > 0.5f)
-						{
-							TraceResult objectTr;
-							UTIL_TraceLine(eyePosition, pObject->Center(), dont_ignore_monsters, edict(), &objectTr);
+						TraceResult objectTr;
+						UTIL_TraceLine(eyePosition, pObject->Center(), dont_ignore_monsters, edict(), &objectTr);
 
-							bool traceOk = objectTr.flFraction == 1.0f || objectTr.pHit == pObject->edict();
-							if (!traceOk)
+						bool traceOk = objectTr.flFraction == 1.0f || objectTr.pHit == pObject->edict();
+						if (!traceOk)
+						{
+							if (objectTr.pHit && ENTINDEX(objectTr.pHit) != 0)
 							{
-								if (objectTr.pHit && ENTINDEX(objectTr.pHit) != 0)
+								entvars_t* objectPev = VARS(objectTr.pHit);
+								const char* model = FStringNull(objectPev->model) ? nullptr : STRING(objectPev->model);
+								if (model && *model == '*' && objectPev->rendermode != kRenderNormal && objectPev->renderamt > 0)
 								{
-									entvars_t* objectPev = VARS(objectTr.pHit);
-									const char* model = FStringNull(objectPev->model) ? nullptr : STRING(objectPev->model);
-									if (model && *model == '*' && objectPev->rendermode != kRenderNormal && objectPev->renderamt > 0)
-									{
-										TraceResult reversedTr;
-										UTIL_TraceLine(pObject->Center(), eyePosition, dont_ignore_monsters, pObject->edict(), &reversedTr);
-										traceOk = reversedTr.pHit == objectTr.pHit;
-									}
+									TraceResult reversedTr;
+									UTIL_TraceLine(pObject->Center(), eyePosition, dont_ignore_monsters, pObject->edict(), &reversedTr);
+									traceOk = reversedTr.pHit == objectTr.pHit;
 								}
 							}
+						}
 
-							if (traceOk)
-							{
-								hintedEntities->push_back(std::make_pair(pObject, hintSpec));
-							}
+						if (traceOk)
+						{
+							hintedEntities->push_back(std::make_pair(pObject, hintSpec));
 						}
 					}
 				}
@@ -4044,17 +4042,17 @@ void CBasePlayer::PostThink()
 			// after this point, we start doing damage
 			float flFallDamage = g_pGameRules->FlPlayerFallDamage( this );
 
-			if( flFallDamage > pev->health )
-			{
-				//splat
-				// note: play on item channel because we play footstep landing on body channel
-				EmitSoundScript(Player::fallBodySplatSoundScript);
-			}
-
-			if( flFallDamage > 0 )
+			if (flFallDamage > 0 && pev->movetype != MOVETYPE_NOCLIP && !m_safeFall)
 			{
 				TakeDamage( VARS( eoNullEntity ), VARS( eoNullEntity ), DamageInfo(flFallDamage, DMG_FALL) );
 				pev->punchangle.x = 0;
+
+				if (pev->health <= 0.0f)
+				{
+					//splat
+					// note: play on item channel because we play footstep landing on body channel
+					EmitSoundScript(Player::fallBodySplatSoundScript);
+				}
 			}
 		}
 
@@ -4072,6 +4070,8 @@ void CBasePlayer::PostThink()
 			// ALERT( at_console, "fall %f\n", m_flFallVelocity );
 		}
 		m_flFallVelocity = 0;
+
+		m_safeFall = false;
 	}
 
 	// select the proper animation for the player character	
@@ -5535,6 +5535,11 @@ void CBasePlayer::ItemPostFrame()
 
 	ImpulseCommands();
 
+	if (!m_pActiveItem)
+		return;
+
+	m_pActiveItem->ItemPostFrameAlways();
+
 #if CLIENT_WEAPONS
 	if( m_flNextAttack > 0 )
 #else
@@ -5543,9 +5548,6 @@ void CBasePlayer::ItemPostFrame()
 	{
 		return;
 	}
-
-	if( !m_pActiveItem )
-		return;
 
 	m_pActiveItem->ItemPostFrame();
 }
@@ -7460,6 +7462,12 @@ bool CBasePlayer::AssignPlayerTemplate(string_t templateName)
 	pev->model = iStringNull;
 	SetMyModel();
 
+	CBaseEntity* playerMarker = nullptr;
+	while ((playerMarker = UTIL_FindEntityByClassname(playerMarker, "player_marker")) != nullptr)
+	{
+		SET_MODEL(playerMarker->edict(), STRING(pev->model));
+	}
+
 	return true;
 }
 
@@ -7516,7 +7524,10 @@ void CBasePlayer::SendPlayerTemplateData()
 			hudDrawNoSuit = 2;
 	}
 
+	const char* playerModel = MyOwnModel();
+
 	MESSAGE_BEGIN(MSG_ONE, gmsgPlTemplate, NULL, pev);
+		WRITE_STRING(playerModel);
 		WRITE_COLOR(hudColor);
 		WRITE_COLOR(hudColorNoSuit);
 		WRITE_COLOR(hudColorCritical);

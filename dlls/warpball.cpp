@@ -17,6 +17,7 @@
 #include "game.h"
 #include "soundent.h"
 #endif
+#include "util_shared.h"
 
 static bool AlienTeleportSoundEnabled()
 {
@@ -169,8 +170,7 @@ const char warpballCatalogSchema[] = R"(
 						"type": ["object", "null"],
 						"properties": {
 							"type": {
-								"type": "string",
-								"pattern": "^combat|danger$"
+								"$ref": "definitions.json#/ai_sound_type"
 							},
 							"duration": {
 								"type": "number",
@@ -385,14 +385,7 @@ static void AssignWarpballAiSound(WarpballAiSound& aiSound, const Value& aiSound
 		UpdatePropertyFromJson(aiSound.duration, aiSoundJson, "duration");
 		HandleJSONMember(aiSoundJson, "type", [&aiSound](const Value& value) {
 			const char* valStr = value.GetString();
-			if (stricmp(valStr, "combat") == 0)
-			{
-				aiSound.type = bits_SOUND_COMBAT;
-			}
-			else if (stricmp(valStr, "danger") == 0)
-			{
-				aiSound.type = bits_SOUND_DANGER;
-			}
+			aiSound.type = ParseAISoundType(valStr);
 		});
 	}
 }

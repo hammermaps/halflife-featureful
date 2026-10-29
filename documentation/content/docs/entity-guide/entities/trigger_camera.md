@@ -11,16 +11,19 @@ bookToC: false
 
 * `Stop by player input` - allow player to press '+use' in order to stop watching at the camera. Note: the `Freeze Player` spawnflag prevents any player's input. You may use the [player_capabilities]({{< ref player_capabilities >}}) disabling the movement and jump on camera activation and enabling them again via the `Target when turned off`.
 * ![](/images/svencoop.png) `Target when turned off` - fire a target when the camera gets turned off when either the hold time expires or the camera is turned off by a trigger or a player's input (if `Stop by player input` is enabled).
+* ![](/images/svencoop.png) `Camera Rotation Speed` - configure camera rotation speed (default value is 40, like in base Half-Life). Ignored if `Instant Follow Turn` spawnflag is enabled.
 
 ### New spawnflags
 
 * ![](/images/svencoop.png) `Player Invulnerable` - make player invulnerable to attacks while they're using the camera.
 * ![](/images/svencoop.png) `Ignore Hold Time` - ignore hold time, turn off only when re-triggered.
+* ![](/images/svencoop.png) `Instant Move` - make the camera move from path to path without any movement smoothing.
 * `Alive player only` - prevent camera activating on the dead player (which is possible in Half-Life).
 * `Don't fire look target` - prevent firing the entity the camera looks at (we keep this weird behavior from Half-Life by default in order to maintain compatibility).
 * `Don't slow down if not Freeze Player` - in Half-Life `trigger_camera` slows down its movement if `Freeze Player` spawnflag is not set. It's unknown why it's coded this way. Tick this flag to prevent such behavior.
 * `Don't skip the first path corner` - in Half-Life `trigger_camera` actually skips moving to the first path corner path. Tick this flag to fix this behavior.
-* `Instant Turn` - instantly turn to the target on activation. By default camera starts at its angle (as it's set in the editor) and then gradually turns to the target. Set this spawnflag when such behavior is not desired.
+* `Instant Initial Turn` - instantly turn to the target on activation. By default camera starts at its angle (as it's set in the editor) and then gradually turns to the target. Set this spawnflag when such behavior is not desired.
+* `Instant Follow Turn` - always look at target (while moving, etc.). By default camera gradually rotates to its target using the rotation speed. Set this spawnflag when such behavior is not desired.
 
 ### Bugfixes
 

@@ -52,14 +52,13 @@ If you just remove the aircraft (without turning it off first) while it's moving
 ### Soundscripts
 
 * **Apache.Rotor** - rotor sound during the flight. Must be looped.
+* **Apache.Pain** - pain sound. Empty by default.
 * **Apache.FireGun** - firing a bullet.
 * **Apache.Crash** - death sound. Derived from **NPC.Crash**
-* **Apache.RPG** - rocket launch sound. Emitted from the rocket projectile.
+* [hvr_rocket soundscripts]({{< ref "hvr_rocket/#soundscripts" >}})
 
 ### Visuals
 
-* **Apache.RocketModel** - Apache rocket model.
-* **Apache.RocketTrail** - Apache rocket trailing beam.
 * **Apache.FallingSmoke** - smokes produced while Apache is falling.
 * **Apache.CrashSmoke** - big smoke on crash.
 * **Apache.RocketSmoke** - smoke when launching rocket.
@@ -67,6 +66,7 @@ If you just remove the aircraft (without turning it off first) while it's moving
 * **Apache.Fireball** - big fireball played when Apache crashes.
 * **Apache.BlastCircle** - wave played when Apache crashes.
 * **Wreckage.Smoke** - smokes played after the Apache crashed.
+* [hvr_rocket visuals]({{< ref "hvr_rocket/#visuals" >}})
 
 ### Entity template examples
 
@@ -122,6 +122,49 @@ The smoke behavior can't be currently expressed via entity templates, so the sta
     }
 }
 ```
+{{% /tab %}}
+
+{{% tab "Condition Zero Deleted Scenes gunships" %}}
+
+![](/images/czeror.png) Enemy gunships used in some CZDS missions are actually `monster_apache` with custom model and sounds.
+
+```json
+{
+    "harrier_gunship": {
+        "own_visual": {
+            "model": "models/props/harrier_gunship.mdl"
+        },
+        "soundscripts": {
+            "Apache.Rotor": {
+                "waves": ["vehicles/harrier_loop.wav"]
+            },
+            "Apache.FireGun": {
+                "waves": ["vehicles/harrier_fire.wav"]
+            },
+            "Apache.Crash": {
+                "waves": ["vehicles/harrier_death.wav"]
+            }
+        }
+    },
+    "hind_gunship": {
+        "own_visual": {
+            "model": "models/props/hind_gunship.mdl"
+        },
+        "soundscripts": {
+            "Apache.Rotor": {
+                "waves": ["vehicles/hind_loop.wav"]
+            },
+            "Apache.FireGun": {
+                "waves": ["vehicles/hind_fire.wav"]
+            },
+            "Apache.Crash": {
+                "waves": ["vehicles/hind_death.wav"]
+            }
+        }
+    }
+}
+```
+
 {{% /tab %}}
 
 {{% /tabs %}}

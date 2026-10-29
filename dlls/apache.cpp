@@ -78,7 +78,10 @@ public:
 	bool FireGun();
 
 	DamageInfo DefaultTransformDamageInfo(entvars_t *pevInflictor, entvars_t *pevAttacker, const DamageInfo& inputDamageInfo) override;
-	TakeDamageResult  TakeDamage( entvars_t* pevInflictor, entvars_t* pevAttacker, const DamageInfo& damageInfo ) override;
+	TakeDamageResult TakeDamage( entvars_t* pevInflictor, entvars_t* pevAttacker, const DamageInfo& damageInfo ) override;
+	void PainSound() override {
+		EmitSoundScript(painSoundScript);
+	}
 	bool MustDoSmoke(const DamageInfo& damageInfo, const TraceResult* ptr);
 	DamageInfo DefaultHandleTraceAttack(entvars_t *pevInflictor, entvars_t *pevAttacker, const DamageInfo &inputDamageInfo, Vector vecDir, TraceResult *ptr) override;
 	void TraceAttack( entvars_t *pevInflictor,  entvars_t *pevAttacker, const DamageInfo& damageInfo, Vector vecDir, TraceResult *ptr ) override;
@@ -115,6 +118,7 @@ public:
 	bool m_attackedRecently;
 
 	static const NamedSoundScript rotorSoundScript;
+	static const NamedSoundScript painSoundScript;
 	static const NamedSoundScript fireGunSoundScript;
 	static constexpr const char* crashSoundScript = "Apache.Crash";
 
@@ -173,6 +177,12 @@ const NamedSoundScript CApache::rotorSoundScript =  {
 	VOL_NORM,
 	0.3f,
 	"Apache.Rotor"
+};
+
+const NamedSoundScript CApache::painSoundScript = {
+	CHAN_VOICE,
+	{},
+	"Apache.Pain"
 };
 
 const NamedSoundScript CApache::fireGunSoundScript = {
@@ -282,7 +292,7 @@ void CApache::PrecacheImpl(const char* gibModel)
 	m_iBodyGibs = PrecacheMyGibModel(gibModel);
 
 	RegisterAndPrecacheSoundScript(rotorSoundScript);
-
+	RegisterAndPrecacheSoundScript(painSoundScript);
 	RegisterAndPrecacheSoundScript(crashSoundScript, NPC::crashSoundScript);
 
 	RegisterVisual(blastCircleVisual);
@@ -1308,7 +1318,6 @@ public:
 	void Spawn() override;
 	void Precache() override;
 	const char* DefaultModel() override { return "models/blkop_apache.mdl"; }
-	bool IsEnabledInMod() override { return g_modFeatures.IsMonsterEnabled("blkop_apache"); }
 	int	DefaultClassify() override
 	{
 		if (g_modFeatures.blackops_classify)

@@ -11,6 +11,7 @@ entityCategory: solid
 ### New parameters
 
 * ![](/images/spirit.png) `Triggered only by entity` - filter touchers by targetname or classname.
+* `Sound to play` - play sound on touch. This actually existed in base Half-Life, but due to the wrong implementation it didn't work until the save-load. It also usually wasn't mentioned in fgd.
 
 ### New spawnflags
 

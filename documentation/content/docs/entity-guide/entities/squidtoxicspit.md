@@ -28,3 +28,14 @@ Speed: 600
 * Type: poison
 * Radius: 32
 * Traits: timed damage is non lethal; ignores armor
+
+### Soundscripts
+
+* **Bullsquid.ToxicSpitTouch** - one of the sounds played when the toxic spit projectile hits something.
+* **Bullsquid.ToxicSpitHit** - one of the sounds played when the toxic spit projectile hits something.
+
+### Visuals
+
+* **Bullsquid.ToxicSpit** - the toxic spit projectile sprite.
+* **Bullsquid.ToxicFleck** - sprites sprayed on the toxic spit projectile impact with the wall.
+* **Bullsquid.ToxicParticle** - sprites emitted from the toxic spit projectile as it flies. Note: currently can't be animated.

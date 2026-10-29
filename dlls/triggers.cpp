@@ -35,6 +35,7 @@
 #include "common_soundscripts.h"
 #include "string_utils.h"
 #include "weapons.h" // for trigger_usetool
+#include "graphic_debug.h"
 
 #define FEATURE_TRIGGER_RANDOM 1
 #define FEATURE_TRIGGER_RESPAWN 1
@@ -1139,9 +1140,9 @@ class CTriggerCDAudio : public CBaseTrigger
 public:
 	void Spawn() override;
 
-	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value ) override;
+	void EXPORT CDAduioUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 	void PlayTrack();
-	void Touch( CBaseEntity *pOther ) override;
+	void EXPORT CDAduioTouch( CBaseEntity *pOther );
 };
 
 LINK_ENTITY_TO_CLASS( trigger_cdaudio, CTriggerCDAudio )
@@ -1150,7 +1151,7 @@ LINK_ENTITY_TO_CLASS( trigger_cdaudio, CTriggerCDAudio )
 // Changes tracks or stops CD when player touches
 //
 // !!!HACK - overloaded HEALTH to avoid adding new field
-void CTriggerCDAudio::Touch( CBaseEntity *pOther )
+void CTriggerCDAudio::CDAduioTouch( CBaseEntity *pOther )
 {
 	if( !pOther->IsPlayer() )
 	{
@@ -1164,47 +1165,52 @@ void CTriggerCDAudio::Touch( CBaseEntity *pOther )
 void CTriggerCDAudio::Spawn()
 {
 	InitTrigger();
+	SetTouch(&CTriggerCDAudio::CDAduioTouch);
+	SetUse(&CTriggerCDAudio::CDAduioUse);
 }
 
-void CTriggerCDAudio::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
+void CTriggerCDAudio::CDAduioUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 {
 	PlayTrack();
 }
 
 void PlayCDTrack( int iTrack )
 {
-	// manually find the single player.
-	CBaseEntity* pClient = UTIL_PlayerByIndex(1);
-
-	// Can't play if the client is not connected!
-	if( !pClient )
-		return;
-
 	if( iTrack < -1 || iTrack > 30 )
 	{
 		ALERT( at_console, "TriggerCDAudio - Track %d out of range\n" );
 		return;
 	}
 
+	char buffer[64];
+	const char* commandStr = nullptr;
+
 	if( iTrack == -1 )
 	{
-		CLIENT_COMMAND( pClient->edict(), "cd stop\n" );
+		commandStr = "cd stop\n";
 	}
 	else
 	{
-		char string[64];
+		sprintf( buffer, "cd play %3d\n", iTrack );
+		commandStr = buffer;
+	}
 
-		sprintf( string, "cd play %3d\n", iTrack );
-		CLIENT_COMMAND( pClient->edict(), string );
+	for (int i = 1; i <= gpGlobals->maxClients; i++)
+	{
+		CBaseEntity* pClient = UTIL_PlayerByIndex(i);
+		if (pClient)
+		{
+			CLIENT_COMMAND(pClient->edict(), commandStr);
+		}
 	}
 }
 
 // only plays for ONE client, so only use in single play!
 void CTriggerCDAudio::PlayTrack()
 {
+	SetTouch(nullptr);
+	SetUse(nullptr);
 	PlayCDTrack( (int)pev->health );
-
-	SetTouch( NULL );
 	UTIL_Remove( this );
 }
 
@@ -1250,19 +1256,20 @@ void CTargetCDAudio::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYP
 // only plays for ONE client, so only use in single play!
 void CTargetCDAudio::Think()
 {
-	edict_t *pClient;
-
-	// manually find the single player.
-	pClient = g_engfuncs.pfnPEntityOfEntIndex( 1 );
-
-	// Can't play if the client is not connected!
-	if( !pClient )
-		return;
-
 	pev->nextthink = gpGlobals->time + 0.5f;
 
-	if( ( pClient->v.origin - pev->origin ).IsLengthLessThanOrEqual(pev->scale) )
-		Play();
+	for (int i = 1; i <= gpGlobals->maxClients; i++)
+	{
+		CBaseEntity* pClient = UTIL_PlayerByIndex(i);
+		if (pClient)
+		{
+			if ((pClient->pev->origin - pev->origin).IsLengthLessThanOrEqual(pev->scale))
+			{
+				Play();
+				break;
+			}
+		}
+	}
 }
 
 void CTargetCDAudio::Play()
@@ -1726,6 +1733,7 @@ class CTriggerMultiple : public CBaseTrigger
 {
 public:
 	void Spawn() override;
+	void Precache() override;
 	void KeyValue( KeyValueData *pkvd ) override;
 
 	USE_TYPE UseType() override;
@@ -1735,6 +1743,8 @@ LINK_ENTITY_TO_CLASS( trigger_multiple, CTriggerMultiple )
 
 void CTriggerMultiple::Spawn()
 {
+	Precache();
+
 	if( m_flWait == 0 )
 		m_flWait = 0.2f;
 
@@ -1742,6 +1752,12 @@ void CTriggerMultiple::Spawn()
 
 	ASSERTSZ( pev->health == 0, "trigger_multiple with health" );
 	SetTouch( &CBaseTrigger::MultiTouch );
+}
+
+void CTriggerMultiple::Precache()
+{
+	if (!FStringNull(pev->noise))
+		PRECACHE_SOUND(STRING(pev->noise));
 }
 
 void CTriggerMultiple::KeyValue( KeyValueData *pkvd )
@@ -4401,13 +4417,15 @@ const char* CTriggerCondition::getValueAsString(const CKeyValue& key)
 #define SF_CAMERA_PLAYER_POSITION	1
 #define SF_CAMERA_PLAYER_TARGET		2
 #define SF_CAMERA_PLAYER_TAKECONTROL 4
+#define SF_CAMERA_INSTANT_MOVE 64
 #define SF_CAMERA_PLAYER_INVULRENABLE 256
 #define SF_CAMERA_IGNORE_HOLD_TIME 512
 #define SF_CAMERA_PLAYER_ALIVE_ONLY 1024
 #define SF_CAMERA_DONT_FIRE_LOOK_TARGET (1<<12)
 #define SF_CAMERA_DONT_SLOW_DOWN_IF_NOT_FREEZE (1<<13)
 #define SF_CAMERA_DONT_SKIP_FIRST_PATH_CORNER (1<<14)
-#define SF_CAMERA_INSTANT_TURN (1<<15)
+#define SF_CAMERA_INSTANT_INITIAL_TURN (1<<15)
+#define SF_CAMERA_INSTANT_FOLLOW_TURN (1<<16)
 
 class CTriggerCamera : public CBaseDelay
 {
@@ -4425,6 +4443,9 @@ public:
 	int ObjectCaps() override { return CBaseEntity :: ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
 	void UpdateOnRemove() override;
 	void ReleasePlayer();
+	float GetTurnSpeed() const {
+		return m_turnspeed > 0.0f ? m_turnspeed : 40.0f;
+	}
 
 	EHANDLE m_hPlayer;
 	EHANDLE m_hTarget;
@@ -4439,6 +4460,7 @@ public:
 	float m_acceleration;
 	float m_deceleration;
 	bool m_state;
+	float m_turnspeed;
 	string_t m_iszTurnedOffTarget;
 	int m_stopByPlayerInput; // don't save, this is going to spawnflags
 };
@@ -4461,6 +4483,7 @@ TYPEDESCRIPTION	CTriggerCamera::m_SaveData[] =
 	DEFINE_FIELD( CTriggerCamera, m_acceleration, FIELD_FLOAT ),
 	DEFINE_FIELD( CTriggerCamera, m_deceleration, FIELD_FLOAT ),
 	DEFINE_FIELD( CTriggerCamera, m_state, FIELD_BOOLEAN ),
+	DEFINE_FIELD( CTriggerCamera, m_turnspeed, FIELD_FLOAT ),
 	DEFINE_FIELD( CTriggerCamera, m_iszTurnedOffTarget, FIELD_STRING ),
 };
 
@@ -4510,6 +4533,11 @@ void CTriggerCamera::KeyValue( KeyValueData *pkvd )
 	else if ( FStrEq(pkvd->szKeyName, "stop_by_player_input" ) )
 	{
 		m_stopByPlayerInput = atoi(pkvd->szValue);
+		pkvd->fHandled = true;
+	}
+	else if ( FStrEq(pkvd->szKeyName, "turnspeed" ) )
+	{
+		m_turnspeed = atof(pkvd->szValue);
 		pkvd->fHandled = true;
 	}
 	else if ( FStrEq(pkvd->szKeyName, "m_iszTurnedOffTarget" ) )
@@ -4605,7 +4633,7 @@ void CTriggerCamera::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYP
 	{
 		pev->velocity = Vector( 0, 0, 0 );
 
-		if (FBitSet(pev->spawnflags, SF_CAMERA_INSTANT_TURN))
+		if (FBitSet(pev->spawnflags, SF_CAMERA_INSTANT_INITIAL_TURN))
 		{
 			Vector vecAnglesGoal = UTIL_VecToAngles( m_hTarget->pev->origin - pev->origin );
 			vecAnglesGoal.x = -vecAnglesGoal.x;
@@ -4672,27 +4700,35 @@ void CTriggerCamera::FollowTarget()
 	Vector vecGoal = UTIL_VecToAngles( m_hTarget->pev->origin - pev->origin );
 	vecGoal.x = -vecGoal.x;
 
-	if( pev->angles.y > 360 )
-		pev->angles.y -= 360;
+	if (!FBitSet(pev->spawnflags, SF_CAMERA_INSTANT_FOLLOW_TURN))
+	{
+		if( pev->angles.y > 360 )
+			pev->angles.y -= 360;
 
-	if( pev->angles.y < 0 )
-		pev->angles.y += 360;
+		if( pev->angles.y < 0 )
+			pev->angles.y += 360;
 
-	float dx = vecGoal.x - pev->angles.x;
-	float dy = vecGoal.y - pev->angles.y;
+		float dx = vecGoal.x - pev->angles.x;
+		float dy = vecGoal.y - pev->angles.y;
 
-	if( dx < -180 )
-		dx += 360;
-	if( dx > 180 )
-		dx = dx - 360;
+		if( dx < -180 )
+			dx += 360;
+		if( dx > 180 )
+			dx = dx - 360;
 
-	if( dy < -180 )
-		dy += 360;
-	if( dy > 180 )
-		dy = dy - 360;
+		if( dy < -180 )
+			dy += 360;
+		if( dy > 180 )
+			dy = dy - 360;
 
-	pev->avelocity.x = dx * 40 * 0.01f;
-	pev->avelocity.y = dy * 40 * 0.01f;
+		const float turnSpeed = GetTurnSpeed();
+		pev->avelocity.x = dx * turnSpeed * 0.01f;
+		pev->avelocity.y = dy * turnSpeed * 0.01f;
+	}
+	else
+	{
+		pev->angles = vecGoal;
+	}
 
 	if (!FBitSet(pev->spawnflags, SF_CAMERA_PLAYER_TAKECONTROL) && !FBitSet(pev->spawnflags, SF_CAMERA_DONT_SLOW_DOWN_IF_NOT_FREEZE))
 	{
@@ -4744,6 +4780,15 @@ void CTriggerCamera::Move()
 			pev->movedir = delta.Normalize();
 			m_flStopTime = gpGlobals->time + m_pentPath->GetDelay();
 		}
+	}
+
+	if (pev->spawnflags & SF_CAMERA_INSTANT_MOVE) {
+		if (m_pentPath)
+		{
+			pev->speed = m_targetSpeed;
+			pev->velocity = pev->movedir * pev->speed;
+		}
+		return;
 	}
 
 	if( m_flStopTime > gpGlobals->time )
@@ -5629,7 +5674,6 @@ class CTriggerGenewormHit : public CTriggerHurt
 public:
 	void Spawn() override;
 	void Precache() override;
-	bool IsEnabledInMod() override { return g_modFeatures.IsMonsterEnabled("geneworm"); }
 	float DamageAmount() override {
 		return pev->dmg ? pev->dmg : GetSkillValue("geneworm_dmg_hit");
 	}
@@ -7935,3 +7979,197 @@ public:
 };
 
 LINK_ENTITY_TO_CLASS( trigger_cleanse, CTriggerCleanse )
+
+class CTriggerSafeFall : public CBaseEntity
+{
+public:
+	void Spawn() override
+	{
+		pev->solid = SOLID_TRIGGER;
+		pev->movetype = MOVETYPE_NONE;
+		SET_MODEL(ENT(pev), STRING(pev->model));
+	}
+	void Touch(CBaseEntity *pOther) override
+	{
+		if (!pOther || !pOther->IsPlayer() || FBitSet(pOther->pev->flags, FL_ONGROUND))
+			return;
+		if (!UTIL_IsMasterTriggered(m_sMaster, pOther))
+			return;
+		CBasePlayer* pPlayer = (CBasePlayer*)pOther;
+		pPlayer->m_safeFall = true;
+	}
+	void KeyValue( KeyValueData* pkvd ) override
+	{
+		if (FStrEq(pkvd->szKeyName, "master"))
+		{
+			m_sMaster = ALLOC_STRING(pkvd->szValue);
+			pkvd->fHandled = true;
+		}
+		else
+			CBaseEntity::KeyValue(pkvd);
+	}
+	int ObjectCaps() override { return CBaseEntity::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
+
+	int Save(CSave &save) override;
+	int Restore(CRestore &restore) override;
+	static  TYPEDESCRIPTION m_SaveData[];
+
+	string_t m_sMaster;
+};
+
+LINK_ENTITY_TO_CLASS( trigger_safe_fall, CTriggerSafeFall )
+
+TYPEDESCRIPTION CTriggerSafeFall::m_SaveData[] =
+{
+	DEFINE_FIELD(CTriggerSafeFall, m_sMaster, FIELD_STRING),
+};
+IMPLEMENT_SAVERESTORE(CTriggerSafeFall, CBaseEntity)
+
+// Trigger that jumps a player to a target point
+class CTriggerJump : public CBaseTrigger
+{
+public:
+	void Spawn() override
+	{
+		Precache();
+		InitTrigger();
+		SetTouch(&CTriggerJump::JumpTouch);
+	}
+	void KeyValue( KeyValueData *pkvd ) override
+	{
+		if (FStrEq(pkvd->szKeyName, "height") )
+		{
+			m_flHeight = atof(pkvd->szValue);
+			pkvd->fHandled = true;
+		}
+		else if (FStrEq(pkvd->szKeyName, "trigger_on_jump"))
+		{
+			m_triggerOnJump = ALLOC_STRING(pkvd->szValue);
+			pkvd->fHandled = true;
+		}
+		else
+			CBaseTrigger::KeyValue( pkvd );
+	}
+	void Precache() override
+	{
+		RegisterAndPrecacheSoundScript(jumpSelfSoundScript);
+		RegisterAndPrecacheSoundScript(jumpOtherSoundScript);
+	}
+	void EXPORT JumpTouch( CBaseEntity *pOther )
+	{
+		if (FStringNull(pev->target))
+			return;
+
+		if (!CanTouch(pOther->pev))
+			return;
+
+		if (!UTIL_IsMasterTriggered(m_sMaster, pOther))
+			return;
+
+		// Don't touch again immediately
+		if (pOther->m_flTouchedByJumpPad > gpGlobals->time)
+		{
+			m_flTouchedByJumpPad = gpGlobals->time + 0.1f;
+			return;
+		}
+
+		TraceResult tr;
+		float flGravity = g_psv_gravity->value;
+
+		if (pOther->pev->gravity > 0.0f)
+		{
+			flGravity *= pOther->pev->gravity;
+		}
+
+		Vector vecTargetOrg;
+		if (!TryCalcLocus_Position(this, pOther, STRING(pev->target), vecTargetOrg))
+			return;
+
+		float height = m_flHeight;
+		if (height <= 0.0f)
+		{
+			if (vecTargetOrg.z >= pOther->pev->origin.z)
+			{
+				height = vecTargetOrg.z - pOther->pev->origin.z;
+			}
+			else
+			{
+				height = 0;
+			}
+			height += pOther->pev->maxs.z + 16.0f;
+		}
+
+		// get a rough idea of how high to launch
+		Vector vecMidPoint = pOther->pev->origin + (vecTargetOrg - pOther->pev->origin) * 0.5f;
+		vecMidPoint.z = pOther->pev->origin.z + height;
+
+		//DrawBeamLine(vecMidPoint, vecMidPoint + Vector(0,0,16), Color3(255, 255, 0), 20);
+
+		//UTIL_TraceLine(vecMidPoint, vecMidPoint + Vector(0,0,height), ignore_monsters, ENT(pev), &tr);
+		//vecMidPoint = tr.vecEndPos;
+		//vecMidPoint.z -= 15; (subtract so we don't hit the ceiling)
+
+		// How high should we travel to reach the apex
+		float distance1 = (vecMidPoint.z - pOther->pev->origin.z);
+		float distance2 = (vecMidPoint.z - vecTargetOrg.z);
+
+		distance1 = Q_max(distance1, 0.0f);
+		distance2 = Q_max(distance2, 0.0f);
+
+		// How long will it take to travel this distance
+		float time1 = sqrt( distance1 / (0.5f * flGravity) );
+		float time2 = sqrt( distance2 / (0.5f * flGravity) );
+		if (time1 < 0.1f)
+			return;
+
+		// how hard to launch to get there in time.
+		Vector vecTargetVel = (vecTargetOrg - pOther->pev->origin) / (time1 + time2);
+		vecTargetVel.z = flGravity * time1;
+
+		// don't affect the player again for a bit
+		pOther->m_flTouchedByJumpPad = gpGlobals->time + 0.2f;
+		pOther->pev->velocity = vecTargetVel;
+		ClearBits(pOther->pev->flags, FL_ONGROUND);
+		if ( pOther->IsPlayer() )
+		{
+			((CBasePlayer*)pOther)->SetAnimation( PLAYER_JUMP );
+		}
+
+		EmitSoundScript(jumpSelfSoundScript);
+		pOther->EmitSoundScript(GetSoundScript(jumpOtherSoundScript));
+
+		if (!FStringNull(m_triggerOnJump))
+			FireTargets(STRING(m_triggerOnJump), pOther, this);
+	}
+
+	int Save(CSave &save) override;
+	int Restore(CRestore &restore) override;
+	static  TYPEDESCRIPTION m_SaveData[];
+
+	float m_flHeight;
+	string_t m_triggerOnJump;
+
+	static const NamedSoundScript jumpSelfSoundScript;
+	static const NamedSoundScript jumpOtherSoundScript;
+};
+
+LINK_ENTITY_TO_CLASS( trigger_jump, CTriggerJump )
+
+TYPEDESCRIPTION CTriggerJump::m_SaveData[] =
+{
+	DEFINE_FIELD(CTriggerJump, m_flHeight, FIELD_FLOAT),
+	DEFINE_FIELD(CTriggerJump, m_triggerOnJump, FIELD_STRING),
+};
+IMPLEMENT_SAVERESTORE(CTriggerJump, CBaseTrigger);
+
+const NamedSoundScript CTriggerJump::jumpSelfSoundScript = {
+	CHAN_ITEM,
+	{},
+	"TriggerJump.Self"
+};
+
+const NamedSoundScript CTriggerJump::jumpOtherSoundScript = {
+	CHAN_AUTO,
+	{},
+	"TriggerJump.Other"
+};

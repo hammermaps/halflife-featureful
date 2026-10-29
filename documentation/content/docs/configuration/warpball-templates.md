@@ -27,6 +27,8 @@ For a quick start:
 2. Set `Warpball template` parameter of the `monstermaker` to `auto`.
 3. Upon triggering the `monstermaker`, the warpball effect will be played depending on the type of the monster it spawns.
 
+If you want to play a warpball effect separate from monstermaker (just as a visual and sound effect) you can use [env_warpball_templated]({{< ref env_warpball_templated >}}).
+
 ## Format of templates/warpball.json
 
 The root document has two properties: `entity_mappings` and `templates`.
@@ -188,7 +190,7 @@ Set `"shake"` to `null` to disable shake effect inherited from the parent warpba
 
 `"ai_sound"` defines the optional AI sound produced when the effect starts (e.g. to attract other monsters' attention).
 
-* `"type"` - the type of AI sound. Possible values are `"combat"` and `"danger"`.
+* `"type"` - the type of [AI sound]({{< ref "ai-sound" >}}). Possible values are `"combat"` and `"danger"`.
 * `"duration"` - duration of sound. Default value is 0.3.
 * `"radius"` - the effective radius. Default value is 192.
 

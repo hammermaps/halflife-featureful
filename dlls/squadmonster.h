@@ -100,13 +100,10 @@ public:
 	}
 	bool InSquad() { return m_hSquadLeader != 0; }
 	bool IsLeader() { return m_hSquadLeader == this; }
-	int SquadJoin( int searchRadius );
 	int SquadRecruit( int searchRadius, int maxMembers );
 	int SquadCount();
 	void SquadRemove( CSquadMonster *pRemove );
-	void SquadUnlink();
 	bool SquadAdd( CSquadMonster *pAdd );
-	void SquadDisband();
 	void SquadAddConditions( int iConditions );
 	void SquadMakeEnemy( CBaseEntity *pEnemy );
 	void SquadPasteEnemyInfo();
@@ -123,10 +120,13 @@ public:
 	bool FValidateCover( const Vector &vecCoverLocation ) override;
 
 	MONSTERSTATE GetIdealState() override;
-	Schedule_t *GetScheduleOfType( int iType ) override;
 	void StartTask( Task_t *pTask ) override;
 
 	void ReportAIState(ALERT_TYPE level) override;
+
+	int DefaultChaseEnemyFailedPolicy() override {
+		return CHASE_ENEMY_FAILED_RETREAT;
+	}
 
 protected:
 	virtual void OnBecomingLeader() {}

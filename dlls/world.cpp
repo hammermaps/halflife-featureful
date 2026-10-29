@@ -519,6 +519,8 @@ LINK_ENTITY_TO_CLASS( worldspawn, CWorld )
 
 extern DLL_GLOBAL bool		g_fGameOver;
 
+extern bool g_worldExists;
+
 void CWorld::Spawn()
 {
 	g_fGameOver = false;
@@ -530,6 +532,7 @@ void CWorld::Precache()
 {
 	static bool worldInitAtLeastOnce = false;
 
+	g_worldExists = true;
 	g_pLastSpawn = NULL;
 #if 1
 	CVAR_SET_STRING( "sv_gravity", "800" ); // 67ft/sec

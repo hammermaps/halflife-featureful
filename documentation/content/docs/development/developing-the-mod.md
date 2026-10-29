@@ -56,5 +56,6 @@ Featureful SDK introduces some new console commands designed to aid the develope
 * `test_particles` - produce some particles. This is for ParticleMan testing.
 * Various commands for [monsters testing and debugging]({{< ref "monsters/#debugging" >}}).
 * `impulse 101` - gives all the enabled weapons to the player and some ammo for them. If player didn't have a suit it will also give a suit (and won't play a greeting sentence which proved to be very annoying if you use this command quite often).
+* `point_contents` - print the point contents type (empty, solid, water, etc.) at the given coordinates. E.g. `point_contents 0 0 0` will print the contents type of the point at the world origin.
 * `toggle_frozen` - toggle the "frozen" status on the player. See also: [trigger_playerfreeze]({{< ref trigger_playerfreeze >}}).
 * `reset_screenfade` - cancel any current screenfade. See also: [env_fade]({{< ref env_fade >}}).

@@ -65,6 +65,7 @@ If you just remove the aircraft (without turning it off first) while it's moving
 
 ### Soundscripts
 
+* **Osprey.Pain** - pain sound. Empty by default.
 * **Osprey.Rotor** - rotor sound during the flight. Must be looped.
 * **Osprey.Crash** - death sound. Derived from **NPC.Crash**
 

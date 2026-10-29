@@ -176,7 +176,6 @@ public:
 
 	// monster use function
 	void EXPORT MonsterUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
-	void EXPORT CorpseUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 
 	// overrideable Monster member functions
 	int BloodColor() override { return m_bloodColor; }
@@ -221,7 +220,7 @@ public:
 	virtual void StartMonster();
 	virtual CBaseEntity *BestVisibleEnemy();// finds best visible enemy for attack
 	virtual bool FInViewCone( CBaseEntity *pEntity );// see if pEntity is in monster's view cone
-	virtual bool FInViewCone( Vector *pOrigin );// see if given location is in monster's view cone
+	virtual bool FInViewCone( const Vector& origin );// see if given location is in monster's view cone
 	void HandleAnimEvent( MonsterEvent_t *pEvent ) override;
 
 	virtual int CheckLocalMove ( const Vector &vecStart, const Vector &vecEnd, CBaseEntity *pTarget, float *pflDist );// check validity of a straight move through space
@@ -398,6 +397,7 @@ public:
 		LeapAttackTouch(pOther);
 	}
 	virtual void LeapAttackTouch(CBaseEntity* pOther);
+	virtual void RestoreTouchAfterLeapAttack();
 	//
 	// Leap attack related end
 	//
@@ -446,7 +446,6 @@ public:
 	void PowerShieldTakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, DamageInfo& damageInfo);
 	TakeDamageResult TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, const DamageInfo& damageInfo) override;
 	void ReactToDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, const DamageInfo& damageInfo, TakeDamageResult& takeDamageResult);
-	void PainReaction(const DamageInfo& damageInfo);
 	TakeDamageResult DeadTakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, const DamageInfo& damageInfo );
 
 	bool IsMoving() override { return m_movementGoal != MOVEGOAL_NONE; }
@@ -457,8 +456,6 @@ public:
 	virtual void DeathSound() { return; }
 	virtual void AlertSound() { return; }
 	virtual void IdleSound() { return; }
-	virtual PainSoundRule DefaultPainSoundRule() { return PainSoundRule{}; }
-	virtual void PainSound() { return; }
 
 	virtual void StopFollowing( bool clearSchedule, bool saySentence = true ) {}
 
@@ -486,7 +483,7 @@ public:
 	}
 
 	const char* MyNonDefaultGibModel();
-	const Visual* MyGibVisual();
+	Visual MyGibVisual();
 	int PrecacheMyGibModel( const char* model = nullptr );
 	void SetMyBloodColor( int defaultBloodColor );
 	void SetMyFieldOfView(const float defaultFieldOfView );
@@ -499,9 +496,13 @@ public:
 	virtual CDeadMonster* MyDeadMonsterPointer() {return nullptr;}
 
 	virtual const char* DefaultGibModel();
-	const char* GibModel();
 	virtual int DefaultGibCount();
 	int GibCount();
+	virtual const EntTemplate::GibDisposition& DefaultGibDisposition() {
+		static const EntTemplate::GibDisposition noDisposition;
+		return noDisposition;
+	}
+	const EntTemplate::GibDisposition& GibDisposition();
 
 	bool IsAlienMonster() override;
 
@@ -559,6 +560,22 @@ public:
 	void MakeCurrentJump();
 	void HandleJumpFallTask(const Vector* target, bool allowAttack);
 
+	virtual int DefaultChaseEnemyFailedPolicy() {
+		return CHASE_ENEMY_FAILED_FAIL;
+	}
+	int ChaseEnemyFailedPolicy();
+
+	virtual bool DefaultInterestedInCoverFromDanger() {
+		return false;
+	}
+	bool InterestedInCoverFromDanger();
+	bool ShouldCoverFromDanger();
+
+	virtual bool DefaultWantsInvestigateSounds() {
+		return false;
+	}
+	bool WantsInvestigateSounds();
+
 	float m_nextPatrolPathCheck;
 
 	// Custom hull sizes
@@ -587,7 +604,6 @@ public:
 	short m_gibPolicy;
 	bool m_bForceConditionsGather;
 	bool m_bForceTakeDamageTriggerCondition;
-	float m_flNextPainTime;
 	float m_equalDislikeTime;
 	string_t m_triggerOnDeath;
 
@@ -606,6 +622,8 @@ public:
 	Vector m_vecJumpTarget;
 	bool m_doingRightAngleJump;
 	bool m_appliedJumpVelocity;
+
+	float m_flNextIdleTime;
 
 	const char* taskFailReason;
 };

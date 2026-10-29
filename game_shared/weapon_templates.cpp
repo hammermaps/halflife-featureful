@@ -12,6 +12,8 @@
 
 #include "const.h"
 #include "skill.h"
+#include "string_set.h"
+#include "util_shared.h"
 
 #include "rapidjson/writer.h"
 #include "rapidjson/ostreamwrapper.h"
@@ -1229,31 +1231,7 @@ void WeaponTemplateSystem::ParseWeaponTemplate(WeaponParameters& params, const r
 
 			HandleJSONMember(value, "extra_ai_sound", [&](const Value& value) {
 				HandleJSONMember(value, "type", [&](const Value& value) {
-					auto parseAISoundType = [](const char* str)
-					{
-						if (stricmp(str, "danger") == 0)
-						{
-							return bits_SOUND_DANGER;
-						}
-						else if (stricmp(str, "combat") == 0)
-						{
-							return bits_SOUND_COMBAT;
-						}
-						return 0;
-					};
-					int soundType = 0;
-					if (value.IsArray())
-					{
-						Value::ConstArray arr = value.GetArray();
-						for (auto& item : arr)
-						{
-							soundType |= parseAISoundType(item.GetString());
-						}
-					}
-					else if (value.IsString())
-					{
-						soundType = parseAISoundType(value.GetString());
-					}
+					int soundType = JSONStringSetToFlags(value, ParseAISoundType);
 					fire.extraSoundTypes.Materialize(altMode) = soundType;
 				});
 				UpdatePropertyFromJson(fire.extraSoundTime, value, "time", altMode);
@@ -1598,13 +1576,7 @@ bool WeaponTemplateSystem::ReadFromDocument(const Document &document, const char
 
 const char* WeaponTemplateSystem::MakeConstantString(const char* str)
 {
-	auto strIt = _stringSet.find(str);
-	if (strIt == _stringSet.end())
-	{
-		auto p = _stringSet.insert(str);
-		strIt = p.first;
-	}
-	return strIt->c_str();
+	return ::MakeStringInSet(_stringSet, str);
 }
 
 WeaponTemplateSystem g_WeaponTemplateSystem;

@@ -149,7 +149,6 @@ public:
 	void Precache() override;
 	const char* DefaultModel() override { return "models/hgrunt_opfor.mdl"; }
 	float DefaultHealth() override { return GetSkillValue("hgrunt_ally_health"); }
-	bool IsEnabledInMod() override { return g_modFeatures.IsMonsterEnabled("human_grunt_ally"); }
 	void SetYawSpeed() override;
 	int  DefaultISoundMask() override;
 	int  DefaultClassify() override;
@@ -164,7 +163,7 @@ public:
 	bool CheckRangeAttack1( float flDot, float flDist ) override;
 	bool CheckRangeAttack2( float flDot, float flDist ) override;
 	bool CheckMeleeAttack1( float flDot, float flDist ) override;
-	int TalkFriendCategory() override { return TALK_FRIEND_SOLDIER; }
+	short AlertFriendsDefaultPolicy() override { return ALERT_FRIENDS_ON_DEATH_IF_NOT_IN_COMBAT; }
 	void PlayCallForMedic() override;
 	void PrescheduleThink() override;
 	bool ShouldAnticipateLanding();
@@ -297,7 +296,6 @@ public:
 	void Precache() override;
 	const char* DefaultModel() override { return "models/hgrunt_medic.mdl"; }
 	float DefaultHealth() override { return GetSkillValue("medic_ally_health"); }
-	bool IsEnabledInMod() override { return g_modFeatures.IsMonsterEnabled("human_grunt_medic"); }
 	const char* DefaultDisplayName() override { return "Medic Grunt"; }
 	void HandleAnimEvent( MonsterEvent_t *pEvent ) override;
 	bool CheckRangeAttack1 ( float flDot, float flDist ) override;
@@ -1955,7 +1953,7 @@ void CHFGrunt::Precache()
 	TalkInit();
 
 	CTalkMonster::Precache();
-	RegisterTalkMonster();
+	RegisterTalkMonster(true, true);
 }
 
 void CHFGrunt::PrecacheCommon()
@@ -2399,31 +2397,23 @@ Schedule_t* CHFGrunt::PrioritizedSchedule()
 	}
 
 	// grunts place HIGH priority on running away from danger sounds.
-	if ( HasConditions(bits_COND_HEAR_SOUND) )
+	if (ShouldCoverFromDanger())
 	{
-		CSound *pSound = PBestSound();
+		// dangerous sound nearby!
 
-		ASSERT( pSound != NULL );
-		if ( pSound)
+		//!!!KELLY - currently, this is the grunt's signal that a grenade has landed nearby,
+		// and the grunt should find cover from the blast
+		// good place for "SHIT!" or some other colorful verbal indicator of dismay.
+		// It's not safe to play a verbal order here "Scatter", etc cause
+		// this may only affect a single individual in a squad.
+
+		if (FOkToSpeak())
 		{
-			if (pSound->m_iType & bits_SOUND_DANGER)
-			{
-				// dangerous sound nearby!
-
-				//!!!KELLY - currently, this is the grunt's signal that a grenade has landed nearby,
-				// and the grunt should find cover from the blast
-				// good place for "SHIT!" or some other colorful verbal indicator of dismay.
-				// It's not safe to play a verbal order here "Scatter", etc cause
-				// this may only affect a single individual in a squad.
-
-				if (FOkToSpeak())
-				{
-					PlayGruntSentence(TLK_GREN);
-				}
-				return GetScheduleOfType( SCHED_TAKE_COVER_FROM_BEST_SOUND );
-			}
+			PlayGruntSentence(TLK_GREN);
 		}
+		return GetScheduleOfType( SCHED_TAKE_COVER_FROM_BEST_SOUND );
 	}
+
 	return NULL;
 }
 
@@ -2713,7 +2703,6 @@ void CTalkMonsterRepel::PrepareBeforeSpawn(CBaseEntity *pEntity)
 class CHFGruntRepel : public CTalkMonsterRepel
 {
 public:
-	bool IsEnabledInMod() override { return g_modFeatures.IsMonsterEnabled("human_grunt_ally"); }
 	void KeyValue(KeyValueData* pkvd) override;
 	const char* TrooperName() override {
 		return "monster_human_grunt_ally";
@@ -2757,7 +2746,6 @@ void CHFGruntRepel::PrepareBeforeSpawn(CBaseEntity *pEntity)
 class CMedicRepel : public CHFGruntRepel
 {
 public:
-	bool IsEnabledInMod() override { return g_modFeatures.IsMonsterEnabled("human_grunt_medic"); }
 	const char* TrooperName() override {
 		return "monster_human_medic_ally";
 	}
@@ -2768,7 +2756,6 @@ LINK_ENTITY_TO_CLASS( monster_medic_ally_repel, CMedicRepel )
 class CTorchRepel : public CTalkMonsterRepel
 {
 public:
-	bool IsEnabledInMod() override { return g_modFeatures.IsMonsterEnabled("human_grunt_torch"); }
 	const char* TrooperName() override {
 		return "monster_human_torch_ally";
 	}
@@ -2785,7 +2772,6 @@ class CDeadFGrunt : public CDeadMonster
 public:
 	void Spawn() override;
 	const char* DefaultModel() override { return "models/hgrunt_opfor.mdl"; }
-	bool IsEnabledInMod() override { return g_modFeatures.IsMonsterEnabled("human_grunt_ally"); }
 	int	DefaultClassify() override { return	CLASS_PLAYER_ALLY_MILITARY; }
 
 	void KeyValue( KeyValueData *pkvd ) override;
@@ -2885,7 +2871,6 @@ public:
 	const char* DefaultModel() override { return "models/hgrunt_torch.mdl"; }
 	float DefaultHealth() override { return GetSkillValue("torch_ally_health"); }
 	void Activate() override;
-	bool IsEnabledInMod() override { return g_modFeatures.IsMonsterEnabled("human_grunt_torch"); }
 	const char* DefaultDisplayName() override { return "Torch Grunt"; }
 	void HandleAnimEvent( MonsterEvent_t* pEvent ) override;
 	int LookupActivity(int activity) override;
@@ -2994,8 +2979,12 @@ void CTorch::Precache()
 	RegisterAndPrecacheSoundScript(desertEagleSoundScript, NPC::desertEagleSoundScript);
 	RegisterAndPrecacheSoundScript(desertEagleReloadSoundScript, NPC::desertEagleReloadSoundScript);
 
-	PRECACHE_SOUND("fgrunt/torch_light.wav");
-	PRECACHE_SOUND("fgrunt/torch_cut_loop.wav");
+	if (!ShouldAutoPrecacheSounds())
+	{
+		// Used in model from Opposing Force
+		PRECACHE_SOUND("fgrunt/torch_light.wav");
+		PRECACHE_SOUND("fgrunt/torch_cut_loop.wav");
+	}
 
 	RegisterVisual(beamVisual);
 	RegisterVisual(dynLightVisual);
@@ -3005,7 +2994,7 @@ void CTorch::Precache()
 
 	TalkInit();
 	CTalkMonster::Precache();
-	RegisterTalkMonster();
+	RegisterTalkMonster(true, true);
 }
 
 void CTorch::Activate()
@@ -3293,7 +3282,6 @@ class CDeadTorch : public CDeadMonster
 public:
 	void Spawn() override;
 	const char* DefaultModel() override { return "models/hgrunt_torch.mdl"; }
-	bool IsEnabledInMod() override { return g_modFeatures.IsMonsterEnabled("human_grunt_torch"); }
 	int	DefaultClassify() override { return	CLASS_PLAYER_ALLY_MILITARY; }
 
 	const char* getPos(int pos) const override;
@@ -3771,7 +3759,7 @@ void CMedic::Precache()
 
 	TalkInit();
 	CTalkMonster::Precache();
-	RegisterTalkMonster();
+	RegisterTalkMonster(true, true);
 	RegisterMedic();
 
 	if (pev->modelindex)
@@ -4063,7 +4051,6 @@ public:
 	void Spawn() override;
 	void Precache() override;
 	const char* DefaultModel() override { return "models/hgrunt_medic.mdl"; }
-	bool IsEnabledInMod() override { return g_modFeatures.IsMonsterEnabled("human_grunt_medic"); }
 	const char* getPos(int pos) const override;
 	static const char *m_szPoses[3];
 

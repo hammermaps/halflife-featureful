@@ -102,6 +102,7 @@ public:
 		CBaseMonster::OnChangeSchedule(pNewSchedule);
 		m_leaping = false;
 	}
+	Schedule_t* GetSchedule() override;
 	Schedule_t* GetScheduleOfType ( int Type ) override;
 
 	virtual Schedule_t* GetLeapAttackSchedule();
@@ -329,7 +330,7 @@ void CHeadCrab::RunTask( Task_t *pTask )
 			if (m_fSequenceFinished)
 			{
 				TaskComplete();
-				SetTouch(nullptr);
+				RestoreTouchAfterLeapAttack();
 				m_IdealActivity = ACT_IDLE;
 				m_leaping = false;
 			}
@@ -452,6 +453,13 @@ void CHeadCrab::PainSound()
 void CHeadCrab::DeathSound()
 {
 	EmitSoundScript(dieSoundScript);
+}
+
+Schedule_t* CHeadCrab::GetSchedule()
+{
+	if (ShouldCoverFromDanger())
+		return GetScheduleOfType( SCHED_TAKE_COVER_FROM_BEST_SOUND );
+	return CBaseMonster::GetSchedule();
 }
 
 Schedule_t *CHeadCrab::GetScheduleOfType( int Type )
@@ -633,7 +641,6 @@ public:
 	void Precache() override;
 	const char* DefaultModel() override { return "models/w_shock_rifle.mdl"; }
 	float DefaultHealth() override { return GetSkillValue("shockroach_health"); }
-	bool IsEnabledInMod() override { return g_modFeatures.IsMonsterEnabled("shockroach"); }
 	const char* DefaultDisplayName() override { return "Shock Roach"; }
 	float GetDamageAmount() override { return GetSkillValue("shockroach_dmg_bite"); }
 	void LeapAttackTouch(CBaseEntity *pOther) override;
@@ -809,7 +816,21 @@ void CShockRoach::Precache()
 	RegisterAndPrecacheSoundScript(dieSoundScript);
 	RegisterAndPrecacheSoundScript(biteSoundScript);
 
-	PRECACHE_SOUND("shockroach/shock_walk.wav");
+	if (!ShouldAutoPrecacheSounds())
+	{
+		// Used in model from Opposing Force
+		PRECACHE_SOUND("shockroach/shock_walk.wav");
+
+		PRECACHE_SOUND("shockroach/shock_idle1.wav");
+		PRECACHE_SOUND("shockroach/shock_idle2.wav");
+		PRECACHE_SOUND("shockroach/shock_idle3.wav");
+
+		PRECACHE_SOUND("shockroach/shock_angry.wav");
+		PRECACHE_SOUND("shockroach/shock_flinch.wav");
+		PRECACHE_SOUND("shockroach/shock_die.wav");
+		PRECACHE_SOUND("shockroach/shock_jump1.wav");
+		PRECACHE_SOUND("shockroach/shock_jump2.wav");
+	}
 
 	PrecacheMyModel();
 	PrecacheMyGibModel();

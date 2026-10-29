@@ -410,7 +410,8 @@ void CMonsterMaker::Activate()
 		g_errorCollector.AddFormattedDeprecation("%s: (at %g, %g, %g) has spawnflag %d. This will be removed/replaced in future. Use 'Face to' (face_position) parameter instead.",
 												 STRING(pev->classname), pev->origin.x, pev->origin.y, pev->origin.z, SF_MONSTERMAKER_ALIGN_TO_PLAYER);
 	}
-	CBaseMonster::Activate();
+	// don't call base Activate as it will also precache some entity template resource that are intended for the monster and are already precached
+	//CBaseMonster::Activate();
 }
 
 bool CMonsterMaker::CheckMonsterClassname()

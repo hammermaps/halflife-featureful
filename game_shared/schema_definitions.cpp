@@ -737,6 +737,14 @@ const char* const json_schemas::definitions = R"(
 			},
 			"miss_soundscript": {
 				"$ref": "#/soundscript"
+			},
+			"soundscript": {
+				"$ref": "#/soundscript"
+			},
+			"soundscript_chance": {
+				"type": "number",
+				"minimum": 0.0,
+				"maximum": 1.0
 			}
 		},
 		"additionalProperties": false
@@ -983,7 +991,17 @@ R"(
 			"Danger",
 			"danger",
 			"Combat",
-			"combat"
+			"combat",
+			"World",
+			"world",
+			"Player",
+			"player",
+			"Carcass",
+			"carcass",
+			"Meat",
+			"meat",
+			"Garbage",
+			"garbage"
 		]
 	},
 	"blood_color": {
@@ -1066,10 +1084,50 @@ R"(
 				"type": "string"
 			},
 			"own_visual": {
-				"$ref": "#/visual_object"
+				"$ref": "#/visual"
 			},
 			"gib_visual": {
-				"$ref": "#/visual_object"
+				"$ref": "#/visual"
+			},
+			"gib_disposition": {
+				"type": "array",
+				"items": {
+					"type": "object",
+					"properties": {
+						"count": {
+							"$ref": "#/range_int_non_negative"
+						},
+						"min_body": {
+							"type": "integer",
+							"minimum": 0
+						},
+						"max_body": {
+							"type": "integer",
+							"minimum": 0
+						},
+						"body": {
+							"type": "integer",
+							"minimum": 0
+						},
+						"position": {
+							"enum": ["box", "head"]
+						},
+						"fly_away": {
+							"enum": ["directed", "random"]
+						},
+						"throw_at_player_chance": {
+							"minimum": 0.0,
+							"maximum": 1.0
+						},
+						"visual": {
+							"$ref": "#/visual_object"
+						},
+						"blood": {
+							"$ref": "#/blood_color"
+						}
+					},
+					"additionalProperties": false
+				}
 			},
 			"size": {
 				"$ref": "#/object_size"
@@ -1626,6 +1684,45 @@ R"(
 				"dependencies": {
 					"start_frame_fraction": { "not": { "required": ["animation_event"] } }
 				}
+			},
+			"npc_behavior": {
+				"type": "object",
+				"properties": {
+					"chase_enemy_failed": {
+						"enum": ["fail", "retreat", "wander", "retreat_or_wander"]
+					},
+					"player_can_interact": {
+						"type": "boolean"
+					},
+					"investigate_sounds": {
+						"type": "boolean"
+					},
+					"cover_from_danger": {
+						"type": "boolean"
+					}
+				},
+				"additionalProperties": false
+			},
+			"soundmask": {
+				"type": ["array", "object"],
+				"items": {
+					"$ref": "#/ai_sound_type"
+				},
+				"uniqueItems": true,
+				"properties": {
+					"sounds": {
+						"type": "array",
+						"items": {
+							"$ref": "#/ai_sound_type"
+						},
+						"uniqueItems": true
+					},
+					"op": {
+						"enum": ["replace", "add", "remove"]
+					}
+				},
+				"required": ["sounds"],
+				"additionalProperties": false
 			}
 		},
 		"additionalProperties": false,

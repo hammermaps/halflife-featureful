@@ -36,12 +36,13 @@ bookToC: false
 * **Gonome.Melee2** - left arm melee attack.
 * **Gonome.AttackHit** - melee attack hit. Derived from **NPC.AttackHit**
 * **Gonome.AttackMiss** - melee attack miss. Derived from **NPC.AttackMiss**
-* **Gonome.SpitTouch** - one of the sounds played when the guts projectile hits something. Emitted from the guts projectile. Derived from **NPC.SpitTouch**
-* **Gonome.SpitHit** - one of the sounds played when the guts projectile hits something. Emitted from the guts projectile. Derived from **NPC.SpitHit**
+* **Gonome.Use** - start following the ally player. Derived from **Gonome.Idle**
+* **Gonome.UnUse** - stop following the ally player. Derived from **Gonome.Alert**.
+* [gonomeguts soundscripts]({{< ref "gonomeguts/#soundscripts" >}})
 
 ### Visuals
 
-* **Gonome.Guts** - guts projectile visual.
+* [gonomeguts visuals]({{< ref "gonomeguts/#visuals" >}})
 
 ### Attacks
 

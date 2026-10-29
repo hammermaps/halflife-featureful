@@ -220,7 +220,6 @@ public:
 	void Precache() override;
 	const char* DefaultModel() override { return "models/pit_drone.mdl"; }
 	float DefaultHealth() override { return GetSkillValue("pitdrone_health"); }
-	bool IsEnabledInMod() override { return g_modFeatures.IsMonsterEnabled("pitdrone"); }
 	void HandleAnimEvent(MonsterEvent_t *pEvent) override;
 	void SetYawSpeed() override;
 	int DefaultISoundMask() override;
@@ -235,8 +234,8 @@ public:
 	void PainSound() override;
 	void AlertSound() override;
 	void DeathSound() override;
-	void PlayUseSentence() override;
-	void PlayUnUseSentence() override;
+	bool PlayUseSentence() override;
+	bool PlayUnUseSentence() override;
 	void BodyChange(int horns);
 	TakeDamageResult TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, const DamageInfo& info) override;
 	int IgnoreConditions() override;
@@ -979,15 +978,11 @@ IMPLEMENT_CUSTOM_SCHEDULES(CPitdrone, CFollowingMonster)
 //=========================================================
 Schedule_t *CPitdrone::GetSchedule()
 {
+	if (ShouldCoverFromDanger())
+		return GetScheduleOfType( SCHED_TAKE_COVER_FROM_BEST_SOUND );
+
 	switch (m_MonsterState)
 	{
-	case MONSTERSTATE_IDLE:
-	{
-		Schedule_t* utilitySchedule = GetUtilitySchedule();
-		if (utilitySchedule)
-			return utilitySchedule;
-		break;
-	}
 	case MONSTERSTATE_ALERT:
 	case MONSTERSTATE_HUNT:
 	{
@@ -1009,7 +1004,7 @@ Schedule_t *CPitdrone::GetSchedule()
 		{
 			CSound *pSound = PBestScent();
 
-			if (pSound && (!FInViewCone(&pSound->m_vecOrigin) || !FVisible(pSound->m_vecOrigin)))
+			if (pSound && (!FInViewCone(pSound->m_vecOrigin) || !FVisible(pSound->m_vecOrigin)))
 			{
 				// scent is behind or occluded
 				return GetScheduleOfType(SCHED_PDRONE_SNIFF_AND_EAT);
@@ -1018,11 +1013,6 @@ Schedule_t *CPitdrone::GetSchedule()
 			// food is right out in the open. Just go get it.
 			return GetScheduleOfType(SCHED_PDRONE_EAT);
 		}
-
-		Schedule_t* followingSchedule = GetFollowingSchedule();
-		if (followingSchedule)
-			return followingSchedule;
-
 		break;
 	}
 	case MONSTERSTATE_COMBAT:
@@ -1160,14 +1150,14 @@ void CPitdrone::RunTask(Task_t *pTask)
 	}
 }
 
-void CPitdrone::PlayUseSentence()
+bool CPitdrone::PlayUseSentence()
 {
-	EmitSoundScript(useSoundScript);
+	return EmitSoundScript(useSoundScript);
 }
 
-void CPitdrone::PlayUnUseSentence()
+bool CPitdrone::PlayUnUseSentence()
 {
-	EmitSoundScript(unuseSoundScript);
+	return EmitSoundScript(unuseSoundScript);
 }
 
 class CDeadPitdrone : public CDeadMonster
@@ -1177,7 +1167,6 @@ public:
 	void Precache() override;
 	const char* DefaultModel() override { return "models/pit_drone.mdl"; }
 	float DefaultHealth() override { return GetSkillValue("pitdrone_health")/2; }
-	bool IsEnabledInMod() override { return g_modFeatures.IsMonsterEnabled("pitdrone"); }
 	int	DefaultClassify() override { return	CLASS_RACEX_PREDATOR; }
 	const char* DefaultGibModel() override {
 		return "models/pit_drone_gibs.mdl";

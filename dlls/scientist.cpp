@@ -956,21 +956,11 @@ Schedule_t *CScientist::GetScheduleOfType( int Type )
 
 Schedule_t *CScientist::GetSchedule()
 {
+	if (ShouldCoverFromDanger())
+		return GetScheduleOfType( SCHED_TAKE_COVER_FROM_BEST_SOUND );
+
 	// so we don't keep calling through the EHANDLE stuff
 	CBaseEntity *pEnemy = m_hEnemy;
-
-	CSound *pSound = NULL;
-	if( HasConditions( bits_COND_HEAR_SOUND ) )
-	{
-		pSound = PBestSound();
-
-		ASSERT( pSound != NULL );
-		if( pSound && ( pSound->m_iType & bits_SOUND_DANGER ) )
-		{
-			Scream();
-			return GetScheduleOfType( SCHED_TAKE_COVER_FROM_BEST_SOUND );
-		}
-	}
 
 	const bool wantsToDisarm = NeedleIsEquiped();
 
@@ -1004,6 +994,7 @@ Schedule_t *CScientist::GetSchedule()
 		// Cower when you hear something scary
 		if( HasConditions( bits_COND_HEAR_SOUND ) )
 		{
+			CSound *pSound = PBestSound();
 			if( pSound )
 			{
 				if( pSound->m_iType & ( bits_SOUND_DANGER | bits_SOUND_COMBAT ) )
@@ -1581,7 +1572,6 @@ public:
 	void Precache() override;
 	const char* DefaultModel() override { return "models/cleansuit_scientist.mdl"; }
 	float DefaultHealth() override { return GetSkillValue("cleansuit_scientist_health"); }
-	bool IsEnabledInMod() override { return g_modFeatures.IsMonsterEnabled("cleansuit_scientist"); }
 	const char* DefaultDisplayName() override { return "Cleansuit Scientist"; }
 	bool AbleToHeal() override { return false; }
 	void ReportAIState(ALERT_TYPE level) override;
@@ -1628,7 +1618,6 @@ class CDeadCleansuitScientist : public CDeadMonster
 public:
 	void Spawn() override;
 	const char* DefaultModel() override { return "models/cleansuit_scientist.mdl"; }
-	bool IsEnabledInMod() override { return g_modFeatures.IsMonsterEnabled("cleansuit_scientist"); }
 	int	DefaultClassify() override { return	CLASS_HUMAN_PASSIVE; }
 
 	const char* getPos(int pos) const override;
@@ -1657,7 +1646,6 @@ class CSittingCleansuitScientist : public CSittingScientist
 public:
 	void Spawn() override;
 	const char* DefaultModel() override { return "models/cleansuit_scientist.mdl"; }
-	bool IsEnabledInMod() override { return g_modFeatures.IsMonsterEnabled("cleansuit_scientist"); }
 };
 
 void CSittingCleansuitScientist::Spawn()
@@ -1683,7 +1671,6 @@ public:
 #endif
 	}
 	float DefaultHealth() override { return GetSkillValue("scientist_health") * 2; }
-	bool IsEnabledInMod() override { return g_modFeatures.IsMonsterEnabled("rosenberg"); }
 	const char* DefaultDisplayName() override { return "Dr. Rosenberg"; }
 	const char* DefaultSentenceGroup(int group) override;
 	int DefaultToleranceLevel() override { return TOLERANCE_ABSOLUTE; }
@@ -1838,7 +1825,6 @@ public:
 	void Precache() override;
 	const char* DefaultModel() override { return "models/wheelchair_sci.mdl"; }
 	float DefaultHealth() override { return GetSkillValue("scientist_health") * 2; }
-	bool IsEnabledInMod() override { return g_modFeatures.IsMonsterEnabled("keller"); }
 	const char* DefaultDisplayName() override { return "Richard Keller"; }
 	const char* DefaultSentenceGroup(int group) override;
 	int DefaultToleranceLevel() override { return TOLERANCE_ABSOLUTE; }
@@ -1885,9 +1871,12 @@ void CKeller::Precache()
 	RegisterAndPrecacheSoundScript(painSoundScript);
 	RegisterAndPrecacheSoundScript(dieSoundScript);
 
-	PRECACHE_SOUND( "wheelchair/wheelchair_jog.wav" );
-	PRECACHE_SOUND( "wheelchair/wheelchair_run.wav" );
-	PRECACHE_SOUND( "wheelchair/wheelchair_walk.wav" );
+	if (!ShouldAutoPrecacheSounds())
+	{
+		PRECACHE_SOUND( "wheelchair/wheelchair_jog.wav" );
+		//PRECACHE_SOUND( "wheelchair/wheelchair_run.wav" ); // not used in default model?
+		PRECACHE_SOUND( "wheelchair/wheelchair_walk.wav" );
+	}
 
 	TalkInit();
 	CTalkMonster::Precache();

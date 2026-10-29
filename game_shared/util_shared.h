@@ -23,6 +23,8 @@ const char* RenderFxToString(int renderfx);
 
 int ParseTracerColor(const char* name);
 
+int ParseAISoundType(const char* name);
+
 template<typename T1, typename T2, typename = std::enable_if<std::is_integral<T1>::value>>
 void SetBits(T1& bitVector, T2 bits)
 {

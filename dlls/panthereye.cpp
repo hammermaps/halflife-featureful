@@ -41,7 +41,6 @@ public:
 	void Precache() override;
 	const char* DefaultModel() override { return "models/panthereye.mdl"; }
 	float DefaultHealth() override { return GetSkillValue("panthereye_health"); }
-	bool IsEnabledInMod() override { return g_modFeatures.IsMonsterEnabled("panthereye"); }
 	void SetYawSpeed() override;
 	int  DefaultClassify() override;
 	const char* DefaultDisplayName() override { return "Panthereye"; }
@@ -77,19 +76,17 @@ public:
 		EmitSoundScript(attackHitSoundScript);
 	}
 
-	void PlayUseSentence() override {
-		EmitSoundScript(useSoundScript);
+	bool PlayUseSentence() override {
+		return EmitSoundScript(useSoundScript);
 	}
-	void PlayUnUseSentence() override {
-		EmitSoundScript(unuseSoundScript);
+	bool PlayUnUseSentence() override {
+		return EmitSoundScript(unuseSoundScript);
 	}
 
 	bool CheckMeleeAttack1( float flDot, float flDist ) override;
 	bool CheckMeleeAttack2( float flDot, float flDist ) override {return false;}
 	bool CheckRangeAttack1( float flDot, float flDist ) override;
 	bool CheckRangeAttack2( float flDot, float flDist ) override {return false;}
-
-	void PerformStrike(const TraceHullAttackParams& params);
 
 	int DefaultSizeForGrapple() override { return GRAPPLE_MEDIUM; }
 	bool IsDisplaceable() override { return true; }
@@ -187,6 +184,7 @@ void CPantherEye::Spawn()
 	SetMyFieldOfView(0.5f);
 	m_MonsterState = MONSTERSTATE_NONE;
 	SetMySquadCapabilities(bits_CAP_SQUAD|bits_CAP_SQUAD_SAME_CLASSNAME);
+	SetMyCanOpenDoors(false);
 
 	FollowingMonsterInit();
 }
@@ -222,14 +220,6 @@ bool CPantherEye::CheckRangeAttack1( float flDot, float flDist )
 	return FBitSet(pev->flags, FL_ONGROUND) && flDist > 80.0f && flDist <= 256 && flDot >= 0.65f && m_flNextLeapAttack <= gpGlobals->time;
 }
 
-void CPantherEye::PerformStrike(const TraceHullAttackParams& params)
-{
-	PerformTraceHullAttack( params );
-
-	if (RANDOM_LONG(0,1))
-		EmitSoundScript(attackSoundScript);
-}
-
 void CPantherEye::HandleAnimEvent( MonsterEvent_t *pEvent )
 {
 	switch (pEvent->event)
@@ -246,9 +236,10 @@ void CPantherEye::HandleAnimEvent( MonsterEvent_t *pEvent )
 			params.damageInfo.damage = GetSkillValue("panthereye_dmg_claw");
 			params.hitSoundScript = attackHitSoundScript;
 			params.missSoundScript = attackMissSoundScript;
+			params.soundScript = attackSoundScript;
+			params.soundScriptChance = 0.5f;
 			SetTraceHullAttackParamsFromTemplate(pEvent->event, params);
-
-			PerformStrike(params);
+			PerformTraceHullAttack(params);
 			break;
 		}
 
@@ -264,9 +255,10 @@ void CPantherEye::HandleAnimEvent( MonsterEvent_t *pEvent )
 			params.damageInfo.damage = GetSkillValue("panthereye_dmg_claw");
 			params.hitSoundScript = attackHitSoundScript;
 			params.missSoundScript = attackMissSoundScript;
+			params.soundScript = attackSoundScript;
+			params.soundScriptChance = 0.5f;
 			SetTraceHullAttackParamsFromTemplate(pEvent->event, params);
-
-			PerformStrike(params);
+			PerformTraceHullAttack(params);
 			break;
 		}
 
@@ -282,9 +274,10 @@ void CPantherEye::HandleAnimEvent( MonsterEvent_t *pEvent )
 			params.damageInfo.damage = GetSkillValue("panthereye_dmg_claw");
 			params.hitSoundScript = attackHitSoundScript;
 			params.missSoundScript = attackMissSoundScript;
+			params.soundScript = attackSoundScript;
+			params.soundScriptChance = 0.5f;
 			SetTraceHullAttackParamsFromTemplate(pEvent->event, params);
-
-			PerformStrike(params);
+			PerformTraceHullAttack(params);
 			break;
 		}
 	default:
@@ -295,18 +288,8 @@ void CPantherEye::HandleAnimEvent( MonsterEvent_t *pEvent )
 
 Schedule_t* CPantherEye::GetSchedule()
 {
-	switch (m_MonsterState)
-	{
-	case MONSTERSTATE_IDLE:
-	case MONSTERSTATE_ALERT:
-	{
-		Schedule_t* utilitySchedule = GetUtilitySchedule();
-		if (utilitySchedule)
-			return utilitySchedule;
-	}
-	default:
-		break;
-	}
+	if (ShouldCoverFromDanger())
+		return GetScheduleOfType( SCHED_TAKE_COVER_FROM_BEST_SOUND );
 	return CFollowingMonster::GetSchedule();
 }
 
@@ -352,7 +335,7 @@ void CPantherEye::RunTask(Task_t *pTask)
 	{
 		if (m_fSequenceFinished)
 		{
-			SetTouch(nullptr);
+			RestoreTouchAfterLeapAttack();
 			m_leaping = false;
 		}
 		else if (!m_leaping && ReadyToLaunchLeapAttackAtCurrentFrame())

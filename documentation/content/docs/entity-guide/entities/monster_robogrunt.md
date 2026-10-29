@@ -9,6 +9,10 @@ Robogrunts act mostly the same way as human grunts, but they don't bleed and hav
 
 When die robogrunts play spark effects and explode after 2 seconds.
 
+### Parameters
+
+* See [monster_human_grunt]({{< ref "monster_human_grunt/#new-parameters" >}}).
+
 ### Skill variables
 
 * **sk_hgrunt_health** - monster's health.

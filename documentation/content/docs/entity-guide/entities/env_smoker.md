@@ -19,7 +19,7 @@ The sprites emitted by `env_smoker` occupy the temporary entity slots on the cli
 
 * `Times to smoke` - the number of sprites to emit after activation. 0 means infinite number of sprites (i.e. `env_smoker` will continue making sprites until it's turned off). When runs out of smokes, the entity either removes itself or automatically deactivates (depending on `Repeatable` spawnflag).
 * `Smoke Scale` - the base scale of smoke sprites. The actual is randomized between this value and this value multiplied by 1.1
-* `Scale unit type` - the meaning of `Smoke Scale` value. If the `Scale unit type` is not set, the smoke scale should be specified in deciles (tenths), i.e. scale 10 means the sprite of scale 1. This is to keep compatibility with original Half-Life entity. If `Scale unit type` is set to `Normal` the scale value is percieved as usual, like in other entities.
+* `Scale unit type` - the meaning of `Smoke Scale` value. If the `Scale unit type` is not set, the smoke scale should be specified in deciles (tenths), i.e. scale 10 means the sprite of scale 1. This is to keep compatibility with original Half-Life entity. If `Scale unit type` is set to `Normal` the scale value is perceived as usual, like in other entities.
 * `Dispersion of smoke particles` - the maximum deviation from the origin position on X and Y axes to create the sprite at. This allows to make a square area where the smoke sprites appear.
 * `Min delay between smokes` - the minimum delay between smokes. The delay after each smoke is randomized in bounds between this value and `Max delay between smokes`.
 * `Max delay between smokes` - the maximum delay between smokes.

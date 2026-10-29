@@ -1116,6 +1116,7 @@ private:
 	int m_cachedMinAlpha; // cache per frame
 	int m_cachedHudColor;
 	int m_cachedTextColor;
+	std::string m_playerModel;
 	int m_forcedHudColor;
 	int m_forcedHudColorNoSuit;
 	int m_forcedHudColorCritical;
@@ -1141,6 +1142,7 @@ public:
 	int		m_iMaxRes;
 	int		m_iHudNumbersYOffset;
 	cvar_t  *m_pCvarDeveloper;
+	cvar_t  *m_pCvarCheats;
 	cvar_t  *m_pCvarZoomSensitivityRatio;
 	cvar_t  *m_pCvarStealMouse;
 	cvar_t	*m_pCvarDraw;
@@ -1317,6 +1319,7 @@ public:
 
 	void ParseModConfigs();
 	bool IsDeveloperModeOn();
+	bool CheatsOn();
 	void Init();
 	void VidInit();
 	void Think();
@@ -1388,6 +1391,9 @@ public:
 
 	fixed_vector<FakeMirror, 32> fakeMirrors;
 	bool HasActiveFakeMirrors() const;
+	const char* PlayerModel() const {
+		return m_playerModel.c_str();
+	}
 
 	HudSpriteRenderer hudRenderer;
 	bool hasHudScaleInEngine;

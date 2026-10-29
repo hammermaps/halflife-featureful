@@ -284,7 +284,7 @@ void CFollowingMonster::OnDying(bool gibbed, CBaseEntity* pKiller)
 int CFollowingMonster::ObjectCaps()
 {
 	int caps = CSquadMonster::ObjectCaps();
-	if ((m_afCapability & bits_CAP_USABLE) && IsFullyAlive())
+	if (CanAnswerToPlayerUse())
 	{
 		caps |= FCAP_IMPULSE_USE | FCAP_ONLYVISIBLE_USE;
 	}
@@ -305,6 +305,25 @@ void CFollowingMonster::KeyValue( KeyValueData *pkvd )
 	}
 	else
 		CSquadMonster::KeyValue( pkvd );
+}
+
+Schedule_t *CFollowingMonster::GetSchedule()
+{
+	switch (m_MonsterState)
+	{
+	case MONSTERSTATE_IDLE:
+	case MONSTERSTATE_ALERT:
+	case MONSTERSTATE_HUNT:
+	{
+		Schedule_t* utilitySchedule = GetUtilitySchedule();
+		if (utilitySchedule)
+			return utilitySchedule;
+		break;
+	}
+	default:
+		break;
+	}
+	return CSquadMonster::GetSchedule();
 }
 
 Schedule_t *CFollowingMonster::GetScheduleOfType( int Type )
@@ -631,13 +650,23 @@ void CFollowingMonster::PrescheduleThink()
 	CSquadMonster::PrescheduleThink();
 }
 
+void CFollowingMonster::RestoreTouchAfterLeapAttack()
+{
+	if (IDefaultRelationship(CLASS_PLAYER) == R_AL) {
+		SetTouch(&CFollowingMonster::FollowerTouch);
+	} else {
+		CSquadMonster::RestoreTouchAfterLeapAttack();
+	}
+}
+
 TakeDamageResult CFollowingMonster::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, const DamageInfo& damageInfo )
 {
 	TakeDamageResult ret = CSquadMonster::TakeDamage(pevInflictor, pevAttacker, damageInfo);
 	if (ret.TookDamageToHealth() && IsFullyAlive() && pevAttacker && m_MonsterState != MONSTERSTATE_PRONE && FBitSet(pevAttacker->flags, FL_CLIENT)
 		&& IDefaultRelationship(CLASS_PLAYER) == R_AL)
 	{
-		PlayFriendlyFireComplaint();
+		if (PlayFriendlyFireComplaint())
+			m_flNextIdleTime = gpGlobals->time + 2.8f;
 	}
 	return ret;
 }
@@ -645,11 +674,8 @@ TakeDamageResult CFollowingMonster::TakeDamage( entvars_t *pevInflictor, entvars
 void CFollowingMonster::FollowingMonsterInit()
 {
 	MonsterInit();
-	if (IDefaultRelationship(CLASS_PLAYER) == R_AL) {
-		m_afCapability |= bits_CAP_USABLE;
-		SetUse( &CFollowingMonster::FollowerUse );
-		SetTouch( &CFollowingMonster::FollowerTouch );
-	}
+	SetUse( &CFollowingMonster::FollowerUse );
+	SetTouch( &CFollowingMonster::FollowerTouch );
 }
 
 // turn head towards supplied origin
@@ -658,6 +684,12 @@ void CFollowingMonster::IdleHeadTurn( Vector &vecFriend )
 	// turn head in desired direction only if ent has a turnable head
 	if( m_afCapability & bits_CAP_TURN_HEAD )
 	{
+		if (!IsFullyAlive())
+		{
+			SetBoneController(0, 0);
+			return;
+		}
+
 		float yaw = VecToYaw( vecFriend - pev->origin ) - pev->angles.y;
 
 		if( yaw > 180 )
@@ -676,7 +708,8 @@ void CFollowingMonster::StopFollowing(bool clearSchedule , bool saySentence)
 	{
 		if( saySentence && !( m_afMemory & bits_MEMORY_PROVOKED ) )
 		{
-			PlayUnUseSentence();
+			if (PlayUnUseSentence())
+				m_flNextIdleTime = gpGlobals->time + 2.8f;
 		}
 
 		if( (m_movementGoal & MOVEGOAL_TARGETENT) && m_hTargetEnt == FollowedPlayer() )
@@ -696,7 +729,8 @@ void CFollowingMonster::StartFollowing(CBaseEntity *pLeader , bool saySentence)
 	m_hTargetEnt = pLeader;
 	if (saySentence)
 	{
-		PlayUseSentence();
+		if (PlayUseSentence())
+			m_flNextIdleTime = gpGlobals->time + 2.8f;
 	}
 
 	ClearConditions( bits_COND_CLIENT_PUSH );
@@ -704,9 +738,22 @@ void CFollowingMonster::StartFollowing(CBaseEntity *pLeader , bool saySentence)
 		ClearSchedule();
 }
 
-void CFollowingMonster::LimitFollowers( CBaseEntity *pPlayer, int maxFollowers )
+bool CFollowingMonster::IsAllyToPlayerClass()
 {
-	return;
+	return IDefaultRelationship(CLASS_PLAYER) == R_AL;
+}
+
+bool CFollowingMonster::CanAnswerToPlayerUse()
+{
+	bool interactionAllowed = true;
+
+	const EntTemplate* entTemplate = GetMyEntTemplate();
+	if (entTemplate)
+	{
+		interactionAllowed = entTemplate->GetNPCBehavior().playerCanInteract;
+	}
+
+	return interactionAllowed && AbleToFollow() && m_pfnUse == &CFollowingMonster::FollowerUse && m_followagePolicy != FOLLOWAGE_SCRIPTED_ONLY && IsAllyToPlayerClass();
 }
 
 bool CFollowingMonster::CanFollow()
@@ -798,6 +845,18 @@ Schedule_t* CFollowingMonster::GetUtilitySchedule()
 	if (followingSchedule)
 		return followingSchedule;
 
+	if (WantsInvestigateSounds())
+	{
+		if (HasConditions(bits_COND_HEAR_SOUND))
+		{
+			CSound *pSound = PBestSound();
+			if (pSound && FBitSet(pSound->m_iType, bits_SOUND_COMBAT))
+			{
+				return GetScheduleOfType(SCHED_INVESTIGATE_SOUND);
+			}
+		}
+	}
+
 	return nullptr;
 }
 
@@ -867,8 +926,6 @@ int CFollowingMonster::DoFollowerUse(CBaseEntity *pCaller, bool saySentence, USE
 		}
 		if (!isFollowing && (useType == USE_TOGGLE || useType == USE_ON))
 		{
-			LimitFollowers( pCaller, MaxFollowers() );
-
 			if( m_afMemory & bits_MEMORY_PROVOKED )
 			{
 				ALERT( at_aiconsole, "%s: I'm not following you, you evil person!\n", STRING(pev->classname) );
@@ -974,7 +1031,7 @@ bool CFollowingMonster::CanRoamAfterCombat()
 
 bool CFollowingMonster::IsUsefulToDisplayHint(CBaseEntity* pPlayer)
 {
-	if (!(m_afCapability & bits_CAP_USABLE))
+	if (!CanAnswerToPlayerUse())
 		return false;
 	if (ShouldDiscardFollowing(pPlayer))
 		return false;

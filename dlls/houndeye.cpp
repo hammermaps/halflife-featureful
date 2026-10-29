@@ -117,8 +117,8 @@ public:
 	void WarnSound();
 	void PainSound() override;
 	void IdleSound() override;
-	void PlayUseSentence() override;
-	void PlayUnUseSentence() override;
+	bool PlayUseSentence() override;
+	bool PlayUnUseSentence() override;
 	void StartTask( Task_t *pTask ) override;
 	void RunTask( Task_t *pTask ) override;
 	void SonicAttack();
@@ -632,7 +632,6 @@ void CHoundeye::StartTask( Task_t *pTask )
 			if (FBitSet(pev->spawnflags, SF_HOUNDEYE_START_SLEEPING))
 			{
 				ClearBits(pev->spawnflags, SF_HOUNDEYE_START_SLEEPING);
-				ClearBits(m_afCapability, bits_CAP_USABLE);
 				SetTouch(&CHoundeye::TouchSleeping);
 				SetUse(&CHoundeye::UseSleeping);
 				m_iAsleep = HOUNDEYE_DEEP_SLEEPING;
@@ -1354,15 +1353,11 @@ Schedule_t *CHoundeye::GetScheduleOfType( int Type )
 //=========================================================
 Schedule_t *CHoundeye::GetSchedule()
 {
+	if (ShouldCoverFromDanger())
+		return GetScheduleOfType( SCHED_TAKE_COVER_FROM_BEST_SOUND );
+
 	switch( m_MonsterState )
 	{
-	case MONSTERSTATE_IDLE:
-		{
-			Schedule_t* utilitySchedule = GetUtilitySchedule();
-			if (utilitySchedule)
-				return utilitySchedule;
-			break;
-		}
 	case MONSTERSTATE_COMBAT:
 		{
 			// dead enemy
@@ -1418,11 +1413,6 @@ Schedule_t *CHoundeye::GetSchedule()
 					return GetScheduleOfType( SCHED_HOUND_EAT );
 				}
 			}
-
-			Schedule_t* followingSchedule = GetFollowingSchedule();
-			if (followingSchedule)
-				return followingSchedule;
-
 			break;
 		}
 	default:
@@ -1482,16 +1472,8 @@ void CHoundeye::TouchSleeping(CBaseEntity *pToucher)
 			m_iAsleep = HOUNDEYE_FORCE_URGENT_WAKING;
 			MakeIdealYaw( pToucher->pev->origin );
 		}
-		if (IDefaultRelationship(CLASS_PLAYER) == R_AL) {
-			m_afCapability |= bits_CAP_USABLE;
-			SetUse( &CFollowingMonster::FollowerUse );
-			SetTouch( &CFollowingMonster::FollowerTouch );
-		}
-		else
-		{
-			SetTouch(NULL);
-			SetUse( &CBaseMonster::MonsterUse );
-		}
+		SetUse( &CFollowingMonster::FollowerUse );
+		SetTouch( &CFollowingMonster::FollowerTouch );
 	}
 }
 
@@ -1503,26 +1485,18 @@ void CHoundeye::UseSleeping(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_T
 		m_iAsleep = useType == USE_ON ? HOUNDEYE_FORCE_URGENT_WAKING : HOUNDEYE_FORCE_LAZY_WAKING;
 	}
 
-	if (IDefaultRelationship(CLASS_PLAYER) == R_AL) {
-		m_afCapability |= bits_CAP_USABLE;
-		SetUse( &CFollowingMonster::FollowerUse );
-		SetTouch( &CFollowingMonster::FollowerTouch );
-	}
-	else
-	{
-		SetTouch(NULL);
-		SetUse( &CBaseMonster::MonsterUse );
-	}
+	SetUse( &CFollowingMonster::FollowerUse );
+	SetTouch( &CFollowingMonster::FollowerTouch );
 }
 
-void CHoundeye::PlayUseSentence()
+bool CHoundeye::PlayUseSentence()
 {
-	EmitSoundScript(useSoundScript);
+	return EmitSoundScript(useSoundScript);
 }
 
-void CHoundeye::PlayUnUseSentence()
+bool CHoundeye::PlayUnUseSentence()
 {
-	EmitSoundScript(unuseSoundScript);
+	return EmitSoundScript(unuseSoundScript);
 }
 
 void CHoundeye::ReportAIState(ALERT_TYPE level)

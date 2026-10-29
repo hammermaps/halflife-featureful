@@ -9,6 +9,10 @@ bookToC: false
 
 * When male assassin checks for friendly fire he takes into account all allies, not only those who are in the same squad as him.
 
+### Parameters
+
+* See [monster_human_grunt]({{< ref "monster_human_grunt/#new-parameters" >}}).
+
 ### Skill variables
 
 * **sk_massassin_health** - monster's health. If not defined, **sk_hgrunt_health** is used.

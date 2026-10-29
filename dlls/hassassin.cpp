@@ -71,14 +71,15 @@ public:
 	void HandleAnimEvent( MonsterEvent_t *pEvent ) override;
 	Schedule_t *GetSchedule() override;
 	Schedule_t *GetScheduleOfType( int Type ) override;
+	bool DefaultInterestedInCoverFromDanger() override { return true; }
 	bool CheckMeleeAttack1( float flDot, float flDist ) override;	// jump
 	// BOOL CheckMeleeAttack2( float flDot, float flDist );
 	bool CheckRangeAttack1( float flDot, float flDist ) override;	// shoot
 	bool CheckRangeAttack2( float flDot, float flDist ) override;	// throw grenade
 	void StartTask( Task_t *pTask ) override;
 	void RunAI() override;
-	void PlayUseSentence() override;
-	void PlayUnUseSentence() override;
+	bool PlayUseSentence() override;
+	bool PlayUnUseSentence() override;
 	bool PlayFriendlyFireComplaint() override;
 	void DeathSound() override;
 	void IdleSound() override;
@@ -120,6 +121,10 @@ public:
 	}
 	int LookupJumpActivity() override {
 		return LookupActivity(ACT_HOP);
+	}
+
+	bool DefaultWantsInvestigateSounds() override {
+		return true;
 	}
 
 	float m_flLastShot;
@@ -215,14 +220,14 @@ const NamedSoundScript CHAssassin::friendlyFireComplaintSoundScript = {
 	"HAssassin.FriendlyFireComplaint"
 };
 
-void CHAssassin::PlayUseSentence()
+bool CHAssassin::PlayUseSentence()
 {
-	PlaySpokenSoundScript(useSoundScript);
+	return PlaySpokenSoundScript(useSoundScript);
 }
 
-void CHAssassin::PlayUnUseSentence()
+bool CHAssassin::PlayUnUseSentence()
 {
-	PlaySpokenSoundScript(unuseSoundScript);
+	return PlaySpokenSoundScript(unuseSoundScript);
 }
 
 bool CHAssassin::PlayFriendlyFireComplaint()
@@ -951,17 +956,8 @@ Schedule_t *CHAssassin::GetSchedule()
 			{
 				pev->movetype = MOVETYPE_STEP;
 			}
-			CSound *pSound = NULL;
-			if( HasConditions( bits_COND_HEAR_SOUND ) )
-			{
-				pSound = PBestSound();
-
-				ASSERT( pSound != NULL );
-				if( pSound &&( pSound->m_iType & bits_SOUND_DANGER ) )
-				{
-					return GetScheduleOfType( SCHED_TAKE_COVER_FROM_BEST_SOUND );
-				}
-			}
+			if (ShouldCoverFromDanger())
+				return GetScheduleOfType( SCHED_TAKE_COVER_FROM_BEST_SOUND );
 
 			Schedule_t* reloadSched = GetIdleReloadSchedule();
 			if (reloadSched)
@@ -970,11 +966,6 @@ Schedule_t *CHAssassin::GetSchedule()
 			Schedule_t* utilitySchedule = GetUtilitySchedule();
 			if (utilitySchedule)
 				return utilitySchedule;
-
-			if( pSound &&( pSound->m_iType & bits_SOUND_COMBAT ) )
-			{
-				return GetScheduleOfType( SCHED_INVESTIGATE_SOUND );
-			}
 		}
 		break;
 	case MONSTERSTATE_COMBAT:

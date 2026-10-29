@@ -181,7 +181,6 @@ TYPEDESCRIPTION	CBaseMonster::m_SaveData[] =
 	DEFINE_FIELD( CBaseMonster, m_gibPolicy, FIELD_SHORT ),
 	DEFINE_FIELD( CBaseMonster, m_bForceConditionsGather, FIELD_BOOLEAN ),
 	DEFINE_FIELD( CBaseMonster, m_bForceTakeDamageTriggerCondition, FIELD_BOOLEAN ),
-	DEFINE_FIELD( CBaseMonster, m_flNextPainTime, FIELD_TIME ),
 	DEFINE_FIELD( CBaseMonster, m_equalDislikeTime, FIELD_TIME ),
 	DEFINE_FIELD( CBaseMonster, m_triggerOnDeath, FIELD_STRING ),
 
@@ -200,6 +199,8 @@ TYPEDESCRIPTION	CBaseMonster::m_SaveData[] =
 	DEFINE_FIELD( CBaseMonster, m_vecJumpTarget, FIELD_VECTOR ),
 	DEFINE_FIELD( CBaseMonster, m_doingRightAngleJump, FIELD_BOOLEAN ),
 	DEFINE_FIELD( CBaseMonster, m_appliedJumpVelocity, FIELD_BOOLEAN ),
+
+	DEFINE_FIELD( CBaseMonster, m_flNextIdleTime, FIELD_TIME ),
 };
 
 //IMPLEMENT_SAVERESTORE( CBaseMonster, CBaseToggle )
@@ -535,14 +536,33 @@ int CBaseMonster::DefaultISoundMask()
 
 int CBaseMonster::ISoundMask()
 {
-	if (m_customSoundMask == 0)
+	auto getDefaultSoundMask = [this]() {
+		const EntTemplate* entTemplate = GetMyEntTemplate();
+		if (entTemplate && entTemplate->IsSoundMaskDefined())
+		{
+			int soundMask = entTemplate->GetSoundMask();
+			EntTemplate::SoundMaskOp soundMaskOp = entTemplate->GetSoundMaskOp();
+
+			switch(soundMaskOp)
+			{
+			case EntTemplate::SoundMaskOp::Add:
+				return DefaultISoundMask() | soundMask;
+			case EntTemplate::SoundMaskOp::Remove:
+				return DefaultISoundMask() & ~soundMask;
+			default:
+				return soundMask;
+			}
+		}
 		return DefaultISoundMask();
+	};
+
+	if (m_customSoundMask == 0)
+		return getDefaultSoundMask();
 	if (m_customSoundMask == -1)
 		return 0;
 	if (FBitSet(m_customSoundMask, bits_SOUND_REMOVE_FROM_DEFAULT))
 	{
-		int defaultMask = DefaultISoundMask();
-		return defaultMask & ~m_customSoundMask;
+		return getDefaultSoundMask() & ~m_customSoundMask;
 	}
 	return m_customSoundMask;
 }
@@ -1505,6 +1525,30 @@ void CBaseMonster::SetActivity( Activity NewActivity )
 	int iSequence = LookupActivity( NewActivity );
 
 	Activity OldActivity = m_Activity;
+
+	if (iSequence == ACTIVITY_NOT_AVAILABLE)
+	{
+		// Try to find WALK if RUN is not available in the model, and vice versa
+		if (NewActivity == ACT_RUN)
+		{
+			iSequence = LookupActivity(ACT_WALK);
+			if (OldActivity == ACT_WALK)
+			{
+				m_IdealActivity = m_Activity = NewActivity;
+				return;
+			}
+		}
+		else if (NewActivity == ACT_WALK)
+		{
+			iSequence = LookupActivity(ACT_RUN);
+			if (OldActivity == ACT_RUN)
+			{
+				m_IdealActivity = m_Activity = NewActivity;
+				return;
+			}
+		}
+	}
+
 	m_Activity = NewActivity; // Go ahead and set this so it doesn't keep trying when the anim is not present
 
 	// In case someone calls this with something other than the ideal activity
@@ -3787,9 +3831,9 @@ void CBaseMonster::ReportAIState( ALERT_TYPE level )
 
 	if (pev->model)
 		ALERT(level, "Model: %s. ", STRING(pev->model));
-	const char* gibModel = GibModel();
-	if (gibModel)
-		ALERT(level, "Gib Model: %s. ", gibModel);
+	Visual gibVisual = MyGibVisual();
+	if (gibVisual.model)
+		ALERT(level, "Gib Model: %s. ", gibVisual.model);
 
 	ALERT(level, "Rendermode: %s. Color: (%g, %g, %g). Alpha: %g. Renderfx: %s. ",
 		  RenderModeToString(pev->rendermode),
@@ -3884,6 +3928,38 @@ void CBaseMonster::ReportAIState( ALERT_TYPE level )
 				ALERT(level, "Time before shield recharge update: %g; ", m_shieldRegenTime - gpGlobals->time);
 		}
 	}
+
+	const int soundMask = ISoundMask();
+	ALERT(level, "Soundmask: [");
+	if (FBitSet(soundMask, bits_SOUND_COMBAT))
+	{
+		ALERT(level, "Combat; ");
+	}
+	if (FBitSet(soundMask, bits_SOUND_WORLD))
+	{
+		ALERT(level, "World; ");
+	}
+	if (FBitSet(soundMask, bits_SOUND_PLAYER))
+	{
+		ALERT(level, "Player; ");
+	}
+	if (FBitSet(soundMask, bits_SOUND_CARCASS))
+	{
+		ALERT(level, "Carcass; ");
+	}
+	if (FBitSet(soundMask, bits_SOUND_MEAT))
+	{
+		ALERT(level, "Meat; ");
+	}
+	if (FBitSet(soundMask, bits_SOUND_DANGER))
+	{
+		ALERT(level, "Danger; ");
+	}
+	if (FBitSet(soundMask, bits_SOUND_GARBAGE))
+	{
+		ALERT(level, "Garbage; ");
+	}
+	ALERT(level, "]; ");
 
 	if (shouldReportRoute)
 	{
@@ -4059,6 +4135,15 @@ void CBaseMonster::PrecacheEntTemplateResources()
 		else
 		{
 			canCloak = CanCloakByDefault();
+		}
+
+		const EntTemplate::GibDisposition& gibDisposition = entTemplate->GetGibDisposition();
+		for (const auto& gibInfo : gibDisposition)
+		{
+			if (gibInfo.visual.model)
+			{
+				PRECACHE_MODEL(gibInfo.visual.model);
+			}
 		}
 	}
 	else
@@ -4805,12 +4890,23 @@ const char* CBaseMonster::MyNonDefaultGibModel()
 	return nullptr;
 }
 
-const Visual* CBaseMonster::MyGibVisual()
+Visual CBaseMonster::MyGibVisual()
 {
+	Visual result;
 	const EntTemplate* entTemplate = GetMyEntTemplate();
 	if (entTemplate)
-		return g_VisualSystem.GetVisual(entTemplate->GibVisualName());
-	return nullptr;
+	{
+		const Visual* templateGibVisual = g_VisualSystem.GetVisual(entTemplate->GibVisualName());
+		if (templateGibVisual)
+			result = *templateGibVisual;
+	}
+
+	if (!FStringNull(m_gibModel))
+		result.SetModel(STRING(m_gibModel));
+	else if (!result.model)
+		result.SetModel(DefaultGibModel());
+
+	return result;
 }
 
 int CBaseMonster::PrecacheMyGibModel(const char *model)
@@ -5904,6 +6000,61 @@ void CBaseMonster::HandleJumpFallTask(const Vector* target, bool allowAttack)
 		ResetCurrentJump();
 		TaskComplete();
 	}
+}
+
+int CBaseMonster::ChaseEnemyFailedPolicy()
+{
+	const EntTemplate* entTemplate = GetMyEntTemplate();
+	if (entTemplate)
+	{
+		const EntTemplate::NPCBehavior& behavior = entTemplate->GetNPCBehavior();
+		if (behavior.chaseEnemyFailed.has_value())
+		{
+			return *behavior.chaseEnemyFailed;
+		}
+	}
+	return DefaultChaseEnemyFailedPolicy();
+}
+
+bool CBaseMonster::InterestedInCoverFromDanger()
+{
+	const EntTemplate* entTemplate = GetMyEntTemplate();
+	if (entTemplate)
+	{
+		const EntTemplate::NPCBehavior& behavior = entTemplate->GetNPCBehavior();
+		if (!indeterminate(behavior.coverFromDanger))
+		{
+			return (bool)behavior.coverFromDanger;
+		}
+	}
+	return DefaultInterestedInCoverFromDanger();
+}
+
+bool CBaseMonster::ShouldCoverFromDanger()
+{
+	if (HasConditions(bits_COND_HEAR_SOUND) && InterestedInCoverFromDanger())
+	{
+		CSound *pSound = PBestSound();
+		if (pSound && FBitSet(pSound->m_iType, bits_SOUND_DANGER))
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+bool CBaseMonster::WantsInvestigateSounds()
+{
+	const EntTemplate* entTemplate = GetMyEntTemplate();
+	if (entTemplate)
+	{
+		const EntTemplate::NPCBehavior& behavior = entTemplate->GetNPCBehavior();
+		if (!indeterminate(behavior.investigateSounds))
+		{
+			return (bool)behavior.investigateSounds;
+		}
+	}
+	return DefaultWantsInvestigateSounds();
 }
 
 void CDeadMonster::KeyValue( KeyValueData *pkvd )

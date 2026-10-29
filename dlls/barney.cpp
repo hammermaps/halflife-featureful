@@ -346,11 +346,8 @@ bool CBarney::CheckRangeAttack1( float flDot, float flDist )
 //=========================================================
 void CBarney::BarneyFirePistol( const char* shotSoundScript, float flDamage )
 {
-	Vector vecShootOrigin;
-
-	UTIL_MakeVectors( pev->angles );
-	vecShootOrigin = pev->origin + Vector( 0, 0, 55 );
-	Vector vecShootDir = ShootAtEnemy( vecShootOrigin );
+	const Vector vecShootOrigin = pev->origin + Vector( 0, 0, 55 );
+	const Vector vecShootDir = ShootAtEnemy( vecShootOrigin );
 
 	Vector angDir = UTIL_VecToAngles( vecShootDir );
 	SetBlending( 0, angDir.x );
@@ -503,8 +500,6 @@ void CBarney::Precache()
 	RegisterAndPrecacheSoundScript(dieSoundScript);
 	RegisterAndPrecacheSoundScript(firePistolSoundScript);
 	RegisterAndPrecacheSoundScript(firePythonSoundScript, NPC::pythonSoundScript);
-
-	PRECACHE_SOUND( "barney/ba_attack1.wav" );
 
 	// every new barney must call this, otherwise
 	// when a level is loaded, nobody will talk (time is reset to 0)
@@ -665,14 +660,9 @@ Schedule_t *CBarney::GetScheduleOfType( int Type )
 //=========================================================
 Schedule_t *CBarney::GetSchedule()
 {
-	if( HasConditions( bits_COND_HEAR_SOUND ) )
-	{
-		CSound *pSound = PBestSound();
+	if (ShouldCoverFromDanger())
+		return GetScheduleOfType( SCHED_TAKE_COVER_FROM_BEST_SOUND );
 
-		ASSERT( pSound != NULL );
-		if( pSound && (pSound->m_iType & bits_SOUND_DANGER) )
-			return GetScheduleOfType( SCHED_TAKE_COVER_FROM_BEST_SOUND );
-	}
 	if( HasConditions( bits_COND_ENEMY_DEAD ) && FOkToSpeak(SPEAK_DISREGARD_ENEMY) )
 	{
 		PlaySentence( SentenceGroup(TLK_KILL), 4, VOL_NORM, ATTN_NORM );
@@ -807,7 +797,6 @@ public:
 	void Precache() override;
 	const char* DefaultModel() override { return "models/otis.mdl"; }
 	float DefaultHealth() override { return GetSkillValue("otis_health"); }
-	bool IsEnabledInMod() override { return g_modFeatures.IsMonsterEnabled("otis"); }
 	const char* DefaultSentenceGroup(int group) override;
 	const char* ReverseRelationshipModel() override { return "models/otisf.mdl"; }
 
@@ -972,7 +961,6 @@ class CDeadOtis : public CDeadBarney
 public:
 	void Spawn() override;
 	const char* DefaultModel() override { return "models/otis.mdl"; }
-	bool IsEnabledInMod() override { return g_modFeatures.IsMonsterEnabled("otis"); }
 	const char* getPos(int pos) const override;
 	static const char *m_szPoses[5];
 };
@@ -1002,7 +990,6 @@ public:
 	void Spawn() override;
 	void Precache() override;
 	const char* DefaultModel() override { return "models/barniel.mdl"; }
-	bool IsEnabledInMod() override { return g_modFeatures.IsMonsterEnabled("barniel"); }
 	const char* DefaultSentenceGroup(int group) override;
 	const char* ReverseRelationshipModel() override { return NULL; }
 	void HandleAnimEvent( MonsterEvent_t *pEvent ) override;
@@ -1056,8 +1043,6 @@ void CBarniel::Precache()
 	RegisterAndPrecacheSoundScript(painSoundScript);
 	RegisterAndPrecacheSoundScript(dieSoundScript);
 	RegisterAndPrecacheSoundScript(firePistolSoundScript);
-
-	PRECACHE_SOUND( "barniel/bn_attack1.wav" );
 
 	TalkInit();
 	CTalkMonster::Precache();
@@ -1142,7 +1127,6 @@ class CDeadBarniel : public CDeadBarney
 public:
 	void Spawn() override;
 	const char* DefaultModel() override { return "models/barniel.mdl"; }
-	bool IsEnabledInMod() override { return g_modFeatures.IsMonsterEnabled("barniel"); }
 	const char* getPos(int pos) const override;
 	static const char *m_szPoses[3];
 };
@@ -1173,7 +1157,6 @@ public:
 	void Precache() override;
 	const char* DefaultModel() override { return "models/kate.mdl"; }
 	float DefaultHealth() override { return GetSkillValue("kate_health"); }
-	bool IsEnabledInMod() override { return g_modFeatures.IsMonsterEnabled("kate"); }
 	const char* DefaultSentenceGroup(int group) override;
 	const char* DefaultDisplayName() override { return "Kate"; }
 	const char* ReverseRelationshipModel() override { return nullptr; }
@@ -1252,8 +1235,6 @@ void CKate::Precache()
 	RegisterAndPrecacheSoundScript(dieSoundScript);
 	RegisterAndPrecacheSoundScript(firePistolSoundScript);
 	RegisterAndPrecacheSoundScript(NPC::swishSoundScript);
-
-	PRECACHE_SOUND( "kate/ka_attack1.wav" );
 
 	if (!ShouldAutoPrecacheSounds())
 	{
@@ -1427,7 +1408,6 @@ class CDeadKate : public CDeadBarney
 public:
 	void Spawn() override;
 	const char* DefaultModel() override { return "models/kate.mdl"; }
-	bool IsEnabledInMod() override { return g_modFeatures.IsMonsterEnabled("kate"); }
 	const char* getPos(int pos) const override;
 	static const char *m_szPoses[3];
 };

@@ -274,6 +274,8 @@ struct TraceHullAttackParams
 
 	const char* hitSoundScript = nullptr;
 	const char* missSoundScript = nullptr;
+	const char* soundScript = nullptr;
+	float soundScriptChance = 1.0f;
 };
 
 #define SF_ITEM_TOUCH_ONLY 128
@@ -638,10 +640,6 @@ public:
 		return func;
 	}
 #endif
-	// virtual functions used by a few classes
-	
-	// used by monsters that are created by the MonsterMaker
-	virtual	void UpdateOwner() { return; };
 
 	static CBaseEntity *Create( const char *szName, const Vector &vecOrigin, const Vector &vecAngles, edict_t *pentOwner = NULL, EntityOverrides entityOverrides = EntityOverrides() );
 	static CBaseEntity *CreateNoSpawn( const char *szName, const Vector &vecOrigin, const Vector &vecAngles, edict_t *pentOwner = NULL, EntityOverrides entityOverrides = EntityOverrides() );
@@ -690,7 +688,11 @@ public:
 
 	virtual void BeforeApplyDamageToHealth(float flDamage) {}
 	bool ApplyDamageToHealth(const DamageInfo& damageInfo, entvars_t *pevAttacker, TakeDamageResult& result);
+	virtual PainSoundRule DefaultPainSoundRule() { return PainSoundRule{}; }
+	virtual void PainSound() {}
+	void PainReaction(const DamageInfo& damageInfo);
 
+	virtual bool CanShowObjectHint() { return true; }
 	virtual bool IsUsefulToDisplayHint(CBaseEntity* pPlayer) { return true; }
 	virtual bool IsLockedByMaster() { return false; }
 	virtual bool PlaysItsOwnHitSounds() const { return false; }
@@ -798,6 +800,9 @@ public:
 	short m_prevRenderFx;
 	short m_prevRenderMode;
 	int m_prevRenderAmt;
+
+	float m_flTouchedByJumpPad;
+	float m_flNextPainTime;
 };
 
 // Ugly technique to override base member functions
@@ -1002,7 +1007,7 @@ public:
 
 #define bits_CAP_FLY			( 1 << 15)// can fly, move all around
 
-#define bits_CAP_USABLE			( 1 << 16 ) // can be used by player
+//#define bits_CAP_USABLE			( 1 << 16 ) // can be used by player
 
 #define bits_CAP_DOORS_GROUP    (bits_CAP_USE | bits_CAP_AUTO_DOORS | bits_CAP_OPEN_DOORS)
 

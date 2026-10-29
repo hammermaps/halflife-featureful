@@ -598,12 +598,15 @@ void CBaseMonster::RunTask( Task_t *pTask )
 					TaskComplete();
 					RouteClear();		// Stop moving
 				}
-				else if ( pTask->iTask == TASK_CATCH_WITH_TARGET_RANGE && m_hTargetEnt->IsMoving() )
-					m_movementActivity = ACT_RUN;
-				else if( distance < 190 && m_movementActivity != ACT_WALK )
-					m_movementActivity = ACT_WALK;
-				else if( distance >= 270 && m_movementActivity != ACT_RUN )
-					m_movementActivity = ACT_RUN;
+				else
+				{
+					if ( pTask->iTask == TASK_CATCH_WITH_TARGET_RANGE && m_hTargetEnt->IsMoving() )
+						m_movementActivity = ACT_RUN;
+					else if( distance < 190 && m_movementActivity != ACT_WALK )
+						m_movementActivity = ACT_WALK;
+					else if( distance >= 270 && m_movementActivity != ACT_RUN )
+						m_movementActivity = ACT_RUN;
+				}
 			}
 			break;
 		}
@@ -1259,6 +1262,15 @@ void CBaseMonster::StartTask( Task_t *pTask )
 				TaskFail("no sound to cover from");
 			}
 
+			break;
+		}
+	case TASK_FIND_LATERAL_SPOT:
+		{
+			const Vector vecThreat = m_MonsterState == MONSTERSTATE_COMBAT ? m_vecEnemyLKP : pev->origin;
+			if (FindLateralSpotAway(vecThreat, COVER_DELTA, COVER_DELTA * 2.0f, FINDSPOTAWAY_RUN|FINDSPOTAWAY_DONT_AVOID_THREAT_NODE))
+				TaskComplete();
+			else
+				TaskFail("no lateral spot found");
 			break;
 		}
 	case TASK_FACE_HINTNODE:

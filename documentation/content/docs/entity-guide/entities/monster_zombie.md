@@ -34,6 +34,8 @@ bookToC: false
 * **Zombie.Attack** - plays occasionally on the slash attack.
 * **Zombie.AttackHit** - melee attack hit. Derived from **NPC.AttackHit**
 * **Zombie.AttackMiss** - melee attack miss. Derived from **NPC.AttackMiss**
+* **Zombie.Use** - start following the ally player. Derived from **Zombie.Idle**
+* **Zombie.UnUse** - stop following the ally player. Derived from **Zombie.Alert**.
 
 ### Attacks
 
@@ -41,9 +43,9 @@ bookToC: false
 
 ### Animation events
 
-* `1` - trace hull attack with right arm. Deals **sk_zombie_dmg_one_slash** damage. Plays **Zombie.AttackHit** or **Zombie.AttackMiss**. Plays **Zombie.Attack** with 50% chance.
-* `2` - trace hull attack with left arm. Deals **sk_zombie_dmg_one_slash** damage. Plays **Zombie.AttackHit** or **Zombie.AttackMiss**. Plays **Zombie.Attack** with 50% chance.
-* `3` - trace hull attack with both arms. Deals **sk_zombie_dmg_both_slash** damage. Plays **Zombie.AttackHit** or **Zombie.AttackMiss**. Plays **Zombie.Attack** with 50% chance.
+* `1` - trace hull attack with right arm. Deals **sk_zombie_dmg_one_slash** damage. Plays **Zombie.AttackHit** or **Zombie.AttackMiss**. Plays **Zombie.Attack** with 50% chance (configurable via the `"soundscript_chance"`).
+* `2` - trace hull attack with left arm. Deals **sk_zombie_dmg_one_slash** damage. Plays **Zombie.AttackHit** or **Zombie.AttackMiss**. Plays **Zombie.Attack** with 50% chance (configurable via the `"soundscript_chance"`).
+* `3` - trace hull attack with both arms. Deals **sk_zombie_dmg_both_slash** damage. Plays **Zombie.AttackHit** or **Zombie.AttackMiss**. Plays **Zombie.Attack** with 50% chance (configurable via the `"soundscript_chance"`).
 
 ### Entity template examples
 
@@ -68,7 +70,8 @@ The [check melee]({{< ref "entity-templates/#check_melee_attack1" >}}) rules and
                 },
                 "knock": {
                     "right": -100
-                }
+                },
+                "soundscript_chance": 0.5
             },
             "2": {
                 "distance": 70,
@@ -78,7 +81,8 @@ The [check melee]({{< ref "entity-templates/#check_melee_attack1" >}}) rules and
                 },
                 "knock": {
                     "right": 100
-                }
+                },
+                "soundscript_chance": 0.5
             },
             "3": {
                 "distance": 70,
@@ -87,7 +91,8 @@ The [check melee]({{< ref "entity-templates/#check_melee_attack1" >}}) rules and
                 },
                 "knock": {
                     "forward": -100
-                }
+                },
+                "soundscript_chance": 0.5
             }
         }
     }
@@ -116,6 +121,69 @@ Zombified assassins from Delta Paricles that are cloaked while moving.
                 "volume": 0.2
             }
         }
+    }
+}
+```
+
+{{% /tab %}}
+
+{{% tab "Blood colors" %}}
+
+Zombie who bleeds in yellow from a head (headcrab) and red from other parts.
+
+```json
+{
+    "monster_zombie": {
+        "gib_visual": {
+            "model": "models/agibs.mdl"
+        },
+        "blood": {
+            "color": "red",
+            "by_hitgroup": [
+                {
+                    "hitgroup": "head",
+                    "color": "yellow"
+                }
+            ]
+        }
+    }
+}
+```
+
+{{% /tab %}}
+
+{{% tab "Gib disposition" %}}
+
+The [gib disposition]({{< ref "entity-templates/#gib_disposition" >}}) that mixes human and alien gibs.
+
+```json
+{
+    "monster_zombie": {
+        "gib_disposition": [
+            {
+                "count": 1,
+                "visual": {
+                    "model": "models/hgibs.mdl"
+                },
+                "body": 0,
+                "position": "head",
+                "fly_away": "random",
+                "throw_at_player_chance": 0.05,
+                "blood": "red"
+            },
+            {
+                "count": 2
+            },
+            {
+                "count": 2,
+                "visual": {
+                    "model": "models/hgibs.mdl"
+                },
+                "min_body": 1,
+                "max_body": 6,
+                "blood": "red"
+            }
+        ]
     }
 }
 ```

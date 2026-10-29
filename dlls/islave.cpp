@@ -383,8 +383,8 @@ public:
 	void PainSound() override;
 	void AlertSound() override;
 	void IdleSound() override;
-	void PlayUseSentence() override;
-	void PlayUnUseSentence() override;
+	bool PlayUseSentence() override;
+	bool PlayUnUseSentence() override;
 	bool EmitSoundScriptTalk(const char* name) override;
 
 	void OnDying(bool gibbed, CBaseEntity* pKiller) override;
@@ -407,6 +407,7 @@ public:
 	Schedule_t* GetHealOrReviveSchedule();
 	Schedule_t *GetSchedule() override;
 	Schedule_t *GetScheduleOfType( int Type ) override;
+	bool DefaultInterestedInCoverFromDanger() override { return true; }
 	CUSTOM_SCHEDULES
 
 	int Save( CSave &save ) override;
@@ -829,7 +830,7 @@ void CISlave::AlertSound()
 //=========================================================
 void CISlave::IdleSound()
 {
-	if( RANDOM_LONG( 0, 2 ) == 0 )
+	//if( RANDOM_LONG( 0, 2 ) == 0 )
 	{
 		EmitSoundScriptTalk(idleSoundScript);
 	}
@@ -1836,24 +1837,16 @@ Schedule_t* CISlave::GetHealOrReviveSchedule()
 
 Schedule_t *CISlave::GetSchedule()
 {
-/*
-	if( pev->spawnflags )
-	{
-		pev->spawnflags = 0;
-		return GetScheduleOfType( SCHED_RELOAD );
-	}
-*/
+	if (ShouldCoverFromDanger())
+		return GetScheduleOfType( SCHED_TAKE_COVER_FROM_BEST_SOUND );
+
 	if( HasConditions( bits_COND_HEAR_SOUND ) )
 	{
 		CSound *pSound = PBestSound();
-
 		ASSERT( pSound != NULL );
-
-		if( pSound )
+		if (pSound)
 		{
-			if( pSound->m_iType & bits_SOUND_DANGER )
-				return GetScheduleOfType( SCHED_TAKE_COVER_FROM_BEST_SOUND );
-			if( pSound->m_iType & bits_SOUND_COMBAT )
+			if (pSound->m_iType & bits_SOUND_COMBAT)
 				m_afMemory |= bits_MEMORY_ISLAVE_PROVOKED;
 		}
 	}
@@ -1920,9 +1913,6 @@ Schedule_t *CISlave::GetSchedule()
 					return GetScheduleOfType(SCHED_ISLAVE_GIVE_CHARGE);
 			}
 		}
-		Schedule_t* utilitySchedule = GetUtilitySchedule();
-		if (utilitySchedule)
-			return utilitySchedule;
 		break;
 	}
 	default:
@@ -2330,14 +2320,14 @@ bool CISlave::CanSpawnFamiliar()
 	return false;
 }
 
-void CISlave::PlayUseSentence()
+bool CISlave::PlayUseSentence()
 {
-	EmitSoundScriptTalk(useSoundScript);
+	return EmitSoundScriptTalk(useSoundScript);
 }
 
-void CISlave::PlayUnUseSentence()
+bool CISlave::PlayUnUseSentence()
 {
-	EmitSoundScriptTalk(unuseSoundScript);
+	return EmitSoundScriptTalk(unuseSoundScript);
 }
 
 bool CISlave::EmitSoundScriptTalk(const char *name)

@@ -24,6 +24,7 @@
 #include	"monsters.h"
 #include	"schedule.h"
 #include	"game.h"
+#include	"followingmonster.h"
 #include	"common_soundscripts.h"
 
 //=========================================================
@@ -35,7 +36,7 @@
 
 #define ZOMBIE_FLINCH_DELAY		2		// at most one flinch every n secs
 
-class CZombie : public CBaseMonster
+class CZombie : public CFollowingMonster
 {
 public:
 	void Spawn() override;
@@ -47,6 +48,7 @@ public:
 	const char* DefaultDisplayName() override { return "Zombie"; }
 	void HandleAnimEvent( MonsterEvent_t *pEvent ) override;
 	int IgnoreConditions() override;
+	Schedule_t* GetSchedule() override;
 	Schedule_t* GetScheduleOfType(int Type) override;
 
 	float m_flNextFlinch;
@@ -56,7 +58,8 @@ public:
 	void DeathSound() override;
 	void AlertSound() override;
 	void IdleSound() override;
-	void AttackSound();
+	bool PlayUseSentence() override;
+	bool PlayUnUseSentence() override;
 
 	static const NamedSoundScript idleSoundScript;
 	static const NamedSoundScript alertSoundScript;
@@ -65,6 +68,8 @@ public:
 	static const NamedSoundScript attackSoundScript;
 	static constexpr const char* attackHitSoundScript = "Zombie.AttackHit";
 	static constexpr const char* attackMissSoundScript = "Zombie.AttackMiss";
+	static constexpr const char* useSoundScript = "Zombie.Use";
+	static constexpr const char* unuseSoundScript = "Zombie.UnUse";
 
 	// No range attacks
 	bool CheckRangeAttack1( float flDot, float flDist ) override { return false; }
@@ -75,10 +80,10 @@ public:
 	bool IsDisplaceable() override { return true; }
 	Vector DefaultMinHullSize() override { return VEC_HUMAN_HULL_MIN; }
 	Vector DefaultMaxHullSize() override { return VEC_HUMAN_HULL_MAX; }
+	int DefaultChaseEnemyFailedPolicy() override { return CHASE_ENEMY_FAILED_FAIL; }
 	virtual float OneSlashDamage() { return GetSkillValue("zombie_dmg_one_slash"); }
 	virtual float BothSlashDamage() { return GetSkillValue("zombie_dmg_both_slash"); }
 protected:
-	void SlashAttack(const TraceHullAttackParams& params);
 	void PrecacheSounds();
 };
 
@@ -148,7 +153,7 @@ TakeDamageResult CZombie::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAtt
 		flDamage *= 0.3f;
 #endif
 	}
-	return CBaseMonster::TakeDamage( pevInflictor, pevAttacker, damageInfo );
+	return CFollowingMonster::TakeDamage( pevInflictor, pevAttacker, damageInfo );
 }
 
 PainSoundRule CZombie::DefaultPainSoundRule()
@@ -179,23 +184,20 @@ void CZombie::IdleSound()
 	EmitSoundScript(idleSoundScript);
 }
 
-void CZombie::AttackSound()
+bool CZombie::PlayUseSentence()
 {
-	EmitSoundScript(attackSoundScript);
+	return EmitSoundScript(useSoundScript);
+}
+
+bool CZombie::PlayUnUseSentence()
+{
+	return EmitSoundScript(unuseSoundScript);
 }
 
 //=========================================================
 // HandleAnimEvent - catches the monster-specific messages
 // that occur when tagged animation frames are played.
 //=========================================================
-void CZombie::SlashAttack(const TraceHullAttackParams& params)
-{
-	PerformTraceHullAttack(params);
-
-	if (RANDOM_LONG(0,1))
-		AttackSound();
-}
-
 void CZombie::HandleAnimEvent( MonsterEvent_t *pEvent )
 {
 	switch( pEvent->event )
@@ -209,8 +211,10 @@ void CZombie::HandleAnimEvent( MonsterEvent_t *pEvent )
 			params.punchAngle.x = 5;
 			params.hitSoundScript = attackHitSoundScript;
 			params.missSoundScript = attackMissSoundScript;
+			params.soundScript = attackSoundScript;
+			params.soundScriptChance = 0.5f;
 			SetTraceHullAttackParamsFromTemplate(pEvent->event, params);
-			SlashAttack(params);
+			PerformTraceHullAttack(params);
 		}
 		break;
 
@@ -223,8 +227,10 @@ void CZombie::HandleAnimEvent( MonsterEvent_t *pEvent )
 			params.punchAngle.x = 5;
 			params.hitSoundScript = attackHitSoundScript;
 			params.missSoundScript = attackMissSoundScript;
+			params.soundScript = attackSoundScript;
+			params.soundScriptChance = 0.5f;
 			SetTraceHullAttackParamsFromTemplate(pEvent->event, params);
-			SlashAttack(params);
+			PerformTraceHullAttack(params);
 		}
 		break;
 
@@ -236,13 +242,15 @@ void CZombie::HandleAnimEvent( MonsterEvent_t *pEvent )
 			params.punchAngle.x = 5;
 			params.hitSoundScript = attackHitSoundScript;
 			params.missSoundScript = attackMissSoundScript;
+			params.soundScript = attackSoundScript;
+			params.soundScriptChance = 0.5f;
 			SetTraceHullAttackParamsFromTemplate(pEvent->event, params);
-			SlashAttack(params);
+			PerformTraceHullAttack(params);
 		}
 		break;
 
 		default:
-			CBaseMonster::HandleAnimEvent( pEvent );
+			CFollowingMonster::HandleAnimEvent( pEvent );
 			break;
 	}
 }
@@ -264,9 +272,10 @@ void CZombie::Spawn()
 	pev->view_ofs		= VEC_VIEW;// position of the eyes relative to monster's origin.
 	SetMyFieldOfView(0.5f);// indicates the width of this monster's forward view cone ( as a dotproduct result )
 	m_MonsterState		= MONSTERSTATE_NONE;
+	SetMySquadCapabilities();
 	SetMyCanOpenDoors(true);
 
-	MonsterInit();
+	FollowingMonsterInit();
 }
 
 //=========================================================
@@ -288,6 +297,8 @@ void CZombie::PrecacheSounds()
 	RegisterAndPrecacheSoundScript(attackSoundScript);
 	RegisterAndPrecacheSoundScript(attackHitSoundScript, NPC::attackHitSoundScript);
 	RegisterAndPrecacheSoundScript(attackMissSoundScript, NPC::attackMissSoundScript);
+	RegisterAndPrecacheSoundScript(useSoundScript, idleSoundScript);
+	RegisterAndPrecacheSoundScript(unuseSoundScript, alertSoundScript);
 }
 
 //=========================================================
@@ -296,7 +307,7 @@ void CZombie::PrecacheSounds()
 
 int CZombie::IgnoreConditions()
 {
-	int iIgnore = CBaseMonster::IgnoreConditions();
+	int iIgnore = CFollowingMonster::IgnoreConditions();
 
 	if( ( m_Activity == ACT_MELEE_ATTACK1 ) || ( m_Activity == ACT_MELEE_ATTACK1 ) )
 	{
@@ -318,13 +329,20 @@ int CZombie::IgnoreConditions()
 	return iIgnore;
 }
 
+Schedule_t* CZombie::GetSchedule()
+{
+	if (ShouldCoverFromDanger())
+		return GetScheduleOfType( SCHED_TAKE_COVER_FROM_BEST_SOUND );
+	return CFollowingMonster::GetSchedule();
+}
+
 Schedule_t* CZombie::GetScheduleOfType(int Type)
 {
 	if (Type == SCHED_CHASE_ENEMY_FAILED && HasMemory(bits_MEMORY_BLOCKER_IS_ENEMY))
 	{
-		return CBaseMonster::GetScheduleOfType(SCHED_CHASE_ENEMY);
+		return CFollowingMonster::GetScheduleOfType(SCHED_CHASE_ENEMY);
 	}
-	return CBaseMonster::GetScheduleOfType(Type);
+	return CFollowingMonster::GetScheduleOfType(Type);
 }
 
 class CDeadZombie : public CDeadMonster
@@ -358,7 +376,6 @@ class CZombieBarney : public CZombie
 {
 	const char* DefaultModel() override { return "models/zombie_barney.mdl"; }
 	float DefaultHealth() override { return GetSkillValue("zombie_barney_health"); }
-	bool IsEnabledInMod() override { return g_modFeatures.IsMonsterEnabled("zombie_barney"); }
 	float OneSlashDamage() override { return GetSkillValue("zombie_barney_dmg_one_slash"); }
 	float BothSlashDamage() override { return GetSkillValue("zombie_barney_dmg_both_slash"); }
 };
@@ -370,7 +387,6 @@ class CDeadZombieBarney : public CDeadZombie
 public:
 	void Spawn() override;
 	const char* DefaultModel() override { return "models/zombie_barney.mdl"; }
-	bool IsEnabledInMod() override { return g_modFeatures.IsMonsterEnabled("zombie_barney"); }
 };
 
 LINK_ENTITY_TO_CLASS( monster_zombie_barney_dead, CDeadZombieBarney )
@@ -386,7 +402,6 @@ class CZombieSoldier : public CZombie
 {
 	const char* DefaultModel() override { return "models/zombie_soldier.mdl"; }
 	float DefaultHealth() override { return GetSkillValue("zombie_soldier_health"); }
-	bool IsEnabledInMod() override { return g_modFeatures.IsMonsterEnabled("zombie_soldier"); }
 	float OneSlashDamage() override { return GetSkillValue("zombie_soldier_dmg_one_slash"); }
 	float BothSlashDamage() override { return GetSkillValue("zombie_soldier_dmg_both_slash"); }
 };
@@ -398,7 +413,6 @@ class CDeadZombieSoldier : public CDeadMonster
 public:
 	void Spawn() override;
 	const char* DefaultModel() override { return "models/zombie_soldier.mdl"; }
-	bool IsEnabledInMod() override { return g_modFeatures.IsMonsterEnabled("zombie_soldier"); }
 	int	DefaultClassify () override { return	CLASS_ALIEN_MONSTER; }
 
 	const char* getPos(int pos) const override;

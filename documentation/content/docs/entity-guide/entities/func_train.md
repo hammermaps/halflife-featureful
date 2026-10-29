@@ -29,7 +29,7 @@ See also: [env_spritetrain]({{< ref env_spritetrain >}}), [env_modeltrain]({{< r
 
 ### Reaction to use-type
 
-Always percieved as `Toggle` (due to compatibility with Half-Life trains) unless `Obey Trigger Mode` parameter is enabled. Activates or stops the train.
+Always perceived as `Toggle` (due to compatibility with Half-Life trains) unless `Obey Trigger Mode` parameter is enabled. Activates or stops the train.
 
 ### Bugfixes
 

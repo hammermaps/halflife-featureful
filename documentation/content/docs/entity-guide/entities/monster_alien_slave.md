@@ -368,4 +368,28 @@ Note: the `jump` animation in the default **models/islave.mdl** features some ve
 
 {{% /tab %}}
 
+{{% tab "Gib disposition" %}}
+
+The [gib disposition]({{< ref "entity-templates/#gib_disposition" >}}) that utilizes the unused **models/islave_gibs1.mdl** model.
+
+```json
+{
+    "monster_alien_slave": {
+        "gib_disposition": [
+            {
+                "count": 4,
+            },
+            {
+                "count": 1,
+                "visual": {
+                    "model": "models/islave_gibs1.mdl"
+                }
+            }
+        ]
+    }
+}
+```
+
+{{% /tab %}}
+
 {{% /tabs %}}

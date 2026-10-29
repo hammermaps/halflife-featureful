@@ -80,7 +80,6 @@ public:
 	void Precache() override;
 	const char* DefaultModel() override { return "models/strooper.mdl"; }
 	float DefaultHealth() override { return GetSkillValue("shocktrooper_health") * GetSkillValue("shocktrooper_health_factor"); }
-	bool IsEnabledInMod() override { return g_modFeatures.IsMonsterEnabled("shocktrooper"); }
 	int  DefaultClassify() override;
 	const char* ReverseRelationshipModel() override { return nullptr; }
 	const char* DefaultDisplayName() override { return "Shock Trooper"; }
@@ -91,8 +90,8 @@ public:
 	void DeathSound() override;
 	void PainSound() override;
 	void GibMonster() override;
-	void PlayUseSentence() override;
-	void PlayUnUseSentence() override;
+	bool PlayUseSentence() override;
+	bool PlayUnUseSentence() override;
 	bool PlayFriendlyFireComplaint() override;
 
 	DamageInfo DefaultHandleTraceAttack(entvars_t *pevInflictor, entvars_t *pevAttacker, const DamageInfo &inputDamageInfo, Vector vecDir, TraceResult *ptr) override {
@@ -575,7 +574,7 @@ bool CShockTrooper::CanDropGrenade() const
 
 void CShockTrooper::DropShockRoach(bool gibbed)
 {
-	if (!FBitSet(pev->spawnflags, SF_MONSTER_DONT_DROP_GUN) && g_modFeatures.IsMonsterEnabled("shockroach"))
+	if (!FBitSet(pev->spawnflags, SF_MONSTER_DONT_DROP_GUN))
 	{
 		Vector	vecGunPos;
 		Vector	vecGunAngles = g_vecZero;
@@ -620,14 +619,14 @@ void CShockTrooper::DropShockRoach(bool gibbed)
 	}
 }
 
-void CShockTrooper::PlayUseSentence()
+bool CShockTrooper::PlayUseSentence()
 {
-	PlaySpokenSoundScript(useSoundScript);
+	return PlaySpokenSoundScript(useSoundScript);
 }
 
-void CShockTrooper::PlayUnUseSentence()
+bool CShockTrooper::PlayUnUseSentence()
 {
-	PlaySpokenSoundScript(unuseSoundScript);
+	return PlaySpokenSoundScript(unuseSoundScript);
 }
 
 bool CShockTrooper::PlayFriendlyFireComplaint()
@@ -642,7 +641,6 @@ public:
 	void Precache() override;
 	const char* DefaultModel() override { return "models/strooper.mdl"; }
 	float DefaultHealth() override { return GetSkillValue("shocktrooper_health")/2; }
-	bool IsEnabledInMod() override { return g_modFeatures.IsMonsterEnabled("shocktrooper"); }
 	int	DefaultClassify() override { return	CLASS_RACEX_SHOCK; }
 	const char* DefaultGibModel() override {
 		return "models/strooper_gibs.mdl";

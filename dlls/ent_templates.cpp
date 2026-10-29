@@ -836,6 +836,72 @@ void EntTemplateSystem::AddTemplateFromJsonValueImpl(const std::string& template
 		}
 	});
 
+	HandleJSONMember(value, "gib_disposition", [&entTemplate, this](const Value& value) {
+		Value::ConstArray arr = value.GetArray();
+		EntTemplate::GibDisposition gibDisposition;
+		gibDisposition.reserve(arr.Size());
+
+		for (auto& item : arr)
+		{
+			EntTemplate::GibInfo gibInfo;
+
+			UpdatePropertyFromJson(gibInfo.count, item, "count");
+			UpdatePropertyFromJson(gibInfo.bodyRange.min, item, "min_body");
+			UpdatePropertyFromJson(gibInfo.bodyRange.max, item, "max_body");
+
+			int body;
+			if (UpdatePropertyFromJson(body, item, "body"))
+				gibInfo.bodyRange.min = gibInfo.bodyRange.max = body;
+
+			HandleJSONMember(item, "visual", [this, &gibInfo](const Value& value) {
+				gibInfo.visual = _visualSystem->ParseVisualAndCacheModelName(value);
+			});
+
+			HandleJSONMember(item, "position", [&gibInfo](const Value& value) {
+				const char* str = value.GetString();
+				if (strcmp(str, "box") == 0)
+				{
+					gibInfo.position = EntTemplate::GibInfo::POSITION_BOX;
+				}
+				else if (strcmp(str, "head") == 0)
+				{
+					gibInfo.position = EntTemplate::GibInfo::POSITION_HEAD;
+				}
+			});
+
+			HandleJSONMember(item, "fly_away", [&gibInfo](const Value& value) {
+				const char* str = value.GetString();
+				if (strcmp(str, "directed") == 0)
+				{
+					gibInfo.flyAway = EntTemplate::GibInfo::FLY_AWAY_DIRECTED;
+				}
+				else if (strcmp(str, "random") == 0)
+				{
+					gibInfo.flyAway = EntTemplate::GibInfo::FLY_AWAY_RANDOM;
+				}
+			});
+
+			UpdatePropertyFromJson(gibInfo.throwAtPlayerChance, item, "throw_at_player_chance");
+
+			HandleJSONMember(item, "blood", [&gibInfo](const Value& value) {
+				const char* bloodTypeName = value.GetString();
+				const int bloodType = BloodTypeFromName(bloodTypeName);
+				if (bloodType == BLOOD_COLOR_INVALID)
+				{
+					LOG_WARNING("Unknown blood type '%s'\n", bloodTypeName);
+				}
+				else
+				{
+					gibInfo.bloodColor = bloodType;
+				}
+			});
+
+			gibDisposition.push_back(gibInfo);
+		}
+
+		entTemplate.SetGibDisposition(std::move(gibDisposition));
+	});
+
 	HandleJSONMember(value, "soundscripts", [&entTemplate, &templateName, this](const Value& value) {
 		for (auto scriptIt = value.MemberBegin(); scriptIt != value.MemberEnd(); ++scriptIt)
 		{
@@ -1167,7 +1233,7 @@ void EntTemplateSystem::AddTemplateFromJsonValueImpl(const std::string& template
 
 			UpdatePropertyFromJson(traceHullAttack.spawnBlood, attackValue, "spawn_blood");
 
-			auto setSoundScript = [&](const char* propertyName, std::string& outStr)
+			auto setSoundScript = [&](const char* propertyName, std::string& outStr, int channel)
 			{
 				HandleJSONMember(attackValue, propertyName, [&](const Value& value) {
 					if (value.IsString())
@@ -1179,14 +1245,16 @@ void EntTemplateSystem::AddTemplateFromJsonValueImpl(const std::string& template
 					else if (value.IsObject())
 					{
 						std::string soundScriptName = templateName + "#trace_hull_attacks#" + eventIndexStr + '#' + propertyName;
-						_soundScriptSystem->AddSoundScriptFromJsonValue(soundScriptName.c_str(), value, CHAN_WEAPON);
+						_soundScriptSystem->AddSoundScriptFromJsonValue(soundScriptName.c_str(), value, channel);
 						entTemplate.AddPrecachedSoundScript(soundScriptName);
 						outStr = soundScriptName;
 					}
 				});
 			};
-			setSoundScript("hit_soundscript", traceHullAttack.hitSoundScript);
-			setSoundScript("miss_soundscript", traceHullAttack.missSoundScript);
+			setSoundScript("hit_soundscript", traceHullAttack.hitSoundScript, CHAN_WEAPON);
+			setSoundScript("miss_soundscript", traceHullAttack.missSoundScript, CHAN_WEAPON);
+			setSoundScript("soundscript", traceHullAttack.soundScript, CHAN_VOICE);
+			UpdatePropertyFromJson(traceHullAttack.soundScriptChance, attackValue, "soundscript_chance");
 
 			entTemplate.SetTraceHullAttackForEvent(eventIndex, traceHullAttack);
 		}
@@ -1705,6 +1773,70 @@ void EntTemplateSystem::AddTemplateFromJsonValueImpl(const std::string& template
 		UpdatePropertyFromJson(jumping.downSequence, value, "down_sequence");
 
 		entTemplate.SetJumping(std::move(jumping));
+	});
+
+	HandleJSONMember(value, "npc_behavior", [&entTemplate](const Value& value) {
+		EntTemplate::NPCBehavior npcBehavior = entTemplate.GetNPCBehavior();
+
+		HandleJSONMember(value, "chase_enemy_failed", [&npcBehavior](const Value& value) {
+			const char* str = value.GetString();
+			if (strcmp(str, "fail") == 0)
+			{
+				npcBehavior.chaseEnemyFailed = CHASE_ENEMY_FAILED_FAIL;
+			}
+			else if (strcmp(str, "retreat") == 0)
+			{
+				npcBehavior.chaseEnemyFailed = CHASE_ENEMY_FAILED_RETREAT;
+			}
+			else if (strcmp(str, "wander") == 0)
+			{
+				npcBehavior.chaseEnemyFailed = CHASE_ENEMY_FAILED_WANDER;
+			}
+			else if (strcmp(str, "retreat_or_wander") == 0)
+			{
+				npcBehavior.chaseEnemyFailed = CHASE_ENEMY_FAILED_RETREAT_OR_WANDER;
+			}
+		});
+
+		UpdatePropertyFromJson(npcBehavior.playerCanInteract, value, "player_can_interact");
+		UpdatePropertyFromJson(npcBehavior.investigateSounds, value, "investigate_sounds");
+		UpdatePropertyFromJson(npcBehavior.coverFromDanger, value, "cover_from_danger");
+
+		entTemplate.SetNPCBehavior(std::move(npcBehavior));
+	});
+
+	HandleJSONMember(value, "soundmask", [&entTemplate](const Value& value) {
+		int soundMask = 0;
+		EntTemplate::SoundMaskOp soundMaskOp = EntTemplate::SoundMaskOp::Replace;
+
+		if (value.IsArray())
+		{
+			soundMask = JSONStringSetToFlags(value, ParseAISoundType);
+		}
+		else if (value.IsObject())
+		{
+			HandleJSONMember(value, "sounds", [&soundMask](const Value& value) {
+				soundMask = JSONStringSetToFlags(value, ParseAISoundType);
+			});
+
+			HandleJSONMember(value, "op", [&soundMaskOp](const Value& value) {
+				const char* str = value.GetString();
+				if (stricmp(str, "replace") == 0)
+				{
+					soundMaskOp = EntTemplate::SoundMaskOp::Replace;
+				}
+				else if (stricmp(str, "add") == 0)
+				{
+					soundMaskOp = EntTemplate::SoundMaskOp::Add;
+				}
+				else if (stricmp(str, "remove") == 0)
+				{
+					soundMaskOp = EntTemplate::SoundMaskOp::Remove;
+				}
+			});
+		}
+
+		entTemplate.SetSoundMask(soundMask, soundMaskOp);
 	});
 
 	HandleJSONMember(value, "primary_weapon", [&entTemplate](const Value& value) {

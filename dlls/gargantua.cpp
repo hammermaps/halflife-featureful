@@ -457,8 +457,8 @@ public:
 	void StartTask( Task_t *pTask ) override;
 	void RunTask( Task_t *pTask ) override;
 
-	void PlayUseSentence() override;
-	void PlayUnUseSentence() override;
+	bool PlayUseSentence() override;
+	bool PlayUnUseSentence() override;
 
 	void PrescheduleThink() override;
 	void OnChangeSchedule(Schedule_t *pNewSchedule) override;
@@ -531,8 +531,6 @@ protected:
 	static const NamedSoundScript breathSoundScript;
 	static constexpr const char* useSoundScript = "Garg.Use";
 	static constexpr const char* unuseSoundScript = "Garg.UnUse";
-
-	static const char *pRicSounds[];
 
 	static const NamedVisual eyeVisual;
 	static const NamedVisual flameVisual;
@@ -664,14 +662,6 @@ const NamedSoundScript CGargantua::breathSoundScript = {
 	ATTN_GARG,
 	IntRange(90, 110),
 	"Garg.Breath"
-};
-
-const char *CGargantua::pRicSounds[] =
-{
-	"debris/metal4.wav",
-	"debris/metal6.wav",
-	"weapons/ric4.wav",
-	"weapons/ric5.wav",
 };
 
 const NamedVisual CGargantua::eyeVisual = BuildVisual("Garg.Eye")
@@ -1146,8 +1136,6 @@ void CGargantua::Precache()
 	RegisterAndPrecacheSoundScript(useSoundScript, idleSoundScript);
 	RegisterAndPrecacheSoundScript(unuseSoundScript, alertSoundScript);
 
-	PRECACHE_SOUND_ARRAY( pRicSounds );
-
 	m_eyeVisual = RegisterVisual(eyeVisual);
 	RegisterVisual(bigFlameVisual);
 	RegisterVisual(smallFlameVisual);
@@ -1176,8 +1164,6 @@ DamageInfo CGargantua::DefaultHandleTraceAttack(entvars_t *pevInflictor, entvars
 		{
 			UTIL_Ricochet( ptr->vecEndPos, RANDOM_FLOAT( 0.5 ,1.5 ) );
 			pev->dmgtime = gpGlobals->time;
-			//if ( RANDOM_LONG( 0, 100 ) < 25 )
-			//	EMIT_SOUND_DYN( ENT( pev ), CHAN_BODY, pRicSounds[RANDOM_LONG( 0, ARRAYSIZE( pRicSounds ) - 1 )], 1.0, ATTN_NORM, 0, PITCH_NORM );
 		}
 		damageInfo.damage = 0;
 	}
@@ -1406,22 +1392,10 @@ void CGargantua::HandleAnimEvent( MonsterEvent_t *pEvent )
 	}
 }
 
-Schedule_t *CGargantua::GetSchedule()
+Schedule_t* CGargantua::GetSchedule()
 {
-	switch (m_MonsterState)
-	{
-	case MONSTERSTATE_IDLE:
-	case MONSTERSTATE_ALERT:
-	case MONSTERSTATE_HUNT:
-	{
-		Schedule_t* utilitySchedule = GetUtilitySchedule();
-		if (utilitySchedule)
-			return utilitySchedule;
-	}
-		break;
-	default:
-		break;
-	}
+	if (ShouldCoverFromDanger())
+		return GetScheduleOfType( SCHED_TAKE_COVER_FROM_BEST_SOUND );
 	return CFollowingMonster::GetSchedule();
 }
 
@@ -1508,28 +1482,36 @@ void CGargantua::RunTask( Task_t *pTask )
 			StopAnimation();
 			pev->nextthink = gpGlobals->time + 0.15f;
 			SetThink( &CBaseEntity::SUB_Remove );
-			int i;
 			int parts = MODEL_FRAMES( m_GargGibModel );
-			const Visual* gibVisual = MyGibVisual();
-			const char* gibModel = GibModel();
-			for( i = 0; i < 10; i++ )
+			Visual gibVisual = MyGibVisual();
+			const EntTemplate::GibDisposition& gibDisposition = GibDisposition();
+
+			if (gibDisposition.empty())
 			{
-				CGib *pGib = GetClassPtr( (CGib *)NULL );
+				for (int i = 0; i < 10; i++)
+				{
+					CGib *pGib = GetClassPtr( (CGib *)NULL );
 
-				pGib->SpawnGib( gibModel, gibVisual );
+					pGib->SpawnGib( nullptr, &gibVisual );
 
-				int bodyPart = 0;
-				if( parts > 1 )
-					bodyPart = RANDOM_LONG( 0, parts - 1 );
+					int bodyPart = 0;
+					if( parts > 1 )
+						bodyPart = RANDOM_LONG( 0, parts - 1 );
 
-				pGib->pev->body = bodyPart;
-				pGib->m_bloodColor = BloodColor();
-				pGib->m_material = matNone;
-				pGib->pev->origin = pev->origin;
-				pGib->pev->velocity = UTIL_RandomBloodVector() * RANDOM_FLOAT( 300, 500 );
-				pGib->pev->nextthink = gpGlobals->time + 1.25f;
-				pGib->SetThink( &CBaseEntity::SUB_FadeOut );
+					pGib->pev->body = bodyPart;
+					pGib->m_bloodColor = BloodColor();
+					pGib->m_material = matNone;
+					pGib->pev->origin = pev->origin;
+					pGib->pev->velocity = UTIL_RandomBloodVector() * RANDOM_FLOAT( 300, 500 );
+					pGib->pev->nextthink = gpGlobals->time + 1.25f;
+					pGib->SetThink( &CBaseEntity::SUB_FadeOut );
+				}
 			}
+			else
+			{
+				CGib::SpawnGibsByDisposition(pev, gibVisual, gibDisposition);
+			}
+
 			MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, pev->origin );
 				WRITE_BYTE( TE_BREAKMODEL );
 
@@ -1713,16 +1695,20 @@ Vector CGargantua::StompAttackStartVec()
 	return pev->origin + Vector(0,0,60) + 35 * gpGlobals->v_forward;
 }
 
-void CGargantua::PlayUseSentence()
+bool CGargantua::PlayUseSentence()
 {
-	m_breatheTime = gpGlobals->time + 1.5;
-	EmitSoundScript(useSoundScript);
+	bool result = EmitSoundScript(useSoundScript);
+	if (result)
+		m_breatheTime = gpGlobals->time + 1.5f;
+	return result;
 }
 
-void CGargantua::PlayUnUseSentence()
+bool CGargantua::PlayUnUseSentence()
 {
-	m_breatheTime = gpGlobals->time + 1.5;
-	EmitSoundScript(unuseSoundScript);
+	bool result = EmitSoundScript(unuseSoundScript);
+	if (result)
+		m_breatheTime = gpGlobals->time + 1.5f;
+	return result;
 }
 
 #define SF_SMOKER_ACTIVE 1
@@ -2051,15 +2037,14 @@ public:
 	void Precache() override;
 	const char* DefaultModel() override { return "models/babygarg.mdl"; }
 	float DefaultHealth() override { return GetSkillValue("babygargantua_health"); }
-	bool IsEnabledInMod() override { return g_modFeatures.IsMonsterEnabled("babygarg"); }
 	void SetYawSpeed() override;
 	const char* ReverseRelationshipModel() override { return "models/babygargf.mdl"; }
 	const char* DefaultDisplayName() override { return "Baby Gargantua"; }
 	const char* DefaultGibModel() override { return CFollowingMonster::DefaultGibModel(); }
 	void StartTask( Task_t *pTask ) override;
 	void RunTask( Task_t *pTask ) override;
-	void PlayUseSentence() override;
-	void PlayUnUseSentence() override;
+	bool PlayUseSentence() override;
+	bool PlayUnUseSentence() override;
 	void HandleAnimEvent( MonsterEvent_t *pEvent ) override;
 	void PainSound() override;
 	void DeathSound() override;
@@ -2419,14 +2404,18 @@ void CBabyGargantua::SetYawSpeed()
 	pev->yaw_speed = ys;
 }
 
-void CBabyGargantua::PlayUseSentence()
+bool CBabyGargantua::PlayUseSentence()
 {
-	m_breatheTime = gpGlobals->time + 1.5;
-	EmitSoundScript(useSoundScript);
+	bool result = EmitSoundScript(useSoundScript);
+	if (result)
+		m_breatheTime = gpGlobals->time + 1.5;
+	return result;
 }
 
-void CBabyGargantua::PlayUnUseSentence()
+bool CBabyGargantua::PlayUnUseSentence()
 {
-	m_breatheTime = gpGlobals->time + 1.5;
-	EmitSoundScript(unuseSoundScript);
+	bool result = EmitSoundScript(unuseSoundScript);
+	if (result)
+		m_breatheTime = gpGlobals->time + 1.5;
+	return result;
 }

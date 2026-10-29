@@ -80,10 +80,13 @@ void CBaseMonster::MayPlayIdleSound()
 {
 	// IDLE sound permitted in ALERT state is because monsters were silent in ALERT state. Only play IDLE sound in IDLE state
 	// once we have sounds for that state.
-	if( ( m_MonsterState == MONSTERSTATE_IDLE || m_MonsterState == MONSTERSTATE_ALERT ) && RANDOM_LONG( 0, 99 ) == 0 && !( pev->spawnflags & SF_MONSTER_GAG ) )
+	if( ( m_MonsterState == MONSTERSTATE_IDLE || m_MonsterState == MONSTERSTATE_ALERT ) && m_flNextIdleTime <= gpGlobals->time && !FBitSet(pev->spawnflags, SF_MONSTER_GAG) && RANDOM_LONG( 0, 99 ) == 0 )
 	{
 		if (npc_idlesound_requires_pvs.value == 0.0f || !FNullEnt(FIND_CLIENT_IN_PVS(edict())))
+		{
 			IdleSound();
+			m_flNextIdleTime = gpGlobals->time + 0.1f;
+		}
 	}
 }
 

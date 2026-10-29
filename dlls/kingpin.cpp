@@ -158,9 +158,6 @@ void CKingpinPlasmaBall::Precache()
 	RegisterVisual(ballVisual);
 	RegisterAndPrecacheSoundScript(impactSoundScript);
 	RegisterAndPrecacheSoundScript(ambienceSoundScript);
-	PRECACHE_SOUND( "kingpin/kingpin_seeker1.wav" );
-	PRECACHE_SOUND( "kingpin/kingpin_seeker2.wav" );
-	PRECACHE_SOUND( "kingpin/kingpin_seeker3.wav" );
 
 	RegisterVisual(trailVisual);
 	RegisterVisual(shockInnerVisual);
@@ -787,7 +784,6 @@ public:
 	void Precache() override;
 	const char* DefaultModel() override { return "models/kingpin.mdl"; }
 	float DefaultHealth() override { return GetSkillValue("kingpin_health"); }
-	bool IsEnabledInMod() override { return g_modFeatures.IsMonsterEnabled("kingpin"); }
 	void SetYawSpeed() override { pev->yaw_speed = 140; }
 	int DefaultClassify() override;
 	const char* DefaultDisplayName() override { return "Kingpin"; }
@@ -809,8 +805,8 @@ public:
 	PainSoundRule DefaultPainSoundRule() override;
 	void PainSound() override;
 	void DeathSound() override;
-	void PlayUseSentence() override;
-	void PlayUnUseSentence() override;
+	bool PlayUseSentence() override;
+	bool PlayUnUseSentence() override;
 
 	bool CheckRangeAttack1(float flDot, float flDist) override { return false; }
 	bool CheckRangeAttack2( float flDot, float flDist ) override;
@@ -1220,9 +1216,13 @@ void CKingpin::Spawn()
 void CKingpin::Precache()
 {
 	PrecacheMyModel();
-	PRECACHE_MODEL("models/stickygibpink.mdl");
-	PRECACHE_SOUND("kingpin/kingpin_moveslow.wav");
-	PRECACHE_SOUND("kingpin/kingpin_move.wav");
+	PrecacheMyGibModel();
+
+	if (!ShouldAutoPrecacheSounds())
+	{
+		PRECACHE_SOUND("kingpin/kingpin_moveslow.wav");
+		PRECACHE_SOUND("kingpin/kingpin_move.wav");
+	}
 
 	RegisterVisual(teleportEnterVisual);
 	RegisterVisual(teleportExitVisual);
@@ -1383,39 +1383,16 @@ bool CKingpin::CheckRangeAttack2(float flDot, float flDist)
 
 Schedule_t* CKingpin::GetSchedule()
 {
-	if( HasConditions( bits_COND_HEAR_SOUND ) )
+	if (ShouldCoverFromDanger())
 	{
-		CSound *pSound = PBestSound();
-
-		ASSERT( pSound != NULL );
-		if( pSound && (pSound->m_iType & bits_SOUND_DANGER) )
+		if (CanTeleportNow())
 		{
-			if (CanTeleportNow())
-			{
-				return GetScheduleOfType(SCHED_KINGPIN_TELEPORT);
-			}
-			return GetScheduleOfType( SCHED_TAKE_COVER_FROM_BEST_SOUND );
+			return GetScheduleOfType(SCHED_KINGPIN_TELEPORT);
 		}
+		return GetScheduleOfType( SCHED_TAKE_COVER_FROM_BEST_SOUND );
 	}
-	switch(m_MonsterState)
-	{
-	case MONSTERSTATE_IDLE:
-	case MONSTERSTATE_ALERT:
-	case MONSTERSTATE_HUNT:
-	{
-		Schedule_t* utilitySchedule = GetUtilitySchedule();
-		if (utilitySchedule)
-			return utilitySchedule;
-	}
-		break;
-	default:
-		break;
-	}
-
 	return CFollowingMonster::GetSchedule();
 }
-
-extern Schedule_t slChaseEnemyFailed[];
 
 Schedule_t* CKingpin::GetScheduleOfType(int Type)
 {
@@ -1453,8 +1430,7 @@ Schedule_t* CKingpin::GetScheduleOfType(int Type)
 		}
 		else
 		{
-			m_failSchedule = SCHED_FREEROAM;
-			return slChaseEnemyFailed;
+			return CFollowingMonster::GetScheduleOfType(SCHED_CHASE_ENEMY_FAILED);
 		}
 		break;
 	case SCHED_KINGPIN_TELEPORT:
@@ -1643,8 +1619,8 @@ void CKingpin::RunTask( Task_t *pTask )
 				g_vecAttackDir = Vector(0,0,-1);
 				GibMonster();
 				::RadiusDamage(pev->origin, pev, pev, RadiusDamageInfo(DamageInfo{GetSkillValue("kingpin_plasma_blast"), DMG_SHOCK}), Classify());
-				m_bloodColor = BLOOD_COLOR_RED; // HACK to change blood color of pink gibs
-				CGib::SpawnRandomGibs( pev, DefaultGibCount(), "models/stickygibpink.mdl" );
+				//m_bloodColor = BLOOD_COLOR_RED; // HACK to change blood color of pink gibs
+				//CGib::SpawnRandomGibs( pev, DefaultGibCount(), "models/stickygibpink.mdl" );
 			}
 			return;
 		}
@@ -1757,14 +1733,14 @@ void CKingpin::DeathSound()
 	EmitSoundScript(dieSoundScript);
 }
 
-void CKingpin::PlayUseSentence()
+bool CKingpin::PlayUseSentence()
 {
-	EmitSoundScript(useSoundScript);
+	return EmitSoundScript(useSoundScript);
 }
 
-void CKingpin::PlayUnUseSentence()
+bool CKingpin::PlayUnUseSentence()
 {
-	EmitSoundScript(unuseSoundScript);
+	return EmitSoundScript(unuseSoundScript);
 }
 
 void CKingpin::UpdateGlows(int target, int speed)

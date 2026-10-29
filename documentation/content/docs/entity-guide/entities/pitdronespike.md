@@ -21,3 +21,13 @@ Speed: 900
 * Damage: **sk_pitdrone_dmg_spit**
 * Type: generic
 * Gib: never
+
+### Soundscripts
+
+* **PitDrone.SpikeHitWorld** - when spike hits the world.
+* **PitDrone.SpikeHitBody** - when spike hits someone.
+
+### Visuals
+
+* **Pitdrone.Spike** - spike projectile.
+* **Pitdrone.SpikeTrail** - a trail beam following the projectile.

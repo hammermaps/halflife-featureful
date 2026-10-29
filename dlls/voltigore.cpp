@@ -347,7 +347,6 @@ public:
 	void Precache() override;
 	const char* DefaultModel() override { return "models/voltigore.mdl"; }
 	float DefaultHealth() override { return GetSkillValue("voltigore_health"); }
-	bool IsEnabledInMod() override { return g_modFeatures.IsMonsterEnabled("voltigore"); }
 	void SetYawSpeed() override;
 	int  DefaultClassify() override;
 	const char* DefaultDisplayName() override { return "Voltigore"; }
@@ -357,11 +356,11 @@ public:
 	void PainSound() override;
 	void DeathSound() override;
 	void AlertSound() override;
-	void PlayUseSentence() override {
-		EmitSoundScript(useSoundScript);
+	bool PlayUseSentence() override {
+		return EmitSoundScript(useSoundScript);
 	}
-	void PlayUnUseSentence() override {
-		EmitSoundScript(unuseSoundScript);
+	bool PlayUnUseSentence() override {
+		return EmitSoundScript(unuseSoundScript);
 	}
 	void StartTask(Task_t *pTask) override;
 	bool CheckMeleeAttack1(float flDot, float flDist) override;
@@ -497,7 +496,6 @@ bool CVoltigore::CheckRangeAttack1(float flDot, float flDist)
 		Vector vecStart, vecDir;
 		TraceResult tr;
 
-		UTIL_MakeVectors( pev->angles );
 		GetAttachment( 3, vecStart, vecDir );
 		UTIL_TraceLine( vecStart, m_hEnemy->BodyTarget( vecStart ), dont_ignore_monsters, ENT( pev ), &tr );
 
@@ -700,9 +698,7 @@ void CVoltigore::HandleAnimEvent(MonsterEvent_t *pEvent)
 		CBaseEntity* pChargedBolt = m_pChargedBolt;
 		if (pChargedBolt)
 		{
-			UTIL_MakeVectors(pev->angles);
-
-			const auto shootPosition = pev->origin + gpGlobals->v_forward * 50 + gpGlobals->v_up * 32;
+			const auto shootPosition = BoltPosition();
 
 			const auto direction = ShootAtEnemy(shootPosition);
 
@@ -818,7 +814,7 @@ void CVoltigore::Spawn()
 void CVoltigore::Precache()
 {
 	PrecacheMyModel();
-	PrecacheMyGibModel("models/vgibs.mdl");
+	PrecacheMyGibModel(DefaultGibModel());
 
 	RegisterAndPrecacheSoundScript(idleSoundScript);
 	RegisterAndPrecacheSoundScript(alertSoundScript);
@@ -941,13 +937,6 @@ Schedule_t *CVoltigore::GetSchedule()
 {
 	switch (m_MonsterState)
 	{
-	case MONSTERSTATE_IDLE:
-	{
-		Schedule_t* utilitySchedule = GetUtilitySchedule();
-		if (utilitySchedule)
-			return utilitySchedule;
-		break;
-	}
 	case MONSTERSTATE_COMBAT:
 	{
 		// dead enemy
@@ -1015,8 +1004,6 @@ void CVoltigore::StartTask(Task_t *pTask)
 	{
 	case TASK_RANGE_ATTACK1:
 		{
-			UTIL_MakeVectors(pev->angles);
-
 			const auto vecConverge = BoltPosition();
 
 			for (auto i = 0; i < 3; ++i)
@@ -1093,8 +1080,9 @@ void CVoltigore::ClearBeams()
 
 Vector CVoltigore::BoltPosition()
 {
-	UTIL_MakeVectors(pev->angles);
-	return pev->origin + gpGlobals->v_forward * 50 + gpGlobals->v_up * 32;
+	Vector forward, right, up;
+	UTIL_MakeVectorsPrivate(pev->angles, forward, right, up);
+	return pev->origin + forward * 50 + up * 32;
 }
 
 //=========================================================
@@ -1113,7 +1101,6 @@ public:
 	void	Precache() override;
 	const char* DefaultModel() override { return "models/baby_voltigore.mdl"; }
 	float DefaultHealth() override { return GetSkillValue("babyvoltigore_health"); }
-	bool IsEnabledInMod() override { return g_modFeatures.IsMonsterEnabled("babyvoltigore"); }
 	const char* DefaultDisplayName() override { return "Baby Voltigore"; }
 	void	HandleAnimEvent(MonsterEvent_t* pEvent) override;
 	bool	CheckMeleeAttack1(float flDot, float flDist) override;
@@ -1137,11 +1124,11 @@ public:
 	void AlertSound() override;
 	void PainSound() override;
 	void DeathSound() override;
-	void PlayUseSentence() override {
-		EmitSoundScript(useSoundScript);
+	bool PlayUseSentence() override {
+		return EmitSoundScript(useSoundScript);
 	}
-	void PlayUnUseSentence() override {
-		EmitSoundScript(unuseSoundScript);
+	bool PlayUnUseSentence() override {
+		return EmitSoundScript(unuseSoundScript);
 	}
 	void AttackSound();
 
@@ -1200,6 +1187,7 @@ void CBabyVoltigore::Spawn()
 void CBabyVoltigore::Precache()
 {
 	PrecacheMyModel();
+	PrecacheMyGibModel();
 
 	SoundScriptParamOverride voiceParamOverride;
 	voiceParamOverride.OverridePitchRelative(180);
@@ -1326,13 +1314,6 @@ Schedule_t *CBabyVoltigore::GetSchedule()
 {
 	switch (m_MonsterState)
 	{
-	case MONSTERSTATE_IDLE:
-	{
-		Schedule_t* utilitySchedule = GetUtilitySchedule();
-		if (utilitySchedule)
-			return utilitySchedule;
-		break;
-	}
 	case MONSTERSTATE_COMBAT:
 	{
 		// dead enemy
