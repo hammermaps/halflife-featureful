@@ -56,3 +56,7 @@ local.properties
 
 #Finder cache
 .DS_Store
+hl-subsmod-ex-master/mod_src/utils/vgui/lib/win32_vc6/vgui.lib
+hl-subsmod-ex-master/mod_src/engine/common/soundlib/mpeg.lib
+hl-subsmod-ex-master/mod_src/engine/common/soundlib/mpeg_dbg.lib
+hl-subsmod-ex-master/mod_src/opengl/DevIL.lib
